@@ -42,27 +42,34 @@ npm install
 
 ## 3. `.env` pre novú appku
 
-Skopíruj `.env.example` → `.env` a vyplň (SUPABASE_URL a SUPABASE_SERVICE_KEY
-sú **rovnaké** ako v hlavnej appke — zdieľate tie isté tabuľky):
+Appka už nepoužíva Supabase — vlastná registrácia/prihlásenie (email+heslo,
+JWT) a MySQL databáza `reklama`. Skopíruj `.env.example` → `.env` a vyplň:
 
 ```
 PORT=3849
 APP_URL=https://ad.sptrener.online
 MAIN_APP_ORIGIN=https://sptrener.online
-SUPABASE_URL=...           # rovnaké ako v hlavnej appke
-SUPABASE_SERVICE_KEY=...   # rovnaké ako v hlavnej appke
-STRIPE_SECRET_KEY=...      # môže byť rovnaký Stripe účet
+JWT_SECRET=...              # node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+MYSQL_HOST=127.0.0.1
+MYSQL_PORT=3306
+MYSQL_DATABASE=reklama
+MYSQL_USER=reklama
+MYSQL_PASSWORD=...
+STRIPE_SECRET_KEY=...       # môže byť rovnaký Stripe účet ako hlavná appka
 STRIPE_AD_PRICE_ID=...
 STRIPE_VIDEO_AD_PRICE_ID=...
 ```
 
-## 4. Databázová schéma
+## 4. Databázová schéma (MySQL)
 
-Ak si už spustil `deploy-patch/01-schema.sql` skôr, **netreba nič znova** —
-tabuľky `advertisers`, `ad_banners`, `ad_events`, `video_ads`,
-`video_ad_views` aj Storage buckety zostávajú presne rovnaké, len ich teraz
-obsluhuje iný proces. Ak si to ešte nespustil, spusti `deploy-patch/01-schema.sql`
-v Supabase SQL Editore.
+```bash
+mysql -h 127.0.0.1 -P 3306 -u reklama -p reklama < schema.sql
+```
+
+Vytvorí 5 tabuliek (`advertisers`, `ad_banners`, `ad_events`, `video_ads`,
+`video_ad_views`). Bezpečné spúšťať opakovane. Nahraté súbory (bannery/videá)
+sa ukladajú lokálne do `public/uploads/banners` a `public/uploads/videos` —
+tie sa vytvoria automaticky pri štarte appky.
 
 ## 5. Nový PM2 proces
 
@@ -129,6 +136,16 @@ grep -n "stats-row" public/app.html
 
 a dorobím presný patch (rovnaký opatrný anchor-based prístup ako doteraz),
 vrátane klik/impression trackingu smerujúceho na `ad.sptrener.online`.
+
+## 9b. Známy dôsledok migrácie na MySQL
+
+Hlavná appka (produkčný `server.js`) má rewards flow (`/api/rewards/video-*`
+— pozri video, získaj +1 test zdarma), ktorý číta `video_ads`/`video_ad_views`
+zo **Supabase**. Keďže video reklamy teraz žijú v tejto MySQL databáze
+(`reklama`), ten flow ich nenájde, kým sa aj hlavná appka nenaučí čítať z
+MySQL. Zatiaľ to nie je viditeľná chyba (v produkcii ešte nie je nahratá
+žiadna video reklama), ale treba to doriešiť predtým, než niekto video
+reklamu skutočne zaplatí — daj mi vedieť, keď na to prídeme.
 
 ## 10. Overenie
 
