@@ -43,6 +43,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/auth', authLimiter, require('./routes/auth'));
 app.use('/api/stripe', require('./routes/stripe'));
 app.use('/api/ai', aiLimiter, require('./routes/ai'));
+app.use('/api', aiLimiter, require('./routes/generate'));
 
 // Health check
 app.get('/api/health', (req, res) => res.json({
