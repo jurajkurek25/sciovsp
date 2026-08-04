@@ -63,8 +63,23 @@ CREATE TABLE IF NOT EXISTS ai_questions (
   created_at  TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- Blog
+CREATE TABLE IF NOT EXISTS blog_posts (
+  id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  slug        TEXT UNIQUE NOT NULL,
+  title       TEXT NOT NULL,
+  excerpt     TEXT NOT NULL,
+  content     TEXT NOT NULL,  -- HTML
+  tag         TEXT,           -- napr. 'Príprava', 'Psychológia'
+  read_time   TEXT,           -- napr. '6 min čítania'
+  published   BOOLEAN DEFAULT TRUE,
+  created_at  TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- Indexy
 CREATE INDEX IF NOT EXISTS idx_subscriptions_user ON subscriptions(user_id);
 CREATE INDEX IF NOT EXISTS idx_results_user ON test_results(user_id);
 CREATE INDEX IF NOT EXISTS idx_ai_questions_user ON ai_questions(user_id);
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+CREATE INDEX IF NOT EXISTS idx_blog_posts_slug ON blog_posts(slug);
+CREATE INDEX IF NOT EXISTS idx_blog_posts_published ON blog_posts(published, created_at DESC);
