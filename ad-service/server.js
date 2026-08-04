@@ -23,6 +23,60 @@ if (!JWT_SECRET) {
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
 const app = express();
+
+// Stripe webhook potrebuje surové telo requestu na overenie podpisu —
+// MUSÍ byť zaregistrovaný pred express.json(), inak by json parser telo
+// už skonzumoval/pretransformoval a podpis by nesedel.
+function mapStripeStatus(stripeStatus) {
+  if (stripeStatus === 'active' || stripeStatus === 'trialing') return 'active';
+  if (stripeStatus === 'past_due') return 'past_due';
+  return 'cancelled';
+}
+
+async function syncFromSubscription(subscriptionId) {
+  if (!subscriptionId) return;
+  const sub = await stripe.subscriptions.retrieve(subscriptionId);
+  const metadata = sub.metadata || {};
+  const status = mapStripeStatus(sub.status);
+  const periodEnd = new Date(sub.current_period_end * 1000);
+  if (metadata.bannerId) {
+    await db.query(
+      'UPDATE ad_banners SET status = ?, current_period_end = ?, stripe_subscription_id = ? WHERE id = ?',
+      [status, periodEnd, subscriptionId, metadata.bannerId]
+    );
+  }
+  if (metadata.videoAdId) {
+    await db.query(
+      'UPDATE video_ads SET status = ?, current_period_end = ?, stripe_subscription_id = ? WHERE id = ?',
+      [status, periodEnd, subscriptionId, metadata.videoAdId]
+    );
+  }
+}
+
+app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+  let event;
+  try {
+    event = stripe.webhooks.constructEvent(req.body, req.headers['stripe-signature'], process.env.STRIPE_WEBHOOK_SECRET);
+  } catch (err) {
+    console.error('Stripe webhook signature error:', err.message);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+
+  try {
+    const obj = event.data.object;
+    const subscriptionId =
+      event.type === 'checkout.session.completed' ? obj.subscription :
+      event.type === 'invoice.payment_succeeded' ? obj.subscription :
+      (event.type === 'customer.subscription.updated' || event.type === 'customer.subscription.deleted') ? obj.id :
+      null;
+    if (subscriptionId) await syncFromSubscription(subscriptionId);
+  } catch (e) {
+    console.error('webhook handling error:', e);
+  }
+
+  res.json({ received: true });
+});
+
 app.use(express.json());
 app.use(cors({ origin: [MAIN_APP_ORIGIN, APP_URL], methods: ['GET', 'POST', 'PATCH', 'DELETE'] }));
 
