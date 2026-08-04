@@ -26,15 +26,22 @@ function mapStatus(stripeStatus) {
   return 'cancelled';
 }
 
+// Novšie Stripe API verzie presunuli current_period_end z hlavného subscription
+// objektu na jednotlivé subscription items — top-level pole už nemusí existovať.
+function getPeriodEnd(sub) {
+  const ts = sub.current_period_end || (sub.items && sub.items.data[0] && sub.items.data[0].current_period_end);
+  return ts ? new Date(ts * 1000) : null;
+}
+
 async function reconcileKnown(table) {
   const [rows] = await db.query(`SELECT id, stripe_subscription_id, status FROM ${table} WHERE stripe_subscription_id IS NOT NULL`);
   for (const row of rows) {
     try {
       const sub = await stripe.subscriptions.retrieve(row.stripe_subscription_id);
       const status = mapStatus(sub.status);
-      const periodEnd = new Date(sub.current_period_end * 1000);
+      const periodEnd = getPeriodEnd(sub);
       await db.query(`UPDATE ${table} SET status = ?, current_period_end = ? WHERE id = ?`, [status, periodEnd, row.id]);
-      console.log(`${table} #${row.id}: ${row.status} -> ${status} (do ${periodEnd.toISOString()})`);
+      console.log(`${table} #${row.id}: ${row.status} -> ${status} (do ${periodEnd ? periodEnd.toISOString() : 'neznáme'})`);
     } catch (e) {
       console.error(`${table} #${row.id}: chyba —`, e.message);
     }
@@ -53,9 +60,9 @@ async function reconcileOrphans(table, metadataKey) {
     const match = subs.data.find(s => s.metadata && s.metadata[metadataKey] === String(row.id));
     if (!match) continue;
     const status = mapStatus(match.status);
-    const periodEnd = new Date(match.current_period_end * 1000);
+    const periodEnd = getPeriodEnd(match);
     await db.query(`UPDATE ${table} SET status = ?, current_period_end = ?, stripe_subscription_id = ? WHERE id = ?`, [status, periodEnd, match.id, row.id]);
-    console.log(`${table} #${row.id}: dohľadané cez zákazníka -> ${status} (do ${periodEnd.toISOString()})`);
+    console.log(`${table} #${row.id}: dohľadané cez zákazníka -> ${status} (do ${periodEnd ? periodEnd.toISOString() : 'neznáme'})`);
   }
 }
 

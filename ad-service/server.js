@@ -33,12 +33,19 @@ function mapStripeStatus(stripeStatus) {
   return 'cancelled';
 }
 
+// Novšie Stripe API verzie presunuli current_period_end z hlavného subscription
+// objektu na jednotlivé subscription items — top-level pole už nemusí existovať.
+function getPeriodEnd(sub) {
+  const ts = sub.current_period_end || (sub.items && sub.items.data[0] && sub.items.data[0].current_period_end);
+  return ts ? new Date(ts * 1000) : null;
+}
+
 async function syncFromSubscription(subscriptionId) {
   if (!subscriptionId) return;
   const sub = await stripe.subscriptions.retrieve(subscriptionId);
   const metadata = sub.metadata || {};
   const status = mapStripeStatus(sub.status);
-  const periodEnd = new Date(sub.current_period_end * 1000);
+  const periodEnd = getPeriodEnd(sub);
   if (metadata.bannerId) {
     await db.query(
       'UPDATE ad_banners SET status = ?, current_period_end = ?, stripe_subscription_id = ? WHERE id = ?',
