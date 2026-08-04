@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Psychológia UCM Trnava — Príprava na prijímačky</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="page">
+    <header class="hero">
+      <div class="eyebrow">UCM Trnava · Filozofická fakulta</div>
+      <h1>Psychológia — príprava na prijímacie skúšky</h1>
+      <p class="subtitle">Precvič si otázky z troch okruhov prijímacej skúšky na bakalársky program Psychológia: Biológia človeka, Filozofia a Psychológia.</p>
+    </header>
+
+    <main>
+      <section id="screen-home" class="screen">
+        <div class="mode-grid"></div>
+        <div id="history-panel"></div>
+      </section>
+
+      <section id="screen-test" class="screen" style="display:none">
+        <div class="test-topbar">
+          <button class="btn-ghost" onclick="showScreen('home')">← Späť</button>
+          <div class="progress-wrap"><div class="progress-bar" id="progress-bar"></div></div>
+          <div id="progress-label"></div>
+        </div>
+        <div id="test-content"></div>
+      </section>
+
+      <section id="screen-result" class="screen" style="display:none">
+        <div id="result-content"></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="/questions-psychologia.js"></script>
+  <script src="/quiz-psychologia.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>
