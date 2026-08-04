@@ -8,6 +8,9 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Za reverse proxy (Cloudflare/Render/...) — správny req.hostname pre subdomain routing (ad.sptrener.online) a req.ip pre rate limiting
+app.set('trust proxy', 1);
+
 // ─── Bezpečnosť ─────────────────────────────────────────────
 app.use(helmet({ contentSecurityPolicy: false }));
 
@@ -45,6 +48,8 @@ app.use('/api/stripe', require('./routes/stripe'));
 app.use('/api/ai', aiLimiter, require('./routes/ai'));
 app.use('/api', aiLimiter, require('./routes/generate'));
 app.use(require('./routes/blog'));
+app.use('/api/ads-auth', authLimiter);
+app.use(require('./routes/ads'));
 
 // Health check
 app.get('/api/health', (req, res) => res.json({
@@ -54,6 +59,15 @@ app.get('/api/health', (req, res) => res.json({
 }));
 
 // ─── Statický frontend ────────────────────────────────────
+const AD_HOSTS = new Set(['ad.sptrener.online', 'ad.localhost']);
+
+// Reklamná subdoména dostane vlastnú SPA stránku pre všetky GET požiadavky
+// (musí bežať PRED express.static, inak by "/" vždy servírovalo public/index.html)
+app.get('*', (req, res, next) => {
+  if (!AD_HOSTS.has(req.hostname)) return next();
+  res.sendFile(path.join(__dirname, 'public', 'ads.html'));
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));

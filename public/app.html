@@ -66,6 +66,14 @@ h1.title span{font-style:italic;color:var(--purple2)}
 .stat-pill:last-child{border-right:none}
 .stat-val{font-family:var(--mono);font-size:1.5rem;font-weight:500;color:var(--volt);display:block}
 .stat-label{font-size:.68rem;color:var(--text3);margin-top:.2rem;font-family:var(--mono);letter-spacing:.08em;text-transform:uppercase;display:block}
+
+.ad-slot{max-width:880px;width:100%;margin-top:1rem;position:relative;z-index:1}
+.ad-slot-banner{display:block;width:100%;aspect-ratio:6.4/1;border-radius:14px;overflow:hidden;border:1px solid var(--border);background:var(--black2)}
+.ad-slot-banner img,.ad-slot-banner video{width:100%;height:100%;object-fit:cover;display:block}
+.ad-slot-label{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin-top:.4rem;text-align:right}
+.ad-slot-cta{display:flex;align-items:center;justify-content:center;gap:.6rem;width:100%;aspect-ratio:6.4/1;border-radius:14px;border:1px dashed var(--border2);background:var(--black2);text-decoration:none;color:var(--text3);font-family:var(--mono);font-size:.72rem;letter-spacing:.05em;transition:all .2s}
+.ad-slot-cta:hover{color:var(--purple2);border-color:var(--purple)}
+@media (max-width:600px){ .ad-slot-banner,.ad-slot-cta{aspect-ratio:3/1} }
 /* TEST */
 #test{flex-direction:column;padding:0}
 .test-header{background:rgba(15,15,24,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:.75rem 1.5rem;display:flex;align-items:center;gap:1rem;position:sticky;top:0;z-index:100}
@@ -733,6 +741,8 @@ h1.title span{font-style:italic;color:var(--purple2)}
     <div class="stat-pill"><span class="stat-val" id="statAccuracy">—</span><span class="stat-label" data-i18n="statAccuracy">Úspešnosť</span></div>
     <div class="stat-pill"><span class="stat-val" id="statAICount">0</span><span class="stat-label" data-i18n="statAIQuestions">AI úloh</span></div>
   </div>
+
+  <div class="ad-slot" id="adSlot"></div>
 </div>
 
 <!-- AI GENERATOR -->
@@ -5235,7 +5245,7 @@ function showInstallBanner() {
   const banner = document.createElement('div');
   banner.id = 'pwa-banner';
   banner.style.cssText = 'position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);background:var(--black2);border:1px solid rgba(200,255,0,.3);border-radius:14px;padding:.75rem 1.25rem;display:flex;align-items:center;gap:.75rem;z-index:9995;font-family:var(--mono);font-size:.78rem;box-shadow:0 8px 30px rgba(0,0,0,.5);white-space:nowrap;max-width:calc(100vw - 2rem);';
-  banner.innerHTML = '<span style="color:var(--volt)">📲</span><span style="color:var(--text2)">Nainštalovať ako appku</span><button onclick="installPWA()" style="background:var(--volt);color:var(--black);border:none;border-radius:8px;padding:.3rem .8rem;font-family:var(--mono);font-size:.75rem;font-weight:700;cursor:pointer;">Inštalovať</button><button onclick="document.getElementById('pwa-banner').remove()" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:1rem;padding:0 .25rem;">✕</button>';
+  banner.innerHTML = `<span style="color:var(--volt)">📲</span><span style="color:var(--text2)">Nainštalovať ako appku</span><button onclick="installPWA()" style="background:var(--volt);color:var(--black);border:none;border-radius:8px;padding:.3rem .8rem;font-family:var(--mono);font-size:.75rem;font-weight:700;cursor:pointer;">Inštalovať</button><button onclick="document.getElementById('pwa-banner').remove()" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:1rem;padding:0 .25rem;">✕</button>`;
   document.body.appendChild(banner);
 }
 function installPWA() {
@@ -5249,6 +5259,35 @@ function installPWA() {
     deferredPrompt = null;
   });
 }
+
+// ─── AD SLOT — rotujúci reklamný banner (SP Tréner Ads) ───
+(function(){
+  const slot = document.getElementById('adSlot');
+  if (!slot) return;
+  let banners = [];
+  let idx = 0;
+
+  function render(){
+    if (!banners.length) {
+      slot.innerHTML = '<a href="https://ad.sptrener.online" target="_blank" rel="noopener" class="ad-slot-cta">+ Chceš tu inzerovať? → ad.sptrener.online</a>';
+      return;
+    }
+    const b = banners[idx % banners.length];
+    const src = '/api/ads/file/' + b.id;
+    const media = b.mimeType === 'video/mp4'
+      ? `<video src="${src}" muted loop autoplay playsinline></video>`
+      : `<img src="${src}" alt="Reklama" loading="lazy">`;
+    slot.innerHTML = `<a class="ad-slot-banner" href="/api/ads/go/${b.id}" target="_blank" rel="noopener sponsored">${media}</a><div class="ad-slot-label">Reklama</div>`;
+    if (navigator.sendBeacon) navigator.sendBeacon('/api/ads/impression/' + b.id);
+    else fetch('/api/ads/impression/' + b.id, { method: 'POST' }).catch(()=>{});
+  }
+
+  fetch('/api/ads/serve').then(r => r.json()).then(data => {
+    banners = data.banners || [];
+    render();
+    if (banners.length > 1) setInterval(() => { idx++; render(); }, 8000);
+  }).catch(() => {});
+})();
 </script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </body>

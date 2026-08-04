@@ -76,6 +76,39 @@ CREATE TABLE IF NOT EXISTS blog_posts (
   created_at  TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- Reklamný systém (ad.sptrener.online)
+CREATE TABLE IF NOT EXISTS advertisers (
+  id                    UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  email                 TEXT UNIQUE NOT NULL,
+  password_hash         TEXT NOT NULL,
+  company_name          TEXT,
+  stripe_customer_id    TEXT UNIQUE,
+  stripe_subscription_id TEXT UNIQUE,
+  status                TEXT DEFAULT 'inactive', -- 'active' | 'inactive' | 'cancelled' | 'past_due'
+  current_period_end    TIMESTAMPTZ,
+  created_at            TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Nahraté banner kreatívy (PNG/GIF/MP4 uložené priamo v DB)
+CREATE TABLE IF NOT EXISTS ad_banners (
+  id            UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  advertiser_id UUID REFERENCES advertisers(id) ON DELETE CASCADE,
+  file_name     TEXT NOT NULL,
+  mime_type     TEXT NOT NULL,  -- image/png | image/gif | video/mp4
+  file_data     BYTEA NOT NULL,
+  link_url      TEXT NOT NULL,
+  active        BOOLEAN DEFAULT TRUE,
+  created_at    TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Impresie a kliky na bannery
+CREATE TABLE IF NOT EXISTS ad_events (
+  id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  banner_id   UUID REFERENCES ad_banners(id) ON DELETE CASCADE,
+  event_type  TEXT NOT NULL,  -- 'impression' | 'click'
+  created_at  TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- Indexy
 CREATE INDEX IF NOT EXISTS idx_subscriptions_user ON subscriptions(user_id);
 CREATE INDEX IF NOT EXISTS idx_results_user ON test_results(user_id);
@@ -83,3 +116,8 @@ CREATE INDEX IF NOT EXISTS idx_ai_questions_user ON ai_questions(user_id);
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 CREATE INDEX IF NOT EXISTS idx_blog_posts_slug ON blog_posts(slug);
 CREATE INDEX IF NOT EXISTS idx_blog_posts_published ON blog_posts(published, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_advertisers_email ON advertisers(email);
+CREATE INDEX IF NOT EXISTS idx_ad_banners_advertiser ON ad_banners(advertiser_id);
+CREATE INDEX IF NOT EXISTS idx_ad_banners_active ON ad_banners(active);
+CREATE INDEX IF NOT EXISTS idx_ad_events_banner ON ad_events(banner_id);
+CREATE INDEX IF NOT EXISTS idx_ad_events_type_created ON ad_events(event_type, created_at);
