@@ -74,6 +74,24 @@ h1.title span{font-style:italic;color:var(--purple2)}
 .ad-slot-cta{display:flex;align-items:center;justify-content:center;gap:.6rem;width:100%;aspect-ratio:6.4/1;border-radius:14px;border:1px dashed var(--border2);background:var(--black2);text-decoration:none;color:var(--text3);font-family:var(--mono);font-size:.72rem;letter-spacing:.05em;transition:all .2s}
 .ad-slot-cta:hover{color:var(--purple2);border-color:var(--purple)}
 @media (max-width:600px){ .ad-slot-banner,.ad-slot-cta{aspect-ratio:3/1} }
+
+/* ── REWARD AD (video za bonus test) ── */
+.reward-overlay{position:fixed;inset:0;background:rgba(8,8,13,.97);display:flex;align-items:center;justify-content:center;z-index:9990;padding:1.5rem}
+.reward-modal{background:var(--black2);border:1px solid var(--border2);border-radius:20px;padding:2rem;max-width:420px;width:100%;text-align:center}
+.reward-modal-icon{font-size:2.5rem;margin-bottom:1rem}
+.reward-modal-title{font-family:var(--serif);font-size:1.5rem;margin-bottom:.6rem}
+.reward-modal-sub{color:var(--text2);font-size:.9rem;line-height:1.6;margin-bottom:1.5rem}
+.reward-modal-actions{display:flex;flex-direction:column;gap:.6rem}
+.reward-btn{padding:.9rem 1.25rem;border-radius:10px;font-family:var(--mono);font-size:.85rem;font-weight:700;cursor:pointer;border:none;transition:all .2s}
+.reward-btn.primary{background:var(--volt);color:var(--black)}
+.reward-btn.primary:hover{transform:translateY(-1px);box-shadow:0 8px 22px rgba(200,255,0,.25)}
+.reward-btn.ghost{background:transparent;color:var(--text3);border:1px solid var(--border2)}
+.reward-btn.ghost:hover{color:var(--text2)}
+.reward-video-wrap{width:100%;max-width:480px;background:#000;border-radius:16px;overflow:hidden;position:relative}
+.reward-video-wrap video{width:100%;display:block;max-height:70vh}
+.reward-progress-bg{height:5px;background:rgba(255,255,255,.1)}
+.reward-progress-fill{height:100%;background:var(--volt);width:0%;transition:width .2s linear}
+.reward-video-label{font-family:var(--mono);font-size:.72rem;color:var(--text3);margin-top:1rem}
 /* TEST */
 #test{flex-direction:column;padding:0}
 .test-header{background:rgba(15,15,24,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:.75rem 1.5rem;display:flex;align-items:center;gap:1rem;position:sticky;top:0;z-index:100}
@@ -2926,16 +2944,24 @@ async function requestTrialSlot(){
     if(count>=FREE_TESTS_ANON){showToast(t('anonLimitMsg'));showPaywall('anon');return false;}
     incrementTrialCount();return true;
   }
+  let blocked=false;
   try{
     const res=await fetch('/api/trial/check',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:currentUser.email,refCode:localStorage.getItem('vsp_pending_ref')||null})});
     const data=await res.json();
     if(data.isPremium){localStorage.setItem('vsp_premium','true');return true;}  // Premium — žiadny paywall
-    if(!data.allowed){showPaywall('registered');return false;}
-    incrementTrialCount();return true;
+    if(!data.allowed)blocked=true;
   }catch(e){
-    if(count>=FREE_TESTS_REGISTERED){showToast(t('registeredLimitMsg'));showPaywall('registered');return false;}
-    incrementTrialCount();return true;
+    if(count>=FREE_TESTS_REGISTERED)blocked=true;
   }
+  if(!blocked){incrementTrialCount();return true;}
+
+  // Vyčerpané testy — free registrovaný user si vie pozrieť reklamu (so zvukom) za +1 test, max 3×/deň
+  if(typeof offerVideoAdReward==='function'){
+    const earned=await offerVideoAdReward();
+    if(earned)return true;
+  }
+
+  showToast(t('registeredLimitMsg'));showPaywall('registered');return false;
 }
 
 // ============================================================
@@ -5288,6 +5314,111 @@ function installPWA() {
     if (banners.length > 1) setInterval(() => { idx++; render(); }, 8000);
   }).catch(() => {});
 })();
+
+// ─── REWARD AD — pozri video so zvukom, získaj +1 test (max 3×/deň) ───
+function rewardOverlayEl(){
+  let el = document.getElementById('rewardOverlay');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'rewardOverlay';
+    document.body.appendChild(el);
+  }
+  return el;
+}
+
+function closeRewardOverlay(){
+  const el = document.getElementById('rewardOverlay');
+  if (el) el.innerHTML = '';
+}
+
+async function offerVideoAdReward(){
+  if (!currentUser) return false;
+  let status;
+  try {
+    const headers = await getAuthHeader();
+    const res = await fetch('/api/rewards/video-status', { headers });
+    status = await res.json();
+  } catch(e) { return false; }
+  if (!status || !status.available) return false;
+
+  return await new Promise(resolve => {
+    const overlay = rewardOverlayEl();
+    overlay.innerHTML = `
+      <div class="reward-overlay">
+        <div class="reward-modal">
+          <div class="reward-modal-icon">🎬</div>
+          <div class="reward-modal-title">Vyčerpal si testy na dnes</div>
+          <div class="reward-modal-sub">Pozri si krátku reklamu so zvukom celú do konca a získaš <strong style="color:var(--volt)">+1 test zadarma</strong>. Dnes ti zostáva ${status.dailyRemaining}/3 takýchto bonusov.</div>
+          <div class="reward-modal-actions">
+            <button class="reward-btn primary" id="rewardWatchBtn">▶ Pozri reklamu a získaj test</button>
+            <button class="reward-btn ghost" id="rewardDeclineBtn">Nie, ďakujem</button>
+          </div>
+        </div>
+      </div>`;
+    document.getElementById('rewardDeclineBtn').onclick = () => { closeRewardOverlay(); resolve(false); };
+    document.getElementById('rewardWatchBtn').onclick = () => runAdRewardVideo(resolve);
+  });
+}
+
+async function runAdRewardVideo(resolve){
+  const overlay = rewardOverlayEl();
+  overlay.innerHTML = `<div class="reward-overlay"><div class="reward-modal-sub">Načítavam reklamu…</div></div>`;
+
+  let session;
+  try {
+    const headers = { 'Content-Type': 'application/json', ...(await getAuthHeader()) };
+    const res = await fetch('/api/rewards/video/start', { method: 'POST', headers });
+    session = await res.json();
+    if (!res.ok) throw new Error(session.error || 'Reklama sa nepodarila načítať.');
+  } catch(e) {
+    closeRewardOverlay();
+    showToast(e.message || 'Reklama sa nepodarila načítať.');
+    resolve(false);
+    return;
+  }
+
+  overlay.innerHTML = `
+    <div class="reward-overlay">
+      <div style="display:flex;flex-direction:column;align-items:center">
+        <div class="reward-video-wrap">
+          <video id="rewardVideo" src="${session.fileUrl}" autoplay playsinline controlsList="nodownload noremoteplayback"></video>
+          <div class="reward-progress-bg"><div class="reward-progress-fill" id="rewardProgressFill"></div></div>
+        </div>
+        <div class="reward-video-label" id="rewardVideoLabel">Sleduj celé video pre získanie testu…</div>
+      </div>
+    </div>`;
+
+  const video = document.getElementById('rewardVideo');
+  const fill = document.getElementById('rewardProgressFill');
+  const label = document.getElementById('rewardVideoLabel');
+  let maxTime = 0;
+
+  video.addEventListener('timeupdate', () => {
+    if (video.currentTime > maxTime + 0.5) video.currentTime = maxTime; // zabráni preskočeniu dopredu
+    else maxTime = Math.max(maxTime, video.currentTime);
+    if (video.duration) fill.style.width = Math.min(100, (video.currentTime / video.duration) * 100) + '%';
+  });
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden && !video.paused) video.pause();
+  });
+
+  video.addEventListener('ended', async () => {
+    label.textContent = 'Vyhodnocujem…';
+    try {
+      const headers = { 'Content-Type': 'application/json', ...(await getAuthHeader()) };
+      const res = await fetch('/api/rewards/video/complete', { method: 'POST', headers, body: JSON.stringify({ sessionToken: session.sessionToken }) });
+      const data = await res.json();
+      if (!res.ok || !data.allowed) throw new Error(data.error || 'Reklama sa nepodarila overiť.');
+      closeRewardOverlay();
+      showToast('✓ Získal si +1 test zadarma!');
+      resolve(true);
+    } catch(e) {
+      closeRewardOverlay();
+      showToast(e.message || 'Reklama sa nepodarila overiť.');
+      resolve(false);
+    }
+  });
+}
 </script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </body>

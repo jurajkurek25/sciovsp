@@ -130,6 +130,19 @@ footer{border-top:1px solid var(--border);padding:2rem;display:flex;align-items:
         </div>
         <p style="font-size:.8rem;color:var(--text3)">Banner nahráš zadarmo, do rotácie ide hneď po zaplatení jeho vlastného predplatného. Za obsah kreatívy a cieľovej stránky zodpovedá inzerent.</p>
       </div>
+
+      <div class="card" style="margin-top:1.25rem">
+        <h2>149&nbsp;€/mesiac <span style="color:var(--purple2)">video so zvukom.</span></h2>
+        <div class="price-row"><span class="price-num" style="color:var(--purple2)">149€</span><span class="price-period">/ mesiac / video, zrušiteľné kedykoľvek</span></div>
+        <div class="feat-list">
+          <span>Rewarded video — používateľ ho pozerá dobrovoľne výmenou za bonus test, dopozerá ho celé aj so zvukom</span>
+          <span>Max. 3 aktívne video reklamy naraz, systém ich strieda</span>
+          <span>Formát: MP4 (so zvukom), max. 25&nbsp;MB, 5–180 sekúnd</span>
+          <span>Vlastný cieľový odkaz cez CTA — kliky trackujeme automaticky</span>
+          <span>Garantovane 100% dopozretie — overujeme to na serveri</span>
+        </div>
+        <p style="font-size:.8rem;color:var(--text3)">Vyššia cena oproti banneru odzrkadľuje garantovanú pozornosť: video sa počíta ako zhliadnuté až po reálnom dopozretí celej dĺžky.</p>
+      </div>
     </div>
 
     <!-- PRAVÝ STĹPEC: auth alebo dashboard -->
@@ -159,24 +172,52 @@ footer{border-top:1px solid var(--border);padding:2rem;display:flex;align-items:
 
       <!-- DASHBOARD -->
       <div class="hidden" id="dashboard">
-        <div class="card" style="margin-bottom:1.25rem">
-          <h3>Nahrať banner</h3>
-          <p style="font-size:.8rem;color:var(--text3);margin-bottom:.9rem">Za každý nahratý banner sa platí samostatné mesačné predplatné 49€ — platbu spustíš tlačidlom pri danom banneri nižšie.</p>
-          <div id="uploadMsg"></div>
-          <form id="uploadForm" onsubmit="return uploadBanner(event)">
-            <div class="field"><label>Súbor (PNG, GIF alebo MP4, max 8MB, bez zvuku)</label><input type="file" id="bannerFile" accept="image/png,image/gif,video/mp4" required></div>
-            <div class="field"><label>Cieľová URL</label><input type="url" id="bannerLink" placeholder="https://tvoja-stranka.sk" required></div>
-            <button class="btn" type="submit" id="uploadBtn">Nahrať banner →</button>
-          </form>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:1rem">
+          <div class="tabs" style="margin:0;flex:1">
+            <div class="tab active" id="tabBanners" onclick="switchProductTab('banners')">Bannery</div>
+            <div class="tab" id="tabVideos" onclick="switchProductTab('videos')">Video reklamy</div>
+          </div>
+          <button class="icon-btn hidden" id="portalBtn" onclick="openPortal()" style="flex-shrink:0">Spravovať fakturáciu</button>
+        </div>
+        <div id="billingMsg"></div>
+
+        <!-- BANNERY -->
+        <div id="productBanners">
+          <div class="card" style="margin-bottom:1.25rem">
+            <h3>Nahrať banner</h3>
+            <p style="font-size:.8rem;color:var(--text3);margin-bottom:.9rem">Za každý nahratý banner sa platí samostatné mesačné predplatné 49€ — platbu spustíš tlačidlom pri danom banneri nižšie.</p>
+            <div id="uploadMsg"></div>
+            <form id="uploadForm" onsubmit="return uploadBanner(event)">
+              <div class="field"><label>Súbor (PNG, GIF alebo MP4, max 8MB, bez zvuku)</label><input type="file" id="bannerFile" accept="image/png,image/gif,video/mp4" required></div>
+              <div class="field"><label>Cieľová URL</label><input type="url" id="bannerLink" placeholder="https://tvoja-stranka.sk" required></div>
+              <button class="btn" type="submit" id="uploadBtn">Nahrať banner →</button>
+            </form>
+          </div>
+
+          <div class="card">
+            <h3>Moje bannery</h3>
+            <div id="bannerList"></div>
+          </div>
         </div>
 
-        <div class="card">
-          <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:.6rem">
-            <h3 style="margin:0">Moje bannery</h3>
-            <button class="icon-btn hidden" id="portalBtn" onclick="openPortal()">Spravovať fakturáciu</button>
+        <!-- VIDEO REKLAMY -->
+        <div class="hidden" id="productVideos">
+          <div class="card" style="margin-bottom:1.25rem">
+            <h3>Nahrať video reklamu</h3>
+            <p style="font-size:.8rem;color:var(--text3);margin-bottom:.9rem">Za každé video sa platí samostatné mesačné predplatné 149€. Dĺžka musí zodpovedať skutočnému súboru — používa sa na overenie plného dopozretia.</p>
+            <div id="videoUploadMsg"></div>
+            <form id="videoUploadForm" onsubmit="return uploadVideoAd(event)">
+              <div class="field"><label>Súbor (MP4, so zvukom, max 25MB)</label><input type="file" id="videoFile" accept="video/mp4" required></div>
+              <div class="field"><label>Dĺžka videa (sekundy, 5–180)</label><input type="number" id="videoDuration" min="5" max="180" placeholder="napr. 15" required></div>
+              <div class="field"><label>Cieľová URL</label><input type="url" id="videoLink" placeholder="https://tvoja-stranka.sk" required></div>
+              <button class="btn" type="submit" id="videoUploadBtn">Nahrať video →</button>
+            </form>
           </div>
-          <div id="billingMsg"></div>
-          <div id="bannerList"></div>
+
+          <div class="card">
+            <h3>Moje video reklamy</h3>
+            <div id="videoList"></div>
+          </div>
         </div>
       </div>
 
@@ -263,15 +304,30 @@ async function enterDashboard(){
   document.getElementById('portalBtn').classList.toggle('hidden', !me.advertiser.hasBilling);
 
   loadBanners();
+  loadVideoAds();
 
   const params = new URLSearchParams(location.search);
-  if (params.get('payment') === 'success') showMsg('billingMsg', 'Platba prebehla úspešne. Banner sa zapne do rotácie automaticky.', 'ok');
+  if (params.get('payment') === 'success') showMsg('billingMsg', 'Platba prebehla úspešne. Reklama sa zapne do rotácie automaticky.', 'ok');
   if (params.get('payment') === 'cancelled') showMsg('billingMsg', 'Platba bola zrušená.', 'error');
+}
+
+function switchProductTab(tab){
+  document.getElementById('tabBanners').classList.toggle('active', tab==='banners');
+  document.getElementById('tabVideos').classList.toggle('active', tab==='videos');
+  document.getElementById('productBanners').classList.toggle('hidden', tab!=='banners');
+  document.getElementById('productVideos').classList.toggle('hidden', tab!=='videos');
 }
 
 async function startCheckout(bannerId){
   try {
     const data = await api('/api/ads/banners/' + bannerId + '/checkout', { method: 'POST' });
+    location.href = data.url;
+  } catch(e) { showMsg('billingMsg', e.message, 'error'); }
+}
+
+async function startVideoCheckout(videoAdId){
+  try {
+    const data = await api('/api/video-ads/' + videoAdId + '/checkout', { method: 'POST' });
     location.href = data.url;
   } catch(e) { showMsg('billingMsg', e.message, 'error'); }
 }
@@ -317,19 +373,19 @@ function bannerMediaHtml(b){
   return `<img src="${src}" alt="">`;
 }
 
-function billingBadgeHtml(b){
-  const isPaidUp = b.status === 'active' && (!b.current_period_end || new Date(b.current_period_end) > new Date());
+function billingBadgeHtml(item, checkoutFnName, priceLabel){
+  const isPaidUp = item.status === 'active' && (!item.current_period_end || new Date(item.current_period_end) > new Date());
   if (isPaidUp) {
-    const until = new Date(b.current_period_end).toLocaleDateString('sk-SK');
+    const until = new Date(item.current_period_end).toLocaleDateString('sk-SK');
     return `<span class="status-pill active">● Zaplatené do ${until}</span>`;
   }
-  if (b.status === 'past_due') {
+  if (item.status === 'past_due') {
     return `<span class="status-pill past_due">● Platba zlyhala</span> <button class="icon-btn" onclick="openPortal()">Opraviť platbu</button>`;
   }
-  if (b.status === 'cancelled') {
-    return `<span class="status-pill inactive">○ Predplatné zrušené</span> <button class="btn" style="width:auto;padding:.5rem .9rem;font-size:.75rem" onclick="startCheckout('${b.id}')">Zaplatiť znova — 49€/mesiac →</button>`;
+  if (item.status === 'cancelled') {
+    return `<span class="status-pill inactive">○ Predplatné zrušené</span> <button class="btn" style="width:auto;padding:.5rem .9rem;font-size:.75rem" onclick="${checkoutFnName}('${item.id}')">Zaplatiť znova — ${priceLabel} →</button>`;
   }
-  return `<span class="status-pill inactive">○ Čaká na platbu</span> <button class="btn" style="width:auto;padding:.5rem .9rem;font-size:.75rem" onclick="startCheckout('${b.id}')">Zaplatiť 49€/mesiac →</button>`;
+  return `<span class="status-pill inactive">○ Čaká na platbu</span> <button class="btn" style="width:auto;padding:.5rem .9rem;font-size:.75rem" onclick="${checkoutFnName}('${item.id}')">Zaplatiť ${priceLabel} →</button>`;
 }
 
 async function loadBanners(){
@@ -347,7 +403,7 @@ async function loadBanners(){
         <div class="banner-info">
           <span class="banner-link">${b.link_url}</span>
           <div class="banner-stats">${b.impressions} zobrazení · ${b.clicks} klikov · CTR ${ctr}%</div>
-          <div style="margin-top:.5rem;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">${billingBadgeHtml(b)}</div>
+          <div style="margin-top:.5rem;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">${billingBadgeHtml(b, 'startCheckout', '49€/mesiac')}</div>
         </div>
         <div class="banner-actions">
           <button class="icon-btn ${b.active ? 'on' : ''}" onclick="toggleBanner('${b.id}', ${!b.active})" title="Zapnúť/vypnúť zobrazovanie (neovplyvní platbu)">${b.active ? 'Zobrazuje sa' : 'Pozastavené'}</button>
@@ -366,6 +422,73 @@ async function toggleBanner(id, active){
 async function deleteBanner(id){
   if (!confirm('Zmazať tento banner?')) return;
   try { await api('/api/ads/banners/' + id, { method: 'DELETE' }); loadBanners(); }
+  catch(e) {}
+}
+
+async function uploadVideoAd(e){
+  e.preventDefault();
+  const fileInput = document.getElementById('videoFile');
+  const linkInput = document.getElementById('videoLink');
+  const durationInput = document.getElementById('videoDuration');
+  if (!fileInput.files[0]) return false;
+
+  const btn = document.getElementById('videoUploadBtn');
+  btn.disabled = true;
+  btn.textContent = 'Nahrávam…';
+
+  const fd = new FormData();
+  fd.append('file', fileInput.files[0]);
+  fd.append('linkUrl', linkInput.value);
+  fd.append('durationS', durationInput.value);
+
+  try {
+    await api('/api/video-ads', { method: 'POST', body: fd });
+    document.getElementById('videoUploadForm').reset();
+    showMsg('videoUploadMsg', 'Video nahrané.', 'ok');
+    loadVideoAds();
+  } catch(e) {
+    showMsg('videoUploadMsg', e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Nahrať video →';
+  }
+  return false;
+}
+
+async function loadVideoAds(){
+  try {
+    const data = await api('/api/video-ads');
+    const list = document.getElementById('videoList');
+    if (!data.videoAds.length) {
+      list.innerHTML = '<p style="color:var(--text3);font-size:.85rem">Zatiaľ žiadne video reklamy.</p>';
+      return;
+    }
+    list.innerHTML = data.videoAds.map(v => {
+      const viewRate = v.views > 0 ? ((v.clicks / v.views) * 100).toFixed(1) : '0.0';
+      return `<div class="banner-item">
+        <div class="banner-thumb"><video src="/api/video-ads/file/${v.id}" muted></video></div>
+        <div class="banner-info">
+          <span class="banner-link">${v.link_url}</span>
+          <div class="banner-stats">${v.duration_s}s · ${v.views} dopozretí · ${v.clicks} klikov · CTR ${viewRate}%</div>
+          <div style="margin-top:.5rem;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">${billingBadgeHtml(v, 'startVideoCheckout', '149€/mesiac')}</div>
+        </div>
+        <div class="banner-actions">
+          <button class="icon-btn ${v.active ? 'on' : ''}" onclick="toggleVideoAd('${v.id}', ${!v.active})" title="Zapnúť/vypnúť zobrazovanie (neovplyvní platbu)">${v.active ? 'Zobrazuje sa' : 'Pozastavené'}</button>
+          <button class="icon-btn" onclick="deleteVideoAd('${v.id}')">Zmazať</button>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) {}
+}
+
+async function toggleVideoAd(id, active){
+  try { await api('/api/video-ads/' + id, { method: 'PATCH', body: JSON.stringify({ active }) }); loadVideoAds(); }
+  catch(e) {}
+}
+
+async function deleteVideoAd(id){
+  if (!confirm('Zmazať toto video?')) return;
+  try { await api('/api/video-ads/' + id, { method: 'DELETE' }); loadVideoAds(); }
   catch(e) {}
 }
 

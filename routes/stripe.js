@@ -99,6 +99,7 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
       case 'checkout.session.completed': {
         const userId = data.metadata?.userId;
         const bannerId = data.metadata?.bannerId;
+        const videoAdId = data.metadata?.videoAdId;
         if (bannerId) {
           const sub = await stripe.subscriptions.retrieve(data.subscription);
           await pool.query(
@@ -110,6 +111,19 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
             [sub.id, sub.status, sub.current_period_end, bannerId]
           );
           console.log(`✅ Banner ${bannerId} aktivovaný (predplatné zaplatené)`);
+          break;
+        }
+        if (videoAdId) {
+          const sub = await stripe.subscriptions.retrieve(data.subscription);
+          await pool.query(
+            `UPDATE video_ads SET
+              stripe_subscription_id = $1,
+              status = $2,
+              current_period_end = to_timestamp($3)
+             WHERE id = $4`,
+            [sub.id, sub.status, sub.current_period_end, videoAdId]
+          );
+          console.log(`✅ Video reklama ${videoAdId} aktivovaná (predplatné zaplatené)`);
           break;
         }
         if (!userId) break;
@@ -132,9 +146,18 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
       case 'customer.subscription.updated': {
         const userId = data.metadata?.userId;
         const bannerId = data.metadata?.bannerId;
+        const videoAdId = data.metadata?.videoAdId;
         if (bannerId) {
           await pool.query(
             `UPDATE ad_banners SET status = $1, current_period_end = to_timestamp($2)
+             WHERE stripe_subscription_id = $3`,
+            [data.status, data.current_period_end, data.id]
+          );
+          break;
+        }
+        if (videoAdId) {
+          await pool.query(
+            `UPDATE video_ads SET status = $1, current_period_end = to_timestamp($2)
              WHERE stripe_subscription_id = $3`,
             [data.status, data.current_period_end, data.id]
           );
@@ -161,6 +184,10 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
           [data.id]
         );
         await pool.query(
+          `UPDATE video_ads SET status = 'cancelled' WHERE stripe_subscription_id = $1`,
+          [data.id]
+        );
+        await pool.query(
           `UPDATE subscriptions SET plan = 'free', status = 'cancelled', updated_at = NOW()
            WHERE stripe_subscription_id = $1`,
           [data.id]
@@ -171,10 +198,14 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
 
       case 'invoice.payment_failed': {
         // data.subscription — konkrétne predplatné, ktoré zlyhalo (jeden Stripe zákazník môže mať viac
-        // banner-predplatných naraz, takže sa nedá spoliehať len na data.customer)
+        // banner/video predplatných naraz, takže sa nedá spoliehať len na data.customer)
         if (data.subscription) {
           await pool.query(
             `UPDATE ad_banners SET status = 'past_due' WHERE stripe_subscription_id = $1`,
+            [data.subscription]
+          );
+          await pool.query(
+            `UPDATE video_ads SET status = 'past_due' WHERE stripe_subscription_id = $1`,
             [data.subscription]
           );
         }

@@ -111,6 +111,37 @@ CREATE TABLE IF NOT EXISTS ad_events (
   created_at  TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- Video reklamy (rewarded video, so zvukom) — drahšia alternatíva k banneru, odmeňuje
+-- registrovaného free používateľa bonus testom za plné dopozeranie. Rovnaký princíp
+-- fakturácie ako ad_banners: predplatné sa platí za KAŽDÉ video samostatne.
+CREATE TABLE IF NOT EXISTS video_ads (
+  id                     UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  advertiser_id          UUID REFERENCES advertisers(id) ON DELETE CASCADE,
+  file_name              TEXT NOT NULL,
+  mime_type              TEXT NOT NULL,  -- video/mp4
+  file_data              BYTEA NOT NULL,
+  duration_s             INT NOT NULL,   -- deklarovaná dĺžka videa — používa sa na overenie plného dopozerania
+  link_url               TEXT NOT NULL,
+  active                 BOOLEAN DEFAULT TRUE,
+  stripe_subscription_id TEXT UNIQUE,
+  status                 TEXT DEFAULT 'pending_payment', -- 'pending_payment' | 'active' | 'past_due' | 'cancelled'
+  current_period_end     TIMESTAMPTZ,
+  created_at             TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Zhliadnutia video reklám — slúži zároveň ako anti-cheat session (start/complete),
+-- denný limit odmien (max 3/deň na používateľa) aj štatistiky pre inzerenta
+CREATE TABLE IF NOT EXISTS video_ad_views (
+  id             UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  video_ad_id    UUID REFERENCES video_ads(id) ON DELETE CASCADE,
+  user_id        UUID REFERENCES users(id) ON DELETE CASCADE,
+  session_token  TEXT UNIQUE NOT NULL,
+  started_at     TIMESTAMPTZ DEFAULT NOW(),
+  completed_at   TIMESTAMPTZ,
+  reward_granted BOOLEAN DEFAULT FALSE,
+  clicked        BOOLEAN DEFAULT FALSE
+);
+
 -- Indexy
 CREATE INDEX IF NOT EXISTS idx_subscriptions_user ON subscriptions(user_id);
 CREATE INDEX IF NOT EXISTS idx_results_user ON test_results(user_id);
@@ -124,3 +155,8 @@ CREATE INDEX IF NOT EXISTS idx_ad_banners_active ON ad_banners(active);
 CREATE INDEX IF NOT EXISTS idx_ad_banners_status ON ad_banners(status);
 CREATE INDEX IF NOT EXISTS idx_ad_events_banner ON ad_events(banner_id);
 CREATE INDEX IF NOT EXISTS idx_ad_events_type_created ON ad_events(event_type, created_at);
+CREATE INDEX IF NOT EXISTS idx_video_ads_advertiser ON video_ads(advertiser_id);
+CREATE INDEX IF NOT EXISTS idx_video_ads_status ON video_ads(status);
+CREATE INDEX IF NOT EXISTS idx_video_ad_views_video ON video_ad_views(video_ad_id);
+CREATE INDEX IF NOT EXISTS idx_video_ad_views_user_day ON video_ad_views(user_id, completed_at);
+CREATE INDEX IF NOT EXISTS idx_video_ad_views_token ON video_ad_views(session_token);
