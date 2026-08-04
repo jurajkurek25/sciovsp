@@ -2,31 +2,37 @@ require('dotenv').config();
 
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
+const crypto = require('crypto');
 const cors = require('cors');
 const multer = require('multer');
-const crypto = require('crypto');
-const { createClient } = require('@supabase/supabase-js');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const Stripe = require('stripe');
-const ws = require('ws');
+const db = require('./db');
 
 const PORT = process.env.PORT || 3849;
 const APP_URL = process.env.APP_URL || 'https://ad.sptrener.online';
 const MAIN_APP_ORIGIN = process.env.MAIN_APP_ORIGIN || 'https://sptrener.online';
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  console.error('❌ Chýba JWT_SECRET v .env. Appka sa nespustí bez neho.');
+  process.exit(1);
+}
 
-// Node < 22 nemá natívny WebSocket — supabase-js ho pri konštrukcii vyžaduje
-// pre realtime klienta, aj keď realtime v tejto appke vôbec nepoužívame.
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY, {
-  realtime: { transport: ws }
-});
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
 const app = express();
 app.use(express.json());
-app.use(cors({ origin: [MAIN_APP_ORIGIN, APP_URL], methods: ['GET', 'POST'] }));
+app.use(cors({ origin: [MAIN_APP_ORIGIN, APP_URL], methods: ['GET', 'POST', 'PATCH', 'DELETE'] }));
+
+const UPLOADS_DIR = path.join(__dirname, 'public', 'uploads');
+fs.mkdirSync(path.join(UPLOADS_DIR, 'banners'), { recursive: true });
+fs.mkdirSync(path.join(UPLOADS_DIR, 'videos'), { recursive: true });
 
 const upload = multer({ storage: multer.memoryStorage() });
 
-// ─── Jednoduchý in-memory rate limiter (žiadna zdieľaná infra s hlavnou appkou) ──
+// ─── Jednoduchý in-memory rate limiter ─────────────────────────
 const hits = new Map();
 function rateLimit(req, res, next) {
   const key = req.ip;
@@ -46,69 +52,103 @@ const MAX_BANNER_SIZE = 8 * 1024 * 1024;
 const MAX_VIDEO_SIZE = 25 * 1024 * 1024;
 const MIN_VIDEO_DURATION = 5, MAX_VIDEO_DURATION = 180;
 
-// ─── Inzerentská autentifikácia (Supabase magic-link, rovnaký princíp ako hlavná appka) ──
+function safeFilename(advertiserId, originalname) {
+  const ext = (originalname.split('.').pop() || 'bin').toLowerCase().replace(/[^a-z0-9]/g, '') || 'bin';
+  return `${advertiserId}-${Date.now()}-${crypto.randomBytes(4).toString('hex')}.${ext}`;
+}
+
+async function unlinkPublicUrl(publicUrl) {
+  if (!publicUrl) return;
+  const filePath = path.join(__dirname, 'public', publicUrl.replace(/^\/+/, ''));
+  fs.promises.unlink(filePath).catch(() => {});
+}
+
+// ─── Vlastná autentifikácia inzerentov (email + heslo, JWT) ─────
+
+function signToken(advertiser) {
+  return jwt.sign({ id: advertiser.id, email: advertiser.email }, JWT_SECRET, { expiresIn: '30d' });
+}
+
+function advertiserJson(a) {
+  return { email: a.email, companyName: a.company_name, hasBilling: !!a.stripe_customer_id };
+}
 
 async function requireAdvertiser(req, res, next) {
   const header = req.headers.authorization;
   const token = header && header.startsWith('Bearer ') ? header.slice(7) : null;
   if (!token) return res.status(401).json({ error: 'Chýba prihlásenie.' });
   try {
-    const { data, error } = await supabase.auth.getUser(token);
-    if (error || !data.user) return res.status(401).json({ error: 'Neplatný token.' });
-    const email = data.user.email;
-    let { data: advertiser } = await supabase.from('advertisers').select('*').eq('email', email).single();
-    if (!advertiser) {
-      const { data: created } = await supabase.from('advertisers').insert({ email }).select().single();
-      advertiser = created;
-    }
-    req.advertiser = advertiser;
+    const payload = jwt.verify(token, JWT_SECRET);
+    const [rows] = await db.query('SELECT * FROM advertisers WHERE id = ?', [payload.id]);
+    if (!rows[0]) return res.status(401).json({ error: 'Neplatný token.' });
+    req.advertiser = rows[0];
     next();
   } catch (e) {
     res.status(401).json({ error: 'Neplatný alebo expirovaný token.' });
   }
 }
 
-app.post('/api/ads-auth/magic-link', rateLimit, async (req, res) => {
-  const { email } = req.body;
-  if (!email || !email.includes('@')) return res.status(400).json({ error: 'Neplatný email.' });
+app.post('/api/ads-auth/register', rateLimit, async (req, res) => {
+  const { email, password, companyName } = req.body || {};
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return res.status(400).json({ error: 'Neplatný email.' });
+  if (!password || password.length < 8) return res.status(400).json({ error: 'Heslo musí mať aspoň 8 znakov.' });
   try {
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: APP_URL + '/' }
-    });
-    if (error) throw error;
-    res.json({ success: true });
+    const [existing] = await db.query('SELECT id FROM advertisers WHERE email = ?', [email]);
+    if (existing.length) return res.status(409).json({ error: 'Tento email je už zaregistrovaný. Skús sa prihlásiť.' });
+    const passwordHash = await bcrypt.hash(password, 12);
+    const [result] = await db.query(
+      'INSERT INTO advertisers (email, password_hash, company_name) VALUES (?, ?, ?)',
+      [email, passwordHash, companyName || null]
+    );
+    const advertiser = { id: result.insertId, email, company_name: companyName || null, stripe_customer_id: null };
+    res.status(201).json({ token: signToken(advertiser), advertiser: advertiserJson(advertiser) });
   } catch (err) {
-    console.error('Ads magic link:', err.message);
-    res.status(500).json({ error: 'Chyba odosielania emailu.' });
+    console.error('register error:', err);
+    res.status(500).json({ error: 'Chyba servera.' });
   }
 });
 
-app.get('/api/ads-auth/me', requireAdvertiser, async (req, res) => {
-  res.json({ advertiser: { email: req.advertiser.email, companyName: req.advertiser.company_name, hasBilling: !!req.advertiser.stripe_customer_id } });
+app.post('/api/ads-auth/login', rateLimit, async (req, res) => {
+  const { email, password } = req.body || {};
+  if (!email || !password) return res.status(400).json({ error: 'Zadaj email aj heslo.' });
+  try {
+    const [rows] = await db.query('SELECT * FROM advertisers WHERE email = ?', [email]);
+    const advertiser = rows[0];
+    if (!advertiser) return res.status(401).json({ error: 'Nesprávny email alebo heslo.' });
+    const ok = await bcrypt.compare(password, advertiser.password_hash);
+    if (!ok) return res.status(401).json({ error: 'Nesprávny email alebo heslo.' });
+    res.json({ token: signToken(advertiser), advertiser: advertiserJson(advertiser) });
+  } catch (err) {
+    console.error('login error:', err);
+    res.status(500).json({ error: 'Chyba servera.' });
+  }
+});
+
+app.get('/api/ads-auth/me', requireAdvertiser, (req, res) => {
+  res.json({ advertiser: advertiserJson(req.advertiser) });
 });
 
 // ─── Bannery — fakturácia je PER BANNER, nie per účet ──────────
 
 app.post('/api/ads/banners/:id/checkout', requireAdvertiser, async (req, res) => {
   try {
-    const { data: banner } = await supabase.from('ad_banners').select('*').eq('id', req.params.id).eq('advertiser_id', req.advertiser.id).single();
+    const [rows] = await db.query('SELECT * FROM ad_banners WHERE id = ? AND advertiser_id = ?', [req.params.id, req.advertiser.id]);
+    const banner = rows[0];
     if (!banner) return res.status(404).json({ error: 'Banner sa nenašiel.' });
     if (banner.status === 'active' && (!banner.current_period_end || new Date(banner.current_period_end) > new Date())) {
       return res.status(400).json({ error: 'Tento banner je už zaplatený a aktívny.' });
     }
 
-    const { count } = await supabase.from('ad_banners').select('*', { count: 'exact', head: true })
-      .eq('status', 'active').gt('current_period_end', new Date().toISOString());
-    if ((count || 0) >= MAX_ACTIVE_BANNERS) {
+    const [[{ cnt }]] = await db.query("SELECT COUNT(*) AS cnt FROM ad_banners WHERE status = 'active' AND current_period_end > NOW()");
+    if (cnt >= MAX_ACTIVE_BANNERS) {
       return res.status(409).json({ error: 'Aktuálne máme plný počet bannerov v rotácii. Skús to prosím neskôr.' });
     }
 
     let customerId = req.advertiser.stripe_customer_id;
     if (!customerId) {
-      const customer = await stripe.customers.create({ email: req.advertiser.email, metadata: { advertiserId: req.advertiser.id } });
+      const customer = await stripe.customers.create({ email: req.advertiser.email, metadata: { advertiserId: String(req.advertiser.id) } });
       customerId = customer.id;
-      await supabase.from('advertisers').update({ stripe_customer_id: customerId }).eq('id', req.advertiser.id);
+      await db.query('UPDATE advertisers SET stripe_customer_id = ? WHERE id = ?', [customerId, req.advertiser.id]);
     }
 
     const session = await stripe.checkout.sessions.create({
@@ -118,8 +158,8 @@ app.post('/api/ads/banners/:id/checkout', requireAdvertiser, async (req, res) =>
       line_items: [{ price: process.env.STRIPE_AD_PRICE_ID, quantity: 1 }],
       success_url: `${APP_URL}/?payment=success`,
       cancel_url: `${APP_URL}/?payment=cancelled`,
-      metadata: { advertiserId: req.advertiser.id, bannerId: banner.id },
-      subscription_data: { metadata: { advertiserId: req.advertiser.id, bannerId: banner.id } }
+      metadata: { advertiserId: String(req.advertiser.id), bannerId: String(banner.id) },
+      subscription_data: { metadata: { advertiserId: String(req.advertiser.id), bannerId: String(banner.id) } }
     });
     res.json({ url: session.url });
   } catch (e) {
@@ -140,11 +180,11 @@ app.post('/api/ads/portal', requireAdvertiser, async (req, res) => {
 
 app.get('/api/ads/banners', requireAdvertiser, async (req, res) => {
   try {
-    const { data: banners } = await supabase.from('ad_banners').select('*').eq('advertiser_id', req.advertiser.id).order('created_at', { ascending: false });
-    const withStats = await Promise.all((banners || []).map(async b => {
-      const { count: impressions } = await supabase.from('ad_events').select('*', { count: 'exact', head: true }).eq('banner_id', b.id).eq('event_type', 'impression');
-      const { count: clicks } = await supabase.from('ad_events').select('*', { count: 'exact', head: true }).eq('banner_id', b.id).eq('event_type', 'click');
-      return { ...b, impressions: impressions || 0, clicks: clicks || 0 };
+    const [banners] = await db.query('SELECT * FROM ad_banners WHERE advertiser_id = ? ORDER BY created_at DESC', [req.advertiser.id]);
+    const withStats = await Promise.all(banners.map(async b => {
+      const [[{ impressions }]] = await db.query("SELECT COUNT(*) AS impressions FROM ad_events WHERE banner_id = ? AND event_type = 'impression'", [b.id]);
+      const [[{ clicks }]] = await db.query("SELECT COUNT(*) AS clicks FROM ad_events WHERE banner_id = ? AND event_type = 'click'", [b.id]);
+      return { ...b, impressions, clicks };
     }));
     res.json({ banners: withStats });
   } catch (e) {
@@ -162,20 +202,16 @@ app.post('/api/ads/banners', requireAdvertiser, (req, res) => {
     if (!linkUrl || !/^https?:\/\//.test(linkUrl)) return res.status(400).json({ error: 'Zadaj platnú cieľovú URL (vrátane https://).' });
 
     try {
-      const ext = req.file.originalname.split('.').pop();
-      const storagePath = `${req.advertiser.id}/${Date.now()}.${ext}`;
-      const { error: upErr } = await supabase.storage.from('ad-banners').upload(storagePath, req.file.buffer, { contentType: req.file.mimetype });
-      if (upErr) throw upErr;
-      const { data: pub } = supabase.storage.from('ad-banners').getPublicUrl(storagePath);
+      const filename = safeFilename(req.advertiser.id, req.file.originalname);
+      await fs.promises.writeFile(path.join(UPLOADS_DIR, 'banners', filename), req.file.buffer);
+      const publicUrl = `/uploads/banners/${filename}`;
 
-      const { data: banner } = await supabase.from('ad_banners').insert({
-        advertiser_id: req.advertiser.id,
-        storage_path: storagePath,
-        public_url: pub.publicUrl,
-        mime_type: req.file.mimetype,
-        link_url: linkUrl
-      }).select().single();
-      res.status(201).json({ banner });
+      const [result] = await db.query(
+        'INSERT INTO ad_banners (advertiser_id, public_url, mime_type, link_url) VALUES (?, ?, ?, ?)',
+        [req.advertiser.id, publicUrl, req.file.mimetype, linkUrl]
+      );
+      const [rows] = await db.query('SELECT * FROM ad_banners WHERE id = ?', [result.insertId]);
+      res.status(201).json({ banner: rows[0] });
     } catch (e) {
       console.error('ads banner upload error:', e);
       res.status(500).json({ error: 'Chyba servera.' });
@@ -186,13 +222,16 @@ app.post('/api/ads/banners', requireAdvertiser, (req, res) => {
 app.patch('/api/ads/banners/:id', requireAdvertiser, async (req, res) => {
   const { active, linkUrl } = req.body || {};
   if (linkUrl && !/^https?:\/\//.test(linkUrl)) return res.status(400).json({ error: 'Zadaj platnú cieľovú URL.' });
-  const patch = {};
-  if (typeof active === 'boolean') patch.active = active;
-  if (linkUrl) patch.link_url = linkUrl;
   try {
-    const { data: banner } = await supabase.from('ad_banners').update(patch).eq('id', req.params.id).eq('advertiser_id', req.advertiser.id).select().single();
-    if (!banner) return res.status(404).json({ error: 'Banner sa nenašiel.' });
-    res.json({ banner });
+    if (typeof active === 'boolean') {
+      await db.query('UPDATE ad_banners SET active = ? WHERE id = ? AND advertiser_id = ?', [active ? 1 : 0, req.params.id, req.advertiser.id]);
+    }
+    if (linkUrl) {
+      await db.query('UPDATE ad_banners SET link_url = ? WHERE id = ? AND advertiser_id = ?', [linkUrl, req.params.id, req.advertiser.id]);
+    }
+    const [rows] = await db.query('SELECT * FROM ad_banners WHERE id = ? AND advertiser_id = ?', [req.params.id, req.advertiser.id]);
+    if (!rows[0]) return res.status(404).json({ error: 'Banner sa nenašiel.' });
+    res.json({ banner: rows[0] });
   } catch (e) {
     res.status(500).json({ error: 'Chyba servera.' });
   }
@@ -200,13 +239,14 @@ app.patch('/api/ads/banners/:id', requireAdvertiser, async (req, res) => {
 
 app.delete('/api/ads/banners/:id', requireAdvertiser, async (req, res) => {
   try {
-    const { data: banner } = await supabase.from('ad_banners').select('stripe_subscription_id, storage_path').eq('id', req.params.id).eq('advertiser_id', req.advertiser.id).single();
+    const [rows] = await db.query('SELECT stripe_subscription_id, public_url FROM ad_banners WHERE id = ? AND advertiser_id = ?', [req.params.id, req.advertiser.id]);
+    const banner = rows[0];
     if (!banner) return res.status(404).json({ error: 'Banner sa nenašiel.' });
     if (banner.stripe_subscription_id) {
       try { await stripe.subscriptions.cancel(banner.stripe_subscription_id); } catch (e) { console.error('cancel sub error:', e); }
     }
-    await supabase.storage.from('ad-banners').remove([banner.storage_path]).catch(() => {});
-    await supabase.from('ad_banners').delete().eq('id', req.params.id).eq('advertiser_id', req.advertiser.id);
+    await unlinkPublicUrl(banner.public_url);
+    await db.query('DELETE FROM ad_banners WHERE id = ? AND advertiser_id = ?', [req.params.id, req.advertiser.id]);
     res.status(204).end();
   } catch (e) {
     res.status(500).json({ error: 'Chyba servera.' });
@@ -217,10 +257,10 @@ app.delete('/api/ads/banners/:id', requireAdvertiser, async (req, res) => {
 
 app.get('/api/ads/serve', async (req, res) => {
   try {
-    const { data } = await supabase.from('ad_banners').select('id, public_url, mime_type')
-      .eq('active', true).eq('status', 'active').gt('current_period_end', new Date().toISOString())
-      .order('created_at', { ascending: false }).limit(20);
-    res.json({ banners: (data || []).map(b => ({ id: b.id, url: b.public_url, mimeType: b.mime_type })) });
+    const [rows] = await db.query(
+      "SELECT id, public_url, mime_type FROM ad_banners WHERE active = 1 AND status = 'active' AND current_period_end > NOW() ORDER BY created_at DESC LIMIT 20"
+    );
+    res.json({ banners: rows.map(b => ({ id: b.id, url: b.public_url, mimeType: b.mime_type })) });
   } catch (e) {
     res.status(500).json({ error: 'Chyba servera.' });
   }
@@ -228,40 +268,41 @@ app.get('/api/ads/serve', async (req, res) => {
 
 app.get('/api/ads/go/:id', async (req, res) => {
   try {
-    const { data: banner } = await supabase.from('ad_banners').select('link_url').eq('id', req.params.id).single();
+    const [rows] = await db.query('SELECT link_url FROM ad_banners WHERE id = ?', [req.params.id]);
+    const banner = rows[0];
     if (!banner) return res.status(404).send('Banner sa nenašiel.');
-    supabase.from('ad_events').insert({ banner_id: req.params.id, event_type: 'click' }).then(() => {});
+    db.query("INSERT INTO ad_events (banner_id, event_type) VALUES (?, 'click')", [req.params.id]).catch(() => {});
     res.redirect(302, banner.link_url);
   } catch (e) {
     res.status(500).send('Chyba servera.');
   }
 });
 
-app.post('/api/ads/impression/:id', async (req, res) => {
-  supabase.from('ad_events').insert({ banner_id: req.params.id, event_type: 'impression' }).then(() => {}).catch(() => {});
+app.post('/api/ads/impression/:id', (req, res) => {
+  db.query("INSERT INTO ad_events (banner_id, event_type) VALUES (?, 'impression')", [req.params.id]).catch(() => {});
   res.status(204).end();
 });
 
-// ─── Video reklamy — rovnaký princíp, iný bucket, + duration_s ────
+// ─── Video reklamy — rovnaký princíp, iný priečinok, + duration_s ────
 
 app.post('/api/video-ads/:id/checkout', requireAdvertiser, async (req, res) => {
   try {
-    const { data: ad } = await supabase.from('video_ads').select('*').eq('id', req.params.id).eq('advertiser_id', req.advertiser.id).single();
+    const [rows] = await db.query('SELECT * FROM video_ads WHERE id = ? AND advertiser_id = ?', [req.params.id, req.advertiser.id]);
+    const ad = rows[0];
     if (!ad) return res.status(404).json({ error: 'Video reklama sa nenašla.' });
     if (ad.status === 'active' && (!ad.current_period_end || new Date(ad.current_period_end) > new Date())) {
       return res.status(400).json({ error: 'Toto video je už zaplatené a aktívne.' });
     }
-    const { count } = await supabase.from('video_ads').select('*', { count: 'exact', head: true })
-      .eq('status', 'active').gt('current_period_end', new Date().toISOString());
-    if ((count || 0) >= MAX_ACTIVE_VIDEO_ADS) {
+    const [[{ cnt }]] = await db.query("SELECT COUNT(*) AS cnt FROM video_ads WHERE status = 'active' AND current_period_end > NOW()");
+    if (cnt >= MAX_ACTIVE_VIDEO_ADS) {
       return res.status(409).json({ error: 'Aktuálne máme plný počet video reklám v rotácii. Skús to prosím neskôr.' });
     }
 
     let customerId = req.advertiser.stripe_customer_id;
     if (!customerId) {
-      const customer = await stripe.customers.create({ email: req.advertiser.email, metadata: { advertiserId: req.advertiser.id } });
+      const customer = await stripe.customers.create({ email: req.advertiser.email, metadata: { advertiserId: String(req.advertiser.id) } });
       customerId = customer.id;
-      await supabase.from('advertisers').update({ stripe_customer_id: customerId }).eq('id', req.advertiser.id);
+      await db.query('UPDATE advertisers SET stripe_customer_id = ? WHERE id = ?', [customerId, req.advertiser.id]);
     }
 
     const session = await stripe.checkout.sessions.create({
@@ -271,8 +312,8 @@ app.post('/api/video-ads/:id/checkout', requireAdvertiser, async (req, res) => {
       line_items: [{ price: process.env.STRIPE_VIDEO_AD_PRICE_ID, quantity: 1 }],
       success_url: `${APP_URL}/?payment=success`,
       cancel_url: `${APP_URL}/?payment=cancelled`,
-      metadata: { advertiserId: req.advertiser.id, videoAdId: ad.id },
-      subscription_data: { metadata: { advertiserId: req.advertiser.id, videoAdId: ad.id } }
+      metadata: { advertiserId: String(req.advertiser.id), videoAdId: String(ad.id) },
+      subscription_data: { metadata: { advertiserId: String(req.advertiser.id), videoAdId: String(ad.id) } }
     });
     res.json({ url: session.url });
   } catch (e) {
@@ -283,11 +324,11 @@ app.post('/api/video-ads/:id/checkout', requireAdvertiser, async (req, res) => {
 
 app.get('/api/video-ads', requireAdvertiser, async (req, res) => {
   try {
-    const { data: ads } = await supabase.from('video_ads').select('*').eq('advertiser_id', req.advertiser.id).order('created_at', { ascending: false });
-    const withStats = await Promise.all((ads || []).map(async a => {
-      const { count: views } = await supabase.from('video_ad_views').select('*', { count: 'exact', head: true }).eq('video_ad_id', a.id).not('completed_at', 'is', null);
-      const { count: clicks } = await supabase.from('video_ad_views').select('*', { count: 'exact', head: true }).eq('video_ad_id', a.id).eq('clicked', true);
-      return { ...a, views: views || 0, clicks: clicks || 0 };
+    const [ads] = await db.query('SELECT * FROM video_ads WHERE advertiser_id = ? ORDER BY created_at DESC', [req.advertiser.id]);
+    const withStats = await Promise.all(ads.map(async a => {
+      const [[{ views }]] = await db.query('SELECT COUNT(*) AS views FROM video_ad_views WHERE video_ad_id = ? AND completed_at IS NOT NULL', [a.id]);
+      const [[{ clicks }]] = await db.query('SELECT COUNT(*) AS clicks FROM video_ad_views WHERE video_ad_id = ? AND clicked = 1', [a.id]);
+      return { ...a, views, clicks };
     }));
     res.json({ videoAds: withStats });
   } catch (e) {
@@ -309,20 +350,16 @@ app.post('/api/video-ads', requireAdvertiser, (req, res) => {
     }
 
     try {
-      const storagePath = `${req.advertiser.id}/${Date.now()}.mp4`;
-      const { error: upErr } = await supabase.storage.from('video-ads').upload(storagePath, req.file.buffer, { contentType: 'video/mp4' });
-      if (upErr) throw upErr;
-      const { data: pub } = supabase.storage.from('video-ads').getPublicUrl(storagePath);
+      const filename = safeFilename(req.advertiser.id, 'video.mp4');
+      await fs.promises.writeFile(path.join(UPLOADS_DIR, 'videos', filename), req.file.buffer);
+      const publicUrl = `/uploads/videos/${filename}`;
 
-      const { data: ad } = await supabase.from('video_ads').insert({
-        advertiser_id: req.advertiser.id,
-        storage_path: storagePath,
-        public_url: pub.publicUrl,
-        mime_type: 'video/mp4',
-        duration_s: duration,
-        link_url: linkUrl
-      }).select().single();
-      res.status(201).json({ videoAd: ad });
+      const [result] = await db.query(
+        'INSERT INTO video_ads (advertiser_id, public_url, mime_type, duration_s, link_url) VALUES (?, ?, ?, ?, ?)',
+        [req.advertiser.id, publicUrl, 'video/mp4', duration, linkUrl]
+      );
+      const [rows] = await db.query('SELECT * FROM video_ads WHERE id = ?', [result.insertId]);
+      res.status(201).json({ videoAd: rows[0] });
     } catch (e) {
       console.error('video ad upload error:', e);
       res.status(500).json({ error: 'Chyba servera.' });
@@ -333,13 +370,16 @@ app.post('/api/video-ads', requireAdvertiser, (req, res) => {
 app.patch('/api/video-ads/:id', requireAdvertiser, async (req, res) => {
   const { active, linkUrl } = req.body || {};
   if (linkUrl && !/^https?:\/\//.test(linkUrl)) return res.status(400).json({ error: 'Zadaj platnú cieľovú URL.' });
-  const patch = {};
-  if (typeof active === 'boolean') patch.active = active;
-  if (linkUrl) patch.link_url = linkUrl;
   try {
-    const { data: ad } = await supabase.from('video_ads').update(patch).eq('id', req.params.id).eq('advertiser_id', req.advertiser.id).select().single();
-    if (!ad) return res.status(404).json({ error: 'Video reklama sa nenašla.' });
-    res.json({ videoAd: ad });
+    if (typeof active === 'boolean') {
+      await db.query('UPDATE video_ads SET active = ? WHERE id = ? AND advertiser_id = ?', [active ? 1 : 0, req.params.id, req.advertiser.id]);
+    }
+    if (linkUrl) {
+      await db.query('UPDATE video_ads SET link_url = ? WHERE id = ? AND advertiser_id = ?', [linkUrl, req.params.id, req.advertiser.id]);
+    }
+    const [rows] = await db.query('SELECT * FROM video_ads WHERE id = ? AND advertiser_id = ?', [req.params.id, req.advertiser.id]);
+    if (!rows[0]) return res.status(404).json({ error: 'Video reklama sa nenašla.' });
+    res.json({ videoAd: rows[0] });
   } catch (e) {
     res.status(500).json({ error: 'Chyba servera.' });
   }
@@ -347,27 +387,29 @@ app.patch('/api/video-ads/:id', requireAdvertiser, async (req, res) => {
 
 app.delete('/api/video-ads/:id', requireAdvertiser, async (req, res) => {
   try {
-    const { data: ad } = await supabase.from('video_ads').select('stripe_subscription_id, storage_path').eq('id', req.params.id).eq('advertiser_id', req.advertiser.id).single();
+    const [rows] = await db.query('SELECT stripe_subscription_id, public_url FROM video_ads WHERE id = ? AND advertiser_id = ?', [req.params.id, req.advertiser.id]);
+    const ad = rows[0];
     if (!ad) return res.status(404).json({ error: 'Video reklama sa nenašla.' });
     if (ad.stripe_subscription_id) {
       try { await stripe.subscriptions.cancel(ad.stripe_subscription_id); } catch (e) { console.error('cancel sub error:', e); }
     }
-    await supabase.storage.from('video-ads').remove([ad.storage_path]).catch(() => {});
-    await supabase.from('video_ads').delete().eq('id', req.params.id).eq('advertiser_id', req.advertiser.id);
+    await unlinkPublicUrl(ad.public_url);
+    await db.query('DELETE FROM video_ads WHERE id = ? AND advertiser_id = ?', [req.params.id, req.advertiser.id]);
     res.status(204).end();
   } catch (e) {
     res.status(500).json({ error: 'Chyba servera.' });
   }
 });
 
-// Verejný presmerovací endpoint pre video reklamy — volá ho hlavná appka
-// (rewards flow tam beží aj naďalej priamo v jej server.js, toto je len klik-tracking).
+// Verejný presmerovací endpoint pre video reklamy — klik-tracking.
+// Zhliadnutie/odmena (+1 test v hlavnej appke) sa rieši mimo tejto appky.
 app.get('/api/video-ads/go/:id', async (req, res) => {
   try {
-    const { data: ad } = await supabase.from('video_ads').select('link_url').eq('id', req.params.id).single();
+    const [rows] = await db.query('SELECT link_url FROM video_ads WHERE id = ?', [req.params.id]);
+    const ad = rows[0];
     if (!ad) return res.status(404).send('Reklama sa nenašla.');
     if (req.query.session) {
-      supabase.from('video_ad_views').update({ clicked: true }).eq('session_token', req.query.session).then(() => {});
+      db.query('UPDATE video_ad_views SET clicked = 1 WHERE session_token = ?', [req.query.session]).catch(() => {});
     }
     res.redirect(302, ad.link_url);
   } catch (e) {
@@ -377,7 +419,7 @@ app.get('/api/video-ads/go/:id', async (req, res) => {
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-// SPA fallback — magic-link presmeruje sem s tokenom v URL, ads.html si ho spracuje na klientovi
+// SPA fallback
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'ads.html'));
 });

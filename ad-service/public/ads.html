@@ -8,7 +8,6 @@
 <meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@300;400;500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{--black:#08080d;--black2:#0f0f18;--border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.13);--text:#eeeef5;--text2:#a1a1bc;--text3:#5c5c7a;--volt:#c8ff00;--purple:#7c5cff;--purple2:#b09bff;--red:#ff3f5e;--green:#36e896;--yellow:#ffc94d;--serif:'Instrument Serif',Georgia,serif;--mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -101,12 +100,18 @@ footer{border-top:1px solid var(--border);padding:2rem;display:flex;justify-cont
 
   <div>
     <div class="card" id="authCard">
-      <h3>Prihlásenie</h3>
+      <h3 id="authTitle">Prihlásenie</h3>
       <div id="authMsg"></div>
-      <form id="magicForm" onsubmit="return sendMagicLink(event)">
-        <div class="field"><label>Email</label><input type="email" id="magicEmail" required></div>
-        <button class="btn" type="submit" id="magicBtn">Poslať prihlasovací odkaz →</button>
+      <form id="authForm" onsubmit="return submitAuth(event)">
+        <div class="field hidden" id="companyField"><label>Názov firmy</label><input type="text" id="authCompany"></div>
+        <div class="field"><label>Email</label><input type="email" id="authEmail" required></div>
+        <div class="field"><label>Heslo</label><input type="password" id="authPassword" minlength="8" required></div>
+        <button class="btn" type="submit" id="authSubmitBtn">Prihlásiť sa →</button>
       </form>
+      <p style="margin-top:.9rem;font-size:.85rem;color:var(--text3)">
+        <span id="authToggleText">Nemáš účet?</span>
+        <a href="#" onclick="return toggleAuthMode(event)" style="color:var(--purple2)" id="authToggleLink">Zaregistruj sa</a>
+      </p>
     </div>
 
     <div class="hidden" id="dashboard">
@@ -153,36 +158,54 @@ footer{border-top:1px solid var(--border);padding:2rem;display:flex;justify-cont
 <footer><div class="footer-logo">SP TRÉNER ADS © 2026</div></footer>
 
 <script>
-const SUPABASE_URL = 'https://zrnqiwareacqyndwchsv.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpybnFpd2FyZWFjcXluZHdjaHN2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMDA3NTAsImV4cCI6MjA4OTc3Njc1MH0.iUne23YDxp12Iwxdk9U8MfcV0NTBtrNf9OgsjQdiADk';
-const _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
 function showMsg(id, text, type){ document.getElementById(id).innerHTML = `<div class="msg ${type}">${text}</div>`; }
 
-async function authHeader(){
-  const { data: { session } } = await _supabase.auth.getSession();
-  if (!session?.access_token) return {};
-  return { 'Authorization': 'Bearer ' + session.access_token };
+function authHeader(){
+  const token = localStorage.getItem('adsToken');
+  return token ? { 'Authorization': 'Bearer ' + token } : {};
 }
 
 async function api(path, opts={}){
   const headers = opts.body instanceof FormData ? {} : { 'Content-Type': 'application/json' };
-  Object.assign(headers, await authHeader());
+  Object.assign(headers, authHeader());
   const res = await fetch(path, { ...opts, headers: { ...headers, ...(opts.headers||{}) } });
   let data = null; try { data = await res.json(); } catch(e) {}
   if (!res.ok) throw new Error((data && data.error) || 'Niečo sa pokazilo.');
   return data;
 }
 
-async function sendMagicLink(e){
+let authMode = 'login';
+function toggleAuthMode(e){
   e.preventDefault();
-  try {
-    await fetch('/api/ads-auth/magic-link', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email: magicEmail.value }) })
-      .then(r => r.json()).then(d => { if (d.error) throw new Error(d.error); });
-    showMsg('authMsg', 'Skontroluj si email — poslali sme ti prihlasovací odkaz.', 'ok');
-  } catch(e) { showMsg('authMsg', e.message, 'error'); }
+  authMode = authMode === 'login' ? 'register' : 'login';
+  document.getElementById('authTitle').textContent = authMode === 'login' ? 'Prihlásenie' : 'Registrácia';
+  document.getElementById('authSubmitBtn').textContent = authMode === 'login' ? 'Prihlásiť sa →' : 'Zaregistrovať sa →';
+  document.getElementById('authToggleText').textContent = authMode === 'login' ? 'Nemáš účet?' : 'Už máš účet?';
+  document.getElementById('authToggleLink').textContent = authMode === 'login' ? 'Zaregistruj sa' : 'Prihlás sa';
+  document.getElementById('companyField').classList.toggle('hidden', authMode === 'login');
   return false;
 }
+
+async function submitAuth(e){
+  e.preventDefault();
+  const btn = document.getElementById('authSubmitBtn');
+  btn.disabled = true;
+  try {
+    const path = authMode === 'login' ? '/api/ads-auth/login' : '/api/ads-auth/register';
+    const body = { email: authEmail.value, password: authPassword.value };
+    if (authMode === 'register') body.companyName = authCompany.value;
+    const res = await fetch(path, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body) });
+    let data = null; try { data = await res.json(); } catch(e) {}
+    if (!res.ok) throw new Error((data && data.error) || 'Niečo sa pokazilo.');
+    localStorage.setItem('adsToken', data.token);
+    document.getElementById('authForm').reset();
+    enterDashboard();
+  } catch(e) { showMsg('authMsg', e.message, 'error'); }
+  finally { btn.disabled = false; }
+  return false;
+}
+
+function logout(){ localStorage.removeItem('adsToken'); location.reload(); }
 
 function switchTab(tab){
   document.getElementById('tabBanners').classList.toggle('active', tab==='banners');
@@ -190,8 +213,6 @@ function switchTab(tab){
   document.getElementById('productBanners').classList.toggle('hidden', tab!=='banners');
   document.getElementById('productVideos').classList.toggle('hidden', tab!=='videos');
 }
-
-function logout(){ _supabase.auth.signOut().then(() => location.reload()); }
 
 async function enterDashboard(){
   let me;
@@ -275,9 +296,7 @@ async function loadVideoAds(){
 async function toggleVideoAd(id, active){ try { await api(`/api/video-ads/${id}`, {method:'PATCH', body: JSON.stringify({active})}); loadVideoAds(); } catch(e){} }
 async function deleteVideoAd(id){ if(!confirm('Zmazať?'))return; try { await api(`/api/video-ads/${id}`, {method:'DELETE'}); loadVideoAds(); } catch(e){} }
 
-// Supabase JS auto-detekuje magic-link token v URL a nastaví session — over ju po načítaní
-_supabase.auth.getSession().then(({ data: { session } }) => { if (session) enterDashboard(); });
-_supabase.auth.onAuthStateChange((event, session) => { if (session) enterDashboard(); });
+if (localStorage.getItem('adsToken')) enterDashboard();
 </script>
 
 </body>
