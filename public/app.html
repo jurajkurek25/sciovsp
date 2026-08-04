@@ -586,6 +586,7 @@ h1.title span{font-style:italic;color:var(--purple2)}
     <div class="mode-card" onclick="showHistory()"><span class="card-icon">📊</span><div class="card-title" data-i18n="modeHistoryTitle">Výsledky a história</div><div class="card-desc" data-i18n="modeHistoryDesc">Pokroky, analýza podľa okruhov, percentilový odhad.</div></div>
     <div class="mode-card" onclick="showClans()"><span class="card-badge" style="background:linear-gradient(135deg,var(--purple),var(--red));color:#fff;">NOVÉ</span><span class="card-icon">⚔️</span><div class="card-title" data-i18n="clansCardTitle">SP Klany</div><div class="card-desc" data-i18n="clansCardDesc">Súkromné skupiny · Leaderboard s kamarátmi</div></div>
     <div class="mode-card" onclick="startMode('topic')"><span class="card-icon">🎯</span><div class="card-title" data-i18n="modeTopicTitle">Podľa okruhu</div><div class="card-desc" data-i18n="modeTopicDesc">Vyber konkrétny okruh — napr. zebry, koherencia, porovnávanie.</div></div>
+    <div class="mode-card" onclick="startMode('psychologia')"><span class="card-badge" style="background:linear-gradient(135deg,var(--purple),var(--red));color:#fff;">NOVÉ</span><span class="card-icon">🧠</span><div class="card-title" data-i18n="modePsychTitle">Psychológia UCM Trnava</div><div class="card-desc" data-i18n="modePsychDesc">76 úloh — Biológia človeka, Filozofia, Psychológia. Príprava na prijímačky FF UCM.</div></div>
   </div>
   <!-- REFERRAL CARD — zobrazí sa Premium userom aj pri platbe -->
 <div class="ref-card hidden" id="refCard">
@@ -891,6 +892,7 @@ const TRANSLATIONS={
     modeAIBankTitle:'AI banka úloh',modeAIBankDesc:'Prehľad všetkých vygenerovaných úloh.',
     modeHistoryTitle:'Výsledky a história',modeHistoryDesc:'Pokroky, analýza podľa okruhov.',
     modeTopicTitle:'Podľa okruhu',modeTopicDesc:'Vyber konkrétny okruh — napr. zebry, koherencia.',
+    modePsychTitle:'Psychológia UCM Trnava',modePsychDesc:'76 úloh — Biológia človeka, Filozofia, Psychológia. Príprava na prijímačky FF UCM.',
     statTests:'Testov',statQuestions:'Úloh',statAccuracy:'Úspešnosť',statAIQuestions:'AI úloh',
     aiGenTitle:'AI Generátor SCIO úloh',aiGenSubtitle:'Claude AI vytvorí nové úlohy v štýle oficiálnych SCIO testov',
     labelTestPart:'Časť testu',chipVerbal:'📖 Verbálna',chipAnalytical:'🧮 Analytická',
@@ -951,8 +953,8 @@ const TRANSLATIONS={
     paywallF1:'Neobmedzené testy s časomierou',paywallF2:'AI generátor — nekonečné nové úlohy',
     paywallF3:'AI Coach analýza po každom teste',paywallF4:'Percentilový tracker + odpočítavanie',paywallF5:'História a analýza slabých miest',
     paywallCTA:'Získať Premium →',paywallPromo:'Máš promo kód?',paywallPromoLink:'Zadaj tu',
-    modeLabels:{full:'Celý test',verbal:'Verbálna',analytical:'Analytická',topic:'Okruh',review:'Opakovanie',ai:'AI Test','ai-full':'AI Celý test'},
-    partLabels:{verbal:'Verbálna časť',analytical:'Analytická časť',ai:'AI Úlohy','ai-full':'AI Úlohy',topic:'Precvičovanie',review:'Opakovanie'},
+    modeLabels:{full:'Celý test',verbal:'Verbálna',analytical:'Analytická',topic:'Okruh',review:'Opakovanie',ai:'AI Test','ai-full':'AI Celý test',psychologia:'Psychológia UCM'},
+    partLabels:{verbal:'Verbálna časť',analytical:'Analytická časť',ai:'AI Úlohy','ai-full':'AI Úlohy',topic:'Precvičovanie',review:'Opakovanie',psychologia:'Psychológia UCM Trnava'},
     verbsPartDone:'Verbálna: <strong>{c}/{t}</strong> správne | Čas: {m}:{s}<br>Teraz analytická časť — <strong>45 minút</strong>',
     scoreFrom:'Skóre z {n} úloh',resultCorrect:'Správne',resultWrong:'Nesprávne',resultSkipped:'Preskočené',resultTime:'Čas',resultVPercentile:'Verbálny percentil',resultAPercentile:'Analytický percentil',
     histMinutes:'{c}/{t} správne | {m} min',
@@ -1020,6 +1022,7 @@ const TRANSLATIONS={
     modeAIBankTitle:'AI banka úkolů',modeAIBankDesc:'Přehled všech vygenerovaných úkolů.',
     modeHistoryTitle:'Výsledky a historie',modeHistoryDesc:'Pokroky, analýza podle okruhů.',
     modeTopicTitle:'Podle okruhu',modeTopicDesc:'Vyber konkrétní okruh — např. zebry, koherence.',
+    modePsychTitle:'Psychologie UCM Trnava',modePsychDesc:'76 úloh — Biologie člověka, Filozofie, Psychologie. Příprava na přijímačky FF UCM.',
     statTests:'Testů',statQuestions:'Úkolů',statAccuracy:'Úspěšnost',statAIQuestions:'AI úkolů',
     aiGenTitle:'AI Generátor SCIO úkolů',aiGenSubtitle:'Claude AI vytvoří nové úkoly ve stylu oficiálních SCIO testů',
     labelTestPart:'Část testu',chipVerbal:'📖 Verbální',chipAnalytical:'🧮 Analytická',
@@ -1080,8 +1083,8 @@ const TRANSLATIONS={
     paywallF1:'Neomezené testy s časomírou',paywallF2:'AI generátor — nekonečné nové úkoly',
     paywallF3:'AI Coach analýza po každém testu',paywallF4:'Percentilový tracker + odpočítávání',paywallF5:'Historie a analýza slabých míst',
     paywallCTA:'Získat Premium →',paywallPromo:'Máš promo kód?',paywallPromoLink:'Zadej zde',
-    modeLabels:{full:'Celý test',verbal:'Verbální',analytical:'Analytická',topic:'Okruh',review:'Opakování',ai:'AI Test','ai-full':'AI Celý test'},
-    partLabels:{verbal:'Verbální část',analytical:'Analytická část',ai:'AI Úlohy','ai-full':'AI Úlohy',topic:'Procvičování',review:'Opakování'},
+    modeLabels:{full:'Celý test',verbal:'Verbální',analytical:'Analytická',topic:'Okruh',review:'Opakování',ai:'AI Test','ai-full':'AI Celý test',psychologia:'Psychologie UCM'},
+    partLabels:{verbal:'Verbální část',analytical:'Analytická část',ai:'AI Úlohy','ai-full':'AI Úlohy',topic:'Procvičování',review:'Opakování',psychologia:'Psychologie UCM Trnava'},
     verbsPartDone:'Verbální: <strong>{c}/{t}</strong> správně | Čas: {m}:{s}<br>Nyní analytická část — <strong>45 minut</strong>',
     scoreFrom:'Skóre z {n} úkolů',resultCorrect:'Správně',resultWrong:'Nesprávně',resultSkipped:'Přeskočeno',resultTime:'Čas',resultVPercentile:'Verbální percentil',resultAPercentile:'Analytický percentil',
     histMinutes:'{c}/{t} správně | {m} min',
@@ -1388,6 +1391,85 @@ const QUESTIONS={
       text:'Pokiaľ by platilo, že v utorok bude tvorivá dielňa v učebni 3b, v ktorý deň by mohla byť tvorivá dielňa v učebni 3a?',
       options:['len vo štvrtok','len v utorok','len v ktoromkoľvek dni z dvojice štvrtok, piatok','v ktoromkoľvek dni z trojice streda, štvrtok, piatok'],
       answer:2,explanation:'Utorok=3b. Streda=2.posch. 3a ostáva pre štvrtok alebo piatok.'},
+  ],
+  // Psychológia — UCM Trnava (Filozofická fakulta), bakalársky program: Biológia človeka, Filozofia, Psychológia
+  psychologia:[
+    {id:'p_b1',topic:'Biológia človeka — Kostra a oporná sústava',text:'Koľko kostí tvorí kostru dospelého človeka?',options:['asi 106','asi 206','asi 306','asi 406'],answer:1,explanation:'Kostra dospelého človeka sa skladá z približne 206 kostí.'},
+    {id:'p_b2',topic:'Biológia človeka — Kostra a oporná sústava',text:'Aký typ kĺbu je ramenný a bedrový kĺb?',options:['Pántový','Guľový','Otočný','Plochý'],answer:1,explanation:'Guľový kĺb umožňuje pohyb vo všetkých smeroch — typický je pre ramenný a bedrový kĺb.'},
+    {id:'p_b3',topic:'Biológia človeka — Svalová sústava',text:'Približne aké percento telesnej hmotnosti tvoria svaly?',options:['10 %','25 %','40 %','60 %'],answer:2,explanation:'Svaly tvoria približne 40 % telesnej hmotnosti.'},
+    {id:'p_b4',topic:'Biológia človeka — Svalová sústava',text:'Ktorý typ svalu pracuje automaticky po celý život a nie je ovládaný vedome?',options:['Kostrový sval','Hladký sval','Srdcový sval','Mimický sval'],answer:2,explanation:'Srdcový sval je špeciálny typ svalu, ktorý pracuje automaticky po celý život.'},
+    {id:'p_b5',topic:'Biológia človeka — Kožná sústava',text:'Ktorý orgán je najväčším orgánom ľudského tela?',options:['Pečeň','Koža','Pľúca','Hrubé črevo'],answer:1,explanation:'Koža má rozlohu približne 2 m² a je najväčším orgánom ľudského tela.'},
+    {id:'p_b6',topic:'Biológia človeka — Tráviaca sústava',text:'Ktorá látka/enzým v žalúdku rozkladá bielkoviny?',options:['Amyláza','Pepsín','Lipáza','Trypsín'],answer:1,explanation:'V kyslom prostredí žalúdka (HCl) rozkladá bielkoviny enzým pepsín.'},
+    {id:'p_b7',topic:'Biológia človeka — Tráviaca sústava',text:'Kde v tráviacej sústave prebieha hlavné vstrebávanie živín?',options:['V žalúdku','V hrubom čreve','V tenkom čreve','V pažeráku'],answer:2,explanation:'Tenké črevo je hlavné miesto vstrebávania živín, kde pôsobia pankreatické enzýmy a žlč.'},
+    {id:'p_b8',topic:'Biológia človeka — Dýchacia sústava',text:'Kde v pľúcach prebieha výmena plynov?',options:['V priedušnici','V hrtane','V alveoloch (pľúcnych mechúrikoch)','V nosovej dutine'],answer:2,explanation:'Výmena kyslíka a oxidu uhličitého prebieha v alveoloch (pľúcnych mechúrikoch).'},
+    {id:'p_b9',topic:'Biológia človeka — Obehová sústava',text:'Aká je typická pokojová srdcová frekvencia dospelého človeka?',options:['30-50 úderov/min','60-80 úderov/min','100-120 úderov/min','140-160 úderov/min'],answer:1,explanation:'Srdcová frekvencia v pokoji je typicky 60-80 úderov za minútu.'},
+    {id:'p_b10',topic:'Biológia človeka — Obehová sústava',text:'Ktoré krvinky zabezpečujú zrážanie krvi?',options:['Erytrocyty (červené krvinky)','Leukocyty (biele krvinky)','Trombocyty (krvné doštičky)','Plazmatické bunky'],answer:2,explanation:'Krvné doštičky (trombocyty) zabezpečujú zrážanie krvi.'},
+    {id:'p_b11',topic:'Biológia človeka — Vylučovacia sústava',text:'Ako sa nazýva základná funkčná jednotka obličky?',options:['Neurón','Nefrón','Alveolus','Glomerul'],answer:1,explanation:'Nefrón je základná funkčná jednotka obličky; každá oblička ich obsahuje približne 1 milión.'},
+    {id:'p_b12',topic:'Biológia človeka — Nervová sústava',text:'V ktorej časti mozgu sa nachádza dýchacie centrum riadiace dýchanie?',options:['V mozočku','V talame','V predĺženej mieche (mozgovom kmeni)','V hypofýze'],answer:2,explanation:'Dýchanie je riadené dýchacím centrom v predĺženej mieche.'},
+    {id:'p_b13',topic:'Biológia človeka — Nervová sústava',text:'Ktorá časť neurónu prijíma signály od iných neurónov?',options:['Axón','Dendrity','Myelínová pošva','Synapsia'],answer:1,explanation:'Dendrity prijímajú signály, axón ich naopak posiela ďalej.'},
+    {id:'p_b14',topic:'Biológia človeka — Nervová sústava',text:'Ktorá zložka autonómnej nervovej sústavy mobilizuje organizmus v strese?',options:['Parasympatikus','Sympatikus','Somatická sústava','Periférna sústava'],answer:1,explanation:'Sympatikus zabezpečuje mobilizáciu organizmu (stresovú reakciu), parasympatikus naopak upokojenie a regeneráciu.'},
+    {id:'p_b15',topic:'Biológia človeka — Hormonálna sústava',text:'Ktorá žľaza s vnútornou sekréciou je hlavnou riadiacou žľazou endokrinného systému?',options:['Štítna žľaza','Nadoblička','Hypofýza','Podžalúdková žľaza'],answer:2,explanation:'Hypofýza je hlavná riadiaca žľaza — produkuje rastový hormón a hormóny regulujúce ostatné žľazy.'},
+    {id:'p_b16',topic:'Biológia človeka — Hormonálna sústava',text:'Ktorý hormón znižuje hladinu cukru v krvi?',options:['Glukagón','Inzulín','Adrenalín','Kortizol'],answer:1,explanation:'Podžalúdková žľaza reguluje hladinu cukru v krvi inzulínom (znižuje) a glukagónom (zvyšuje).'},
+    {id:'p_b17',topic:'Biológia človeka — Genetika človeka',text:'Koľko chromozómov obsahuje bežná ľudská somatická bunka?',options:['23','44','46','48'],answer:2,explanation:'Človek má 46 chromozómov v 23 pároch (diploidná sada); pohlavné bunky majú 23 (haploidná sada).'},
+    {id:'p_b18',topic:'Biológia človeka — Genetika človeka',text:'Downov syndróm je spôsobený:',options:['Mutáciou jedného génu','Trizómiou 21. chromozómu','Nedostatkom hormónov štítnej žľazy','Vírusovou infekciou počas tehotenstva'],answer:1,explanation:'Downov syndróm je chromozómová choroba spôsobená trizómiou 21. chromozómu.'},
+    {id:'p_b19',topic:'Biológia človeka — Zdravý životný štýl',text:'Ktorý faktor podľa učebnice ovplyvňuje zdravie človeka najviac?',options:['Genetika a biológia (20 %)','Životný štýl a správanie (50 %)','Životné prostredie (20 %)','Zdravotná starostlivosť (10 %)'],answer:1,explanation:'Životný štýl a správanie tvoria približne 50 % faktorov ovplyvňujúcich zdravie.'},
+    {id:'p_b20',topic:'Biológia človeka — Zdravý životný štýl',text:'Koľko minút strednej intenzity aeróbnej aktivity týždenne odporúča WHO dospelým?',options:['30 minút','75 minút','150 minút','300 minút'],answer:2,explanation:'WHO odporúča minimálne 150 minút strednej intenzity (alebo 75 minút vysokej intenzity) aeróbnej aktivity týždenne.'},
+    {id:'p_b21',topic:'Biológia človeka — Zdravý životný štýl',text:'Od akej hodnoty BMI hovoríme o obezite?',options:['BMI > 20','BMI > 25','BMI > 30','BMI > 40'],answer:2,explanation:'Obezita je definovaná ako nadmerné hromadenie tuku v tele pri BMI vyššom ako 30.'},
+    {id:'p_f1',topic:'Filozofia — Filozofia ako veda',text:'Slovo \'filozofia\' pochádza z gréčtiny a v preklade znamená:',options:['Náuka o prírode','Láska k múdrosti','Umenie presviedčania','Cesta k šťastiu'],answer:1,explanation:'Filozofia = philos (láska) + sophia (múdrosť) = láska k múdrosti.'},
+    {id:'p_f2',topic:'Filozofia — Filozofia ako veda',text:'Ktorá filozofická disciplína sa zaoberá otázkou, čo existuje a ako to existuje?',options:['Etika','Estetika','Ontológia','Logika'],answer:2,explanation:'Ontológia je náuka o bytí — o tom, čo existuje a ako to existuje.'},
+    {id:'p_f3',topic:'Filozofia — Antická filozofia — predsokratovci',text:'Ktorý predsokratovský filozof považoval za prapočiatok (arché) všetkých vecí vodu?',options:['Anaximandros','Táles z Milétu','Pytagoras','Hérakleitos'],answer:1,explanation:'Táles z Milétu, prvý filozof, videl arché vo vode.'},
+    {id:'p_f4',topic:'Filozofia — Antická filozofia — predsokratovci',text:'Hérakleitov výrok \'panta rhei\' znamená:',options:['Všetko je jedno','Všetko plynie','Nič neexistuje','Človek je mierou všetkých vecí'],answer:1,explanation:'Hérakleitos hlásal, že všetko plynie (panta rhei), za prapočiatok považoval oheň.'},
+    {id:'p_f5',topic:'Filozofia — Klasická grécka filozofia',text:'Ktorý filozof je autorom výroku \'Poznaj sám seba\' a metódy maieutiky (pôrodnej metódy)?',options:['Platón','Aristoteles','Sokrates','Protagoras'],answer:2,explanation:'Sokrates používal dialóg a maieutiku; sám nič nenapísal a bol odsúdený na smrť pitím bolehlavu.'},
+    {id:'p_f6',topic:'Filozofia — Klasická grécka filozofia',text:'Platónova teória ideí rozlišuje:',options:['Hmotu a formu','Svet ideí a svet vecí','Rozum a cit','Bytie a nebytie'],answer:1,explanation:'Podľa Platóna existuje svet ideí (pravá, nemenná realita) a svet vecí (nestále kópie ideí).'},
+    {id:'p_f7',topic:'Filozofia — Klasická grécka filozofia',text:'Kto je považovaný za zakladateľa logiky a zároveň odmietol Platónovu teóriu ideí?',options:['Sokrates','Aristoteles','Demokritos','Epikúros'],answer:1,explanation:'Aristoteles, žiak Platóna, odmietol teóriu ideí — podľa neho je podstata (forma) vo veciach samých.'},
+    {id:'p_f8',topic:'Filozofia — Klasická grécka filozofia',text:'Podľa Aristotela je cnosť (areté):',options:['Vrodená vlastnosť, ktorú nemožno zmeniť','Stred medzi nedostatkom a nadbytkom','Dar bohov','Výsledok logického dôkazu'],answer:1,explanation:'Aristotelova etika chápe cnosť ako stred medzi nedostatkom a nadbytkom (napr. odvaha medzi zbabelosťou a bezhlavosťou).'},
+    {id:'p_f9',topic:'Filozofia — Helenistická filozofia',text:'Hlavným cieľom epikureizmu je dosiahnutie:',options:['Slávy a bohatstva','Ataraxie (duševného pokoja)','Politickej moci','Extázy'],answer:1,explanation:'Epikureizmus kladie za cieľ ataraxiu (duševný pokoj) a apóniu (neprítomnosť bolesti).'},
+    {id:'p_f10',topic:'Filozofia — Helenistická filozofia',text:'Stoici zdôrazňovali život v súlade s:',options:['Vášňami a citmi','Spoločenskými konvenciami','Prírodou a rozumom (logos)','Náhodou'],answer:2,explanation:'Stoicizmus učil žiť v súlade s prírodou a rozumom (logos) a rozlišovať, čo od nás závisí a čo nie.'},
+    {id:'p_f11',topic:'Filozofia — Stredoveká filozofia — patristika',text:'Kto je autorom výroku \'Verím, aby som rozumel\'?',options:['Tomáš Akvinský','Anselm z Canterbury','Augustín z Hippa','Ockham'],answer:2,explanation:'Augustín z Hippa, najvýznamnejší cirkevný otec, spája neoplatonizmus s kresťanstvom.'},
+    {id:'p_f12',topic:'Filozofia — Stredoveká filozofia — scholastika',text:'Tomáš Akvinský je predstaviteľom:',options:['Nominalizmu','Tomizmu — syntézy aristotelizmu s kresťanstvom','Novoplatonizmu','Skepticizmu'],answer:1,explanation:'Tomáš Akvinský vytvoril tomizmus, syntézu Aristotelovej filozofie s kresťanskou teológiou (Summa theologica).'},
+    {id:'p_f13',topic:'Filozofia — Stredoveká filozofia — spor o univerzálie',text:'V stredovekom spore o univerzálie tvrdí nominalizmus (Ockham), že:',options:['Univerzálie existujú nezávisle od vecí (ante res)','Univerzálie existujú len v mysli (in rebus)','Iba jednotlivé veci sú reálne, univerzálie sú len mená (post res)','Univerzálie sú totožné s Bohom'],answer:2,explanation:'Nominalizmus (Ockham) tvrdí, že reálne sú iba jednotlivé veci, univerzálie sú len mená.'},
+    {id:'p_f14',topic:'Filozofia — Klasická novoveká filozofia — racionalizmus',text:'Descartov výrok \'Cogito ergo sum\' znamená:',options:['Som, teda myslím','Myslím, teda som','Pochybujem, teda existujem','Poznávam, teda som slobodný'],answer:1,explanation:'René Descartes dospel metodickou pochybnosťou k prvej istote: \'Myslím, teda som.\''},
+    {id:'p_f15',topic:'Filozofia — Klasická novoveká filozofia — empirizmus',text:'Ktorý filozof zaviedol pojem \'tabula rasa\' pre ľudskú myseľ pri narodení?',options:['René Descartes','John Locke','Gottfried Leibniz','Baruch Spinoza'],answer:1,explanation:'John Locke tvrdil, že myseľ je pri narodení tabula rasa (čistá tabuľka) a všetko poznanie pochádza zo skúsenosti.'},
+    {id:'p_f16',topic:'Filozofia — Klasická novoveká filozofia — empirizmus',text:'Podľa Davida Huma je kauzalita (príčinná súvislosť):',options:['Vrodená idea','Nevyhnutné logické spojenie','Len zvyk vyplývajúci zo skúsenosti','Božský zákon'],answer:2,explanation:'Hume tvrdil, že kauzalita je len zvyk, nie nevyhnutné spojenie — je to jadro jeho skepticizmu.'},
+    {id:'p_f17',topic:'Filozofia — Immanuel Kant',text:'Kantov kategorický imperatív požaduje konať tak, aby:',options:['Maxima nášho konania mohla platiť ako všeobecný zákon','Sme dosiahli čo najväčšie potešenie','Sme sa vyhli akémukoľvek riziku','Sme poslúchali autority'],answer:0,explanation:'Kategorický imperatív: \'Konaj tak, aby maxima tvojho konania mohla platiť ako všeobecný zákon.\''},
+    {id:'p_f18',topic:'Filozofia — Moderná filozofia od 19. storočia',text:'Hegelova dialektika prebieha v triáde:',options:['Bytie – nebytie – stávanie sa','Téza – antitéza – syntéza','Id – ego – superego','Arché – logos – étos'],answer:1,explanation:'Hegelova dialektika (téza-antitéza-syntéza) opisuje dejiny ako sebarealizáciu absolútneho ducha.'},
+    {id:'p_f19',topic:'Filozofia — Moderná filozofia od 19. storočia',text:'Nietzscheho výrok \'Boh je mŕtvy\' súvisí s jeho kritikou:',options:['Vedeckého pokroku','Kresťanskej (otrockej) morálky','Gréckej mytológie','Demokracie'],answer:1,explanation:'Nietzsche kritizoval kresťanstvo a morálku otrokov, hlásal prehodnotenie všetkých hodnôt a myšlienku nadčloveka.'},
+    {id:'p_f20',topic:'Filozofia — Filozofia od 20. storočia',text:'Sartrov výrok \'Existencia predchádza esenciu\' je charakteristický pre:',options:['Fenomenológiu','Existencializmus','Pozitivizmus','Racionalizmus'],answer:1,explanation:'Jean-Paul Sartre je kľúčovým predstaviteľom existencializmu — človek je odsúdený byť slobodný.'},
+    {id:'p_f21',topic:'Filozofia — Filozofia od 20. storočia',text:'Kto je zakladateľom fenomenológie a autorom hesla \'Späť k samým veciam\'?',options:['Martin Heidegger','Edmund Husserl','Jean-Paul Sartre','Ludwig Wittgenstein'],answer:1,explanation:'Edmund Husserl založil fenomenológiu; kľúčové pojmy sú epoché a intencionalita vedomia.'},
+    {id:'p_f22',topic:'Filozofia — Slovenská filozofia',text:'Ktorý slovenský mysliteľ je počas národného obrodenia (19. storočie) spájaný s myšlienkou jazyka ako nositeľa ducha národa?',options:['Ladislav Hanus','Milan Kusý','Ľudovít Štúr','Svätopluk Štúr'],answer:2,explanation:'Ľudovít Štúr rozvíjal filozofiu slovenského národa a chápal jazyk ako nositeľa ducha národa.'},
+    {id:'p_p1',topic:'Psychológia — Psychológia ako veda',text:'V ktorom roku a kde založil Wilhelm Wundt prvé psychologické laboratórium?',options:['1879, Lipsko','1900, Viedeň','1850, Londýn','1920, New York'],answer:0,explanation:'Psychológia vznikla ako samostatná veda v roku 1879, keď Wilhelm Wundt založil prvé psychologické laboratórium v Lipsku.'},
+    {id:'p_p2',topic:'Psychológia — Psychológia ako veda',text:'Slovo \'psychológia\' je zložené z gréckych slov, ktoré v preklade znamenajú:',options:['Náuka o tele','Náuka o duši','Náuka o správaní','Náuka o mysli a hmote'],answer:1,explanation:'Psychológia = psyché (duša) + logos (slovo, náuka) = náuka o duši.'},
+    {id:'p_p3',topic:'Psychológia — Metódy psychológie',text:'Ktorá výskumná metóda zámerne manipuluje nezávislú premennú za kontrolovaných podmienok?',options:['Pozorovanie','Dotazník','Experiment','Prípadová štúdia'],answer:2,explanation:'Experiment cielene ovplyvňuje nezávislú premennú a meria jej vplyv na závislú premennú.'},
+    {id:'p_p4',topic:'Psychológia — Metódy psychológie',text:'Aká je typická nevýhoda dotazníkovej metódy?',options:['Vysoké finančné náklady','Sociálna žiaducosť odpovedí a nízka návratnosť','Nemožnosť anonymity','Nutnosť osobného kontaktu'],answer:1,explanation:'Dotazník má výhodu veľkého počtu respondentov, ale nevýhodou je nízka návratnosť a sociálna žiaducosť odpovedí.'},
+    {id:'p_p5',topic:'Psychológia — Metódy psychológie',text:'Rorschachov test atramentových škvŕn je príkladom:',options:['Výkonového testu','Inteligenčného testu','Projektívneho testu','Dotazníka osobnosti'],answer:2,explanation:'Rorschachov test a TAT patria medzi projektívne testy.'},
+    {id:'p_p6',topic:'Psychológia — Psychologické smery — behaviorizmus',text:'Kto je zakladateľom behaviorizmu a autorom manifestu \'Psychológia ako ju vníma behaviorista\' (1913)?',options:['B.F. Skinner','John B. Watson','Ivan Pavlov','Wilhelm Wundt'],answer:1,explanation:'John B. Watson založil behaviorizmus — psychológia má skúmať iba pozorovateľné správanie.'},
+    {id:'p_p7',topic:'Psychológia — Psychologické smery — behaviorizmus',text:'Klasické podmieňovanie (pes, zvon, sliny) skúmal:',options:['B.F. Skinner','Sigmund Freud','Ivan Pavlov','John B. Watson'],answer:2,explanation:'Ivan Pavlov opísal klasické podmieňovanie na svojom klasickom experimente s psom, zvonom a slinením.'},
+    {id:'p_p8',topic:'Psychológia — Psychologické smery — behaviorizmus',text:'Operantné podmieňovanie a posilňovanie (odmena/trest) skúmal:',options:['Ivan Pavlov','B.F. Skinner','Carl Rogers','Jean Piaget'],answer:1,explanation:'B.F. Skinner rozpracoval operantné podmieňovanie a pozitívne/negatívne posilňovanie.'},
+    {id:'p_p9',topic:'Psychológia — Psychologické smery — psychoanalýza',text:'Zakladateľom psychoanalýzy je:',options:['Carl Gustav Jung','Alfred Adler','Sigmund Freud','Erik Erikson'],answer:2,explanation:'Sigmund Freud vo Viedni založil psychoanalýzu, ktorá zdôrazňuje úlohu nevedomia.'},
+    {id:'p_p10',topic:'Psychológia — Psychologické smery — psychoanalýza',text:'Vo Freudovej štruktúre osobnosti predstavuje \'id\' (ono):',options:['Morálku a svedomie','Primárne pudové popudy riadené princípom slasti','Racionálne sprostredkovanie medzi pudmi a realitou','Ideálne self'],answer:1,explanation:'Id je najprimitívnejšia zložka osobnosti — pudové popudy riadené princípom slasti; ego sprostredkúva realitu, superego je svedomie.'},
+    {id:'p_p11',topic:'Psychológia — Psychologické smery — psychoanalýza',text:'Nevedomé vytláčanie nepríjemných myšlienok a spomienok z vedomia sa v psychoanalýze nazýva:',options:['Projekcia','Racionalizácia','Vytesnenie','Sublimácia'],answer:2,explanation:'Vytesnenie je obranný mechanizmus, pri ktorom nepríjemné obsahy vytláčame z vedomia do nevedomia.'},
+    {id:'p_p12',topic:'Psychológia — Psychologické smery — psychoanalýza',text:'Pojem \'kolektívne nevedomie\' a \'archetypy\' zaviedol do psychológie:',options:['Sigmund Freud','Carl Gustav Jung','Alfred Adler','Erik Erikson'],answer:1,explanation:'C.G. Jung, zakladateľ analytickej psychológie, pracoval s pojmami kolektívne nevedomie a archetypy (tieň, anima/animus, self).'},
+    {id:'p_p13',topic:'Psychológia — Psychologické smery — psychoanalýza',text:'Alfred Adler je zakladateľom individuálnej psychológie a autorom pojmu:',options:['Kolektívne nevedomie','Komplex menejcennosti','Kognitívna disonancia','Operantné podmieňovanie'],answer:1,explanation:'Adler rozpracoval pojmy komplex menejcennosti, kompenzácia a životný štýl.'},
+    {id:'p_p14',topic:'Psychológia — Psychologické smery — humanistická psychológia',text:'Humanistická psychológia (50.-60. roky 20. storočia) sa označuje ako:',options:['Prvá sila','Druhá sila','Tretia sila','Štvrtá sila'],answer:2,explanation:'Humanistická psychológia vznikla ako "tretia sila" po behaviorizme a psychoanalýze.'},
+    {id:'p_p15',topic:'Psychológia — Psychologické smery — humanistická psychológia',text:'Na vrchole Maslowovej hierarchie potrieb sa nachádza:',options:['Potreba bezpečia','Potreba úcty','Sebarealizácia','Fyziologické potreby'],answer:2,explanation:'Maslowova pyramída potrieb vrcholí sebarealizáciou.'},
+    {id:'p_p16',topic:'Psychológia — Psychologické smery — humanistická psychológia',text:'Carl Rogers je predstaviteľom:',options:['Psychoanalýzy','Behaviorizmu','Klientsky centrovanej terapie','Gestalt psychológie'],answer:2,explanation:'Carl Rogers rozvíjal klientsky centrovanú terapiu založenú na bezpodmienečnom pozitívnom prijatí, empatii a kongruencii.'},
+    {id:'p_p17',topic:'Psychológia — Psychologické smery — kognitívna psychológia',text:'\'Kognitívna revolúcia\' v psychológii nastala v:',options:['20. rokoch 20. storočia','40. rokoch 20. storočia','60. rokoch 20. storočia','90. rokoch 20. storočia'],answer:2,explanation:'Kognitívna psychológia sa presadila v 60. rokoch 20. storočia ako "kognitívna revolúcia".'},
+    {id:'p_p18',topic:'Psychológia — Psychologické smery — kognitívna psychológia',text:'Jean Piaget je známy svojím výskumom:',options:['Klasického podmieňovania','Kognitívneho vývinu dieťaťa','Psychosexuálnych štádií','Sociálnej percepcie'],answer:1,explanation:'Jean Piaget opísal štádiá kognitívneho vývinu dieťaťa: senzomotorické, predoperačné, konkrétnych operácií, formálnych operácií.'},
+    {id:'p_p19',topic:'Psychológia — Psychologické smery — gestalt psychológia',text:'Gestalt psychológia zdôrazňuje princíp, podľa ktorého:',options:['Správanie je len súčtom podnetov a reakcií','Celok je viac než súčet jeho častí','Osobnosť tvoria id, ego a superego','Poznanie pochádza výlučne zo skúsenosti'],answer:1,explanation:'Gestalt psychológia (Wertheimer, Köhler, Koffka) hlása, že celok je viac než súčet častí, a skúma zákony organizácie vnímania.'},
+    {id:'p_p20',topic:'Psychológia — Pamäť',text:'Podľa Atkinsonovho-Shiffrinovho modelu je kapacita krátkodobej (pracovnej) pamäti približne:',options:['2±1 položky','7±2 položky','15±3 položky','neobmedzená'],answer:1,explanation:'Krátkodobá pamäť má objem 7±2 položky a trvá približne 20 sekúnd.'},
+    {id:'p_p21',topic:'Psychológia — Pamäť',text:'Explicitná (deklaratívna) dlhodobá pamäť sa delí na:',options:['Senzorickú a procedurálnu','Epizodickú a sémantickú','Krátkodobú a dlhodobú','Vizuálnu a auditívnu'],answer:1,explanation:'Explicitná pamäť zahŕňa epizodickú (udalosti) a sémantickú (fakty) zložku; implicitná pamäť zase automatické zručnosti.'},
+    {id:'p_p22',topic:'Psychológia — Pamäť',text:'Krivku zabúdania, ktorá popisuje rýchlosť straty naučených informácií v čase, skúmal:',options:['Wilhelm Wundt','Hermann Ebbinghaus','Jean Piaget','B.F. Skinner'],answer:1,explanation:'Hermann Ebbinghaus je autorom klasickej krivky zabúdania.'},
+    {id:'p_p23',topic:'Psychológia — Myslenie',text:'Rozdiel medzi algoritmom a heuristikou pri riešení problémov spočíva v tom, že:',options:['Algoritmus je náhodný postup, heuristika presný','Algoritmus je presný postup vedúci k riešeniu, heuristika je skratka (pravidlo palca)','Oba pojmy sú synonymá','Heuristika sa používa len v matematike'],answer:1,explanation:'Algoritmus je presný postup, heuristika je skratka/pravidlo palca, ktoré nemusí vždy viesť k správnemu riešeniu.'},
+    {id:'p_p24',topic:'Psychológia — Inteligencia',text:'Priemerná hodnota IQ v štandardizovaných testoch inteligencie je nastavená na:',options:['85','100','115','130'],answer:1,explanation:'IQ skóre je štandardizované s priemerom 100 a štandardnou odchýlkou 15.'},
+    {id:'p_p25',topic:'Psychológia — Inteligencia',text:'Ktorý autor rozpracoval teóriu viacnásobnej inteligencie (lingvistická, priestorová, hudobná atď.)?',options:['Charles Spearman','Louis Thurstone','Howard Gardner','Robert Sternberg'],answer:2,explanation:'Gardner rozlišuje viacero typov inteligencie — napr. lingvistickú, logicko-matematickú, priestorovú, hudobnú, telesno-kinestetickú.'},
+    {id:'p_p26',topic:'Psychológia — Emócie',text:'Medzi základné, kultúrne univerzálne emócie podľa Paula Ekmana NEPATRÍ:',options:['Radosť','Strach','Žiarlivosť','Odpor'],answer:2,explanation:'Ekman uvádza šesť základných emócií: radosť, smútok, strach, hnev, odpor, prekvapenie — žiarlivosť medzi ne nepatrí.'},
+    {id:'p_p27',topic:'Psychológia — Emócie',text:'James-Langeho teória emócií tvrdí, že:',options:['Emócia a fyziologická reakcia vznikajú súčasne','Najprv vzniká fyziologická reakcia, potom emócia','Emócia vzniká len na základe kognitívneho hodnotenia','Emócie sú úplne nezávislé od tela'],answer:1,explanation:'Podľa James-Langeho teórie najprv nastáva fyziologická reakcia a z jej vnímania potom vzniká emócia ("utekáme, preto sa bojíme").'},
+    {id:'p_p28',topic:'Psychológia — Ontogenéza psychiky',text:'Podľa Eriksonovej teórie psychosociálneho vývinu je hlavnou úlohou obdobia adolescencie:',options:['Autonómia vs. hanba a pochybnosti','Iniciatíva vs. vina','Identita vs. zmätok rolí','Intimita vs. izolácia'],answer:2,explanation:'V adolescencii rieši jedinec podľa Eriksona konflikt identita vs. zmätok rolí.'},
+    {id:'p_p29',topic:'Psychológia — Ontogenéza psychiky',text:'Výskum citovej väzby (attachment) medzi dieťaťom a opatrovateľom je spojený s menami:',options:['Piaget a Vygotskij','Bowlby a Ainsworth','Freud a Jung','Maslow a Rogers'],answer:1,explanation:'Bowlby a Ainsworth skúmali citovú väzbu (attachment) a jej typy — secure, insecure-avoidant, insecure-resistant, disorganized.'},
+    {id:'p_p30',topic:'Psychológia — Psychológia osobnosti',text:'Podľa antickej humorálnej typológie (Hippokrates, Galén) je cholerik typ osobnosti spájaný s:',options:['Krvou — živý typ','Žlčou — výbušný typ','Hlienom — pomalý typ','Čiernou žlčou — smutný typ'],answer:1,explanation:'Hippokratova-Galénova typológia: sangvinik (krv), cholerik (žlč), flegmatik (hlien), melancholik (čierna žlč).'},
+    {id:'p_p31',topic:'Psychológia — Psychológia osobnosti',text:'Model \'Big Five\' (päťfaktorový model osobnosti) zahŕňa okrem iného:',options:['Temperament, charakter, vôľu, city, schopnosti','Otvorenosť, svedomitosť, extraverziu, prívetivosť, neurotizmus','Id, ego, superego, libido, archetypy','Sangvinik, cholerik, flegmatik, melancholik'],answer:1,explanation:'Big Five tvorí päť dimenzií: otvorenosť voči skúsenostiam, svedomitosť, extraverzia, prívetivosť, neurotizmus.'},
+    {id:'p_p32',topic:'Psychológia — Duševné zdravie a stres',text:'Selyeho syndróm všeobecnej adaptácie (GAS) na stres má fázy:',options:['Popretie – hnev – prijatie','Alarm – rezistencia – vyčerpanie','Vzrušenie – plató – uvoľnenie','Iniciácia – adaptácia – regresia'],answer:1,explanation:'Selyeho GAS má tri fázy: alarm, rezistencia a vyčerpanie.'},
+    {id:'p_p33',topic:'Psychológia — Bio-psycho-sociálny model',text:'Bio-psycho-sociálny model chápania človeka zdôrazňuje, že napríklad depresia môže mať:',options:['Výlučne biologické príčiny','Len sociálne príčiny','Biologické, psychologické aj sociálne príčiny súčasne','Iba genetické príčiny'],answer:2,explanation:'Bio-psycho-sociálny model zdôrazňuje interakciu biologických (napr. nízky serotonín), psychologických (negatívne myslenie) a sociálnych (strata práce, samota) faktorov.'},
   ]
 };
 
@@ -1681,10 +1763,13 @@ const _origStartMode=function(mode){
     state.verbalTimeUsed=0;state.analyticalTimeUsed=0;
   }
   else if(mode==='review'){
-    const wrongIds=getWrongIds();const all=[...QUESTIONS.verbal,...QUESTIONS.analytical,...aiQuestions];
+    const wrongIds=getWrongIds();const all=[...QUESTIONS.verbal,...QUESTIONS.analytical,...QUESTIONS.psychologia,...aiQuestions];
     qs=all.filter(q=>wrongIds.includes(q.id));
     if(qs.length===0){showToast(t('noWrongQuestions'));return;}
     state.part='review';state.timeLeft=0;state.verbalCount=0;
+  }
+  else if(mode==='psychologia'){
+    qs=shuffle(QUESTIONS.psychologia);state.part='psychologia';state.timeLeft=0;state.verbalCount=0;
   }
   state.questions=qs;state.currentIdx=0;state.answers={};state.revealed={};state.startTime=Date.now();
   renderTest();showScreen('test');
@@ -1959,12 +2044,13 @@ function endTestEarly(){if(confirm(t('endTestConfirm'))){stopTimer();finishTest(
 function finishTest(){
   stopTimer();const qs=state.questions;
   let totalScore=0,correct=0,wrong=0,skipped=0,vCorrect=0,vTotal=0,aCorrect=0,aTotal=0;
+  const trackPercentile=state.mode!=='psychologia';
   qs.forEach((q,i)=>{
     const ans=state.answers[i],correctAns=q.answer;
-    const isVerbal=QUESTIONS.verbal.some(v=>v.id===q.id)||q.part==='verbal';
-    if(isVerbal)vTotal++;else aTotal++;
+    const isVerbal=trackPercentile&&(QUESTIONS.verbal.some(v=>v.id===q.id)||q.part==='verbal');
+    if(trackPercentile){if(isVerbal)vTotal++;else aTotal++;}
     if(ans==='skip'||ans===undefined){skipped++;}
-    else if(ans===correctAns){correct++;totalScore+=1;if(isVerbal)vCorrect++;else aCorrect++;}
+    else if(ans===correctAns){correct++;totalScore+=1;if(trackPercentile){if(isVerbal)vCorrect++;else aCorrect++;}}
     else{wrong++;totalScore-=1/3;}
   });
   // Trvanie = súčet skutočne strávených sekúnd v oboch častiach (nie celkový wall-clock čas)
@@ -2017,9 +2103,14 @@ function renderResults(entry,qs){
   document.getElementById('finalScore').textContent=entry.score>0?'+'+entry.score:entry.score;
   document.getElementById('scoreLabel').textContent=t('scoreFrom',{n:qs.length});
   let badgesHtml='';
-  if(entry.estimated>=85)badgesHtml+=`<span class="verify-badge correct">${t('goalAchieved')}</span>`;
-  else badgesHtml+=`<span class="verify-badge wrong">${t('goalMissed')}</span>`;
-  badgesHtml+=`<span class="verify-badge" style="background:rgba(124,92,255,.12);color:var(--purple2);">${t('percentileLabel',{p:entry.estimated})}</span>`;
+  if(entry.mode==='psychologia'){
+    const pct=qs.length?Math.round(entry.correct/qs.length*100):0;
+    badgesHtml+=`<span class="verify-badge ${pct>=70?'correct':'wrong'}">${pct}% správnosť</span>`;
+  }else{
+    if(entry.estimated>=85)badgesHtml+=`<span class="verify-badge correct">${t('goalAchieved')}</span>`;
+    else badgesHtml+=`<span class="verify-badge wrong">${t('goalMissed')}</span>`;
+    badgesHtml+=`<span class="verify-badge" style="background:rgba(124,92,255,.12);color:var(--purple2);">${t('percentileLabel',{p:entry.estimated})}</span>`;
+  }
   if(qs.some(q=>q.isAI))badgesHtml+=`<span class="verify-badge" style="background:rgba(200,255,0,.08);color:var(--volt);">🤖 AI</span>`;
   if(!isPremium()){const limit=currentUser?FREE_TESTS_REGISTERED:FREE_TESTS_ANON;const rem=Math.max(0,limit-getTrialCount());if(rem>0)badgesHtml+=`<span class="verify-badge" style="background:rgba(255,196,77,.1);color:var(--yellow);">${t('testsRemaining',{r:rem,l:limit})}</span>`;}
   document.getElementById('scoreBadges').innerHTML=badgesHtml;
@@ -2075,7 +2166,9 @@ function renderHistory(){
     const gt=entry.correct>0?`<span class="hi-tag good">+${entry.correct} ✓</span>`:'';
     const bt=entry.wrong>0?`<span class="hi-tag bad">${entry.wrong} ✗</span>`:'';
     const mins=Math.floor(entry.duration/60);
-    return`<div class="history-item"><div class="hi-score">~${entry.estimated}</div><div class="hi-info"><div class="hi-mode">${ml[entry.mode]||entry.mode} — ${entry.date}</div><div class="hi-meta">${t('historyMinCorr',{c:entry.correct,t:entry.correct+entry.wrong+entry.skipped,m:mins})}</div></div><div class="hi-tags">${gt}${bt}</div></div>`;
+    const total=entry.correct+entry.wrong+entry.skipped;
+    const scoreLabel=entry.mode==='psychologia'?(total?Math.round(entry.correct/total*100)+'%':'0%'):'~'+entry.estimated;
+    return`<div class="history-item"><div class="hi-score">${scoreLabel}</div><div class="hi-info"><div class="hi-mode">${ml[entry.mode]||entry.mode} — ${entry.date}</div><div class="hi-meta">${t('historyMinCorr',{c:entry.correct,t:entry.correct+entry.wrong+entry.skipped,m:mins})}</div></div><div class="hi-tags">${gt}${bt}</div></div>`;
   }).join('');
 }
 
