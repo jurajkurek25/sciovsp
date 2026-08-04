@@ -195,6 +195,22 @@ h1.title span{font-style:italic;color:var(--purple2)}
 .setup-box{background:var(--black2);border:1px solid var(--border);border-radius:20px;padding:2.25rem;max-width:480px;width:100%}
 .setup-title{font-family:var(--serif);font-size:1.5rem;font-style:italic;font-weight:400;margin-bottom:.35rem}
 .setup-subtitle{color:var(--text2);font-size:.87rem;margin-bottom:2rem}
+/* PSYCH INFO */
+#psych-info{align-items:center;justify-content:center;padding:2rem;position:relative}
+.psych-info-actions{display:flex;flex-direction:column;gap:.6rem;margin-top:1.75rem}
+/* ATTENTION TASK */
+#attention{align-items:center;justify-content:center;padding:2rem 1.25rem;position:relative}
+.attn-box{background:var(--black2);border:1px solid var(--border);border-radius:20px;padding:2.25rem;max-width:640px;width:100%}
+.attn-meta{display:flex;align-items:center;gap:.6rem;margin:1.5rem 0 1rem;font-family:var(--mono);font-size:.85rem;color:var(--text2)}
+.attn-target{color:var(--volt);font-weight:700;font-size:1.15rem;padding:.1rem .6rem;border:1px solid rgba(200,255,0,.3);border-radius:6px;background:rgba(200,255,0,.06)}
+.attn-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:4px;margin-bottom:1.5rem}
+.attn-cell{aspect-ratio:1;display:flex;align-items:center;justify-content:center;background:var(--black3);border:1px solid var(--border2);border-radius:6px;font-family:var(--mono);font-size:.8rem;color:var(--text2);cursor:pointer;user-select:none;transition:all .1s}
+.attn-cell:hover{border-color:var(--volt)}
+.attn-cell.marked{background:rgba(200,255,0,.15);border-color:var(--volt);color:var(--text)}
+.attn-cell.correct{background:rgba(54,232,150,.2);border-color:var(--green);color:var(--text)}
+.attn-cell.wrong{background:rgba(255,63,94,.2);border-color:var(--red);color:var(--text)}
+.attn-cell.missed{background:rgba(255,196,77,.15);border-color:var(--yellow);color:var(--text)}
+.attn-note{color:var(--text3);font-size:.82rem;line-height:1.55;margin-top:1rem}
 /* RESULTS */
 #results{padding:2.5rem 1.5rem;align-items:center}
 .results-container{max-width:760px;width:100%;margin:0 auto}
@@ -586,7 +602,8 @@ h1.title span{font-style:italic;color:var(--purple2)}
     <div class="mode-card" onclick="showHistory()"><span class="card-icon">📊</span><div class="card-title" data-i18n="modeHistoryTitle">Výsledky a história</div><div class="card-desc" data-i18n="modeHistoryDesc">Pokroky, analýza podľa okruhov, percentilový odhad.</div></div>
     <div class="mode-card" onclick="showClans()"><span class="card-badge" style="background:linear-gradient(135deg,var(--purple),var(--red));color:#fff;">NOVÉ</span><span class="card-icon">⚔️</span><div class="card-title" data-i18n="clansCardTitle">SP Klany</div><div class="card-desc" data-i18n="clansCardDesc">Súkromné skupiny · Leaderboard s kamarátmi</div></div>
     <div class="mode-card" onclick="startMode('topic')"><span class="card-icon">🎯</span><div class="card-title" data-i18n="modeTopicTitle">Podľa okruhu</div><div class="card-desc" data-i18n="modeTopicDesc">Vyber konkrétny okruh — napr. zebry, koherencia, porovnávanie.</div></div>
-    <div class="mode-card" onclick="startMode('psychologia')"><span class="card-badge" style="background:linear-gradient(135deg,var(--purple),var(--red));color:#fff;">NOVÉ</span><span class="card-icon">🧠</span><div class="card-title" data-i18n="modePsychTitle">Psychológia UCM Trnava</div><div class="card-desc" data-i18n="modePsychDesc">76 úloh — Biológia človeka, Filozofia, Psychológia. Príprava na prijímačky FF UCM.</div></div>
+    <div class="mode-card" onclick="startMode('psychologia')"><span class="card-badge" style="background:linear-gradient(135deg,var(--purple),var(--red));color:#fff;">NOVÉ</span><span class="card-icon">🧠</span><div class="card-title" data-i18n="modePsychTitle">Psychológia UCM Trnava</div><div class="card-desc" data-i18n="modePsychDesc">76 úloh — Biológia človeka, Filozofia, Psychológia. Vedomostná časť prijímačiek FF UCM.</div></div>
+    <div class="mode-card" onclick="showScreen('psych-info')"><span class="card-badge" style="background:linear-gradient(135deg,var(--purple),var(--red));color:#fff;">NOVÉ</span><span class="card-icon">🧭</span><div class="card-title" data-i18n="modePsychInfoTitle">Test študijných predpokladov (UCM)</div><div class="card-desc" data-i18n="modePsychInfoDesc">Druhá časť prijímačiek na psychológiu — verbálne/analytické uvažovanie + koncentrácia pozornosti.</div></div>
   </div>
   <!-- REFERRAL CARD — zobrazí sa Premium userom aj pri platbe -->
 <div class="ref-card hidden" id="refCard">
@@ -768,6 +785,41 @@ h1.title span{font-style:italic;color:var(--purple2)}
   </div>
 </div>
 
+<!-- PSYCH INFO — test študijných predpokladov (UCM) -->
+<div id="psych-info" class="screen">
+  <button class="btn back-btn" onclick="showScreen('home')" data-i18n="btnBack">← Späť</button>
+  <div class="setup-box" style="max-width:560px;">
+    <div class="setup-title" data-i18n="psychInfoTitle">Test študijných predpokladov</div>
+    <div class="setup-subtitle" data-i18n="psychInfoSubtitle">Druhá časť prijímačiek na psychológiu UCM — spolu s vedomostným testom sa počíta do 120 bodov.</div>
+    <p style="color:var(--text2);font-size:.87rem;line-height:1.6;margin-bottom:0;" data-i18n="psychInfoBody">UCM presný formát tejto časti verejne nezverejňuje. Označenie „test študijných predpokladov" na slovenských vysokých školách bežne znamená test verbálneho a analytického uvažovania (rovnaký typ, aký táto appka trénuje) — preto sú najrelevantnejšou dostupnou prípravou práve Verbálna a Analytická časť nižšie. Doplnkovo si môžeš precvičiť aj koncentráciu pozornosti.</p>
+    <div class="psych-info-actions">
+      <button class="btn primary" onclick="startMode('verbal')" style="width:100%;justify-content:center;margin:0;" data-i18n="btnStartVerbal">Spustiť Verbálnu časť →</button>
+      <button class="btn primary" onclick="startMode('analytical')" style="width:100%;justify-content:center;margin:0;" data-i18n="btnStartAnalytical">Spustiť Analytickú časť →</button>
+      <button class="btn" onclick="startMode('full')" style="width:100%;justify-content:center;" data-i18n="btnStartFull">Spustiť Celý test (obe časti na čas) →</button>
+      <button class="btn" onclick="showScreen('attention');resetAttentionTask();" style="width:100%;justify-content:center;" data-i18n="btnStartAttention">🎯 Precvičiť koncentráciu pozornosti →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ATTENTION TASK -->
+<div id="attention" class="screen">
+  <button class="btn back-btn" onclick="stopAttnTimer();showScreen('psych-info')" data-i18n="btnBack">← Späť</button>
+  <div class="attn-box">
+    <div class="setup-title" data-i18n="attnTitle">Koncentrácia pozornosti</div>
+    <div class="setup-subtitle" style="margin-bottom:.75rem;" data-i18n="attnSubtitle">Za 60 sekúnd označ všetky políčka s cieľovým písmenom.</div>
+    <p class="attn-note" style="margin-top:0;margin-bottom:0;" data-i18n="attnDisclaimer">Bežné cvičenie na sústredenie a rýchle vizuálne vyhľadávanie (typu Bourdonov test) — nie overená kópia konkrétneho testu UCM.</p>
+    <div class="attn-meta">
+      <span data-i18n="attnFind">Hľadaj písmeno:</span>
+      <span class="attn-target" id="attnTargetLabel">—</span>
+      <span class="timer" id="attnTimerBox" style="margin-left:auto;"><span class="timer-dot"></span><span id="attnTimer">60s</span></span>
+    </div>
+    <div id="attnGrid" class="attn-grid"></div>
+    <div id="attnResults" style="display:none;margin-bottom:1rem;"></div>
+    <button class="btn primary" id="attnStartBtn" onclick="startAttentionTask()" style="width:100%;justify-content:center;margin:0;" data-i18n="attnStartBtn">▶ Spustiť (60 s)</button>
+    <button class="btn" id="attnRetryBtn" onclick="startAttentionTask()" style="width:100%;justify-content:center;margin-top:.75rem;display:none;" data-i18n="attnRetryBtn">↻ Skúsiť znova</button>
+  </div>
+</div>
+
 <!-- TEST -->
 <div id="test" class="screen">
   <div class="test-header">
@@ -892,7 +944,15 @@ const TRANSLATIONS={
     modeAIBankTitle:'AI banka úloh',modeAIBankDesc:'Prehľad všetkých vygenerovaných úloh.',
     modeHistoryTitle:'Výsledky a história',modeHistoryDesc:'Pokroky, analýza podľa okruhov.',
     modeTopicTitle:'Podľa okruhu',modeTopicDesc:'Vyber konkrétny okruh — napr. zebry, koherencia.',
-    modePsychTitle:'Psychológia UCM Trnava',modePsychDesc:'76 úloh — Biológia človeka, Filozofia, Psychológia. Príprava na prijímačky FF UCM.',
+    modePsychTitle:'Psychológia UCM Trnava',modePsychDesc:'76 úloh — Biológia človeka, Filozofia, Psychológia. Vedomostná časť prijímačiek FF UCM.',
+    modePsychInfoTitle:'Test študijných predpokladov (UCM)',modePsychInfoDesc:'Druhá časť prijímačiek na psychológiu — verbálne/analytické uvažovanie + koncentrácia pozornosti.',
+    psychInfoTitle:'Test študijných predpokladov',psychInfoSubtitle:'Druhá časť prijímačiek na psychológiu UCM — spolu s vedomostným testom sa počíta do 120 bodov.',
+    psychInfoBody:'UCM presný formát tejto časti verejne nezverejňuje. Označenie „test študijných predpokladov" na slovenských vysokých školách bežne znamená test verbálneho a analytického uvažovania (rovnaký typ, aký táto appka trénuje) — preto sú najrelevantnejšou dostupnou prípravou práve Verbálna a Analytická časť nižšie. Doplnkovo si môžeš precvičiť aj koncentráciu pozornosti.',
+    btnStartVerbal:'Spustiť Verbálnu časť →',btnStartAnalytical:'Spustiť Analytickú časť →',btnStartFull:'Spustiť Celý test (obe časti na čas) →',btnStartAttention:'🎯 Precvičiť koncentráciu pozornosti →',
+    attnTitle:'Koncentrácia pozornosti',attnSubtitle:'Za 60 sekúnd označ všetky políčka s cieľovým písmenom.',
+    attnDisclaimer:'Bežné cvičenie na sústredenie a rýchle vizuálne vyhľadávanie (typu Bourdonov test) — nie overená kópia konkrétneho testu UCM.',
+    attnFind:'Hľadaj písmeno:',attnStartBtn:'▶ Spustiť (60 s)',attnRetryBtn:'↻ Skúsiť znova',
+    attnFound:'Nájdené',attnAccuracy:'Presnosť',attnMissed:'Vynechané',attnFalse:'Falošné zásahy',
     statTests:'Testov',statQuestions:'Úloh',statAccuracy:'Úspešnosť',statAIQuestions:'AI úloh',
     aiGenTitle:'AI Generátor SCIO úloh',aiGenSubtitle:'Claude AI vytvorí nové úlohy v štýle oficiálnych SCIO testov',
     labelTestPart:'Časť testu',chipVerbal:'📖 Verbálna',chipAnalytical:'🧮 Analytická',
@@ -1022,7 +1082,15 @@ const TRANSLATIONS={
     modeAIBankTitle:'AI banka úkolů',modeAIBankDesc:'Přehled všech vygenerovaných úkolů.',
     modeHistoryTitle:'Výsledky a historie',modeHistoryDesc:'Pokroky, analýza podle okruhů.',
     modeTopicTitle:'Podle okruhu',modeTopicDesc:'Vyber konkrétní okruh — např. zebry, koherence.',
-    modePsychTitle:'Psychologie UCM Trnava',modePsychDesc:'76 úloh — Biologie člověka, Filozofie, Psychologie. Příprava na přijímačky FF UCM.',
+    modePsychTitle:'Psychologie UCM Trnava',modePsychDesc:'76 úloh — Biologie člověka, Filozofie, Psychologie. Vědomostní část přijímaček FF UCM.',
+    modePsychInfoTitle:'Test studijních předpokladů (UCM)',modePsychInfoDesc:'Druhá část přijímaček na psychologii — verbální/analytické uvažování + koncentrace pozornosti.',
+    psychInfoTitle:'Test studijních předpokladů',psychInfoSubtitle:'Druhá část přijímaček na psychologii UCM — spolu se znalostním testem se počítá do 120 bodů.',
+    psychInfoBody:'UCM přesný formát této části veřejně nezveřejňuje. Označení „test studijních předpokladů" na slovenských vysokých školách běžně znamená test verbálního a analytického uvažování (stejný typ, jaký tato appka trénuje) — proto jsou nejrelevantnější dostupnou přípravou právě Verbální a Analytická část níže. Doplňkově si můžeš procvičit i koncentraci pozornosti.',
+    btnStartVerbal:'Spustit Verbální část →',btnStartAnalytical:'Spustit Analytickou část →',btnStartFull:'Spustit Celý test (obě části na čas) →',btnStartAttention:'🎯 Procvičit koncentraci pozornosti →',
+    attnTitle:'Koncentrace pozornosti',attnSubtitle:'Za 60 sekund označ všechna políčka s cílovým písmenem.',
+    attnDisclaimer:'Běžné cvičení na soustředění a rychlé vizuální vyhledávání (typu Bourdonův test) — ne ověřená kopie konkrétního testu UCM.',
+    attnFind:'Hledej písmeno:',attnStartBtn:'▶ Spustit (60 s)',attnRetryBtn:'↻ Zkusit znovu',
+    attnFound:'Nalezeno',attnAccuracy:'Přesnost',attnMissed:'Vynecháno',attnFalse:'Falešné zásahy',
     statTests:'Testů',statQuestions:'Úkolů',statAccuracy:'Úspěšnost',statAIQuestions:'AI úkolů',
     aiGenTitle:'AI Generátor SCIO úkolů',aiGenSubtitle:'Claude AI vytvoří nové úkoly ve stylu oficiálních SCIO testů',
     labelTestPart:'Část testu',chipVerbal:'📖 Verbální',chipAnalytical:'🧮 Analytická',
@@ -2037,6 +2105,80 @@ function updateTimer(){
 }
 function togglePause(){state.paused=!state.paused;document.getElementById('pauseBtn').textContent=state.paused?'▶':'⏸';updateTimerDisplay();}
 function endTestEarly(){if(confirm(t('endTestConfirm'))){stopTimer();finishTest();}}
+
+// ============================================================
+// ATTENTION TASK — koncentrácia pozornosti (Bourdon-štýl, voľné cvičenie, bez trial limitu)
+// ============================================================
+const ATTN_LETTERS=['A','E','K','M','P','R','S','T'];
+const ATTN_SIZE=144,ATTN_COLS=12,ATTN_DURATION=60;
+let attnState={grid:[],target:'',marked:{},timerInterval:null,timeLeft:ATTN_DURATION,running:false};
+function resetAttentionTask(){
+  stopAttnTimer();
+  attnState={grid:[],target:'',marked:{},timerInterval:null,timeLeft:ATTN_DURATION,running:false};
+  document.getElementById('attnGrid').innerHTML='';
+  document.getElementById('attnResults').style.display='none';
+  document.getElementById('attnTargetLabel').textContent='—';
+  document.getElementById('attnTimer').textContent=ATTN_DURATION+'s';
+  document.getElementById('attnStartBtn').style.display='inline-flex';
+  document.getElementById('attnRetryBtn').style.display='none';
+}
+function startAttentionTask(){
+  attnState.target=ATTN_LETTERS[Math.floor(Math.random()*ATTN_LETTERS.length)];
+  const pool=ATTN_LETTERS.filter(l=>l!==attnState.target);
+  attnState.grid=Array.from({length:ATTN_SIZE},()=>Math.random()<0.18?attnState.target:pool[Math.floor(Math.random()*pool.length)]);
+  attnState.marked={};attnState.timeLeft=ATTN_DURATION;attnState.running=true;
+  document.getElementById('attnTargetLabel').textContent=attnState.target;
+  document.getElementById('attnResults').style.display='none';
+  document.getElementById('attnStartBtn').style.display='none';
+  document.getElementById('attnRetryBtn').style.display='none';
+  renderAttentionGrid();
+  startAttnTimer();
+}
+function toggleAttnCell(i){
+  if(!attnState.running)return;
+  if(attnState.marked[i])delete attnState.marked[i];else attnState.marked[i]=true;
+  renderAttentionGrid();
+}
+function renderAttentionGrid(){
+  document.getElementById('attnGrid').innerHTML=attnState.grid.map((ch,i)=>
+    `<div class="attn-cell${attnState.marked[i]?' marked':''}" onclick="toggleAttnCell(${i})">${ch}</div>`
+  ).join('');
+}
+function startAttnTimer(){
+  stopAttnTimer();
+  document.getElementById('attnTimer').textContent=attnState.timeLeft+'s';
+  attnState.timerInterval=setInterval(()=>{
+    attnState.timeLeft--;
+    document.getElementById('attnTimer').textContent=Math.max(0,attnState.timeLeft)+'s';
+    if(attnState.timeLeft<=0)finishAttentionTask();
+  },1000);
+}
+function stopAttnTimer(){if(attnState.timerInterval){clearInterval(attnState.timerInterval);attnState.timerInterval=null;}}
+function finishAttentionTask(){
+  stopAttnTimer();attnState.running=false;
+  let hits=0,missed=0,falsePos=0;
+  attnState.grid.forEach((ch,i)=>{
+    const isTarget=ch===attnState.target,isMarked=!!attnState.marked[i];
+    if(isTarget&&isMarked)hits++;else if(isTarget&&!isMarked)missed++;else if(!isTarget&&isMarked)falsePos++;
+  });
+  const totalTargets=hits+missed;
+  const accuracy=totalTargets?Math.round(hits/totalTargets*100):0;
+  document.getElementById('attnGrid').innerHTML=attnState.grid.map((ch,i)=>{
+    const isTarget=ch===attnState.target,isMarked=!!attnState.marked[i];
+    let cls='attn-cell';
+    if(isTarget&&isMarked)cls+=' correct';else if(isTarget&&!isMarked)cls+=' missed';else if(!isTarget&&isMarked)cls+=' wrong';
+    return `<div class="${cls}">${ch}</div>`;
+  }).join('');
+  document.getElementById('attnResults').innerHTML=`
+    <div class="results-grid">
+      <div class="result-card"><div class="result-card-title">${t('attnFound')}</div><div class="result-card-val green">${hits}/${totalTargets}</div></div>
+      <div class="result-card"><div class="result-card-title">${t('attnAccuracy')}</div><div class="result-card-val purple">${accuracy}%</div></div>
+      <div class="result-card"><div class="result-card-title">${t('attnMissed')}</div><div class="result-card-val yellow">${missed}</div></div>
+      <div class="result-card"><div class="result-card-title">${t('attnFalse')}</div><div class="result-card-val red">${falsePos}</div></div>
+    </div>`;
+  document.getElementById('attnResults').style.display='block';
+  document.getElementById('attnRetryBtn').style.display='inline-flex';
+}
 
 // ============================================================
 // FINISH & RESULTS
