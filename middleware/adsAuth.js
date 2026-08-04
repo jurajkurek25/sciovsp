@@ -11,7 +11,7 @@ async function requireAdvertiserAuth(req, res, next) {
     if (!advertiserId) return res.status(401).json({ error: 'Neplatný token.' });
 
     const result = await pool.query(
-      `SELECT id, email, company_name, status, current_period_end
+      `SELECT id, email, company_name, stripe_customer_id
        FROM advertisers WHERE id = $1`,
       [advertiserId]
     );

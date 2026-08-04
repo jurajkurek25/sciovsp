@@ -98,18 +98,18 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
     switch (event.type) {
       case 'checkout.session.completed': {
         const userId = data.metadata?.userId;
-        const advertiserId = data.metadata?.advertiserId;
-        if (advertiserId) {
+        const bannerId = data.metadata?.bannerId;
+        if (bannerId) {
           const sub = await stripe.subscriptions.retrieve(data.subscription);
           await pool.query(
-            `UPDATE advertisers SET
+            `UPDATE ad_banners SET
               stripe_subscription_id = $1,
               status = $2,
               current_period_end = to_timestamp($3)
              WHERE id = $4`,
-            [sub.id, sub.status, sub.current_period_end, advertiserId]
+            [sub.id, sub.status, sub.current_period_end, bannerId]
           );
-          console.log(`✅ Reklamné predplatné aktivované pre advertisera ${advertiserId}`);
+          console.log(`✅ Banner ${bannerId} aktivovaný (predplatné zaplatené)`);
           break;
         }
         if (!userId) break;
@@ -131,10 +131,10 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
 
       case 'customer.subscription.updated': {
         const userId = data.metadata?.userId;
-        const advertiserId = data.metadata?.advertiserId;
-        if (advertiserId) {
+        const bannerId = data.metadata?.bannerId;
+        if (bannerId) {
           await pool.query(
-            `UPDATE advertisers SET status = $1, current_period_end = to_timestamp($2)
+            `UPDATE ad_banners SET status = $1, current_period_end = to_timestamp($2)
              WHERE stripe_subscription_id = $3`,
             [data.status, data.current_period_end, data.id]
           );
@@ -157,7 +157,7 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
 
       case 'customer.subscription.deleted': {
         await pool.query(
-          `UPDATE advertisers SET status = 'cancelled' WHERE stripe_subscription_id = $1`,
+          `UPDATE ad_banners SET status = 'cancelled' WHERE stripe_subscription_id = $1`,
           [data.id]
         );
         await pool.query(
@@ -170,10 +170,14 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
       }
 
       case 'invoice.payment_failed': {
-        await pool.query(
-          `UPDATE advertisers SET status = 'past_due' WHERE stripe_customer_id = $1`,
-          [data.customer]
-        );
+        // data.subscription — konkrétne predplatné, ktoré zlyhalo (jeden Stripe zákazník môže mať viac
+        // banner-predplatných naraz, takže sa nedá spoliehať len na data.customer)
+        if (data.subscription) {
+          await pool.query(
+            `UPDATE ad_banners SET status = 'past_due' WHERE stripe_subscription_id = $1`,
+            [data.subscription]
+          );
+        }
         await pool.query(
           `UPDATE subscriptions SET status = 'past_due', updated_at = NOW()
            WHERE stripe_customer_id = $1`,

@@ -77,28 +77,30 @@ CREATE TABLE IF NOT EXISTS blog_posts (
 );
 
 -- Reklamný systém (ad.sptrener.online)
+-- Predplatné sa platí ZA KAŽDÝ BANNER SAMOSTATNE (nie raz za účet inzerenta) —
+-- preto stripe_subscription_id/status/current_period_end žijú na ad_banners, nie na advertisers.
 CREATE TABLE IF NOT EXISTS advertisers (
-  id                    UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  email                 TEXT UNIQUE NOT NULL,
-  password_hash         TEXT NOT NULL,
-  company_name          TEXT,
-  stripe_customer_id    TEXT UNIQUE,
-  stripe_subscription_id TEXT UNIQUE,
-  status                TEXT DEFAULT 'inactive', -- 'active' | 'inactive' | 'cancelled' | 'past_due'
-  current_period_end    TIMESTAMPTZ,
-  created_at            TIMESTAMPTZ DEFAULT NOW()
+  id                 UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  email              TEXT UNIQUE NOT NULL,
+  password_hash      TEXT NOT NULL,
+  company_name       TEXT,
+  stripe_customer_id TEXT UNIQUE,  -- jeden Stripe zákazník, môže mať viac predplatných (jedno na banner)
+  created_at         TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Nahraté banner kreatívy (PNG/GIF/MP4 uložené priamo v DB)
+-- Nahraté banner kreatívy (PNG/GIF/MP4 uložené priamo v DB) — každý riadok = vlastné mesačné predplatné
 CREATE TABLE IF NOT EXISTS ad_banners (
-  id            UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  advertiser_id UUID REFERENCES advertisers(id) ON DELETE CASCADE,
-  file_name     TEXT NOT NULL,
-  mime_type     TEXT NOT NULL,  -- image/png | image/gif | video/mp4
-  file_data     BYTEA NOT NULL,
-  link_url      TEXT NOT NULL,
-  active        BOOLEAN DEFAULT TRUE,
-  created_at    TIMESTAMPTZ DEFAULT NOW()
+  id                     UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  advertiser_id          UUID REFERENCES advertisers(id) ON DELETE CASCADE,
+  file_name              TEXT NOT NULL,
+  mime_type              TEXT NOT NULL,  -- image/png | image/gif | video/mp4
+  file_data              BYTEA NOT NULL,
+  link_url               TEXT NOT NULL,
+  active                 BOOLEAN DEFAULT TRUE,  -- inzerent si banner môže sám pozastaviť bez zrušenia platby
+  stripe_subscription_id TEXT UNIQUE,
+  status                 TEXT DEFAULT 'pending_payment', -- 'pending_payment' | 'active' | 'past_due' | 'cancelled'
+  current_period_end     TIMESTAMPTZ,
+  created_at             TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- Impresie a kliky na bannery
@@ -119,5 +121,6 @@ CREATE INDEX IF NOT EXISTS idx_blog_posts_published ON blog_posts(published, cre
 CREATE INDEX IF NOT EXISTS idx_advertisers_email ON advertisers(email);
 CREATE INDEX IF NOT EXISTS idx_ad_banners_advertiser ON ad_banners(advertiser_id);
 CREATE INDEX IF NOT EXISTS idx_ad_banners_active ON ad_banners(active);
+CREATE INDEX IF NOT EXISTS idx_ad_banners_status ON ad_banners(status);
 CREATE INDEX IF NOT EXISTS idx_ad_events_banner ON ad_events(banner_id);
 CREATE INDEX IF NOT EXISTS idx_ad_events_type_created ON ad_events(event_type, created_at);

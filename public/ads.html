@@ -77,7 +77,7 @@ nav{position:sticky;top:0;z-index:100;padding:1.1rem 2rem;display:flex;align-ite
 .status-pill.inactive{background:rgba(255,255,255,.05);color:var(--text3);border:1px solid var(--border2)}
 .status-pill.past_due{background:rgba(255,201,77,.1);color:var(--yellow);border:1px solid rgba(255,201,77,.25)}
 
-.banner-item{display:flex;gap:1rem;align-items:center;padding:1rem;border:1px solid var(--border);border-radius:14px;margin-bottom:.8rem;background:var(--black)}
+.banner-item{display:flex;gap:1rem;align-items:flex-start;padding:1rem;border:1px solid var(--border);border-radius:14px;margin-bottom:.8rem;background:var(--black)}
 .banner-thumb{width:90px;height:56px;border-radius:8px;overflow:hidden;background:var(--black2);flex-shrink:0;display:flex;align-items:center;justify-content:center}
 .banner-thumb img,.banner-thumb video{width:100%;height:100%;object-fit:cover}
 .banner-info{flex:1;min-width:0}
@@ -118,16 +118,17 @@ footer{border-top:1px solid var(--border);padding:2rem;display:flex;align-items:
     <!-- ĽAVÝ STĹPEC: cena / info alebo dashboard obsah -->
     <div id="leftCol">
       <div class="card">
-        <h2>Jeden slot. <span style="color:var(--volt)">49&nbsp;€/mesiac.</span></h2>
-        <div class="price-row"><span class="price-num">49€</span><span class="price-period">/ mesiac, zrušiteľné kedykoľvek</span></div>
+        <h2>49&nbsp;€/mesiac <span style="color:var(--volt)">za banner.</span></h2>
+        <div class="price-row"><span class="price-num">49€</span><span class="price-period">/ mesiac / banner, zrušiteľné kedykoľvek</span></div>
         <div class="feat-list">
-          <span>Rotujúci banner slot v dashboarde appky, zdieľaný max. 4 inzerentmi naraz</span>
+          <span>Predplatné sa platí za KAŽDÝ banner samostatne — 2 kreatívy naraz = 2× 49€/mesiac</span>
+          <span>Rotujúci banner slot v dashboarde appky, max. 4 zaplatené bannery naraz</span>
           <span>Formáty: PNG, GIF alebo MP4 video (bez zvuku), max. 8&nbsp;MB</span>
           <span>Vlastný cieľový odkaz — presmerovanie sledujeme automaticky</span>
           <span>Prehľad zobrazení a klikov naživo v tomto dashboarde</span>
           <span>Platba cez Stripe, faktúra mesačne, zrušenie jedným klikom</span>
         </div>
-        <p style="font-size:.8rem;color:var(--text3)">Banner ide do rotácie automaticky hneď po úspešnej platbe. Za obsah kreatívy a cieľovej stránky zodpovedá inzerent.</p>
+        <p style="font-size:.8rem;color:var(--text3)">Banner nahráš zadarmo, do rotácie ide hneď po zaplatení jeho vlastného predplatného. Za obsah kreatívy a cieľovej stránky zodpovedá inzerent.</p>
       </div>
     </div>
 
@@ -159,15 +160,8 @@ footer{border-top:1px solid var(--border);padding:2rem;display:flex;align-items:
       <!-- DASHBOARD -->
       <div class="hidden" id="dashboard">
         <div class="card" style="margin-bottom:1.25rem">
-          <h3>Predplatné</h3>
-          <div id="statusPill"></div>
-          <div id="billingMsg"></div>
-          <button class="btn hidden" id="checkoutBtn" onclick="startCheckout()">Aktivovať predplatné — 49€/mesiac →</button>
-          <button class="btn secondary hidden" id="portalBtn" onclick="openPortal()">Spravovať predplatné</button>
-        </div>
-
-        <div class="card" style="margin-bottom:1.25rem">
           <h3>Nahrať banner</h3>
+          <p style="font-size:.8rem;color:var(--text3);margin-bottom:.9rem">Za každý nahratý banner sa platí samostatné mesačné predplatné 49€ — platbu spustíš tlačidlom pri danom banneri nižšie.</p>
           <div id="uploadMsg"></div>
           <form id="uploadForm" onsubmit="return uploadBanner(event)">
             <div class="field"><label>Súbor (PNG, GIF alebo MP4, max 8MB, bez zvuku)</label><input type="file" id="bannerFile" accept="image/png,image/gif,video/mp4" required></div>
@@ -177,7 +171,11 @@ footer{border-top:1px solid var(--border);padding:2rem;display:flex;align-items:
         </div>
 
         <div class="card">
-          <h3>Moje bannery</h3>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:.6rem">
+            <h3 style="margin:0">Moje bannery</h3>
+            <button class="icon-btn hidden" id="portalBtn" onclick="openPortal()">Spravovať fakturáciu</button>
+          </div>
+          <div id="billingMsg"></div>
           <div id="bannerList"></div>
         </div>
       </div>
@@ -262,25 +260,7 @@ async function enterDashboard(){
   document.getElementById('dashboard').classList.remove('hidden');
   document.getElementById('logoutBtn').classList.remove('hidden');
 
-  const a = me.advertiser;
-  const pill = document.getElementById('statusPill');
-  const checkoutBtn = document.getElementById('checkoutBtn');
-  const portalBtn = document.getElementById('portalBtn');
-
-  if (a.isActive) {
-    const until = a.currentPeriodEnd ? new Date(a.currentPeriodEnd).toLocaleDateString('sk-SK') : '';
-    pill.innerHTML = `<span class="status-pill active">● Aktívne${until ? ' do ' + until : ''}</span>`;
-    checkoutBtn.classList.add('hidden');
-    portalBtn.classList.remove('hidden');
-  } else if (a.status === 'past_due') {
-    pill.innerHTML = `<span class="status-pill past_due">● Platba zlyhala</span>`;
-    checkoutBtn.classList.remove('hidden');
-    portalBtn.classList.remove('hidden');
-  } else {
-    pill.innerHTML = `<span class="status-pill inactive">○ Neaktívne</span>`;
-    checkoutBtn.classList.remove('hidden');
-    portalBtn.classList.add('hidden');
-  }
+  document.getElementById('portalBtn').classList.toggle('hidden', !me.advertiser.hasBilling);
 
   loadBanners();
 
@@ -289,9 +269,9 @@ async function enterDashboard(){
   if (params.get('payment') === 'cancelled') showMsg('billingMsg', 'Platba bola zrušená.', 'error');
 }
 
-async function startCheckout(){
+async function startCheckout(bannerId){
   try {
-    const data = await api('/api/ads/checkout', { method: 'POST' });
+    const data = await api('/api/ads/banners/' + bannerId + '/checkout', { method: 'POST' });
     location.href = data.url;
   } catch(e) { showMsg('billingMsg', e.message, 'error'); }
 }
@@ -337,6 +317,21 @@ function bannerMediaHtml(b){
   return `<img src="${src}" alt="">`;
 }
 
+function billingBadgeHtml(b){
+  const isPaidUp = b.status === 'active' && (!b.current_period_end || new Date(b.current_period_end) > new Date());
+  if (isPaidUp) {
+    const until = new Date(b.current_period_end).toLocaleDateString('sk-SK');
+    return `<span class="status-pill active">● Zaplatené do ${until}</span>`;
+  }
+  if (b.status === 'past_due') {
+    return `<span class="status-pill past_due">● Platba zlyhala</span> <button class="icon-btn" onclick="openPortal()">Opraviť platbu</button>`;
+  }
+  if (b.status === 'cancelled') {
+    return `<span class="status-pill inactive">○ Predplatné zrušené</span> <button class="btn" style="width:auto;padding:.5rem .9rem;font-size:.75rem" onclick="startCheckout('${b.id}')">Zaplatiť znova — 49€/mesiac →</button>`;
+  }
+  return `<span class="status-pill inactive">○ Čaká na platbu</span> <button class="btn" style="width:auto;padding:.5rem .9rem;font-size:.75rem" onclick="startCheckout('${b.id}')">Zaplatiť 49€/mesiac →</button>`;
+}
+
 async function loadBanners(){
   try {
     const data = await api('/api/ads/banners');
@@ -352,9 +347,10 @@ async function loadBanners(){
         <div class="banner-info">
           <span class="banner-link">${b.link_url}</span>
           <div class="banner-stats">${b.impressions} zobrazení · ${b.clicks} klikov · CTR ${ctr}%</div>
+          <div style="margin-top:.5rem;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">${billingBadgeHtml(b)}</div>
         </div>
         <div class="banner-actions">
-          <button class="icon-btn ${b.active ? 'on' : ''}" onclick="toggleBanner('${b.id}', ${!b.active})">${b.active ? 'Aktívny' : 'Vypnutý'}</button>
+          <button class="icon-btn ${b.active ? 'on' : ''}" onclick="toggleBanner('${b.id}', ${!b.active})" title="Zapnúť/vypnúť zobrazovanie (neovplyvní platbu)">${b.active ? 'Zobrazuje sa' : 'Pozastavené'}</button>
           <button class="icon-btn" onclick="deleteBanner('${b.id}')">Zmazať</button>
         </div>
       </div>`;

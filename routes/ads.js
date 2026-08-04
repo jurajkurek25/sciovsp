@@ -8,7 +8,9 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { pool } = require('../db/pool');
 const { requireAdvertiserAuth } = require('../middleware/adsAuth');
 
-const MAX_ACTIVE_ADVERTISERS = 4; // 1 rotujúci slot v appke, zdieľaný max. 4 platiacimi inzerentmi
+// Každý banner má VLASTNÉ mesačné Stripe predplatné — pri viacerých banneroch
+// naraz sa platí za každý zvlášť. 1 rotujúci slot v appke, max. 4 aktívne bannery.
+const MAX_ACTIVE_BANNERS = 4;
 const ALLOWED_MIME = ['image/png', 'image/gif', 'video/mp4'];
 const MAX_FILE_SIZE = 8 * 1024 * 1024; // 8 MB
 
@@ -29,24 +31,16 @@ function signAdvertiserToken(advertiserId) {
   return jwt.sign({ advertiserId }, process.env.JWT_SECRET, { expiresIn: '30d' });
 }
 
-function isActive(advertiser) {
-  return advertiser.status === 'active' &&
-    (!advertiser.current_period_end || new Date(advertiser.current_period_end) > new Date());
-}
-
 // ─── Verejné API — slúži na zobrazovanie bannerov v hlavnej appke ──────────
 
-// GET /api/ads/serve — zoznam aktuálne aktívnych bannerov (bez súborových dát)
+// GET /api/ads/serve — zoznam aktuálne zaplatených a aktívnych bannerov (bez súborových dát)
 router.get('/api/ads/serve', async (req, res) => {
   try {
     const { rows } = await pool.query(
-      `SELECT b.id, b.mime_type
-       FROM ad_banners b
-       JOIN advertisers a ON a.id = b.advertiser_id
-       WHERE b.active = TRUE
-         AND a.status = 'active'
-         AND (a.current_period_end IS NULL OR a.current_period_end > NOW())
-       ORDER BY b.created_at DESC
+      `SELECT id, mime_type FROM ad_banners
+       WHERE active = TRUE AND status = 'active'
+         AND (current_period_end IS NULL OR current_period_end > NOW())
+       ORDER BY created_at DESC
        LIMIT 20`
     );
     res.json({ banners: rows.map(r => ({ id: r.id, mimeType: r.mime_type })) });
@@ -56,11 +50,11 @@ router.get('/api/ads/serve', async (req, res) => {
   }
 });
 
-// GET /api/ads/file/:id — streamuje kreatívu (obrázok/video) z DB
+// GET /api/ads/file/:id — streamuje kreatívu (obrázok/video) z DB — funguje aj na náhľad v dashboarde pred platbou
 router.get('/api/ads/file/:id', async (req, res) => {
   try {
     const { rows } = await pool.query(
-      'SELECT mime_type, file_data FROM ad_banners WHERE id = $1 AND active = TRUE',
+      'SELECT mime_type, file_data FROM ad_banners WHERE id = $1',
       [req.params.id]
     );
     const banner = rows[0];
@@ -120,7 +114,7 @@ router.post('/api/ads-auth/register', async (req, res) => {
     );
 
     const token = signAdvertiserToken(advertiserId);
-    res.status(201).json({ token, advertiser: { id: advertiserId, email: email.toLowerCase(), companyName, status: 'inactive' } });
+    res.status(201).json({ token, advertiser: { id: advertiserId, email: email.toLowerCase(), companyName } });
   } catch (e) {
     console.error('ads register error:', e);
     res.status(500).json({ error: 'Chyba servera.' });
@@ -143,13 +137,7 @@ router.post('/api/ads-auth/login', async (req, res) => {
     const token = signAdvertiserToken(advertiser.id);
     res.json({
       token,
-      advertiser: {
-        id: advertiser.id,
-        email: advertiser.email,
-        companyName: advertiser.company_name,
-        status: advertiser.status,
-        currentPeriodEnd: advertiser.current_period_end
-      }
+      advertiser: { id: advertiser.id, email: advertiser.email, companyName: advertiser.company_name }
     });
   } catch (e) {
     console.error('ads login error:', e);
@@ -164,26 +152,32 @@ router.get('/api/ads-auth/me', requireAdvertiserAuth, async (req, res) => {
       id: req.advertiser.id,
       email: req.advertiser.email,
       companyName: req.advertiser.company_name,
-      status: req.advertiser.status,
-      isActive: isActive(req.advertiser),
-      currentPeriodEnd: req.advertiser.current_period_end
+      hasBilling: !!req.advertiser.stripe_customer_id
     }
   });
 });
 
-// ─── Predplatné (Stripe) ────────────────────────────────────────────────────
+// ─── Fakturácia (Stripe) — predplatné je viazané na konkrétny banner ───────
 
-// POST /api/ads/checkout
-router.post('/api/ads/checkout', requireAdvertiserAuth, async (req, res) => {
+// POST /api/ads/banners/:id/checkout — spustí platbu za KONKRÉTNY banner (49€/mesiac za tento jeden banner)
+router.post('/api/ads/banners/:id/checkout', requireAdvertiserAuth, async (req, res) => {
   try {
-    const { rows: activeRows } = await pool.query(
-      `SELECT COUNT(*)::int AS n FROM advertisers
-       WHERE status = 'active' AND (current_period_end IS NULL OR current_period_end > NOW())
-         AND id != $1`,
-      [req.advertiser.id]
+    const { rows } = await pool.query(
+      'SELECT id, status, current_period_end FROM ad_banners WHERE id = $1 AND advertiser_id = $2',
+      [req.params.id, req.advertiser.id]
     );
-    if (activeRows[0].n >= MAX_ACTIVE_ADVERTISERS) {
-      return res.status(409).json({ error: 'Aktuálne máme plný počet inzerentov v rotácii. Skús to prosím neskôr.' });
+    const banner = rows[0];
+    if (!banner) return res.status(404).json({ error: 'Banner sa nenašiel.' });
+    if (banner.status === 'active' && (!banner.current_period_end || new Date(banner.current_period_end) > new Date())) {
+      return res.status(400).json({ error: 'Tento banner je už zaplatený a aktívny.' });
+    }
+
+    const { rows: activeRows } = await pool.query(
+      `SELECT COUNT(*)::int AS n FROM ad_banners
+       WHERE status = 'active' AND (current_period_end IS NULL OR current_period_end > NOW())`
+    );
+    if (activeRows[0].n >= MAX_ACTIVE_BANNERS) {
+      return res.status(409).json({ error: 'Aktuálne máme plný počet bannerov v rotácii. Skús to prosím neskôr.' });
     }
 
     let customerId = req.advertiser.stripe_customer_id;
@@ -203,8 +197,8 @@ router.post('/api/ads/checkout', requireAdvertiserAuth, async (req, res) => {
       line_items: [{ price: process.env.STRIPE_AD_PRICE_ID, quantity: 1 }],
       success_url: `${AD_FRONTEND_URL}/dashboard?payment=success`,
       cancel_url: `${AD_FRONTEND_URL}/dashboard?payment=cancelled`,
-      metadata: { advertiserId: req.advertiser.id },
-      subscription_data: { metadata: { advertiserId: req.advertiser.id } }
+      metadata: { advertiserId: req.advertiser.id, bannerId: banner.id },
+      subscription_data: { metadata: { advertiserId: req.advertiser.id, bannerId: banner.id } }
     });
 
     res.json({ url: session.url });
@@ -214,10 +208,10 @@ router.post('/api/ads/checkout', requireAdvertiserAuth, async (req, res) => {
   }
 });
 
-// POST /api/ads/portal
+// POST /api/ads/portal — jeden Stripe zákaznícky portál, spravuje všetky predplatné bannery naraz
 router.post('/api/ads/portal', requireAdvertiserAuth, async (req, res) => {
   try {
-    if (!req.advertiser.stripe_customer_id) return res.status(400).json({ error: 'Nemáš aktívne predplatné.' });
+    if (!req.advertiser.stripe_customer_id) return res.status(400).json({ error: 'Zatiaľ nemáš žiadnu platbu.' });
     const session = await stripe.billingPortal.sessions.create({
       customer: req.advertiser.stripe_customer_id,
       return_url: `${AD_FRONTEND_URL}/dashboard`
@@ -231,11 +225,11 @@ router.post('/api/ads/portal', requireAdvertiserAuth, async (req, res) => {
 
 // ─── Správa bannerov ────────────────────────────────────────────────────────
 
-// GET /api/ads/banners — vlastné bannery + štatistiky
+// GET /api/ads/banners — vlastné bannery + štatistiky + stav platby ku každému
 router.get('/api/ads/banners', requireAdvertiserAuth, async (req, res) => {
   try {
     const { rows } = await pool.query(
-      `SELECT b.id, b.file_name, b.mime_type, b.link_url, b.active, b.created_at,
+      `SELECT b.id, b.file_name, b.mime_type, b.link_url, b.active, b.status, b.current_period_end, b.created_at,
         COALESCE(SUM(CASE WHEN e.event_type = 'impression' THEN 1 ELSE 0 END), 0)::int AS impressions,
         COALESCE(SUM(CASE WHEN e.event_type = 'click' THEN 1 ELSE 0 END), 0)::int AS clicks
        FROM ad_banners b
@@ -252,7 +246,7 @@ router.get('/api/ads/banners', requireAdvertiserAuth, async (req, res) => {
   }
 });
 
-// POST /api/ads/banners — nahratie novej kreatívy
+// POST /api/ads/banners — nahratie novej kreatívy (bez platby — tá sa spúšťa samostatne cez /checkout)
 router.post('/api/ads/banners', requireAdvertiserAuth, (req, res) => {
   upload.single('file')(req, res, async (err) => {
     if (err) return res.status(400).json({ error: err.message || 'Nahrávanie zlyhalo.' });
@@ -266,7 +260,8 @@ router.post('/api/ads/banners', requireAdvertiserAuth, (req, res) => {
     try {
       const { rows } = await pool.query(
         `INSERT INTO ad_banners (advertiser_id, file_name, mime_type, file_data, link_url)
-         VALUES ($1, $2, $3, $4, $5) RETURNING id, file_name, mime_type, link_url, active, created_at`,
+         VALUES ($1, $2, $3, $4, $5)
+         RETURNING id, file_name, mime_type, link_url, active, status, current_period_end, created_at`,
         [req.advertiser.id, req.file.originalname, req.file.mimetype, req.file.buffer, linkUrl]
       );
       res.status(201).json({ banner: rows[0] });
@@ -277,7 +272,7 @@ router.post('/api/ads/banners', requireAdvertiserAuth, (req, res) => {
   });
 });
 
-// PATCH /api/ads/banners/:id — zapnúť/vypnúť, zmeniť odkaz
+// PATCH /api/ads/banners/:id — pozastaviť/obnoviť zobrazovanie, zmeniť odkaz (neovplyvňuje platbu)
 router.patch('/api/ads/banners/:id', requireAdvertiserAuth, async (req, res) => {
   const { active, linkUrl } = req.body || {};
   if (linkUrl && !/^https?:\/\//.test(linkUrl)) {
@@ -289,7 +284,7 @@ router.patch('/api/ads/banners/:id', requireAdvertiserAuth, async (req, res) => 
         active = COALESCE($1, active),
         link_url = COALESCE($2, link_url)
        WHERE id = $3 AND advertiser_id = $4
-       RETURNING id, file_name, mime_type, link_url, active, created_at`,
+       RETURNING id, file_name, mime_type, link_url, active, status, current_period_end, created_at`,
       [typeof active === 'boolean' ? active : null, linkUrl || null, req.params.id, req.advertiser.id]
     );
     if (!rows[0]) return res.status(404).json({ error: 'Banner sa nenašiel.' });
@@ -300,14 +295,21 @@ router.patch('/api/ads/banners/:id', requireAdvertiserAuth, async (req, res) => 
   }
 });
 
-// DELETE /api/ads/banners/:id
+// DELETE /api/ads/banners/:id — zruší aj prípadné bežiace predplatné tohto bannera
 router.delete('/api/ads/banners/:id', requireAdvertiserAuth, async (req, res) => {
   try {
-    const { rowCount } = await pool.query(
-      'DELETE FROM ad_banners WHERE id = $1 AND advertiser_id = $2',
+    const { rows } = await pool.query(
+      'SELECT stripe_subscription_id FROM ad_banners WHERE id = $1 AND advertiser_id = $2',
       [req.params.id, req.advertiser.id]
     );
-    if (!rowCount) return res.status(404).json({ error: 'Banner sa nenašiel.' });
+    if (!rows[0]) return res.status(404).json({ error: 'Banner sa nenašiel.' });
+
+    if (rows[0].stripe_subscription_id) {
+      try { await stripe.subscriptions.cancel(rows[0].stripe_subscription_id); }
+      catch (e) { console.error('ads cancel subscription error:', e); }
+    }
+
+    await pool.query('DELETE FROM ad_banners WHERE id = $1 AND advertiser_id = $2', [req.params.id, req.advertiser.id]);
     res.status(204).end();
   } catch (e) {
     console.error('ads delete banner error:', e);
