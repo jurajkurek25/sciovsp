@@ -218,8 +218,8 @@ app.post('/api/ads/banners/:id/checkout', requireAdvertiser, async (req, res) =>
       payment_method_types: ['card'],
       line_items: [{ price: process.env.STRIPE_AD_PRICE_ID, quantity: 1 }],
       allow_promotion_codes: true,
-      success_url: `${APP_URL}/?payment=success`,
-      cancel_url: `${APP_URL}/?payment=cancelled`,
+      success_url: `${APP_URL}/dashboard?payment=success`,
+      cancel_url: `${APP_URL}/dashboard?payment=cancelled`,
       metadata: { advertiserId: String(req.advertiser.id), bannerId: String(banner.id) },
       subscription_data: { metadata: { advertiserId: String(req.advertiser.id), bannerId: String(banner.id) } }
     });
@@ -373,8 +373,8 @@ app.post('/api/video-ads/:id/checkout', requireAdvertiser, async (req, res) => {
       payment_method_types: ['card'],
       line_items: [{ price: process.env.STRIPE_VIDEO_AD_PRICE_ID, quantity: 1 }],
       allow_promotion_codes: true,
-      success_url: `${APP_URL}/?payment=success`,
-      cancel_url: `${APP_URL}/?payment=cancelled`,
+      success_url: `${APP_URL}/dashboard?payment=success`,
+      cancel_url: `${APP_URL}/dashboard?payment=cancelled`,
       metadata: { advertiserId: String(req.advertiser.id), videoAdId: String(ad.id) },
       subscription_data: { metadata: { advertiserId: String(req.advertiser.id), videoAdId: String(ad.id) } }
     });
@@ -480,11 +480,18 @@ app.get('/api/video-ads/go/:id', async (req, res) => {
   }
 });
 
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'landing.html'));
+});
+
+app.get('/dashboard', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 
-// SPA fallback
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'ads.html'));
+  res.redirect('/');
 });
 
 app.listen(PORT, () => {
