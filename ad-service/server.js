@@ -7,12 +7,17 @@ const multer = require('multer');
 const crypto = require('crypto');
 const { createClient } = require('@supabase/supabase-js');
 const Stripe = require('stripe');
+const ws = require('ws');
 
 const PORT = process.env.PORT || 3849;
 const APP_URL = process.env.APP_URL || 'https://ad.sptrener.online';
 const MAIN_APP_ORIGIN = process.env.MAIN_APP_ORIGIN || 'https://sptrener.online';
 
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
+// Node < 22 nemá natívny WebSocket — supabase-js ho pri konštrukcii vyžaduje
+// pre realtime klienta, aj keď realtime v tejto appke vôbec nepoužívame.
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY, {
+  realtime: { transport: ws }
+});
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
 const app = express();
