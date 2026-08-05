@@ -100,6 +100,23 @@ async function extractFrames(buffer, ext, maxFrames = MAX_FRAMES) {
   }
 }
 
+// Bežné bot-ochrany (Cloudflare a pod.) blokujú automatizované requesty aj
+// pre úplne legitímne, reálne fungujúce stránky — to sa nesmie posudzovať
+// rovnako ako skutočne mŕtvy/neexistujúci odkaz.
+const BOT_PROTECTION_MARKERS = [
+  'just a moment', 'cf-browser-verification', 'cf_chl_', 'checking your browser',
+  'attention required! | cloudflare', 'enable javascript and cookies to continue',
+  'ddos protection by', 'sorry, you have been blocked', '__cf_chl_'
+];
+
+function looksLikeBotProtection(html, res) {
+  const lower = html.slice(0, 4000).toLowerCase();
+  if (BOT_PROTECTION_MARKERS.some(m => lower.includes(m))) return true;
+  const server = (res.headers && res.headers.get && res.headers.get('server')) || '';
+  if (/cloudflare/i.test(server) && [403, 503, 429].includes(res.status)) return true;
+  return false;
+}
+
 // Rýchly (max ~6s) jednorazový pokus stiahnuť a prezrieť cieľovú stránku —
 // titulok, popis, viditeľný text (na odhalenie podvodu/nepovoleného obsahu
 // skrytého za nevinne vyzerajúcim titulkom) a či nedošlo ku skrytému
@@ -108,9 +125,18 @@ async function fetchLinkContext(linkUrl) {
   try {
     const controller = new AbortController();
     const t = setTimeout(() => controller.abort(), 6000);
-    const res = await fetch(linkUrl, { signal: controller.signal, redirect: 'follow' });
+    const res = await fetch(linkUrl, {
+      signal: controller.signal,
+      redirect: 'follow',
+      headers: {
+        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+        'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'accept-language': 'sk,cs;q=0.9,en;q=0.8'
+      }
+    });
     clearTimeout(t);
     const html = (await res.text()).slice(0, 60000);
+    const botBlocked = looksLikeBotProtection(html, res);
     const title = (html.match(/<title[^>]*>([^<]*)<\/title>/i) || [])[1] || '';
     const desc = (html.match(/<meta[^>]+name=["']description["'][^>]+content=["']([^"']*)["']/i) || [])[1] || '';
     const bodyText = html
@@ -129,10 +155,13 @@ async function fetchLinkContext(linkUrl) {
       bodyText,
       finalUrl,
       redirected: finalUrl !== linkUrl,
-      reachable: res.ok
+      // Bot-ochrana môže vrátiť non-ok status aj pre plne funkčnú stránku —
+      // taký prípad sa nepovažuje za "neexistujúci/mŕtvy odkaz".
+      reachable: res.ok || botBlocked,
+      botBlocked
     };
   } catch (e) {
-    return { title: '', description: '', bodyText: '', finalUrl: linkUrl, redirected: false, reachable: false };
+    return { title: '', description: '', bodyText: '', finalUrl: linkUrl, redirected: false, reachable: false, botBlocked: false };
   }
 }
 
@@ -143,13 +172,20 @@ function buildPrompt(linkUrl, linkContext, frameCount) {
   const redirectLine = linkContext.redirected
     ? `⚠️ Stránka pri načítaní presmerovala inam, na: ${linkContext.finalUrl} — over, či nejde o pokus schovať skutočný cieľ za nevinne vyzerajúcou URL.`
     : '';
+  const botBlockedLine = linkContext.botBlocked
+    ? `ℹ️ Stránku sa nepodarilo automatizovane načítať, lebo ju chráni bot-ochrana (napr. Cloudflare) — TOTO JE BEŽNÉ AJ PRE ÚPLNE LEGITÍMNE STRÁNKY a samo osebe to NIE JE dôvod na zamietnutie. Posudzuj hlavne podľa kreatívy, domény a toho, čo o cieli vieš.`
+    : '';
+  const reachabilityLine = linkContext.botBlocked
+    ? 'Cieľová stránka dostupná: nedá sa automatizovane overiť (blokovaná bot-ochranou, pozri poznámku vyššie)'
+    : `Cieľová stránka dostupná: ${linkContext.reachable ? 'áno' : 'nie'}`;
   return `Si prísny kontrolór reklamného obsahu pre platformu vloženú do vzdelávacej appky, ktorej publikum zahŕňa stredoškolákov (maloletých). ${mediaLine} Rovnako dôkladne posúď aj skutočný obsah cieľovej stránky nižšie — nielen kreatívu samotnú.
 
 Cieľová URL: ${linkUrl}
 ${redirectLine}
+${botBlockedLine}
 Titulok cieľovej stránky: ${linkContext.title || '(nepodarilo sa načítať)'}
 Popis cieľovej stránky: ${linkContext.description || '(nepodarilo sa načítať)'}
-Cieľová stránka dostupná: ${linkContext.reachable ? 'áno' : 'nie'}
+${reachabilityLine}
 Viditeľný text cieľovej stránky (vzorka, môže byť orezaná): ${linkContext.bodyText || '(nepodarilo sa načítať obsah stránky)'}
 
 ZAMIETNI (allowed:false), ak kreatíva ALEBO cieľová stránka:
@@ -158,8 +194,10 @@ ZAMIETNI (allowed:false), ak kreatíva ALEBO cieľová stránka:
 - obsahuje nenávistný prejav, násilie alebo diskrimináciu
 - vedie na škodlivý softvér alebo inak nebezpečný cieľ
 - zjavne porušuje autorské práva alebo ochranné známky (napr. falzifikáty)
-- cieľová stránka nie je dostupná (mŕtvy/nefunkčný odkaz), alebo skryto presmerováva na iný, podozrivý cieľ
-- viditeľný text stránky nedáva zmysel vzhľadom na tému kreatívy (nesúlad medzi sľubovaným a skutočným obsahom)
+- cieľová stránka je preukázateľne mŕtva/neexistujúca (NIE ak ju len blokuje bot-ochrana — pozri poznámku vyššie), alebo skryto presmerováva na iný, podozrivý cieľ
+- viditeľný text stránky jasne nedáva zmysel vzhľadom na tému kreatívy (nesúlad medzi sľubovaným a skutočným obsahom) — ale ak text stránky chýba/nepodarilo sa načítať, toto sa neposudzuje ako dôvod na zamietnutie
+
+Ak si o kategórii produktu (napr. či ide o alkohol) neistý, over si to podľa toho, čo v skutočnosti o danej značke/produkte vieš — pri bežných celosvetovo známych nealkoholických nápojoch (napr. limonády, energetické nápoje) sa NEOZNAČUJ za alkohol len na základe vzhľadu fľaše/plechovky.
 
 V opačnom prípade POVOĽ (allowed:true).
 
