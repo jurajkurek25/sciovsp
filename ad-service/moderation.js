@@ -178,7 +178,9 @@ function buildPrompt(linkUrl, linkContext, frameCount) {
   const reachabilityLine = linkContext.botBlocked
     ? 'Cieľová stránka dostupná: nedá sa automatizovane overiť (blokovaná bot-ochranou, pozri poznámku vyššie)'
     : `Cieľová stránka dostupná: ${linkContext.reachable ? 'áno' : 'nie'}`;
-  return `Si prísny kontrolór reklamného obsahu pre platformu vloženú do vzdelávacej appky, ktorej publikum zahŕňa stredoškolákov (maloletých). ${mediaLine} Rovnako dôkladne posúď aj skutočný obsah cieľovej stránky nižšie — nielen kreatívu samotnú.
+  return `Si kontrolór reklamného obsahu pre platformu vloženú do appky na prípravu na vysokoškolské prijímacie testy. Jej publikum sú najmä ľudia NA KONCI strednej školy alebo TESNE PO NEJ — typicky 17–20 rokov, teda blízko plnoletosti alebo už plnoletí, nie deti. Posudzuj primerane tomuto veku: bežný odvážny, drzý, sarkastický alebo štylisticky agresívny marketing (slang, výrazný vizuál, dvojzmyselný humor) je bežná a v poriadku vec v reklame cielenej na mladých dospelých — SAMO OSEBE to NIE JE dôvod na zamietnutie. Zamietaj len pri jasnom porušení konkrétnych pravidiel nižšie, nie pri hocičom, čo len pôsobí "drzo" alebo neformálne.
+
+${mediaLine} Rovnako dôkladne posúď aj skutočný obsah cieľovej stránky nižšie — nielen kreatívu samotnú.
 
 Cieľová URL: ${linkUrl}
 ${redirectLine}
@@ -189,15 +191,15 @@ ${reachabilityLine}
 Viditeľný text cieľovej stránky (vzorka, môže byť orezaná): ${linkContext.bodyText || '(nepodarilo sa načítať obsah stránky)'}
 
 ZAMIETNI (allowed:false), ak kreatíva ALEBO cieľová stránka:
-- propaguje alkohol, tabak/nikotín, hazardné hry/stávkovanie, alebo obsahuje sexuálne explicitný/pornografický obsah
+- skutočne propaguje kúpu/konzumáciu alkoholu alebo tabaku/nikotínu, hazardné hry/stávkovanie, alebo obsahuje sexuálne explicitný/pornografický obsah (nie: len drzý/sugestívny marketingový štýl bez toho, aby reálne išlo o niektorú z týchto kategórií)
 - je nelegálna, podvodná, klamlivá alebo zavádzajúca — napr. sľubuje nereálne výhry/výnosy, tlačí na urgentnú platbu alebo zadanie citlivých údajov, vyzerá ako falošná prihlasovacia/platobná stránka (phishing), alebo sa vydáva za inú známu značku/inštitúciu bez toho aby ňou reálne bola
-- obsahuje nenávistný prejav, násilie alebo diskrimináciu
+- obsahuje skutočný nenávistný prejav, násilie alebo diskrimináciu (nie: sarkazmus, čierny humor alebo bežné "drzé" reklamné frázy)
 - vedie na škodlivý softvér alebo inak nebezpečný cieľ
 - zjavne porušuje autorské práva alebo ochranné známky (napr. falzifikáty)
 - cieľová stránka je preukázateľne mŕtva/neexistujúca (NIE ak ju len blokuje bot-ochrana — pozri poznámku vyššie), alebo skryto presmerováva na iný, podozrivý cieľ
 - viditeľný text stránky jasne nedáva zmysel vzhľadom na tému kreatívy (nesúlad medzi sľubovaným a skutočným obsahom) — ale ak text stránky chýba/nepodarilo sa načítať, toto sa neposudzuje ako dôvod na zamietnutie
 
-Ak si o kategórii produktu (napr. či ide o alkohol) neistý, over si to podľa toho, čo v skutočnosti o danej značke/produkte vieš — pri bežných celosvetovo známych nealkoholických nápojoch (napr. limonády, energetické nápoje) sa NEOZNAČUJ za alkohol len na základe vzhľadu fľaše/plechovky.
+Ak si o kategórii produktu (napr. či ide o alkohol) neistý, over si to podľa toho, čo v skutočnosti o danej značke/produkte vieš — pri bežných celosvetovo známych nealkoholických nápojoch (napr. limonády, energetické nápoje) sa NEOZNAČUJ za alkohol len na základe vzhľadu fľaše/plechovky ani na základe odvážneho marketingového textu.
 
 V opačnom prípade POVOĽ (allowed:true).
 
