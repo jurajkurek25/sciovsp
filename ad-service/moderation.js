@@ -29,14 +29,36 @@ async function getDurationSeconds(filePath) {
   }
 }
 
-async function extractFrameAt(filePath, offsetSeconds) {
+const FRAME_EXTRACT_ATTEMPTS = 2;
+const FFMPEG_TIMEOUT_MS = 10000;
+
+// Jeden pokus o extrakciu jedného snímku. Retry sa rieši v extractFrameAt.
+async function extractFrameOnce(filePath, offsetSeconds, extraArgs = []) {
   const tmpOut = path.join(os.tmpdir(), `mod-out-${crypto.randomBytes(6).toString('hex')}.jpg`);
   try {
-    await execFileAsync('ffmpeg', ['-y', '-ss', String(offsetSeconds), '-i', filePath, '-frames:v', '1', '-q:v', '3', tmpOut], { timeout: 15000 });
+    await execFileAsync('ffmpeg', ['-y', ...extraArgs, '-i', filePath, '-frames:v', '1', '-q:v', '3', tmpOut], { timeout: FFMPEG_TIMEOUT_MS });
     return await fs.promises.readFile(tmpOut);
   } finally {
     fs.promises.unlink(tmpOut).catch(() => {});
   }
+}
+
+// Extrahuje snímok pri danom čase, s viacerými pokusmi — malý VPS (2GB RAM)
+// môže byť pod záťažou pomalý/timeoutovať, čo by inak zbytočne zamietlo
+// úplne v poriadku kreatívu. Loguje skutočnú ffmpeg chybu (predtým sa
+// tichotichy prehltla), aby bolo vidno v pm2 logoch, čo presne zlyhalo.
+async function extractFrameAt(filePath, offsetSeconds) {
+  let lastErr;
+  for (let attempt = 1; attempt <= FRAME_EXTRACT_ATTEMPTS; attempt++) {
+    try {
+      return await extractFrameOnce(filePath, offsetSeconds, ['-ss', String(offsetSeconds)]);
+    } catch (e) {
+      lastErr = e;
+      console.warn(`moderation: extrakcia snímku (offset ${offsetSeconds}s, pokus ${attempt}/${FRAME_EXTRACT_ATTEMPTS}) zlyhala: ${e.message}`);
+      if (attempt < FRAME_EXTRACT_ATTEMPTS) await new Promise(r => setTimeout(r, 500 * attempt));
+    }
+  }
+  throw lastErr;
 }
 
 // Vytiahne viacero snímkov rovnomerne rozmiestnených v priebehu videa/gifu
@@ -55,9 +77,23 @@ async function extractFrames(buffer, ext, maxFrames = MAX_FRAMES) {
     }
     const frames = [];
     for (const off of offsets) {
-      try { frames.push(await extractFrameAt(tmpIn, off)); } catch (e) { /* preskočí zlyhaný snímok, pokračuje ďalšími */ }
+      try { frames.push(await extractFrameAt(tmpIn, off)); } catch (e) { /* už zalogované v extractFrameAt, pokračuje ďalšími časmi */ }
     }
-    if (!frames.length) throw new Error('žiadny snímok sa nepodarilo extrahovať');
+    if (!frames.length) {
+      // Posledný záchranný pokus — bez seekovania na presný čas, nech vezme
+      // prvý dostupný snímok akokoľvek (niektoré súbory majú problém so seekom).
+      console.warn('moderation: všetky pokusy so seekovaním zlyhali, skúšam záchranný fallback bez -ss.');
+      try {
+        for (let attempt = 1; attempt <= FRAME_EXTRACT_ATTEMPTS; attempt++) {
+          try { frames.push(await extractFrameOnce(tmpIn, 0, [])); break; }
+          catch (e) {
+            console.warn(`moderation: záchranný fallback (pokus ${attempt}/${FRAME_EXTRACT_ATTEMPTS}) zlyhal: ${e.message}`);
+            if (attempt < FRAME_EXTRACT_ATTEMPTS) await new Promise(r => setTimeout(r, 500 * attempt));
+          }
+        }
+      } catch (e) { /* frames ostane prázdne, nižšie sa vyhodí finálna chyba */ }
+    }
+    if (!frames.length) throw new Error('žiadny snímok sa nepodarilo extrahovať ani po opakovaných pokusoch');
     return frames;
   } finally {
     fs.promises.unlink(tmpIn).catch(() => {});
