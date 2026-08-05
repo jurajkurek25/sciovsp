@@ -199,7 +199,10 @@ ZAMIETNI (allowed:false), ak kreatíva ALEBO cieľová stránka:
 - cieľová stránka je preukázateľne mŕtva/neexistujúca (NIE ak ju len blokuje bot-ochrana — pozri poznámku vyššie), alebo skryto presmerováva na iný, podozrivý cieľ
 - viditeľný text stránky jasne nedáva zmysel vzhľadom na tému kreatívy (nesúlad medzi sľubovaným a skutočným obsahom) — ale ak text stránky chýba/nepodarilo sa načítať, toto sa neposudzuje ako dôvod na zamietnutie
 
-Ak si o kategórii produktu (napr. či ide o alkohol) neistý, over si to podľa toho, čo v skutočnosti o danej značke/produkte vieš — pri bežných celosvetovo známych nealkoholických nápojoch (napr. limonády, energetické nápoje) sa NEOZNAČUJ za alkohol len na základe vzhľadu fľaše/plechovky ani na základe odvážneho marketingového textu.
+DÔLEŽITÉ pravidlá pri rozhodovaní (prísne dodržuj):
+- Kategóriu "alkohol" smieš priradiť LEN ak je na snímkoch SKUTOČNE VIDIEŤ konkrétny alkoholický produkt (fľaša/plechovka/pohár s rozpoznateľnou značkou alkoholu, logo pivovaru/liehovaru a pod.) alebo text explicitne hovorí o alkohole. Farebný tón (napr. červená), štylizácia videa, slovné hračky, skratky alebo "vibe" reklamy NIE SÚ dôkaz alkoholu — na základe samotného štýlu/nálady sa alkohol NIKDY neoznačuje.
+- Ak sa cieľová stránka nedala automatizovane overiť (blokovaná bot-ochranou), toto ber ako NEUTRÁLNU, chýbajúcu informáciu — nie ako priťažujúcu okolnosť, ktorá by mala prispieť k zamietnutiu v kombinácii s iným neistým podozrením. Rozhoduj sa výhradne na základe toho, čo v kreatíve SKUTOČNE VIDÍŠ.
+- Ak si pri akomkoľvek kritériu neistý/nemáš konkrétny dôkaz priamo v obraze alebo texte, rozhoduj v prospech POVOLENIA (allowed:true) — zamietnutie vyžaduje konkrétny, popísateľný dôvod, nie všeobecný dojem.
 
 V opačnom prípade POVOĽ (allowed:true).
 
