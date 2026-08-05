@@ -503,8 +503,10 @@ const OLD_BODY = `  <div class="ticker-wrap">
       <a href="/app">Aplikácia</a>
       <a href="/blog">Blog</a>
       <a href="mailto:juraj@jurajkurek.com">Kontakt</a>
-      <a href="#vop">Podmienky</a>
-      <a href="#privacy">Súkromie</a>
+      <a href="/legal.html#vop">VOP</a>
+      <a href="/legal.html#privacy">Súkromie</a>
+      <a href="https://partner.sptrener.online">Partnerský program</a>
+      <a href="https://ad.sptrener.online">Inzercia</a>
     </div>
   </footer>`;
 
@@ -865,9 +867,12 @@ const REPLACEMENTS = [
 
   // footer links
   ['<a href="/app">Aplikácia</a>', `<a href="/app">${sp('Aplikácia', 'Aplikace')}</a>`],
+  ['<a href="/blog">Blog</a>', `<a href="/blog">${sp('Blog', 'Blog')}</a>`],
   ['<a href="mailto:juraj@jurajkurek.com">Kontakt</a>', `<a href="mailto:juraj@jurajkurek.com">${sp('Kontakt', 'Kontakt')}</a>`],
-  ['<a href="#vop">Podmienky</a>', `<a href="#vop">${sp('Podmienky', 'Podmínky')}</a>`],
-  ['<a href="#privacy">Súkromie</a>', `<a href="#privacy">${sp('Súkromie', 'Soukromí')}</a>`]
+  ['<a href="/legal.html#vop">VOP</a>', `<a href="/legal.html#vop">${sp('VOP', 'VOP')}</a>`],
+  ['<a href="/legal.html#privacy">Súkromie</a>', `<a href="/legal.html#privacy">${sp('Súkromie', 'Soukromí')}</a>`],
+  ['<a href="https://partner.sptrener.online">Partnerský program</a>', `<a href="https://partner.sptrener.online">${sp('Partnerský program', 'Partnerský program')}</a>`],
+  ['<a href="https://ad.sptrener.online">Inzercia</a>', `<a href="https://ad.sptrener.online">${sp('Inzercia', 'Inzerce')}</a>`]
 ];
 
 let NEW_BODY = OLD_BODY;
