@@ -15,18 +15,52 @@ const execFileAsync = promisify(execFile);
 
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 const MODERATION_MODEL = 'claude-haiku-4-5-20251001';
+const MAX_FRAMES = 4;
 
-// Vytiahne prvý frame z videa/gifu ako JPEG cez ffmpeg (funguje pre mp4 aj gif).
-async function extractFirstFrame(buffer, ext) {
-  const tmpIn = path.join(os.tmpdir(), `mod-in-${crypto.randomBytes(6).toString('hex')}.${ext}`);
-  const tmpOut = path.join(os.tmpdir(), `mod-out-${crypto.randomBytes(6).toString('hex')}.jpg`);
-  await fs.promises.writeFile(tmpIn, buffer);
+async function getDurationSeconds(filePath) {
   try {
-    await execFileAsync('ffmpeg', ['-y', '-ss', '0.5', '-i', tmpIn, '-frames:v', '1', '-q:v', '3', tmpOut], { timeout: 15000 });
+    const { stdout } = await execFileAsync('ffprobe', [
+      '-v', 'error', '-show_entries', 'format=duration', '-of', 'default=noprint_wrappers=1:nokey=1', filePath
+    ], { timeout: 10000 });
+    const d = parseFloat(stdout.trim());
+    return Number.isFinite(d) && d > 0 ? d : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+async function extractFrameAt(filePath, offsetSeconds) {
+  const tmpOut = path.join(os.tmpdir(), `mod-out-${crypto.randomBytes(6).toString('hex')}.jpg`);
+  try {
+    await execFileAsync('ffmpeg', ['-y', '-ss', String(offsetSeconds), '-i', filePath, '-frames:v', '1', '-q:v', '3', tmpOut], { timeout: 15000 });
     return await fs.promises.readFile(tmpOut);
   } finally {
-    fs.promises.unlink(tmpIn).catch(() => {});
     fs.promises.unlink(tmpOut).catch(() => {});
+  }
+}
+
+// Vytiahne viacero snímkov rovnomerne rozmiestnených v priebehu videa/gifu
+// (nie len jeden na začiatku) — funguje pre mp4 aj gif cez ffmpeg/ffprobe.
+async function extractFrames(buffer, ext, maxFrames = MAX_FRAMES) {
+  const tmpIn = path.join(os.tmpdir(), `mod-in-${crypto.randomBytes(6).toString('hex')}.${ext}`);
+  await fs.promises.writeFile(tmpIn, buffer);
+  try {
+    const duration = await getDurationSeconds(tmpIn);
+    let offsets;
+    if (duration && duration > 1) {
+      const n = Math.min(maxFrames, Math.max(2, Math.floor(duration)));
+      offsets = Array.from({ length: n }, (_, i) => (duration * (i + 0.5)) / n);
+    } else {
+      offsets = [Math.min(0.5, (duration || 1) / 2)];
+    }
+    const frames = [];
+    for (const off of offsets) {
+      try { frames.push(await extractFrameAt(tmpIn, off)); } catch (e) { /* preskočí zlyhaný snímok, pokračuje ďalšími */ }
+    }
+    if (!frames.length) throw new Error('žiadny snímok sa nepodarilo extrahovať');
+    return frames;
+  } finally {
+    fs.promises.unlink(tmpIn).catch(() => {});
   }
 }
 
@@ -47,8 +81,11 @@ async function fetchLinkContext(linkUrl) {
   }
 }
 
-function buildPrompt(linkUrl, linkContext) {
-  return `Si prísny kontrolór reklamného obsahu pre platformu vloženú do vzdelávacej appky, ktorej publikum zahŕňa stredoškolákov (maloletých). Skontroluj priloženú reklamnú kreatívu (obrázok alebo snímku z videa) a cieľovú URL.
+function buildPrompt(linkUrl, linkContext, frameCount) {
+  const mediaLine = frameCount > 1
+    ? `Priložených je ${frameCount} snímkov rovnomerne rozmiestnených naprieč celým videom (nie len úvodný záber) — posúď VŠETKY, zamietni ak čo i len jeden z nich porušuje pravidlá nižšie.`
+    : `Priložený je obrázok reklamnej kreatívy.`;
+  return `Si prísny kontrolór reklamného obsahu pre platformu vloženú do vzdelávacej appky, ktorej publikum zahŕňa stredoškolákov (maloletých). ${mediaLine} Skontroluj aj cieľovú URL.
 
 Cieľová URL: ${linkUrl}
 Titulok cieľovej stránky: ${linkContext.title || '(nepodarilo sa načítať)'}
@@ -74,16 +111,16 @@ async function moderateContent({ buffer, mimeType, linkUrl }) {
     return { allowed: false, category: 'config_error', reason: 'ANTHROPIC_API_KEY nie je nastavený — automatická kontrola nemôže bežať, preto sa nahrávanie zamieta pre istotu.' };
   }
 
-  let imageBuffer, imageMediaType;
+  let imageBuffers, imageMediaType;
   try {
     if (mimeType === 'video/mp4') {
-      imageBuffer = await extractFirstFrame(buffer, 'mp4');
+      imageBuffers = await extractFrames(buffer, 'mp4');
       imageMediaType = 'image/jpeg';
     } else if (mimeType === 'image/gif') {
-      imageBuffer = await extractFirstFrame(buffer, 'gif');
+      imageBuffers = await extractFrames(buffer, 'gif');
       imageMediaType = 'image/jpeg';
     } else {
-      imageBuffer = buffer;
+      imageBuffers = [buffer];
       imageMediaType = mimeType;
     }
   } catch (e) {
@@ -109,8 +146,8 @@ async function moderateContent({ buffer, mimeType, linkUrl }) {
         messages: [{
           role: 'user',
           content: [
-            { type: 'image', source: { type: 'base64', media_type: imageMediaType, data: imageBuffer.toString('base64') } },
-            { type: 'text', text: buildPrompt(linkUrl, linkContext) }
+            ...imageBuffers.map(buf => ({ type: 'image', source: { type: 'base64', media_type: imageMediaType, data: buf.toString('base64') } })),
+            { type: 'text', text: buildPrompt(linkUrl, linkContext, imageBuffers.length) }
           ]
         }]
       }),
