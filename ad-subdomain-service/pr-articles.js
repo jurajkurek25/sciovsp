@@ -115,7 +115,7 @@ Odpovedz VÝHRADNE validným JSON: {"questions": ["otázka 1", "otázka 2", "ot�
   return questions;
 }
 
-async function generateArticle({ companyName, productInfo, studentBenefit, studentOutcome, blogFit, targetUrl, questions, answers }) {
+async function generateArticle({ companyName, productInfo, studentBenefit, studentOutcome, blogFit, targetUrl, questions, answers, previousDraft, revisionReason }) {
   const qaText = questions.map((q, i) => `Otázka: ${q}\nOdpoveď: ${answers[i] || '(nezodpovedané)'}`).join('\n\n');
   const system = `Si skúsený redaktor blogu SP Tréner (sptrener.online/blog) — appky na prípravu na vysokoškolské prijímacie testy (VŠP, OSP, SCIO). Píšeš PR (sponzorovaný) článok na objednávku inzerenta, ale musí byť napísaný v ROVNAKOM štýle a s ROVNAKOU užitočnosťou ako organické články na blogu — teda musí čitateľovi (stredoškolák/uchádzač o VŠ) reálne niečo dať, nie byť len reklamný text. Produkt/firmu spomínaj prirodzene v kontexte, nie ako opakovaný slogan.
 
@@ -141,6 +141,15 @@ Cieľová URL (spomeň ju/odkáž na ňu v texte prirodzene): ${targetUrl}
 
 Doplňujúce otázky a odpovede od inzerenta:
 ${qaText}
+${previousDraft && revisionReason ? `
+
+Toto je OPRAVNÝ pokus. Predchádzajúci návrh článku automatická kontrola obsahu ZAMIETLA z tohto dôvodu: "${revisionReason}"
+
+Predchádzajúci návrh (titulok + SK obsah, pre kontext):
+Titulok: ${previousDraft.title}
+${previousDraft.content}
+
+Napíš NOVÝ návrh, ktorý konkrétne rieši uvedený dôvod zamietnutia — over si najmä fakty, tón a súlad medzi tvrdeniami a cieľovou stránkou. Zvyšok (štýl, dĺžka, HTML konvencie, disclosure odsek) zostáva rovnaký ako predtým.` : ''}
 
 Napíš kompletný PR článok. Odpovedz VÝHRADNE validným JSON v tomto tvare (žiadny text okolo):
 {
@@ -290,24 +299,39 @@ async function handlePrArticlePaid(prArticleId, paymentIntentId) {
     const questions = JSON.parse(pr.questions_json || '[]');
     const answers = JSON.parse(pr.answers_json || '[]');
 
-    const article = await generateArticle({
-      companyName: pr.company_name, productInfo: pr.product_info, studentBenefit: pr.student_benefit,
-      studentOutcome: pr.student_outcome, blogFit: pr.blog_fit, targetUrl: pr.target_url, questions, answers
-    });
+    // Text (na rozdiel od banner/video kreatívy) vie AI na základe konkrétneho
+    // dôvodu zamietnutia sama prepísať — preto tu na rozdiel od moderateContent()
+    // skúšame až MAX_ATTEMPTS pokusov s revíziou, kým sa to vzdá a pošle na
+    // človeka. Fail-closed princíp ostáva: ak ani posledný pokus neprejde,
+    // nič sa nepublikuje.
+    const MAX_ATTEMPTS = 3;
+    let article = null;
+    let moderation = null;
+    for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+      article = await generateArticle({
+        companyName: pr.company_name, productInfo: pr.product_info, studentBenefit: pr.student_benefit,
+        studentOutcome: pr.student_outcome, blogFit: pr.blog_fit, targetUrl: pr.target_url, questions, answers,
+        previousDraft: attempt > 1 ? article : null,
+        revisionReason: attempt > 1 && moderation ? moderation.reason : null
+      });
 
-    const moderation = await moderateArticleText({
-      companyName: pr.company_name, title: article.title, content: article.content, linkUrl: pr.target_url
-    });
+      moderation = await moderateArticleText({
+        companyName: pr.company_name, title: article.title, content: article.content, linkUrl: pr.target_url
+      });
 
-    db.query(
-      `INSERT INTO moderation_log (item_type, item_id, advertiser_id, allowed, category, reason, raw_response, link_url) VALUES ('pr_article', ?, ?, ?, ?, ?, ?, ?)`,
-      [pr.id, pr.advertiser_id, moderation.allowed ? 1 : 0, moderation.category || null, moderation.reason || null, moderation.raw || null, pr.target_url]
-    ).catch(e => console.error('moderation_log insert error:', e.message));
+      db.query(
+        `INSERT INTO moderation_log (item_type, item_id, advertiser_id, allowed, category, reason, raw_response, link_url) VALUES ('pr_article', ?, ?, ?, ?, ?, ?, ?)`,
+        [pr.id, pr.advertiser_id, moderation.allowed ? 1 : 0, moderation.category || null, `[pokus ${attempt}/${MAX_ATTEMPTS}] ${moderation.reason || ''}`, moderation.raw || null, pr.target_url]
+      ).catch(e => console.error('moderation_log insert error:', e.message));
+
+      if (moderation.allowed) break;
+      console.warn(`pr-article ${pr.id}: pokus ${attempt}/${MAX_ATTEMPTS} zamietnutý (${moderation.category}): ${moderation.reason}`);
+    }
 
     if (!moderation.allowed) {
       await db.query(
         `UPDATE pr_articles SET status = 'failed', moderation_allowed = 0, moderation_reason = ?, fail_reason = ? WHERE id = ?`,
-        [moderation.reason || null, `Automatická kontrola obsahu článok zamietla: ${moderation.reason || 'nespĺňa pravidlá platformy.'}`, pr.id]
+        [moderation.reason || null, `Automatická kontrola obsahu článok zamietla aj po 3 pokusoch AI o opravu. Posledný dôvod: ${moderation.reason || 'nespĺňa pravidlá platformy.'}`, pr.id]
       );
       const { notifyAdminRejection, notifyAdvertiserPrArticleFailed } = require('./notify');
       notifyAdminRejection({ advertiserEmail, itemType: 'pr_article', linkUrl: pr.target_url, category: moderation.category, reason: moderation.reason }).catch(() => {});
