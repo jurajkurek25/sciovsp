@@ -64,20 +64,39 @@ async function extractFrames(buffer, ext, maxFrames = MAX_FRAMES) {
   }
 }
 
-// Najlepšie-možný pokus stiahnuť titulok/popis cieľovej stránky — nikdy nehádže,
-// len vráti reachable:false ak to zlyhá (pomalá/padnutá stránka upload neblokuje).
+// Rýchly (max ~6s) jednorazový pokus stiahnuť a prezrieť cieľovú stránku —
+// titulok, popis, viditeľný text (na odhalenie podvodu/nepovoleného obsahu
+// skrytého za nevinne vyzerajúcim titulkom) a či nedošlo ku skrytému
+// presmerovaniu inam. Nikdy nehádže — pri zlyhaní vráti reachable:false.
 async function fetchLinkContext(linkUrl) {
   try {
     const controller = new AbortController();
-    const t = setTimeout(() => controller.abort(), 5000);
+    const t = setTimeout(() => controller.abort(), 6000);
     const res = await fetch(linkUrl, { signal: controller.signal, redirect: 'follow' });
     clearTimeout(t);
-    const html = (await res.text()).slice(0, 20000);
+    const html = (await res.text()).slice(0, 60000);
     const title = (html.match(/<title[^>]*>([^<]*)<\/title>/i) || [])[1] || '';
     const desc = (html.match(/<meta[^>]+name=["']description["'][^>]+content=["']([^"']*)["']/i) || [])[1] || '';
-    return { title: title.trim().slice(0, 200), description: desc.trim().slice(0, 300), reachable: res.ok };
+    const bodyText = html
+      .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+      .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+      .replace(/<!--[\s\S]*?-->/g, ' ')
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .slice(0, 3000);
+    const finalUrl = res.url || linkUrl;
+    return {
+      title: title.trim().slice(0, 200),
+      description: desc.trim().slice(0, 300),
+      bodyText,
+      finalUrl,
+      redirected: finalUrl !== linkUrl,
+      reachable: res.ok
+    };
   } catch (e) {
-    return { title: '', description: '', reachable: false };
+    return { title: '', description: '', bodyText: '', finalUrl: linkUrl, redirected: false, reachable: false };
   }
 }
 
@@ -85,20 +104,26 @@ function buildPrompt(linkUrl, linkContext, frameCount) {
   const mediaLine = frameCount > 1
     ? `Priložených je ${frameCount} snímkov rovnomerne rozmiestnených naprieč celým videom (nie len úvodný záber) — posúď VŠETKY, zamietni ak čo i len jeden z nich porušuje pravidlá nižšie.`
     : `Priložený je obrázok reklamnej kreatívy.`;
-  return `Si prísny kontrolór reklamného obsahu pre platformu vloženú do vzdelávacej appky, ktorej publikum zahŕňa stredoškolákov (maloletých). ${mediaLine} Skontroluj aj cieľovú URL.
+  const redirectLine = linkContext.redirected
+    ? `⚠️ Stránka pri načítaní presmerovala inam, na: ${linkContext.finalUrl} — over, či nejde o pokus schovať skutočný cieľ za nevinne vyzerajúcou URL.`
+    : '';
+  return `Si prísny kontrolór reklamného obsahu pre platformu vloženú do vzdelávacej appky, ktorej publikum zahŕňa stredoškolákov (maloletých). ${mediaLine} Rovnako dôkladne posúď aj skutočný obsah cieľovej stránky nižšie — nielen kreatívu samotnú.
 
 Cieľová URL: ${linkUrl}
+${redirectLine}
 Titulok cieľovej stránky: ${linkContext.title || '(nepodarilo sa načítať)'}
 Popis cieľovej stránky: ${linkContext.description || '(nepodarilo sa načítať)'}
 Cieľová stránka dostupná: ${linkContext.reachable ? 'áno' : 'nie'}
+Viditeľný text cieľovej stránky (vzorka, môže byť orezaná): ${linkContext.bodyText || '(nepodarilo sa načítať obsah stránky)'}
 
-ZAMIETNI (allowed:false), ak kreatíva alebo cieľová stránka:
+ZAMIETNI (allowed:false), ak kreatíva ALEBO cieľová stránka:
 - propaguje alkohol, tabak/nikotín, hazardné hry/stávkovanie, alebo obsahuje sexuálne explicitný/pornografický obsah
-- je nelegálna, podvodná, klamlivá alebo zavádzajúca
+- je nelegálna, podvodná, klamlivá alebo zavádzajúca — napr. sľubuje nereálne výhry/výnosy, tlačí na urgentnú platbu alebo zadanie citlivých údajov, vyzerá ako falošná prihlasovacia/platobná stránka (phishing), alebo sa vydáva za inú známu značku/inštitúciu bez toho aby ňou reálne bola
 - obsahuje nenávistný prejav, násilie alebo diskrimináciu
-- vedie na škodlivý softvér, phishing alebo inak nebezpečný cieľ
+- vedie na škodlivý softvér alebo inak nebezpečný cieľ
 - zjavne porušuje autorské práva alebo ochranné známky (napr. falzifikáty)
-- cieľová stránka nie je dostupná (mŕtvy/nefunkčný odkaz)
+- cieľová stránka nie je dostupná (mŕtvy/nefunkčný odkaz), alebo skryto presmerováva na iný, podozrivý cieľ
+- viditeľný text stránky nedáva zmysel vzhľadom na tému kreatívy (nesúlad medzi sľubovaným a skutočným obsahom)
 
 V opačnom prípade POVOĽ (allowed:true).
 
