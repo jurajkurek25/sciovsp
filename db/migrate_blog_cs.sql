@@ -3,6 +3,14 @@
 -- Idempotentné — bezpečné spúšťať opakovane (ADD COLUMN IF NOT EXISTS,
 -- UPDATE prepíše _cs stĺpce na aktuálny preklad, nie je to INSERT).
 -- Spustiť: psql $DATABASE_URL -f db/migrate_blog_cs.sql
+--
+-- DÔLEŽITÉ (Supabase): keď sa táto migrácia spúšťa priamym psql pripojením
+-- (nie cez Supabase Studio/SQL Editor), PostgREST — vrstva, cez ktorú ide
+-- supabase.from('blog_posts')... v server.js — má vlastnú cache schémy
+-- tabuľky a o nových stĺpcoch sa nemusí dozvedieť hneď. Preto skript na
+-- konci pošle "NOTIFY pgrst, 'reload schema'", aby si to Supabase API
+-- ihneď všimlo. Bez tohto by /blog vedel skončiť s "0 článkov" aj keď
+-- stĺpce aj dáta v Postgrese reálne existujú.
 
 ALTER TABLE blog_posts ADD COLUMN IF NOT EXISTS title_cs TEXT;
 ALTER TABLE blog_posts ADD COLUMN IF NOT EXISTS excerpt_cs TEXT;
@@ -165,3 +173,8 @@ UPDATE blog_posts SET
 <p>Analytickou část najdeš v SP Tréner jako samostatný okruh cvičných testů i s AI generátorem nových úloh na konkrétní typ (grafy, postačující podmínky, zebry a další), takže si dokážeš doslova „domakat" přesně ten typ úlohy, který ti dělá nejvíc problémů.</p>
 $html$
 WHERE slug = 'analyticka-cast-vsp-grafy-tabulky-slovne-ulohy';
+
+-- Prinúti Supabase API (PostgREST) hneď si všimnúť nové stĺpce —
+-- bez tohto vie /blog cez supabase-js skončiť s prázdnym zoznamom
+-- článkov aj keď dáta v Postgrese reálne existujú.
+NOTIFY pgrst, 'reload schema';
