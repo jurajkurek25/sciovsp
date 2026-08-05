@@ -53,6 +53,7 @@ function prArticleJson(row) {
     studentOutcome: row.student_outcome,
     blogFit: row.blog_fit,
     targetUrl: row.target_url,
+    targetLang: row.target_lang,
     questions: row.questions_json ? JSON.parse(row.questions_json) : null,
     answers: row.answers_json ? JSON.parse(row.answers_json) : null,
     status: row.status,
@@ -115,22 +116,36 @@ Odpovedz VÝHRADNE validným JSON: {"questions": ["otázka 1", "otázka 2", "ot�
   return questions;
 }
 
-async function generateArticle({ companyName, productInfo, studentBenefit, studentOutcome, blogFit, targetUrl, questions, answers, previousDraft, revisionReason }) {
+async function generateArticle({ companyName, productInfo, studentBenefit, studentOutcome, blogFit, targetUrl, questions, answers, targetLang, previousDraft, revisionReason }) {
   const qaText = questions.map((q, i) => `Otázka: ${q}\nOdpoveď: ${answers[i] || '(nezodpovedané)'}`).join('\n\n');
+  const bilingual = targetLang === 'both';
+  // Keď cieľové publikum NIE JE "oba", píše sa len jeden jazyk — do polí
+  // title/excerpt/tag/readTime/content (bez prípony Cs) bez ohľadu na to,
+  // či je to SK alebo CZ text (schéma blog_posts vyžaduje tieto polia
+  // vyplnené vždy; polia s príponou Cs zostanú prázdne a blog ich jednoducho
+  // nezobrazí ako druhú jazykovú verziu).
+  const primaryLang = targetLang === 'cz' ? 'cz' : 'sk';
+
+  const languageInstruction = bilingual
+    ? 'Článok musí byť bilingválny — vyplň VŠETKY polia: title/excerpt/tag/readTime/content v slovenčine, titleCs/excerptCs/tagCs/readTimeCs/contentCs v prirodzenej češtine (nie strojový preklad, píš ako rodený hovorca).'
+    : primaryLang === 'sk'
+      ? 'Cieľové publikum je LEN slovenské. Píš VÝHRADNE v slovenčine. Vyplň len title/excerpt/tag/readTime/content. Polia s príponou Cs (titleCs/excerptCs/tagCs/readTimeCs/contentCs) nechaj ako prázdny reťazec "".'
+      : 'Cieľové publikum je LEN české. Píš VÝHRADNE v prirodzenej češtine (nie strojový preklad, píš ako rodený hovorca) — AJ KEĎ sa polia v JSON schéme nižšie volajú title/excerpt/tag/readTime/content (bez prípony Cs), napíš do NICH český text, keďže to bude jediná jazyková verzia tohto článku. Polia s príponou Cs (titleCs/excerptCs/tagCs/readTimeCs/contentCs) nechaj ako prázdny reťazec "".';
+
   const system = `Si skúsený redaktor blogu SP Tréner (sptrener.online/blog) — appky na prípravu na vysokoškolské prijímacie testy (VŠP, OSP, SCIO). Píšeš PR (sponzorovaný) článok na objednávku inzerenta, ale musí byť napísaný v ROVNAKOM štýle a s ROVNAKOU užitočnosťou ako organické články na blogu — teda musí čitateľovi (stredoškolák/uchádzač o VŠ) reálne niečo dať, nie byť len reklamný text. Produkt/firmu spomínaj prirodzene v kontexte, nie ako opakovaný slogan.
 
-HTML konvencie, ktoré MUSÍŠ dodržať v poliach content/content_cs:
+HTML konvencie, ktoré MUSÍŠ dodržať v obsahových poliach:
 - odseky <p>...</p>
 - medzititulky <h2>...</h2>
 - needusporiadaný zoznam <ul><li>...</li></ul>
 - usporiadaný zoznam presne takto: <ol style="margin-left:1.2rem;color:var(--text2)"><li>...</li></ol>
 - žiadne iné HTML značky, žiadne <html>/<body>/<script>
 - článok má cca 500-800 slov, viacero <h2> sekcií
-- PRVÝ odsek (<p>) v content aj content_cs MUSÍ byť presne toto (disclosure, nič nemeň, len preval jazyk):
-  SK: <p style="font-family:var(--mono);font-size:.75rem;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">Partnerský obsah — v spolupráci s ${companyName}</p>
-  CZ: <p style="font-family:var(--mono);font-size:.75rem;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">Partnerský obsah — ve spolupráci s ${companyName}</p>
+- PRVÝ odsek (<p>) v každom vyplnenom obsahovom poli MUSÍ byť presne toto (disclosure, nič nemeň, len použi disclosure v JAZYKU DANÉHO POĽA — teda ak do poľa "content" píšeš český text pre výhradne české publikum, použi ČESKÚ verziu disclosure aj v poli "content"):
+  slovenský text: <p style="font-family:var(--mono);font-size:.75rem;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">Partnerský obsah — v spolupráci s ${companyName}</p>
+  český text: <p style="font-family:var(--mono);font-size:.75rem;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">Partnerský obsah — ve spolupráci s ${companyName}</p>
 
-Článok musí byť bilingválny — content v slovenčine, content_cs v prirodzenej češtine (nie strojový preklad, píš ako rodený hovorca).`;
+${languageInstruction}`;
 
   const userPrompt = `Firma/produkt: ${companyName}
 Čo produkt robí: ${productInfo}
@@ -167,7 +182,9 @@ Napíš kompletný PR článok. Odpovedz VÝHRADNE validným JSON v tomto tvare 
 }`;
 
   const parsed = await callClaude({ system, userPrompt, maxTokens: 6000 });
-  const required = ['slug', 'title', 'excerpt', 'content', 'titleCs', 'excerptCs', 'contentCs'];
+  const required = bilingual
+    ? ['slug', 'title', 'excerpt', 'content', 'titleCs', 'excerptCs', 'contentCs']
+    : ['slug', 'title', 'excerpt', 'content'];
   for (const f of required) {
     if (!parsed[f] || typeof parsed[f] !== 'string' || !parsed[f].trim()) {
       throw new Error(`AI nevygenerovala povinné pole: ${f}`);
@@ -179,13 +196,14 @@ Napíš kompletný PR článok. Odpovedz VÝHRADNE validným JSON v tomto tvare 
 // ─── Routes (mountované v server.js pod requireAdvertiser aj bez neho) ───
 
 router.post('/api/pr-articles', requireAdvertiser, async (req, res) => {
-  const { companyName, productInfo, studentBenefit, studentOutcome, blogFit, targetUrl } = req.body || {};
+  const { companyName, productInfo, studentBenefit, studentOutcome, blogFit, targetUrl, targetLang } = req.body || {};
   if (!companyName || !productInfo || !studentBenefit || !studentOutcome || !blogFit) {
     return res.status(400).json({ error: 'Vyplň prosím všetky polia.' });
   }
   if (!targetUrl || !/^https?:\/\//.test(targetUrl)) {
     return res.status(400).json({ error: 'Zadaj platnú cieľovú URL (vrátane https://).' });
   }
+  const finalTargetLang = ['sk', 'cz', 'both'].includes(targetLang) ? targetLang : 'both';
 
   try {
     const [existing] = await db.query(
@@ -199,9 +217,9 @@ router.post('/api/pr-articles', requireAdvertiser, async (req, res) => {
     const questions = await generateQuestions({ companyName, productInfo, studentBenefit, studentOutcome, blogFit });
 
     const [result] = await db.query(
-      `INSERT INTO pr_articles (advertiser_id, company_name, product_info, student_benefit, student_outcome, blog_fit, target_url, questions_json, status)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'questions_ready')`,
-      [req.advertiser.id, companyName, productInfo, studentBenefit, studentOutcome, blogFit, targetUrl, JSON.stringify(questions)]
+      `INSERT INTO pr_articles (advertiser_id, company_name, product_info, student_benefit, student_outcome, blog_fit, target_url, target_lang, questions_json, status)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'questions_ready')`,
+      [req.advertiser.id, companyName, productInfo, studentBenefit, studentOutcome, blogFit, targetUrl, finalTargetLang, JSON.stringify(questions)]
     );
     const [rows] = await db.query('SELECT * FROM pr_articles WHERE id = ?', [result.insertId]);
     res.status(201).json({ prArticle: prArticleJson(rows[0]) });
@@ -311,6 +329,7 @@ async function handlePrArticlePaid(prArticleId, paymentIntentId) {
       article = await generateArticle({
         companyName: pr.company_name, productInfo: pr.product_info, studentBenefit: pr.student_benefit,
         studentOutcome: pr.student_outcome, blogFit: pr.blog_fit, targetUrl: pr.target_url, questions, answers,
+        targetLang: pr.target_lang,
         previousDraft: attempt > 1 ? article : null,
         revisionReason: attempt > 1 && moderation ? moderation.reason : null
       });
@@ -347,9 +366,9 @@ async function handlePrArticlePaid(prArticleId, paymentIntentId) {
       body: JSON.stringify({
         slug: article.slug, title: article.title, excerpt: article.excerpt, content: article.content,
         tag: article.tag, read_time: article.readTime,
-        title_cs: article.titleCs, excerpt_cs: article.excerptCs, tag_cs: article.tagCs,
-        read_time_cs: article.readTimeCs, content_cs: article.contentCs,
-        sponsor_name: pr.company_name
+        title_cs: article.titleCs || null, excerpt_cs: article.excerptCs || null, tag_cs: article.tagCs || null,
+        read_time_cs: article.readTimeCs || null, content_cs: article.contentCs || null,
+        sponsor_name: pr.company_name, target_lang: pr.target_lang
       })
     });
     if (!publishRes.ok) {
