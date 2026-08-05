@@ -92,6 +92,12 @@ h1.title span{font-style:italic;color:var(--purple2)}
 .reward-progress-bg{height:5px;background:rgba(255,255,255,.1)}
 .reward-progress-fill{height:100%;background:var(--volt);width:0%;transition:width .2s linear}
 .reward-video-label{font-family:var(--mono);font-size:.72rem;color:var(--text3);margin-top:1rem}
+.reward-overlay.video-playing{padding:0}
+.reward-overlay.video-playing .reward-video-stage{width:100%;height:100%;display:flex;align-items:center;justify-content:center}
+.reward-overlay.video-playing .reward-video-wrap{width:100%;height:100%;max-width:none;border-radius:0;display:flex;align-items:center;justify-content:center}
+.reward-overlay.video-playing .reward-video-wrap video{width:100%;height:100%;max-height:none;object-fit:contain}
+.reward-overlay.video-playing .reward-progress-bg{position:absolute;left:0;right:0;bottom:0;z-index:2}
+.reward-overlay.video-playing .reward-video-label{position:absolute;left:0;right:0;bottom:.6rem;z-index:2;margin-top:0;text-align:center}
 /* TEST */
 #test{flex-direction:column;padding:0}
 .test-header{background:rgba(15,15,24,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:.75rem 1.5rem;display:flex;align-items:center;gap:1rem;position:sticky;top:0;z-index:100}
@@ -5378,13 +5384,13 @@ async function runAdRewardVideo(resolve){
   }
 
   overlay.innerHTML = `
-    <div class="reward-overlay">
-      <div style="display:flex;flex-direction:column;align-items:center">
+    <div class="reward-overlay video-playing">
+      <div class="reward-video-stage">
         <div class="reward-video-wrap">
           <video id="rewardVideo" src="${session.fileUrl}" autoplay playsinline controlsList="nodownload noremoteplayback"></video>
           <div class="reward-progress-bg"><div class="reward-progress-fill" id="rewardProgressFill"></div></div>
+          <div class="reward-video-label" id="rewardVideoLabel">Sleduj celé video pre získanie testu…</div>
         </div>
-        <div class="reward-video-label" id="rewardVideoLabel">Sleduj celé video pre získanie testu…</div>
       </div>
     </div>`;
 
