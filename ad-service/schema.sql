@@ -73,3 +73,20 @@ CREATE TABLE IF NOT EXISTS video_ad_views (
   INDEX idx_video_ad_views_email_day (user_email, completed_at),
   CONSTRAINT fk_video_ad_views_video FOREIGN KEY (video_ad_id) REFERENCES video_ads(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
+
+-- Audit stopa AI kontroly obsahu (moderation.js) — item_id je NULL, ak bol
+-- obsah zamietnutý ešte pred vložením záznamu (nikdy sa nedostal do ad_banners/video_ads).
+CREATE TABLE IF NOT EXISTS moderation_log (
+  id             INT AUTO_INCREMENT PRIMARY KEY,
+  item_type      VARCHAR(10) NOT NULL, -- 'banner' | 'video'
+  item_id        INT NULL,
+  advertiser_id  INT NOT NULL,
+  allowed        TINYINT(1) NOT NULL,
+  category       VARCHAR(60),
+  reason         TEXT,
+  raw_response   TEXT,
+  link_url       VARCHAR(1000),
+  created_at     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_moderation_log_advertiser (advertiser_id),
+  INDEX idx_moderation_log_item (item_type, item_id)
+) ENGINE=InnoDB;

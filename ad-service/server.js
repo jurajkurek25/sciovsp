@@ -10,6 +10,8 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const Stripe = require('stripe');
 const db = require('./db');
+const { moderateContent } = require('./moderation');
+const { notifyAdminRejection } = require('./notify');
 
 const PORT = process.env.PORT || 3849;
 const APP_URL = process.env.APP_URL || 'https://ad.sptrener.online';
@@ -122,6 +124,20 @@ async function unlinkPublicUrl(publicUrl) {
   if (!publicUrl) return;
   const filePath = path.join(__dirname, 'public', publicUrl.replace(/^\/+/, ''));
   fs.promises.unlink(filePath).catch(() => {});
+}
+
+// ─── AI kontrola obsahu (fail-closed) — loguje každé rozhodnutie a pri
+// zamietnutí pošle adminovi email (ak je SMTP nastavený). ────────────
+async function runModeration({ itemType, itemId, advertiserId, advertiserEmail, buffer, mimeType, linkUrl }) {
+  const result = await moderateContent({ buffer, mimeType, linkUrl });
+  db.query(
+    'INSERT INTO moderation_log (item_type, item_id, advertiser_id, allowed, category, reason, raw_response, link_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+    [itemType, itemId || null, advertiserId, result.allowed ? 1 : 0, result.category || null, result.reason || null, result.raw || null, linkUrl]
+  ).catch(e => console.error('moderation_log insert error:', e.message));
+  if (!result.allowed) {
+    notifyAdminRejection({ advertiserEmail, itemType, linkUrl, category: result.category, reason: result.reason }).catch(() => {});
+  }
+  return result;
 }
 
 // ─── Vlastná autentifikácia inzerentov (email + heslo, JWT) ─────
@@ -264,6 +280,14 @@ app.post('/api/ads/banners', requireAdvertiser, (req, res) => {
     if (!linkUrl || !/^https?:\/\//.test(linkUrl)) return res.status(400).json({ error: 'Zadaj platnú cieľovú URL (vrátane https://).' });
 
     try {
+      const moderation = await runModeration({
+        itemType: 'banner', itemId: null, advertiserId: req.advertiser.id, advertiserEmail: req.advertiser.email,
+        buffer: req.file.buffer, mimeType: req.file.mimetype, linkUrl
+      });
+      if (!moderation.allowed) {
+        return res.status(422).json({ error: `Automatická kontrola obsahu túto kreatívu zamietla: ${moderation.reason || 'nespĺňa pravidlá platformy.'}` });
+      }
+
       const filename = safeFilename(req.advertiser.id, req.file.originalname);
       await fs.promises.writeFile(path.join(UPLOADS_DIR, 'banners', filename), req.file.buffer);
       const publicUrl = `/uploads/banners/${filename}`;
@@ -285,16 +309,30 @@ app.patch('/api/ads/banners/:id', requireAdvertiser, async (req, res) => {
   const { active, linkUrl } = req.body || {};
   if (linkUrl && !/^https?:\/\//.test(linkUrl)) return res.status(400).json({ error: 'Zadaj platnú cieľovú URL.' });
   try {
+    const [existingRows] = await db.query('SELECT public_url, mime_type FROM ad_banners WHERE id = ? AND advertiser_id = ?', [req.params.id, req.advertiser.id]);
+    if (!existingRows[0]) return res.status(404).json({ error: 'Banner sa nenašiel.' });
+
+    if (linkUrl) {
+      // Zmena cieľovej URL musí prejsť cez rovnakú AI kontrolu ako pri uploade —
+      // inak by sa dal schválený banner dodatočne presmerovať na nepovolený obsah.
+      const filePath = path.join(__dirname, 'public', existingRows[0].public_url.replace(/^\/+/, ''));
+      const buffer = await fs.promises.readFile(filePath);
+      const moderation = await runModeration({
+        itemType: 'banner', itemId: req.params.id, advertiserId: req.advertiser.id, advertiserEmail: req.advertiser.email,
+        buffer, mimeType: existingRows[0].mime_type, linkUrl
+      });
+      if (!moderation.allowed) {
+        return res.status(422).json({ error: `Automatická kontrola obsahu túto zmenu zamietla: ${moderation.reason || 'nespĺňa pravidlá platformy.'}` });
+      }
+      await db.query('UPDATE ad_banners SET link_url = ? WHERE id = ? AND advertiser_id = ?', [linkUrl, req.params.id, req.advertiser.id]);
+    }
     if (typeof active === 'boolean') {
       await db.query('UPDATE ad_banners SET active = ? WHERE id = ? AND advertiser_id = ?', [active ? 1 : 0, req.params.id, req.advertiser.id]);
     }
-    if (linkUrl) {
-      await db.query('UPDATE ad_banners SET link_url = ? WHERE id = ? AND advertiser_id = ?', [linkUrl, req.params.id, req.advertiser.id]);
-    }
     const [rows] = await db.query('SELECT * FROM ad_banners WHERE id = ? AND advertiser_id = ?', [req.params.id, req.advertiser.id]);
-    if (!rows[0]) return res.status(404).json({ error: 'Banner sa nenašiel.' });
     res.json({ banner: rows[0] });
   } catch (e) {
+    console.error('ads banner patch error:', e);
     res.status(500).json({ error: 'Chyba servera.' });
   }
 });
@@ -413,6 +451,14 @@ app.post('/api/video-ads', requireAdvertiser, (req, res) => {
     }
 
     try {
+      const moderation = await runModeration({
+        itemType: 'video', itemId: null, advertiserId: req.advertiser.id, advertiserEmail: req.advertiser.email,
+        buffer: req.file.buffer, mimeType: req.file.mimetype, linkUrl
+      });
+      if (!moderation.allowed) {
+        return res.status(422).json({ error: `Automatická kontrola obsahu túto kreatívu zamietla: ${moderation.reason || 'nespĺňa pravidlá platformy.'}` });
+      }
+
       const filename = safeFilename(req.advertiser.id, 'video.mp4');
       await fs.promises.writeFile(path.join(UPLOADS_DIR, 'videos', filename), req.file.buffer);
       const publicUrl = `/uploads/videos/${filename}`;
@@ -434,16 +480,28 @@ app.patch('/api/video-ads/:id', requireAdvertiser, async (req, res) => {
   const { active, linkUrl } = req.body || {};
   if (linkUrl && !/^https?:\/\//.test(linkUrl)) return res.status(400).json({ error: 'Zadaj platnú cieľovú URL.' });
   try {
+    const [existingRows] = await db.query('SELECT public_url, mime_type FROM video_ads WHERE id = ? AND advertiser_id = ?', [req.params.id, req.advertiser.id]);
+    if (!existingRows[0]) return res.status(404).json({ error: 'Video reklama sa nenašla.' });
+
+    if (linkUrl) {
+      const filePath = path.join(__dirname, 'public', existingRows[0].public_url.replace(/^\/+/, ''));
+      const buffer = await fs.promises.readFile(filePath);
+      const moderation = await runModeration({
+        itemType: 'video', itemId: req.params.id, advertiserId: req.advertiser.id, advertiserEmail: req.advertiser.email,
+        buffer, mimeType: existingRows[0].mime_type, linkUrl
+      });
+      if (!moderation.allowed) {
+        return res.status(422).json({ error: `Automatická kontrola obsahu túto zmenu zamietla: ${moderation.reason || 'nespĺňa pravidlá platformy.'}` });
+      }
+      await db.query('UPDATE video_ads SET link_url = ? WHERE id = ? AND advertiser_id = ?', [linkUrl, req.params.id, req.advertiser.id]);
+    }
     if (typeof active === 'boolean') {
       await db.query('UPDATE video_ads SET active = ? WHERE id = ? AND advertiser_id = ?', [active ? 1 : 0, req.params.id, req.advertiser.id]);
     }
-    if (linkUrl) {
-      await db.query('UPDATE video_ads SET link_url = ? WHERE id = ? AND advertiser_id = ?', [linkUrl, req.params.id, req.advertiser.id]);
-    }
     const [rows] = await db.query('SELECT * FROM video_ads WHERE id = ? AND advertiser_id = ?', [req.params.id, req.advertiser.id]);
-    if (!rows[0]) return res.status(404).json({ error: 'Video reklama sa nenašla.' });
     res.json({ videoAd: rows[0] });
   } catch (e) {
+    console.error('video ad patch error:', e);
     res.status(500).json({ error: 'Chyba servera.' });
   }
 });
