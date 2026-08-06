@@ -10,13 +10,23 @@
 // "označiť ako vyplatené" v UI. Žiadny kód tu nemá prístup k bankovému účtu.
 const express = require('express');
 const router = express.Router();
-const { requireDashAuth } = require('../lib/auth');
+const { requireDashAuth, timingSafeEqualStr } = require('../lib/auth');
 const { supabase } = require('../lib/db-partner');
 const { supabase: mainDb } = require('../lib/db-main');
 const { callClaude } = require('../lib/claude');
 
 const AUTO_PUBLISH_BLOG = process.env.DASH_AUTO_PUBLISH_BLOG !== 'false'; // default true — user explicitly asked for automatic publisher
 const PAYOUT_READY_THRESHOLD_EUR = Number(process.env.DASH_PAYOUT_READY_THRESHOLD_EUR) || 20;
+const DASH_CRON_KEY = process.env.DASH_CRON_KEY;
+
+// Samostatný kľúč pre externý cron (nie session cookie) — rovnaký vzor ako
+// x-admin-key v ad-subdomain-service/automation.js. Bez DASH_CRON_KEY
+// nastaveného v .env je tento endpoint natrvalo zamknutý.
+function checkCronKey(req) {
+  const key = req.headers['x-cron-key'];
+  if (!key || !DASH_CRON_KEY) return false;
+  return timingSafeEqualStr(key, DASH_CRON_KEY);
+}
 
 async function logAction({ actionType, targetSystem, targetId, reasoning, result, detail }) {
   try {
@@ -108,6 +118,17 @@ router.post('/api/dash/aiops/run', requireDashAuth, async (req, res) => {
   const results = {};
   if (want('blog')) results.blog = await runBlogTrendPublisher();
   if (want('payouts')) results.payouts = await runPayoutReadyFlagger();
+  res.json({ ok: true, results });
+});
+
+// Pre externý cron (denný beh bez prihlásenia) — chránené x-cron-key, nie
+// session cookie, presne ako POST /api/admin/cron/daily v ad appke.
+router.post('/api/dash/aiops/cron', async (req, res) => {
+  if (!checkCronKey(req)) return res.status(403).json({ error: 'Forbidden.' });
+  const results = {
+    blog: await runBlogTrendPublisher(),
+    payouts: await runPayoutReadyFlagger()
+  };
   res.json({ ok: true, results });
 });
 

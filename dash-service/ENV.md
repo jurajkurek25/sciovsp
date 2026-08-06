@@ -34,6 +34,7 @@ Poznámka: `dash_*` tabuľky (schema-dash.sql) žijú v partnerskom Supabase pro
 ## AI (poradca + autonómny aiops)
 
 - `ANTHROPIC_API_KEY`
+- `DASH_CRON_KEY` — chráni `POST /api/dash/aiops/cron` (externý denný beh, bez session cookie). Vygeneruj: `node -e "console.log(require('crypto').randomBytes(24).toString('hex'))"`. Bez tohto nastaveného zostáva endpoint natrvalo zamknutý (403).
 
 ## Voliteľné prahy pre autonómny aiops
 
