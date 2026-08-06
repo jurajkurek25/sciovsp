@@ -7,6 +7,7 @@
 <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet">
 <style>
 :root{--black:#08080d;--black2:#0f0f18;--black3:#15151f;--border:rgba(255,255,255,.08);--border2:rgba(255,255,255,.14);--text:#eeeef5;--text2:#a1a1bc;--text3:#5c5c7a;--volt:#c8ff00;--purple:#7c5cff;--purple2:#b09bff;--red:#ff3f5e;--green:#36e896;--yellow:#ffc94d;--serif:'Instrument Serif',Georgia,serif;--mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif}
 *{box-sizing:border-box}
@@ -77,6 +78,23 @@ textarea{width:100%;min-height:110px;padding:.7rem;background:var(--black3);bord
 .qr-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:50}
 .qr-modal{background:var(--black2);border:1px solid var(--border2);border-radius:14px;padding:1.6rem;max-width:340px;width:90%;text-align:center}
 .qr-modal img{width:220px;height:220px;background:#fff;border-radius:8px;margin:.8rem auto}
+
+.rich-editor{background:var(--black3);border:1px solid var(--border2);border-radius:8px;margin-top:.6rem;overflow:hidden}
+.rich-editor .ql-toolbar{background:var(--black2);border:none;border-bottom:1px solid var(--border2)}
+.rich-editor .ql-toolbar .ql-stroke{stroke:var(--text2)}
+.rich-editor .ql-toolbar .ql-fill{fill:var(--text2)}
+.rich-editor .ql-toolbar .ql-picker-label{color:var(--text2)}
+.rich-editor .ql-toolbar button:hover .ql-stroke,.rich-editor .ql-toolbar button.ql-active .ql-stroke{stroke:var(--volt)}
+.rich-editor .ql-toolbar button:hover .ql-fill,.rich-editor .ql-toolbar button.ql-active .ql-fill{fill:var(--volt)}
+.rich-editor .ql-toolbar button.ql-active .ql-picker-label{color:var(--volt)}
+.rich-editor .ql-container{border:none;font-family:var(--sans);font-size:.9rem;color:var(--text);min-height:240px}
+.rich-editor .ql-editor{min-height:240px}
+.rich-editor .ql-editor.ql-blank::before{color:var(--text3);font-style:normal}
+.rich-editor .ql-editor h2{font-family:var(--serif);font-size:1.4rem}
+.rich-editor .ql-editor h3{font-weight:700}
+.rich-editor .ql-editor a{color:var(--purple2)}
+.rich-editor .ql-picker-options{background:var(--black2);border:1px solid var(--border2)}
+.rich-editor .ql-picker-item{color:var(--text2)}
 </style>
 </head>
 <body>
@@ -111,6 +129,7 @@ textarea{width:100%;min-height:110px;padding:.7rem;background:var(--black3);bord
 
 <div id="qrModalRoot"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
 <script>
 const $ = (sel, root=document) => root.querySelector(sel);
 const $$ = (sel, root=document) => [...root.querySelectorAll(sel)];
@@ -233,6 +252,48 @@ function bindCoverField(root, urlInputClass, kind) {
     updatePreview();
     status.textContent = 'Vygeneruje sa automaticky';
   };
+}
+
+// ─────────────────────────── RICH TEXT EDITOR (zdielane kurzy + blog) ───────────────────────────
+function richEditorHtml(containerClass, placeholder) {
+  return `<div class="rich-editor"><div class="${containerClass}" data-placeholder="${(placeholder||'').replace(/"/g,'&quot;')}"></div></div>`;
+}
+
+function initRichEditor(root, containerClass, initialHtml) {
+  const container = $('.' + containerClass, root);
+  if (typeof Quill === 'undefined') return fallbackTextEditor(container, initialHtml);
+  try {
+    const quill = new Quill(container, {
+      theme: 'snow',
+      placeholder: container.dataset.placeholder || '',
+      modules: {
+        toolbar: [
+          [{ header: [2, 3, false] }],
+          ['bold', 'italic'],
+          [{ list: 'ordered' }, { list: 'bullet' }],
+          ['blockquote', 'link'],
+          ['clean']
+        ]
+      }
+    });
+    if (initialHtml) quill.root.innerHTML = initialHtml;
+    return quill;
+  } catch (err) {
+    return fallbackTextEditor(container, initialHtml);
+  }
+}
+
+// Ak sa Quill nepodarí načítať z CDN (výpadok siete, adblock...), formulár
+// nesmie zostať nepoužiteľný — spadne na obyčajný textarea s rovnakým
+// rozhraním (.getText()/.root.innerHTML), aby zvyšok kódu fungoval bez zmeny.
+function fallbackTextEditor(container, initialHtml) {
+  container.innerHTML = '';
+  const ta = document.createElement('textarea');
+  ta.style.cssText = 'width:100%;min-height:240px;padding:.8rem;background:transparent;border:none;color:var(--text);font-family:var(--sans);font-size:.9rem;resize:vertical;display:block';
+  ta.value = initialHtml || '';
+  ta.placeholder = 'Rich editor sa nepodarilo načítať — vlož HTML priamo (h2, p, ul/li, strong...).';
+  container.appendChild(ta);
+  return { getText: () => ta.value, root: { get innerHTML() { return ta.value; } } };
 }
 
 function metricCard(m, formatFn) {
@@ -370,8 +431,8 @@ function courseFormHtml(c) {
     </div>
     ${coverFieldHtml('cf-cover', c?.cover_image_url)}
     <textarea class="cf-desc" placeholder="Krátky popis (karta v zozname + meta description, cca 1-2 vety)" style="min-height:60px">${c?.description||''}</textarea>
-    <textarea class="cf-sales" placeholder="Sales letter — plnohodnotný HTML predajný text na stránke kurzu (h2, p, ul/li, strong...)" style="min-height:260px;margin-top:.6rem">${c?.sales_content||''}</textarea>
-    <p class="muted" style="margin-top:.4rem">Sales letter podporuje HTML: &lt;h2&gt;, &lt;p&gt;, &lt;ul&gt;&lt;li&gt;, &lt;strong&gt;, &lt;blockquote&gt;. Zobrazí sa medzi horným a dolným tlačidlom "Kúpiť kurz".</p>
+    <p class="muted" style="margin-top:.6rem">Sales letter — zobrazí sa medzi horným a dolným tlačidlom "Kúpiť kurz".</p>
+    ${richEditorHtml('cf-sales-editor', 'Napíš predajný text kurzu — nadpisy, tučné písmo, zoznamy...')}
     <div style="display:flex;gap:.6rem;margin-top:.6rem">
       <button class="btn cf-save">Uložiť</button>
       <button class="btn secondary cf-cancel">Zrušiť</button>
@@ -382,10 +443,11 @@ function courseFormHtml(c) {
 function bindCourseForm(course) {
   const root = $('#courseFormRoot');
   bindCoverField(root, 'cf-cover', 'courses');
+  const salesQuill = initRichEditor(root, 'cf-sales-editor', course?.sales_content);
   $('.cf-save', root).onclick = async () => {
     const body = {
       title: $('.cf-title', root).value, description: $('.cf-desc', root).value, priceCents: Number($('.cf-price', root).value) || 5700,
-      coverImageUrl: $('.cf-cover', root).value, salesContent: $('.cf-sales', root).value
+      coverImageUrl: $('.cf-cover', root).value, salesContent: salesQuill.getText().trim() ? salesQuill.root.innerHTML : ''
     };
     try {
       if (course) await api(`/api/dash/courses/${course.id}`, { method: 'PUT', body: JSON.stringify(body) });
@@ -560,7 +622,7 @@ function postFormHtml(p) {
     </div>
     <textarea class="pf-excerpt" placeholder="Excerpt / meta description (140-160 znakov)" style="min-height:60px">${p?.excerpt||''}</textarea>
     ${coverFieldHtml('pf-image', p?.image_url)}
-    <textarea class="pf-content" placeholder="Obsah článku — HTML (h2, p, ul/li, strong...)" style="min-height:260px">${p?.content||''}</textarea>
+    ${richEditorHtml('pf-content-editor', 'Napíš obsah článku — nadpisy, tučné písmo, zoznamy...')}
     <div style="display:flex;gap:.6rem;margin-top:.6rem">
       <button class="btn pf-save">Uložiť</button>
       <button class="btn secondary pf-cancel">Zrušiť</button>
@@ -571,9 +633,11 @@ function postFormHtml(p) {
 function bindPostForm(post) {
   const root = $('#postFormRoot');
   bindCoverField(root, 'pf-image', 'blog');
+  const contentQuill = initRichEditor(root, 'pf-content-editor', post?.content);
   $('.pf-save', root).onclick = async () => {
     const body = {
-      title: $('.pf-title', root).value, excerpt: $('.pf-excerpt', root).value, content: $('.pf-content', root).value,
+      title: $('.pf-title', root).value, excerpt: $('.pf-excerpt', root).value,
+      content: contentQuill.getText().trim() ? contentQuill.root.innerHTML : '',
       tag: $('.pf-tag', root).value, readTime: $('.pf-readtime', root).value,
       imageUrl: $('.pf-image', root).value, targetLang: $('.pf-lang', root).value
     };
