@@ -281,12 +281,18 @@ const DASH_I18N = {
     prQuestionsDesc: 'Odpovede použije AI na napísanie konkrétneho článku — čím konkrétnejšie odpovieš, tým lepší výsledok.',
     prAnswersSubmitBtn: 'Odoslať odpovede →', prAnswersSending: 'Odosielam…',
     prReadyTitle: 'Pripravené na publikovanie',
-    prReadyDesc: 'Po zaplatení AI automaticky vygeneruje článok v zvolenom jazyku, skontroluje ho a vypublikuje na blog. Zvyčajne to trvá do minúty.',
-    prPayBtn: 'Zaplatiť 249€ a publikovať →',
+    prReadyDesc: 'Po zaplatení AI vygeneruje článok v zvolenom jazyku, skontroluje ho a pripraví na tvoje schválenie. Vypublikuje sa až po tom, čo ho v dashboarde schváliš. Zvyčajne to trvá do minúty.',
+    prPayBtn: 'Zaplatiť 249€ a vygenerovať →',
     prProcessingTitle: 'Spracúva sa…',
     prProcessingDesc: 'Platba prebehla úspešne. AI teraz píše a kontroluje tvoj článok — zvyčajne to trvá do minúty. Táto stránka sa sama obnoví.',
+    prPendingTitle: 'Návrh čaká na tvoje schválenie',
+    prPendingDesc: 'AI vygenerovala a skontrolovala článok nižšie. Skontroluj ho a buď ho schváľ (vypublikuje sa hneď na blog), alebo ho zamietni s dôvodom, ak niečo nesedí.',
+    prApproveBtn: 'Schváliť a publikovať →', prApproving: 'Publikujem…',
+    prRejectBtn: 'Zamietnuť', prRejecting: 'Odosielam…',
+    prRejectPromptLabel: 'Dôvod zamietnutia (nepovinné)', prRejectPlaceholder: 'Čo konkrétne nesedí?',
+    prRejectConfirmBtn: 'Potvrdiť zamietnutie', prRejectCancelBtn: 'Späť',
     prPublishedTitle: 'Článok je live! 🎉',
-    prPublishedDesc: 'Tvoj PR článok bol automaticky vygenerovaný, skontrolovaný a vypublikovaný.',
+    prPublishedDesc: 'Tvoj PR článok bol vygenerovaný, skontrolovaný, schválený a vypublikovaný.',
     prViewBtn: 'Pozrieť článok →', prNewAnotherBtn: 'Vytvoriť ďalší PR článok',
     prFailedTitle: 'Niečo sa nepodarilo',
     prFailedDesc1: 'Automatické vygenerovanie/publikovanie článku zlyhalo.', prFailedReason: 'Dôvod:',
@@ -338,12 +344,18 @@ const DASH_I18N = {
     prQuestionsDesc: 'Odpovědi použije AI k napsání konkrétního článku — čím konkrétněji odpovíš, tím lepší výsledek.',
     prAnswersSubmitBtn: 'Odeslat odpovědi →', prAnswersSending: 'Odesílám…',
     prReadyTitle: 'Připraveno k publikování',
-    prReadyDesc: 'Po zaplacení AI automaticky vygeneruje článek ve zvoleném jazyce, zkontroluje ho a vypublikuje na blog. Obvykle to trvá do minuty.',
-    prPayBtn: 'Zaplatit 249€ a publikovat →',
+    prReadyDesc: 'Po zaplacení AI vygeneruje článek ve zvoleném jazyce, zkontroluje ho a připraví ke tvému schválení. Vypublikuje se až poté, co ho v dashboardu schválíš. Obvykle to trvá do minuty.',
+    prPayBtn: 'Zaplatit 249€ a vygenerovat →',
     prProcessingTitle: 'Zpracovává se…',
     prProcessingDesc: 'Platba proběhla úspěšně. AI teď píše a kontroluje tvůj článek — obvykle to trvá do minuty. Tato stránka se sama obnoví.',
+    prPendingTitle: 'Návrh čeká na tvé schválení',
+    prPendingDesc: 'AI vygenerovala a zkontrolovala článek níže. Zkontroluj ho a buď ho schval (vypublikuje se hned na blog), nebo ho zamítni s důvodem, pokud něco nesedí.',
+    prApproveBtn: 'Schválit a publikovat →', prApproving: 'Publikuji…',
+    prRejectBtn: 'Zamítnout', prRejecting: 'Odesílám…',
+    prRejectPromptLabel: 'Důvod zamítnutí (nepovinné)', prRejectPlaceholder: 'Co konkrétně nesedí?',
+    prRejectConfirmBtn: 'Potvrdit zamítnutí', prRejectCancelBtn: 'Zpět',
     prPublishedTitle: 'Článek je live! 🎉',
-    prPublishedDesc: 'Tvůj PR článek byl automaticky vygenerován, zkontrolován a vypublikován.',
+    prPublishedDesc: 'Tvůj PR článek byl vygenerován, zkontrolován, schválen a vypublikován.',
     prViewBtn: 'Podívat se na článek →', prNewAnotherBtn: 'Vytvořit další PR článek',
     prFailedTitle: 'Něco se nepovedlo',
     prFailedDesc1: 'Automatické vygenerování/publikování článku selhalo.', prFailedReason: 'Důvod:',
@@ -577,6 +589,38 @@ function prArticleProcessingHtml(){
   </div>`;
 }
 
+function prArticlePendingApprovalHtml(pr){
+  const d = pr.draft || {};
+  return `<div class="card">
+    <h3>${t('prPendingTitle')}</h3>
+    <p style="font-size:.85rem;color:var(--text2);margin-bottom:1rem">${t('prPendingDesc')}</p>
+    <div id="prApprovalMsg"></div>
+    <div style="border:1px solid var(--border2,rgba(255,255,255,.13));border-radius:12px;padding:1.1rem;margin-bottom:1rem;max-height:420px;overflow-y:auto;background:var(--black,#08080d)">
+      <div style="font-family:var(--mono);font-size:.7rem;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem">${d.title || ''}</div>
+      <div style="font-size:.88rem;line-height:1.6">${d.content || ''}</div>
+      ${d.contentCs ? `<div style="border-top:1px solid var(--border2,rgba(255,255,255,.13));margin-top:1rem;padding-top:1rem">
+        <div style="font-family:var(--mono);font-size:.7rem;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem">${d.titleCs || ''}</div>
+        <div style="font-size:.88rem;line-height:1.6">${d.contentCs}</div>
+      </div>` : ''}
+    </div>
+    <div style="display:flex;gap:.6rem;flex-wrap:wrap">
+      <button class="btn" id="prApproveBtn" onclick="approvePrArticle(${pr.id})">${t('prApproveBtn')}</button>
+      <button class="btn secondary" onclick="showPrRejectForm()">${t('prRejectBtn')}</button>
+    </div>
+    <div id="prRejectForm" class="hidden" style="margin-top:1rem">
+      <div class="field"><label>${t('prRejectPromptLabel')}</label><input type="text" id="prRejectReason" placeholder="${t('prRejectPlaceholder')}"></div>
+      <div style="display:flex;gap:.6rem">
+        <button class="btn secondary" id="prRejectConfirmBtn" onclick="rejectPrArticle(${pr.id})">${t('prRejectConfirmBtn')}</button>
+        <button class="btn secondary" onclick="document.getElementById('prRejectForm').classList.add('hidden')">${t('prRejectCancelBtn')}</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function showPrRejectForm(){
+  document.getElementById('prRejectForm').classList.remove('hidden');
+}
+
 function prArticlePublishedHtml(pr){
   return `<div class="card">
     <h3>${t('prPublishedTitle')}</h3>
@@ -608,6 +652,7 @@ function renderPrArticle(){
   if (pr.status === 'questions_ready') { el.innerHTML = prArticleQuestionsHtml(pr); return; }
   if (pr.status === 'answered') { el.innerHTML = prArticleAnsweredHtml(pr); return; }
   if (pr.status === 'paid' || pr.status === 'generating') { el.innerHTML = prArticleProcessingHtml(); startPrArticlePolling(); return; }
+  if (pr.status === 'pending_approval') { el.innerHTML = prArticlePendingApprovalHtml(pr); return; }
   if (pr.status === 'published') { el.innerHTML = prArticlePublishedHtml(pr); return; }
   if (pr.status === 'failed') { el.innerHTML = prArticleFailedHtml(pr); return; }
   el.innerHTML = prArticleFormHtml();
@@ -663,6 +708,27 @@ async function submitPrArticleAnswers(e, id){
 async function startPrArticleCheckout(id){
   try { const d = await api(`/api/pr-articles/${id}/checkout`, {method:'POST'}); location.href = d.url; }
   catch(err){ showMsg('prCheckoutMsg', err.message, 'error'); }
+}
+
+async function approvePrArticle(id){
+  const btn = document.getElementById('prApproveBtn');
+  btn.disabled = true; btn.textContent = t('prApproving');
+  try {
+    const data = await api(`/api/pr-articles/${id}/approve`, { method:'POST' });
+    currentPrArticle = data.prArticle;
+    renderPrArticle();
+  } catch(err) { showMsg('prApprovalMsg', err.message, 'error'); btn.disabled = false; btn.textContent = t('prApproveBtn'); }
+}
+
+async function rejectPrArticle(id){
+  const btn = document.getElementById('prRejectConfirmBtn');
+  btn.disabled = true; btn.textContent = t('prRejecting');
+  const reason = document.getElementById('prRejectReason').value;
+  try {
+    const data = await api(`/api/pr-articles/${id}/reject`, { method:'POST', body: JSON.stringify({ reason }) });
+    currentPrArticle = data.prArticle;
+    renderPrArticle();
+  } catch(err) { showMsg('prApprovalMsg', err.message, 'error'); btn.disabled = false; btn.textContent = t('prRejectConfirmBtn'); }
 }
 
 applyStaticI18n();

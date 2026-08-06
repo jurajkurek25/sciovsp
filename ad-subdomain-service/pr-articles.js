@@ -24,7 +24,7 @@ const APP_URL = process.env.APP_URL || 'https://ad.sptrener.online';
 const MAIN_APP_URL = process.env.MAIN_APP_URL || 'https://sptrener.online';
 const INTERNAL_API_SECRET = process.env.INTERNAL_API_SECRET;
 
-const NON_TERMINAL_STATUSES = ['draft', 'questions_ready', 'answered', 'paid', 'generating'];
+const NON_TERMINAL_STATUSES = ['draft', 'questions_ready', 'answered', 'paid', 'generating', 'pending_approval'];
 
 // Rovnaká logika ako requireAdvertiser v server.js — zámerne duplikovaná
 // (nie zdieľaná cez spoločný modul), aby sa nemusel meniť existujúci,
@@ -45,6 +45,7 @@ async function requireAdvertiser(req, res, next) {
 }
 
 function prArticleJson(row) {
+  const draft = row.status === 'pending_approval' && row.draft_json ? JSON.parse(row.draft_json) : null;
   return {
     id: row.id,
     companyName: row.company_name,
@@ -59,8 +60,37 @@ function prArticleJson(row) {
     status: row.status,
     blogUrl: row.blog_url,
     failReason: row.status === 'failed' ? row.fail_reason : null,
+    draft: draft ? {
+      title: draft.title, excerpt: draft.excerpt, content: draft.content, tag: draft.tag, readTime: draft.readTime,
+      titleCs: draft.titleCs || null, excerptCs: draft.excerptCs || null, contentCs: draft.contentCs || null,
+      tagCs: draft.tagCs || null, readTimeCs: draft.readTimeCs || null
+    } : null,
     createdAt: row.created_at
   };
+}
+
+// Zdieľané medzi handlePrArticlePaid (po schválení automatickou kontrolou)
+// a /approve routou (po schválení inzerentom) — publikuje článok na
+// hlavný blog cez interné API.
+async function publishArticle(pr, article) {
+  if (!INTERNAL_API_SECRET) throw new Error('INTERNAL_API_SECRET nie je nastavený — nemôžem publikovať na hlavný blog.');
+
+  const publishRes = await fetch(`${MAIN_APP_URL}/api/internal/publish-blog-post`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Internal-Secret': INTERNAL_API_SECRET },
+    body: JSON.stringify({
+      slug: article.slug, title: article.title, excerpt: article.excerpt, content: article.content,
+      tag: article.tag, read_time: article.readTime,
+      title_cs: article.titleCs || null, excerpt_cs: article.excerptCs || null, tag_cs: article.tagCs || null,
+      read_time_cs: article.readTimeCs || null, content_cs: article.contentCs || null,
+      sponsor_name: pr.company_name, target_lang: pr.target_lang
+    })
+  });
+  if (!publishRes.ok) {
+    const errText = await publishRes.text().catch(() => '');
+    throw new Error(`Publikovanie na hlavný blog zlyhalo (${publishRes.status}): ${errText.slice(0, 300)}`);
+  }
+  return publishRes.json();
 }
 
 async function callClaude({ system, userPrompt, maxTokens }) {
@@ -298,6 +328,55 @@ router.post('/api/pr-articles/:id/checkout', requireAdvertiser, async (req, res)
   }
 });
 
+router.post('/api/pr-articles/:id/approve', requireAdvertiser, async (req, res) => {
+  try {
+    const [rows] = await db.query('SELECT * FROM pr_articles WHERE id = ? AND advertiser_id = ?', [req.params.id, req.advertiser.id]);
+    const pr = rows[0];
+    if (!pr) return res.status(404).json({ error: 'PR článok sa nenašiel.' });
+    if (pr.status !== 'pending_approval' || !pr.draft_json) return res.status(400).json({ error: 'Tento článok momentálne nečaká na schválenie.' });
+
+    const article = JSON.parse(pr.draft_json);
+    const publishData = await publishArticle(pr, article);
+
+    await db.query(
+      `UPDATE pr_articles SET status = 'published', generated_title = ?, generated_slug = ?, blog_url = ?, published_at = NOW() WHERE id = ?`,
+      [article.title, publishData.slug, publishData.url, pr.id]
+    );
+
+    const { notifyAdvertiserPrArticlePublished } = require('./notify');
+    notifyAdvertiserPrArticlePublished({ advertiserEmail: req.advertiser.email, blogUrl: publishData.url }).catch(() => {});
+
+    const [updated] = await db.query('SELECT * FROM pr_articles WHERE id = ?', [pr.id]);
+    res.json({ prArticle: prArticleJson(updated[0]) });
+  } catch (e) {
+    console.error('pr-article approve error:', e);
+    await db.query(`UPDATE pr_articles SET status = 'failed', fail_reason = ? WHERE id = ?`, [e.message.slice(0, 1000), req.params.id]).catch(() => {});
+    res.status(500).json({ error: 'Publikovanie zlyhalo. Skús to prosím znova alebo nás kontaktuj.' });
+  }
+});
+
+router.post('/api/pr-articles/:id/reject', requireAdvertiser, async (req, res) => {
+  const { reason } = req.body || {};
+  try {
+    const [rows] = await db.query('SELECT * FROM pr_articles WHERE id = ? AND advertiser_id = ?', [req.params.id, req.advertiser.id]);
+    const pr = rows[0];
+    if (!pr) return res.status(404).json({ error: 'PR článok sa nenašiel.' });
+    if (pr.status !== 'pending_approval') return res.status(400).json({ error: 'Tento článok momentálne nečaká na schválenie.' });
+
+    const failReason = `Inzerent zamietol vygenerovaný návrh.${reason ? ' Dôvod: ' + reason : ''}`;
+    await db.query(`UPDATE pr_articles SET status = 'failed', fail_reason = ? WHERE id = ?`, [failReason.slice(0, 1000), pr.id]);
+
+    const { notifyAdminRejection } = require('./notify');
+    notifyAdminRejection({ advertiserEmail: req.advertiser.email, itemType: 'pr_article', linkUrl: pr.target_url, category: 'advertiser_rejected', reason: reason || 'bez uvedeného dôvodu' }).catch(() => {});
+
+    const [updated] = await db.query('SELECT * FROM pr_articles WHERE id = ?', [pr.id]);
+    res.json({ prArticle: prArticleJson(updated[0]) });
+  } catch (e) {
+    console.error('pr-article reject error:', e);
+    res.status(500).json({ error: 'Chyba servera.' });
+  }
+});
+
 // ─── Volané z webhooku po úspešnej jednorazovej platbe (server.js) ───
 
 async function handlePrArticlePaid(prArticleId, paymentIntentId) {
@@ -358,32 +437,15 @@ async function handlePrArticlePaid(prArticleId, paymentIntentId) {
       return;
     }
 
-    if (!INTERNAL_API_SECRET) throw new Error('INTERNAL_API_SECRET nie je nastavený — nemôžem publikovať na hlavný blog.');
-
-    const publishRes = await fetch(`${MAIN_APP_URL}/api/internal/publish-blog-post`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-Internal-Secret': INTERNAL_API_SECRET },
-      body: JSON.stringify({
-        slug: article.slug, title: article.title, excerpt: article.excerpt, content: article.content,
-        tag: article.tag, read_time: article.readTime,
-        title_cs: article.titleCs || null, excerpt_cs: article.excerptCs || null, tag_cs: article.tagCs || null,
-        read_time_cs: article.readTimeCs || null, content_cs: article.contentCs || null,
-        sponsor_name: pr.company_name, target_lang: pr.target_lang
-      })
-    });
-    if (!publishRes.ok) {
-      const errText = await publishRes.text().catch(() => '');
-      throw new Error(`Publikovanie na hlavný blog zlyhalo (${publishRes.status}): ${errText.slice(0, 300)}`);
-    }
-    const publishData = await publishRes.json();
-
+    // Článok prešiel automatickou kontrolou — namiesto rovno publikovania
+    // čaká na schválenie Inzerentom v dashboarde (pozri /approve, /reject).
     await db.query(
-      `UPDATE pr_articles SET status = 'published', generated_title = ?, generated_slug = ?, blog_url = ?, moderation_allowed = 1, published_at = NOW() WHERE id = ?`,
-      [article.title, publishData.slug, publishData.url, pr.id]
+      `UPDATE pr_articles SET status = 'pending_approval', moderation_allowed = 1, draft_json = ? WHERE id = ?`,
+      [JSON.stringify(article), pr.id]
     );
 
-    const { notifyAdvertiserPrArticlePublished } = require('./notify');
-    if (advertiserEmail) notifyAdvertiserPrArticlePublished({ advertiserEmail, blogUrl: publishData.url }).catch(() => {});
+    const { notifyAdvertiserPrArticleReadyForApproval } = require('./notify');
+    if (advertiserEmail) notifyAdvertiserPrArticleReadyForApproval({ advertiserEmail }).catch(() => {});
   } catch (e) {
     console.error('pr-article generation/publish error:', e);
     await db.query(`UPDATE pr_articles SET status = 'failed', fail_reason = ? WHERE id = ?`, [e.message.slice(0, 1000), pr.id]).catch(() => {});
