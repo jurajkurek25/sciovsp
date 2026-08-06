@@ -5242,6 +5242,16 @@ async function onUserLoggedIn(user,token){
   renderAuthButton();updateHomeStats();loadRefCard();renderEliteHomeCards();initEliteFeatures();
   if(isPremium()){const ol=document.getElementById('paywall-overlay');if(ol)ol.remove();}
   loadScioDateFromCloud();
+  attachPendingPartnerRef();
+}
+async function attachPendingPartnerRef(){
+  try{
+    const refType=localStorage.getItem('vsp_pending_ref_type');
+    const refCode=localStorage.getItem('vsp_pending_ref');
+    if(refType!=='partner'||!refCode)return;
+    const headers={'Content-Type':'application/json',...(await getAuthHeader())};
+    await fetch('/api/referral/attach-partner',{method:'POST',headers,body:JSON.stringify({refCode})});
+  }catch(e){}
 }
 function onUserLoggedOut(){
   currentUser=null;localStorage.removeItem('vsp_user_email');localStorage.removeItem('vsp_premium');
