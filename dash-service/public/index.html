@@ -309,7 +309,11 @@ function courseFormHtml(c) {
       <input class="cf-title" placeholder="Názov kurzu" value="${(c?.title||'').replace(/"/g,'&quot;')}" style="flex:1;min-width:220px">
       <input class="cf-price" type="number" placeholder="Cena v centoch" value="${c?.price_cents ?? 5700}" style="width:160px">
     </div>
-    <textarea class="cf-desc" placeholder="Popis kurzu (zobrazí sa na predajnej stránke)">${c?.description||''}</textarea>
+    <input class="cf-cover" placeholder="URL cover obrázku (zobrazí sa v zozname aj na stránke kurzu)" value="${(c?.cover_image_url||'').replace(/"/g,'&quot;')}" style="width:100%;padding:.6rem .8rem;background:var(--black3);border:1px solid var(--border2);border-radius:8px;margin-bottom:.6rem">
+    ${c?.cover_image_url ? `<img src="${c.cover_image_url.replace(/"/g,'&quot;')}" style="max-width:220px;border-radius:8px;margin-bottom:.6rem;display:block">` : ''}
+    <textarea class="cf-desc" placeholder="Krátky popis (karta v zozname + meta description, cca 1-2 vety)" style="min-height:60px">${c?.description||''}</textarea>
+    <textarea class="cf-sales" placeholder="Sales letter — plnohodnotný HTML predajný text na stránke kurzu (h2, p, ul/li, strong...)" style="min-height:260px;margin-top:.6rem">${c?.sales_content||''}</textarea>
+    <p class="muted" style="margin-top:.4rem">Sales letter podporuje HTML: &lt;h2&gt;, &lt;p&gt;, &lt;ul&gt;&lt;li&gt;, &lt;strong&gt;, &lt;blockquote&gt;. Zobrazí sa medzi horným a dolným tlačidlom "Kúpiť kurz".</p>
     <div style="display:flex;gap:.6rem;margin-top:.6rem">
       <button class="btn cf-save">Uložiť</button>
       <button class="btn secondary cf-cancel">Zrušiť</button>
@@ -320,7 +324,10 @@ function courseFormHtml(c) {
 function bindCourseForm(course) {
   const root = $('#courseFormRoot');
   $('.cf-save', root).onclick = async () => {
-    const body = { title: $('.cf-title', root).value, description: $('.cf-desc', root).value, priceCents: Number($('.cf-price', root).value) || 5700 };
+    const body = {
+      title: $('.cf-title', root).value, description: $('.cf-desc', root).value, priceCents: Number($('.cf-price', root).value) || 5700,
+      coverImageUrl: $('.cf-cover', root).value, salesContent: $('.cf-sales', root).value
+    };
     try {
       if (course) await api(`/api/dash/courses/${course.id}`, { method: 'PUT', body: JSON.stringify(body) });
       else await api('/api/dash/courses', { method: 'POST', body: JSON.stringify(body) });
