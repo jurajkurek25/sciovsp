@@ -38,23 +38,23 @@ function groupByMonth(rows, dateField, limit) {
 router.get('/api/dash/trends', requireDashAuth, async (req, res) => {
   const since30d = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
 
-  const [signupsByDay, subsByPlan, testActivityByDay, blogByTag, blogByMonth] = await Promise.all([
+  const [signupsByDay, subsByPlan, blogByTag, blogByMonth] = await Promise.all([
     safe('signups_by_day_30', async () => {
       const { data, error } = await mainDb.from('users').select('created_at').gt('created_at', since30d).limit(ROW_LIMIT);
       if (error) throw new Error(error.message);
       return groupByDay(data || [], 'created_at');
     }),
     safe('active_subs_by_plan', async () => {
-      const { data, error } = await mainDb.from('subscriptions').select('plan').eq('status', 'active').limit(ROW_LIMIT);
+      // Plán/stav predplatného žije priamo na users (žiadna samostatná
+      // subscriptions tabuľka) — pozri routes/overview.js pre rovnaký fix.
+      const { data, error } = await mainDb.from('users').select('plan').eq('is_premium', true).limit(ROW_LIMIT);
       if (error) throw new Error(error.message);
       const counts = {};
-      for (const row of data || []) counts[row.plan] = (counts[row.plan] || 0) + 1;
+      for (const row of data || []) {
+        const plan = row.plan || 'premium';
+        counts[plan] = (counts[plan] || 0) + 1;
+      }
       return Object.entries(counts).map(([plan, n]) => ({ plan, n }));
-    }),
-    safe('test_activity_by_day_30', async () => {
-      const { data, error } = await mainDb.from('test_results').select('created_at').gt('created_at', since30d).limit(ROW_LIMIT);
-      if (error) throw new Error(error.message);
-      return groupByDay(data || [], 'created_at');
     }),
     safe('blog_posts_by_tag', async () => {
       const { data, error } = await mainDb.from('blog_posts').select('tag').eq('published', true).limit(ROW_LIMIT);
@@ -73,7 +73,7 @@ router.get('/api/dash/trends', requireDashAuth, async (req, res) => {
     })
   ]);
 
-  res.json({ signupsByDay, subsByPlan, testActivityByDay, blogByTag, blogByMonth });
+  res.json({ signupsByDay, subsByPlan, blogByTag, blogByMonth });
 });
 
 module.exports = router;

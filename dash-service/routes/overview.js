@@ -30,10 +30,16 @@ router.get('/api/dash/overview', requireDashAuth, async (req, res) => {
       return { value: count || 0 };
     }),
     safe('active_subscriptions', async () => {
-      const { data, error } = await mainDb.from('subscriptions').select('plan').eq('status', 'active');
+      // Plán/stav predplatného žije priamo na users (žiadna samostatná
+      // subscriptions tabuľka) — is_premium je jednoznačný boolean, plan
+      // (napr. 'premium'/'elite') sa použije len na rozdelenie počtu.
+      const { data, error } = await mainDb.from('users').select('plan').eq('is_premium', true);
       if (error) throw new Error(error.message);
       const counts = {};
-      for (const row of data || []) counts[row.plan] = (counts[row.plan] || 0) + 1;
+      for (const row of data || []) {
+        const plan = row.plan || 'premium';
+        counts[plan] = (counts[plan] || 0) + 1;
+      }
       return { value: Object.entries(counts).map(([plan, n]) => ({ plan, n })) };
     }),
     safe('new_signups_7d', async () => {

@@ -215,7 +215,6 @@ async function renderTrends() {
       <div class="card wide"><h3>Registrácie / 30 dní</h3>${data.signupsByDay.ok ? barList(data.signupsByDay.value,'day','n') : `<div class="err">${data.signupsByDay.error}</div>`}</div>
       <div class="card"><h3>Aktívne predplatné</h3>${data.subsByPlan.ok ? barList(data.subsByPlan.value,'plan','n') : `<div class="err">${data.subsByPlan.error}</div>`}</div>
       <div class="card"><h3>Blog podľa tagu</h3>${data.blogByTag.ok ? barList(data.blogByTag.value,'tag','n') : `<div class="err">${data.blogByTag.error}</div>`}</div>
-      <div class="card wide"><h3>Aktivita testov / 30 dní</h3>${data.testActivityByDay.ok ? barList(data.testActivityByDay.value,'day','n') : `<div class="err">${data.testActivityByDay.error}</div>`}</div>
       <div class="card wide"><h3>Blog podľa mesiaca</h3>${data.blogByMonth.ok ? barList(data.blogByMonth.value,'month','n') : `<div class="err">${data.blogByMonth.error}</div>`}</div>
     </div>`;
 }
