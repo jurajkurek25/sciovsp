@@ -16,7 +16,8 @@ const {
   notifyAdvertiserCampaignExpiringSoon,
   notifyAdvertiserCampaignLive,
   notifyAdvertiserPrArticleApprovalReminder,
-  notifyAdminFraudFlag
+  notifyAdminFraudFlag,
+  notifyAdvertiserPerformanceReport
 } = require('./notify');
 
 const ADMIN_KEY = process.env.ADMIN_KEY;
@@ -28,6 +29,7 @@ const PR_APPROVAL_REMINDER_HOURS = 48;
 const RECENT_CAMPAIGN_DAYS = 2;
 const FRAUD_REJECTION_THRESHOLD = 3;
 const FRAUD_REJECTION_WINDOW_DAYS = 7;
+const REPORT_WINDOW_DAYS = 7;
 
 function checkAdminKey(req) {
   const key = req.headers['x-admin-key'];
@@ -144,6 +146,54 @@ async function checkRepeatedRejections() {
   return flagged;
 }
 
+// Týždenný report výkonu — impressions/kliky pre bannery (ad_events),
+// zhliadnutia/kliky pre videá (video_ad_views). Advertiseri bez akejkoľvek
+// aktivity za obdobie report nedostanú (žiadny prázdny email).
+async function sendPerformanceReports() {
+  const [advertisers] = await db.query(
+    `SELECT DISTINCT a.id, a.email FROM advertisers a
+     WHERE EXISTS (SELECT 1 FROM ad_banners b WHERE b.advertiser_id = a.id)
+        OR EXISTS (SELECT 1 FROM video_ads v WHERE v.advertiser_id = a.id)`
+  );
+  const period = new Date().toISOString().slice(0, 10);
+
+  let sent = 0;
+  for (const adv of advertisers) {
+    const [[{ impressions }]] = await db.query(
+      `SELECT COUNT(*) AS impressions FROM ad_events e JOIN ad_banners b ON b.id = e.banner_id
+       WHERE b.advertiser_id = ? AND e.event_type = 'impression' AND e.created_at > DATE_SUB(NOW(), INTERVAL ? DAY)`,
+      [adv.id, REPORT_WINDOW_DAYS]
+    );
+    const [[{ clicks }]] = await db.query(
+      `SELECT COUNT(*) AS clicks FROM ad_events e JOIN ad_banners b ON b.id = e.banner_id
+       WHERE b.advertiser_id = ? AND e.event_type = 'click' AND e.created_at > DATE_SUB(NOW(), INTERVAL ? DAY)`,
+      [adv.id, REPORT_WINDOW_DAYS]
+    );
+    const [[{ views }]] = await db.query(
+      `SELECT COUNT(*) AS views FROM video_ad_views vv JOIN video_ads v ON v.id = vv.video_ad_id
+       WHERE v.advertiser_id = ? AND vv.completed_at IS NOT NULL AND vv.started_at > DATE_SUB(NOW(), INTERVAL ? DAY)`,
+      [adv.id, REPORT_WINDOW_DAYS]
+    );
+    const [[{ videoClicks }]] = await db.query(
+      `SELECT COUNT(*) AS videoClicks FROM video_ad_views vv JOIN video_ads v ON v.id = vv.video_ad_id
+       WHERE v.advertiser_id = ? AND vv.clicked = 1 AND vv.started_at > DATE_SUB(NOW(), INTERVAL ? DAY)`,
+      [adv.id, REPORT_WINDOW_DAYS]
+    );
+
+    if (impressions === 0 && views === 0) continue;
+
+    const logged = await tryLogNotification('advertiser', adv.id, 'performance_report', period);
+    if (!logged) continue;
+
+    notifyAdvertiserPerformanceReport({
+      advertiserEmail: adv.email, days: REPORT_WINDOW_DAYS,
+      impressions, clicks, views, videoClicks: videoClicks
+    }).catch(() => {});
+    sent++;
+  }
+  return sent;
+}
+
 router.get('/api/admin/flags', async (req, res) => {
   if (!checkAdminKey(req)) return res.status(403).json({ error: 'Forbidden.' });
   const resolved = req.query.resolved === 'true' ? 1 : 0;
@@ -174,12 +224,15 @@ router.post('/api/admin/flags/:id/resolve', async (req, res) => {
 
 router.post('/api/admin/cron/daily', async (req, res) => {
   if (!checkAdminKey(req)) return res.status(403).json({ error: 'Forbidden.' });
-  const results = { expiringSoonEmails: 0, campaignLiveEmails: 0, prApprovalReminders: 0, fraudFlags: 0 };
+  const results = { expiringSoonEmails: 0, campaignLiveEmails: 0, prApprovalReminders: 0, fraudFlags: 0, performanceReports: 0 };
   try {
     results.expiringSoonEmails = await checkExpiringSoon();
     results.campaignLiveEmails = await checkCampaignLive();
     results.prApprovalReminders = await checkPrApprovalReminders();
     results.fraudFlags = await checkRepeatedRejections();
+    // Report je za posledných REPORT_WINDOW_DAYS dní — posiela sa len raz
+    // týždenne (pondelky), nie pri každom dennom behu cronu.
+    if (new Date().getUTCDay() === 1) results.performanceReports = await sendPerformanceReports();
   } catch (e) {
     console.error('ads cron/daily error:', e);
     return res.status(500).json({ error: e.message, partial: results });

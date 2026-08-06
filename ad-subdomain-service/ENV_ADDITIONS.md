@@ -38,4 +38,6 @@ ADMIN_KEY=
 ADMIN_EMAIL=
 ```
 
+Týždenný report výkonu (impressions/kliky pre bannery z `ad_events`, dopozretia/kliky pre videá z `video_ad_views` — obe tabuľky už existujú a už sa plnia, žiadna nová schéma netreba) sa posiela automaticky ako súčasť `POST /api/admin/cron/daily`, ale len keď cron padne na pondelok — inak sa v ten deň len preskočí, nič sa nezalogovuje navyše.
+
 Denná údržba sa nespúšťa sama — treba na `POST /api/admin/cron/daily` (s hlavičkou `x-admin-key`) nastaviť externý cron (odporúčané raz denne, napr. o 8:00).
