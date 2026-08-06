@@ -11,9 +11,10 @@ admin endpointov.
   `node -e "console.log(require('bcryptjs').hashSync('TVOJE_HESLO', 10))"`
 - `DASH_BENEFICIARY_NAME` — meno príjemcu, ktoré sa zobrazí v PAY by square QR (default `SP Trener`)
 
-## Hlavná appka (sptrener.online) — priamy Postgres
+## Hlavná appka (sptrener.online) — Supabase
 
-- `MAIN_DATABASE_URL` — rovnaká connection string ako v hlavnom repe (`DATABASE_URL`), read-mostly prístup
+- `MAIN_SUPABASE_URL` — rovnaká hodnota ako `SUPABASE_URL` v `.env` hlavnej appky
+- `MAIN_SUPABASE_SERVICE_KEY` — rovnaká hodnota ako `SUPABASE_SERVICE_KEY` v `.env` hlavnej appky
 
 ## Partner appka (partner.sptrener.online) — Supabase
 

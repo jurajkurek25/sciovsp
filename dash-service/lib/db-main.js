@@ -1,15 +1,11 @@
-// Priamy prístup do hlavnej appky (sptrener.online) — read-mostly, raw pg
-// Pool rovnako ako v hlavnom repe (db/pool.js), aby dash vedel čítať
-// klientov/platby bez toho, aby musel prechádzať cez HTTP admin endpoint,
-// ktorý v hlavnej appke ani neexistuje.
-const { Pool } = require('pg');
+// Priamy prístup do hlavnej appky (sptrener.online) — read-mostly Supabase
+// klient (hlavná appka beží na Supabase, nie na raw pg s DATABASE_URL —
+// pôvodná verzia tohto súboru to predpokladala nesprávne).
+const { createClient } = require('@supabase/supabase-js');
 
-const pool = new Pool({
-  connectionString: process.env.MAIN_DATABASE_URL
-});
+const supabase = createClient(
+  process.env.MAIN_SUPABASE_URL,
+  process.env.MAIN_SUPABASE_SERVICE_KEY
+);
 
-pool.on('error', (err) => {
-  console.error('Neočakávaná chyba PostgreSQL pool (main):', err);
-});
-
-module.exports = { pool };
+module.exports = { supabase };

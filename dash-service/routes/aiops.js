@@ -12,7 +12,7 @@ const express = require('express');
 const router = express.Router();
 const { requireDashAuth } = require('../lib/auth');
 const { supabase } = require('../lib/db-partner');
-const { pool: mainPool } = require('../lib/db-main');
+const { supabase: mainDb } = require('../lib/db-main');
 const { callClaude } = require('../lib/claude');
 
 const AUTO_PUBLISH_BLOG = process.env.DASH_AUTO_PUBLISH_BLOG !== 'false'; // default true — user explicitly asked for automatic publisher
@@ -31,12 +31,20 @@ async function logAction({ actionType, targetSystem, targetId, reasoning, result
 
 async function runBlogTrendPublisher() {
   try {
-    const { rows: tagRows } = await mainPool.query(
-      `SELECT tag, COUNT(*)::int AS n, MAX(created_at) AS last_at FROM blog_posts WHERE tag IS NOT NULL GROUP BY tag ORDER BY last_at ASC NULLS FIRST LIMIT 8`
-    );
-    const { rows: recentTitles } = await mainPool.query(
-      `SELECT title, tag FROM blog_posts ORDER BY created_at DESC LIMIT 12`
-    );
+    const { data: allTagged, error: tagErr } = await mainDb.from('blog_posts').select('tag, created_at').not('tag', 'is', null).limit(2000);
+    if (tagErr) throw new Error(tagErr.message);
+    const byTag = {};
+    for (const row of allTagged || []) {
+      const t = byTag[row.tag] || { tag: row.tag, n: 0, last_at: null };
+      t.n += 1;
+      if (!t.last_at || row.created_at > t.last_at) t.last_at = row.created_at;
+      byTag[row.tag] = t;
+    }
+    const tagRows = Object.values(byTag).sort((a, b) => (a.last_at || '').localeCompare(b.last_at || '')).slice(0, 8);
+
+    const { data: recentTitles, error: titlesErr } = await mainDb.from('blog_posts')
+      .select('title, tag').order('created_at', { ascending: false }).limit(12);
+    if (titlesErr) throw new Error(titlesErr.message);
 
     const system = `Si obsahový editor blogu SP Tréner (príprava na VŠP/SCIO prijímacie testy pre SR/ČR stredoškolákov). Na základe zoznamu tém/tagov, ktoré sa dlho nepokrývali, a nedávnych titulkov (aby si sa neopakoval), navrhni JEDEN nový blogový článok.
 
@@ -52,17 +60,19 @@ Odpovedz IBA validným JSON objektom (žiadny iný text) v tvare:
     const draft = JSON.parse(jsonMatch[0]);
     if (!draft.title || !draft.slug || !draft.content) throw new Error('AI návrh chýba povinné polia.');
 
-    const { rows: existing } = await mainPool.query('SELECT id FROM blog_posts WHERE slug = $1', [draft.slug]);
-    const slug = existing.length ? `${draft.slug}-${Date.now().toString(36)}` : draft.slug;
+    const { data: existing, error: existingErr } = await mainDb.from('blog_posts').select('id').eq('slug', draft.slug);
+    if (existingErr) throw new Error(existingErr.message);
+    const slug = (existing || []).length ? `${draft.slug}-${Date.now().toString(36)}` : draft.slug;
 
-    const { rows: inserted } = await mainPool.query(
-      `INSERT INTO blog_posts (slug, title, excerpt, content, tag, read_time, published) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id`,
-      [slug, draft.title, draft.excerpt || '', draft.content, draft.tag || null, draft.readTime || null, AUTO_PUBLISH_BLOG]
-    );
+    const { data: inserted, error: insertErr } = await mainDb.from('blog_posts').insert({
+      slug, title: draft.title, excerpt: draft.excerpt || '', content: draft.content,
+      tag: draft.tag || null, read_time: draft.readTime || null, published: AUTO_PUBLISH_BLOG
+    }).select().single();
+    if (insertErr) throw new Error(insertErr.message);
 
     await logAction({
       actionType: AUTO_PUBLISH_BLOG ? 'blog_draft_published' : 'blog_draft_created',
-      targetSystem: 'main', targetId: inserted[0].id,
+      targetSystem: 'main', targetId: inserted.id,
       reasoning: `Tag/téma "${draft.tag}" sa dlho nepokrývala (najstarší dlho-nepokrytý tag z DB). AI vygenerovala nový článok a ${AUTO_PUBLISH_BLOG ? 'rovno ho publikovala' : 'uložila ako draft na schválenie'}.`,
       result: 'success', detail: { slug, title: draft.title, tag: draft.tag }
     });

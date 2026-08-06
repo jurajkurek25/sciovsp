@@ -5,7 +5,7 @@
 const express = require('express');
 const router = express.Router();
 const { requireDashAuth } = require('../lib/auth');
-const { pool: mainPool } = require('../lib/db-main');
+const { supabase: mainDb } = require('../lib/db-main');
 const { supabase: partnerDb } = require('../lib/db-partner');
 const { pool: adPool } = require('../lib/db-ads');
 
@@ -25,24 +25,27 @@ router.get('/api/dash/overview', requireDashAuth, async (req, res) => {
     bugReports, aiActions
   ] = await Promise.all([
     safe('users_total', async () => {
-      const { rows } = await mainPool.query('SELECT COUNT(*)::int AS n FROM users');
-      return { value: rows[0].n };
+      const { count, error } = await mainDb.from('users').select('id', { count: 'exact', head: true });
+      if (error) throw new Error(error.message);
+      return { value: count || 0 };
     }),
     safe('active_subscriptions', async () => {
-      const { rows } = await mainPool.query(
-        `SELECT plan, COUNT(*)::int AS n FROM subscriptions WHERE status = 'active' GROUP BY plan`
-      );
-      return { value: rows };
+      const { data, error } = await mainDb.from('subscriptions').select('plan').eq('status', 'active');
+      if (error) throw new Error(error.message);
+      const counts = {};
+      for (const row of data || []) counts[row.plan] = (counts[row.plan] || 0) + 1;
+      return { value: Object.entries(counts).map(([plan, n]) => ({ plan, n })) };
     }),
     safe('new_signups_7d', async () => {
-      const { rows } = await mainPool.query(
-        `SELECT COUNT(*)::int AS n FROM users WHERE created_at > now() - interval '7 days'`
-      );
-      return { value: rows[0].n };
+      const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      const { count, error } = await mainDb.from('users').select('id', { count: 'exact', head: true }).gt('created_at', since);
+      if (error) throw new Error(error.message);
+      return { value: count || 0 };
     }),
     safe('blog_posts_total', async () => {
-      const { rows } = await mainPool.query('SELECT COUNT(*)::int AS n FROM blog_posts WHERE published = true');
-      return { value: rows[0].n };
+      const { count, error } = await mainDb.from('blog_posts').select('id', { count: 'exact', head: true }).eq('published', true);
+      if (error) throw new Error(error.message);
+      return { value: count || 0 };
     }),
     safe('partners_total', async () => {
       const { count } = await partnerDb.from('partners').select('id', { count: 'exact', head: true });
