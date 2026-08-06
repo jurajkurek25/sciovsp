@@ -37,6 +37,11 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .lang-btn:hover:not(.active){background:var(--black3);color:var(--text)}
 .screen{display:none}
 .screen.active{display:flex;flex-direction:column;min-height:100vh}
+footer{border-top:1px solid var(--border);padding:2.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-top:auto}
+.footer-logo{font-family:var(--mono);font-size:12px;letter-spacing:.15em;color:var(--text3)}
+.footer-links{display:flex;gap:1.5rem}
+.footer-links a{font-size:.78rem;color:var(--text3);text-decoration:none;font-family:var(--mono);letter-spacing:.05em;transition:color .2s}
+.footer-links a:hover{color:var(--text2)}
 /* HOME */
 #home{align-items:center;justify-content:center;padding:5rem 2rem 3rem;position:relative;gap:0}
 #home::after{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(124,92,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(124,92,255,.04) 1px,transparent 1px);background-size:60px 60px;mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black,transparent);pointer-events:none;z-index:0}
@@ -772,6 +777,16 @@ h1.title span{font-style:italic;color:var(--purple2)}
   </div>
 
   <div class="ad-slot" id="adSlot"></div>
+
+  <footer>
+    <div class="footer-logo">SP TRÉNER © 2026</div>
+    <div class="footer-links">
+      <a href="/">Domov</a>
+      <a href="/blog">Blog</a>
+      <a href="mailto:juraj@jurajkurek.com">Kontakt</a>
+      <a href="legal.html">Obchodné podmienky a ochrana osobných údajov</a>
+    </div>
+  </footer>
 </div>
 
 <!-- AI GENERATOR -->
