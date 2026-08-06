@@ -90,7 +90,8 @@ Na konci — a IBA na konci, po dokončení vyhľadávania — odpovedz POSLEDN�
 
     const { data: inserted, error: insertErr } = await mainDb.from('blog_posts').insert({
       slug, title: draft.title, excerpt: draft.excerpt || '', content: draft.content,
-      tag: draft.tag || null, read_time: draft.readTime || null, published: AUTO_PUBLISH_BLOG
+      tag: draft.tag || null, read_time: draft.readTime || null, published: AUTO_PUBLISH_BLOG,
+      target_lang: 'sk' // AI generuje iba SK obsah (žiadne title_cs/excerpt_cs/content_cs) — bez tohto ho /blog vyfiltruje (`.in('target_lang', audienceLangs)` nikdy nezachytí NULL)
     }).select().single();
     if (insertErr) throw new Error(insertErr.message);
 
