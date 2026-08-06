@@ -128,6 +128,12 @@ footer{border-top:1px solid var(--border);padding:2rem clamp(1rem,4vw,2rem);padd
         <div class="field hidden" id="companyField"><label data-i18n="companyLabel">Názov firmy</label><input type="text" id="authCompany"></div>
         <div class="field"><label data-i18n="emailLabel">Email</label><input type="email" id="authEmail" required></div>
         <div class="field"><label data-i18n="passwordLabel">Heslo</label><input type="password" id="authPassword" minlength="8" required></div>
+        <div class="field hidden" id="termsField">
+          <label style="display:flex;align-items:flex-start;gap:.5rem;font-size:.82rem;color:var(--text2);cursor:pointer;font-weight:400">
+            <input type="checkbox" id="authTerms" style="margin-top:.2rem">
+            <span data-i18n-html="termsCheckboxLabel">Súhlasím s <a href="/terms" target="_blank" style="color:var(--purple2)">podmienkami využívania reklamnej platformy</a>.</span>
+          </label>
+        </div>
         <button class="btn" type="submit" id="authSubmitBtn" data-i18n="authSubmitLogin">Prihlásiť sa →</button>
       </form>
       <p style="margin-top:.9rem;font-size:.85rem;color:var(--text3)">
@@ -246,6 +252,8 @@ const DASH_I18N = {
     authSubmitLogin: 'Prihlásiť sa →', authSubmitRegister: 'Zaregistrovať sa →',
     authToggleTextLogin: 'Nemáš účet?', authToggleTextRegister: 'Už máš účet?',
     authToggleLinkLogin: 'Zaregistruj sa', authToggleLinkRegister: 'Prihlás sa',
+    termsCheckboxLabel: 'Súhlasím s <a href="/terms" target="_blank" style="color:var(--purple2)">podmienkami využívania reklamnej platformy</a>.',
+    termsRequiredMsg: 'Pre registráciu musíš súhlasiť s podmienkami využívania.',
     tabBanners: 'Bannery', tabVideos: 'Video reklamy', tabPrArticle: 'PR článok',
     billingBtn: 'Fakturácia',
     uploadBannerTitle: 'Nahrať banner', bannerFileLabel: 'Súbor (PNG/GIF/MP4, max 8MB)',
@@ -309,6 +317,8 @@ const DASH_I18N = {
     authSubmitLogin: 'Přihlásit se →', authSubmitRegister: 'Zaregistrovat se →',
     authToggleTextLogin: 'Nemáš účet?', authToggleTextRegister: 'Už máš účet?',
     authToggleLinkLogin: 'Zaregistruj se', authToggleLinkRegister: 'Přihlas se',
+    termsCheckboxLabel: 'Souhlasím s <a href="/terms" target="_blank" style="color:var(--purple2)">podmínkami využívání reklamní platformy</a>.',
+    termsRequiredMsg: 'Pro registraci musíš souhlasit s podmínkami využívání.',
     tabBanners: 'Bannery', tabVideos: 'Video reklamy', tabPrArticle: 'PR článek',
     billingBtn: 'Fakturace',
     uploadBannerTitle: 'Nahrát banner', bannerFileLabel: 'Soubor (PNG/GIF/MP4, max 8MB)',
@@ -408,12 +418,17 @@ function toggleAuthMode(e){
   e.preventDefault();
   authMode = authMode === 'login' ? 'register' : 'login';
   document.getElementById('companyField').classList.toggle('hidden', authMode === 'login');
+  document.getElementById('termsField').classList.toggle('hidden', authMode === 'login');
   applyStaticI18n();
   return false;
 }
 
 async function submitAuth(e){
   e.preventDefault();
+  if (authMode === 'register' && !document.getElementById('authTerms').checked) {
+    showMsg('authMsg', t('termsRequiredMsg'), 'error');
+    return false;
+  }
   const btn = document.getElementById('authSubmitBtn');
   btn.disabled = true;
   try {
