@@ -8,7 +8,7 @@ async function callClaude({ system, messages, maxTokens = 1500, tools }) {
   const controller = new AbortController();
   // Web search predlžuje odpoveď (viacero serverových vyhľadávaní pred finálnou
   // odpoveďou) — dlhší timeout len keď je tools naozaj použité.
-  const timeoutMs = tools && tools.length ? 120000 : 60000;
+  const timeoutMs = tools && tools.length ? 240000 : 60000;
   const t = setTimeout(() => controller.abort(), timeoutMs);
   let res;
   try {
