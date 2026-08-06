@@ -98,6 +98,7 @@ textarea{width:100%;min-height:110px;padding:.7rem;background:var(--black3);bord
     <a class="navlink" data-page="trends">Trendy</a>
     <a class="navlink" data-page="academy">Akadémia</a>
     <a class="navlink" data-page="courses">Kurzy</a>
+    <a class="navlink" data-page="blog">Blog</a>
     <a class="navlink" data-page="giftcards">Darčekové karty</a>
     <a class="navlink" data-page="payouts">Výplaty (PAY by square)</a>
     <a class="navlink" data-page="bugs">Nahlásené chyby</a>
@@ -163,7 +164,7 @@ function showApp() {
 }
 
 // ─────────────────────────── ROUTER ───────────────────────────
-const PAGES = { overview: renderOverview, trends: renderTrends, academy: renderAcademy, courses: renderCourses, giftcards: renderGiftcards, payouts: renderPayouts, bugs: renderBugs, advisor: renderAdvisor, aiops: renderAiops };
+const PAGES = { overview: renderOverview, trends: renderTrends, academy: renderAcademy, courses: renderCourses, blog: renderBlog, giftcards: renderGiftcards, payouts: renderPayouts, bugs: renderBugs, advisor: renderAdvisor, aiops: renderAiops };
 
 $$('.navlink[data-page]').forEach(a => a.addEventListener('click', () => navigate(a.dataset.page)));
 
@@ -434,6 +435,96 @@ function bindLessonForms(courseId, panel) {
       await renderCourseLessons(courseId, panelEl);
     } catch (err) { alert(err.message); }
   });
+}
+
+// ─────────────────────────── BLOG ───────────────────────────
+async function renderBlog() {
+  const { posts } = await api('/api/dash/blog');
+  $('#main').innerHTML = `
+    <div class="pagehead"><h2>Blog</h2><button class="btn" id="newPostBtn">+ Nový článok</button></div>
+    <p class="muted" style="margin-bottom:1.2rem">Tu vidíš aj články, ktoré napísala AI sama (autonómny publisher) — vieš ich tu upraviť, publikovať/skryť alebo zmazať. Cover obrázok sa generuje automaticky podľa názvu, ak nezadáš vlastný.</p>
+    <div id="postFormRoot"></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Titulok</th><th>Tag</th><th>Jazyk</th><th>Stav</th><th></th></tr></thead>
+        <tbody>${posts.map(p => `<tr data-id="${p.id}">
+          <td>${(p.title||'').replace(/</g,'&lt;')}<br><span class="muted">/blog/${p.slug}</span></td>
+          <td class="muted">${p.tag||''}</td>
+          <td class="muted">${p.target_lang||'—'}</td>
+          <td><span class="pill ${p.published?'resolved':'pending'}">${p.published?'publikovaný':'draft'}</span></td>
+          <td style="white-space:nowrap">
+            <button class="btn secondary edit-post-btn">Upraviť</button>
+            <button class="btn secondary toggle-publish-post-btn" data-published="${p.published}">${p.published?'Skryť':'Publikovať'}</button>
+            <button class="btn danger delete-post-btn">Zmazať</button>
+          </td>
+        </tr>`).join('') || '<tr><td class="muted" colspan="5">Zatiaľ žiadne články.</td></tr>'}</tbody>
+      </table>
+    </div>`;
+
+  $('#newPostBtn').onclick = () => {
+    $('#postFormRoot').innerHTML = postFormHtml();
+    bindPostForm(null);
+  };
+
+  $$('.edit-post-btn').forEach(btn => btn.onclick = async () => {
+    const id = btn.closest('tr').dataset.id;
+    const { posts } = await api('/api/dash/blog');
+    const p = posts.find(x => x.id === id);
+    $('#postFormRoot').innerHTML = postFormHtml(p);
+    bindPostForm(p);
+    $('#postFormRoot').scrollIntoView({ behavior: 'smooth' });
+  });
+  $$('.toggle-publish-post-btn').forEach(btn => btn.onclick = async () => {
+    const id = btn.closest('tr').dataset.id;
+    const nowPublished = btn.dataset.published === 'true';
+    try { await api(`/api/dash/blog/${id}`, { method: 'PUT', body: JSON.stringify({ published: !nowPublished }) }); navigate('blog'); }
+    catch (err) { alert(err.message); }
+  });
+  $$('.delete-post-btn').forEach(btn => btn.onclick = async () => {
+    if (!confirm('Zmazať článok?')) return;
+    const id = btn.closest('tr').dataset.id;
+    try { await api(`/api/dash/blog/${id}`, { method: 'DELETE' }); navigate('blog'); }
+    catch (err) { alert(err.message); }
+  });
+}
+
+function postFormHtml(p) {
+  const isEdit = !!p;
+  return `<div class="card" style="margin-bottom:1.4rem">
+    <h3>${isEdit ? 'Upraviť článok' : 'Nový článok'}</h3>
+    <div class="formrow">
+      <input class="pf-title" placeholder="Titulok (max 55 znakov pre SEO)" value="${(p?.title||'').replace(/"/g,'&quot;')}" style="flex:1;min-width:220px">
+      <input class="pf-tag" placeholder="Tag" value="${(p?.tag||'').replace(/"/g,'&quot;')}" style="width:160px">
+      <input class="pf-readtime" placeholder="Čas čítania" value="${(p?.read_time||'').replace(/"/g,'&quot;')}" style="width:140px">
+      <select class="pf-lang" style="width:120px">
+        ${['sk','cz','both'].map(o => `<option value="${o}" ${(p?.target_lang||'sk')===o?'selected':''}>${o}</option>`).join('')}
+      </select>
+    </div>
+    <textarea class="pf-excerpt" placeholder="Excerpt / meta description (140-160 znakov)" style="min-height:60px">${p?.excerpt||''}</textarea>
+    <input class="pf-image" placeholder="URL cover obrázku (voliteľné — inak sa vygeneruje automaticky)" value="${(p?.image_url||'').replace(/"/g,'&quot;')}" style="width:100%;padding:.6rem .8rem;background:var(--black3);border:1px solid var(--border2);border-radius:8px;margin:.6rem 0">
+    <textarea class="pf-content" placeholder="Obsah článku — HTML (h2, p, ul/li, strong...)" style="min-height:260px">${p?.content||''}</textarea>
+    <div style="display:flex;gap:.6rem;margin-top:.6rem">
+      <button class="btn pf-save">Uložiť</button>
+      <button class="btn secondary pf-cancel">Zrušiť</button>
+    </div>
+  </div>`;
+}
+
+function bindPostForm(post) {
+  const root = $('#postFormRoot');
+  $('.pf-save', root).onclick = async () => {
+    const body = {
+      title: $('.pf-title', root).value, excerpt: $('.pf-excerpt', root).value, content: $('.pf-content', root).value,
+      tag: $('.pf-tag', root).value, readTime: $('.pf-readtime', root).value,
+      imageUrl: $('.pf-image', root).value, targetLang: $('.pf-lang', root).value
+    };
+    try {
+      if (post) await api(`/api/dash/blog/${post.id}`, { method: 'PUT', body: JSON.stringify(body) });
+      else await api('/api/dash/blog', { method: 'POST', body: JSON.stringify(body) });
+      navigate('blog');
+    } catch (err) { alert(err.message); }
+  };
+  $('.pf-cancel', root).onclick = () => { root.innerHTML = ''; };
 }
 
 // ─────────────────────────── GIFT CARDS ───────────────────────────
