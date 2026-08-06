@@ -177,6 +177,64 @@ function navigate(page) {
   PAGES[page]().catch(err => { main.innerHTML = `<p style="color:var(--red)">${err.message}</p>`; });
 }
 
+// ─────────────────────────── COVER IMAGE FIELD (zdielane kurzy + blog) ───────────────────────────
+function coverFieldHtml(urlInputClass, currentUrl) {
+  const safeUrl = (currentUrl || '').replace(/"/g, '&quot;');
+  return `<div class="cover-field" style="margin-bottom:.6rem">
+    <input class="${urlInputClass}" placeholder="URL cover obrázku (alebo nahraj súbor / vygeneruj automaticky nižšie)" value="${safeUrl}" style="width:100%;padding:.6rem .8rem;background:var(--black3);border:1px solid var(--border2);border-radius:8px;margin-bottom:.5rem">
+    <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap">
+      <input type="file" class="cover-file" accept="image/png,image/jpeg,image/webp" style="font-size:.78rem;max-width:220px">
+      <button class="btn secondary cover-upload-btn" type="button">Nahrať súbor</button>
+      <button class="btn secondary cover-auto-btn" type="button">Vygenerovať automaticky</button>
+      <span class="muted cover-status"></span>
+    </div>
+    <div class="cover-preview" style="margin-top:.6rem">${currentUrl ? `<img src="${safeUrl}" style="max-width:220px;border-radius:8px;display:block">` : '<span class="muted">Bez URL sa vygeneruje automaticky (branded cover podľa názvu).</span>'}</div>
+  </div>`;
+}
+
+function bindCoverField(root, urlInputClass, kind) {
+  const urlInput = $('.' + urlInputClass, root);
+  const fileInput = $('.cover-file', root);
+  const uploadBtn = $('.cover-upload-btn', root);
+  const autoBtn = $('.cover-auto-btn', root);
+  const status = $('.cover-status', root);
+  const preview = $('.cover-preview', root);
+
+  function updatePreview() {
+    const url = urlInput.value.trim();
+    preview.innerHTML = url
+      ? `<img src="${url.replace(/"/g,'&quot;')}" style="max-width:220px;border-radius:8px;display:block">`
+      : '<span class="muted">Bez URL sa vygeneruje automaticky (branded cover podľa názvu).</span>';
+  }
+  urlInput.addEventListener('input', updatePreview);
+
+  uploadBtn.onclick = async () => {
+    const file = fileInput.files[0];
+    if (!file) { alert('Najprv vyber súbor.'); return; }
+    status.textContent = 'Nahrávam…';
+    try {
+      const fd = new FormData();
+      fd.append('kind', kind);
+      fd.append('file', file);
+      const res = await fetch('/api/dash/upload-cover', { method: 'POST', body: fd, credentials: 'same-origin' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Nahrávanie zlyhalo.');
+      urlInput.value = data.url;
+      updatePreview();
+      status.textContent = 'Nahraté ✓';
+    } catch (err) {
+      status.textContent = '';
+      alert(err.message);
+    }
+  };
+
+  autoBtn.onclick = () => {
+    urlInput.value = '';
+    updatePreview();
+    status.textContent = 'Vygeneruje sa automaticky';
+  };
+}
+
 function metricCard(m, formatFn) {
   if (!m.ok) return `<div class="card"><h3>${m.label}</h3><div class="err">chyba: ${m.error}</div></div>`;
   return `<div class="card"><h3>${m.label}</h3><div class="num">${formatFn ? formatFn(m.value) : m.value}</div></div>`;
@@ -310,8 +368,7 @@ function courseFormHtml(c) {
       <input class="cf-title" placeholder="Názov kurzu" value="${(c?.title||'').replace(/"/g,'&quot;')}" style="flex:1;min-width:220px">
       <input class="cf-price" type="number" placeholder="Cena v centoch" value="${c?.price_cents ?? 5700}" style="width:160px">
     </div>
-    <input class="cf-cover" placeholder="URL cover obrázku (zobrazí sa v zozname aj na stránke kurzu)" value="${(c?.cover_image_url||'').replace(/"/g,'&quot;')}" style="width:100%;padding:.6rem .8rem;background:var(--black3);border:1px solid var(--border2);border-radius:8px;margin-bottom:.6rem">
-    ${c?.cover_image_url ? `<img src="${c.cover_image_url.replace(/"/g,'&quot;')}" style="max-width:220px;border-radius:8px;margin-bottom:.6rem;display:block">` : ''}
+    ${coverFieldHtml('cf-cover', c?.cover_image_url)}
     <textarea class="cf-desc" placeholder="Krátky popis (karta v zozname + meta description, cca 1-2 vety)" style="min-height:60px">${c?.description||''}</textarea>
     <textarea class="cf-sales" placeholder="Sales letter — plnohodnotný HTML predajný text na stránke kurzu (h2, p, ul/li, strong...)" style="min-height:260px;margin-top:.6rem">${c?.sales_content||''}</textarea>
     <p class="muted" style="margin-top:.4rem">Sales letter podporuje HTML: &lt;h2&gt;, &lt;p&gt;, &lt;ul&gt;&lt;li&gt;, &lt;strong&gt;, &lt;blockquote&gt;. Zobrazí sa medzi horným a dolným tlačidlom "Kúpiť kurz".</p>
@@ -324,6 +381,7 @@ function courseFormHtml(c) {
 
 function bindCourseForm(course) {
   const root = $('#courseFormRoot');
+  bindCoverField(root, 'cf-cover', 'courses');
   $('.cf-save', root).onclick = async () => {
     const body = {
       title: $('.cf-title', root).value, description: $('.cf-desc', root).value, priceCents: Number($('.cf-price', root).value) || 5700,
@@ -501,7 +559,7 @@ function postFormHtml(p) {
       </select>
     </div>
     <textarea class="pf-excerpt" placeholder="Excerpt / meta description (140-160 znakov)" style="min-height:60px">${p?.excerpt||''}</textarea>
-    <input class="pf-image" placeholder="URL cover obrázku (voliteľné — inak sa vygeneruje automaticky)" value="${(p?.image_url||'').replace(/"/g,'&quot;')}" style="width:100%;padding:.6rem .8rem;background:var(--black3);border:1px solid var(--border2);border-radius:8px;margin:.6rem 0">
+    ${coverFieldHtml('pf-image', p?.image_url)}
     <textarea class="pf-content" placeholder="Obsah článku — HTML (h2, p, ul/li, strong...)" style="min-height:260px">${p?.content||''}</textarea>
     <div style="display:flex;gap:.6rem;margin-top:.6rem">
       <button class="btn pf-save">Uložiť</button>
@@ -512,6 +570,7 @@ function postFormHtml(p) {
 
 function bindPostForm(post) {
   const root = $('#postFormRoot');
+  bindCoverField(root, 'pf-image', 'blog');
   $('.pf-save', root).onclick = async () => {
     const body = {
       title: $('.pf-title', root).value, excerpt: $('.pf-excerpt', root).value, content: $('.pf-content', root).value,
