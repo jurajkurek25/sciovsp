@@ -101,6 +101,8 @@ h1.title span{font-style:italic;color:var(--purple2)}
 .reward-video-cta{position:absolute;top:1rem;right:1rem;z-index:3;background:var(--volt);color:var(--black);font-family:var(--mono);font-size:.72rem;font-weight:700;padding:.6rem 1rem;border-radius:8px;text-decoration:none;box-shadow:0 4px 14px rgba(0,0,0,.35);transition:transform .15s}
 .reward-video-cta:hover{transform:translateY(-1px)}
 @media (max-width:600px){ .reward-video-cta{top:.7rem;right:.7rem;font-size:.66rem;padding:.5rem .8rem} }
+.reward-video-resume{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:4;display:none;align-items:center;gap:.5rem;background:rgba(8,8,13,.85);color:var(--text);border:1px solid var(--border2);font-family:var(--mono);font-size:.85rem;font-weight:700;padding:.9rem 1.4rem;border-radius:999px;cursor:pointer;backdrop-filter:blur(6px)}
+.reward-video-resume:hover{border-color:var(--volt);color:var(--volt)}
 /* TEST */
 #test{flex-direction:column;padding:0}
 .test-header{background:rgba(15,15,24,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:.75rem 1.5rem;display:flex;align-items:center;gap:1rem;position:sticky;top:0;z-index:100}
@@ -5392,6 +5394,7 @@ async function runAdRewardVideo(resolve){
         <div class="reward-video-wrap">
           <video id="rewardVideo" src="${session.fileUrl}" autoplay playsinline controlsList="nodownload noremoteplayback"></video>
           ${session.linkUrl ? `<a class="reward-video-cta" href="https://ad.sptrener.online/api/video-ads/go/${session.videoAdId}?session=${encodeURIComponent(session.sessionToken)}" target="_blank" rel="noopener">Navštíviť stránku inzerenta →</a>` : ''}
+          <button type="button" id="rewardResumeBtn" class="reward-video-resume" style="display:none">▶ Pokračovať v sledovaní</button>
           <div class="reward-progress-bg"><div class="reward-progress-fill" id="rewardProgressFill"></div></div>
           <div class="reward-video-label" id="rewardVideoLabel">Sleduj celé video pre získanie testu…</div>
         </div>
@@ -5411,6 +5414,11 @@ async function runAdRewardVideo(resolve){
   document.addEventListener('visibilitychange', () => {
     if (document.hidden && !video.paused) video.pause();
   });
+
+  const resumeBtn = document.getElementById('rewardResumeBtn');
+  video.addEventListener('pause', () => { if (!video.ended) resumeBtn.style.display = 'flex'; });
+  video.addEventListener('play', () => { resumeBtn.style.display = 'none'; });
+  resumeBtn.onclick = () => video.play();
 
   video.addEventListener('ended', async () => {
     label.textContent = 'Vyhodnocujem…';
