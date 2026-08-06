@@ -97,6 +97,7 @@ textarea{width:100%;min-height:110px;padding:.7rem;background:var(--black3);bord
     <a class="navlink" data-page="overview">Prehľad</a>
     <a class="navlink" data-page="trends">Trendy</a>
     <a class="navlink" data-page="academy">Akadémia</a>
+    <a class="navlink" data-page="courses">Kurzy</a>
     <a class="navlink" data-page="giftcards">Darčekové karty</a>
     <a class="navlink" data-page="payouts">Výplaty (PAY by square)</a>
     <a class="navlink" data-page="bugs">Nahlásené chyby</a>
@@ -162,7 +163,7 @@ function showApp() {
 }
 
 // ─────────────────────────── ROUTER ───────────────────────────
-const PAGES = { overview: renderOverview, trends: renderTrends, academy: renderAcademy, giftcards: renderGiftcards, payouts: renderPayouts, bugs: renderBugs, advisor: renderAdvisor, aiops: renderAiops };
+const PAGES = { overview: renderOverview, trends: renderTrends, academy: renderAcademy, courses: renderCourses, giftcards: renderGiftcards, payouts: renderPayouts, bugs: renderBugs, advisor: renderAdvisor, aiops: renderAiops };
 
 $$('.navlink[data-page]').forEach(a => a.addEventListener('click', () => navigate(a.dataset.page)));
 
@@ -267,6 +268,164 @@ function bindLessonForms() {
     const item = btn.closest('.lesson-item');
     try { await api(`/api/dash/academy/${item.dataset.id}`, { method: 'DELETE' }); navigate('academy'); }
     catch (err) { alert(err.message); }
+  });
+}
+
+// ─────────────────────────── KURZY ───────────────────────────
+function eur(cents) { return (Number(cents || 0) / 100).toFixed(2).replace('.', ',') + ' €'; }
+
+async function renderCourses() {
+  const { courses } = await api('/api/dash/courses');
+  $('#main').innerHTML = `
+    <div class="pagehead"><h2>Video kurzy</h2><button class="btn" id="newCourseBtn">+ Nový kurz</button></div>
+    <p class="muted" style="margin-bottom:1.2rem">Kurz = jednorázová platba (default 57 €), zloženy z lekcií (video + PDF + kvíz A/B/C/D). Ďalšia lekcia sa odomkne až po správnej odpovedi.</p>
+    <div id="courseFormRoot"></div>
+    <div id="coursesList">${courses.map(c => `
+      <div class="card-item" data-id="${c.id}">
+        <h4>${(c.title||'').replace(/</g,'&lt;')} ${c.published ? '<span class="pill resolved">publikovaný</span>' : '<span class="pill pending">draft</span>'}</h4>
+        <p class="muted">/kurzy/${c.slug} · ${eur(c.price_cents)} · ${c.lessonCount} lekcií · ${c.purchaseCount} nákupov</p>
+        <p style="margin:.5rem 0">${(c.description||'').replace(/</g,'&lt;')}</p>
+        <div style="display:flex;gap:.6rem;flex-wrap:wrap">
+          <button class="btn secondary open-lessons-btn">Lekcie (${c.lessonCount})</button>
+          <button class="btn secondary edit-course-btn">Upraviť</button>
+          <button class="btn ${c.published ? 'secondary' : ''} toggle-publish-btn" data-published="${c.published}">${c.published ? 'Zrušiť publikovanie' : 'Publikovať'}</button>
+          <button class="btn danger delete-course-btn">Zmazať</button>
+        </div>
+        <div class="lessons-panel hidden" style="margin-top:1rem"></div>
+      </div>`).join('') || '<p class="muted">Zatiaľ žiadne kurzy.</p>'}</div>`;
+
+  $('#newCourseBtn').onclick = () => {
+    $('#courseFormRoot').innerHTML = courseFormHtml();
+    bindCourseForm(null);
+  };
+  bindCourseListActions();
+}
+
+function courseFormHtml(c) {
+  const isEdit = !!c;
+  return `<div class="card" style="margin-bottom:1.4rem">
+    <h3>${isEdit ? 'Upraviť kurz' : 'Nový kurz'}</h3>
+    <div class="formrow">
+      <input class="cf-title" placeholder="Názov kurzu" value="${(c?.title||'').replace(/"/g,'&quot;')}" style="flex:1;min-width:220px">
+      <input class="cf-price" type="number" placeholder="Cena v centoch" value="${c?.price_cents ?? 5700}" style="width:160px">
+    </div>
+    <textarea class="cf-desc" placeholder="Popis kurzu (zobrazí sa na predajnej stránke)">${c?.description||''}</textarea>
+    <div style="display:flex;gap:.6rem;margin-top:.6rem">
+      <button class="btn cf-save">Uložiť</button>
+      <button class="btn secondary cf-cancel">Zrušiť</button>
+    </div>
+  </div>`;
+}
+
+function bindCourseForm(course) {
+  const root = $('#courseFormRoot');
+  $('.cf-save', root).onclick = async () => {
+    const body = { title: $('.cf-title', root).value, description: $('.cf-desc', root).value, priceCents: Number($('.cf-price', root).value) || 5700 };
+    try {
+      if (course) await api(`/api/dash/courses/${course.id}`, { method: 'PUT', body: JSON.stringify(body) });
+      else await api('/api/dash/courses', { method: 'POST', body: JSON.stringify(body) });
+      navigate('courses');
+    } catch (err) { alert(err.message); }
+  };
+  $('.cf-cancel', root).onclick = () => { root.innerHTML = ''; };
+}
+
+function bindCourseListActions() {
+  $$('.edit-course-btn').forEach(btn => btn.onclick = async () => {
+    const id = btn.closest('.card-item').dataset.id;
+    const { courses } = await api('/api/dash/courses');
+    const c = courses.find(x => x.id === id);
+    $('#courseFormRoot').innerHTML = courseFormHtml(c);
+    bindCourseForm(c);
+    $('#courseFormRoot').scrollIntoView({ behavior: 'smooth' });
+  });
+  $$('.toggle-publish-btn').forEach(btn => btn.onclick = async () => {
+    const id = btn.closest('.card-item').dataset.id;
+    const nowPublished = btn.dataset.published === 'true';
+    try { await api(`/api/dash/courses/${id}`, { method: 'PUT', body: JSON.stringify({ published: !nowPublished }) }); navigate('courses'); }
+    catch (err) { alert(err.message); }
+  });
+  $$('.delete-course-btn').forEach(btn => btn.onclick = async () => {
+    if (!confirm('Zmazať kurz aj so všetkými lekciami?')) return;
+    const id = btn.closest('.card-item').dataset.id;
+    try { await api(`/api/dash/courses/${id}`, { method: 'DELETE' }); navigate('courses'); }
+    catch (err) { alert(err.message); }
+  });
+  $$('.open-lessons-btn').forEach(btn => btn.onclick = async () => {
+    const item = btn.closest('.card-item');
+    const panel = $('.lessons-panel', item);
+    if (!panel.classList.contains('hidden')) { panel.classList.add('hidden'); panel.innerHTML = ''; return; }
+    panel.classList.remove('hidden');
+    await renderCourseLessons(item.dataset.id, panel);
+  });
+}
+
+async function renderCourseLessons(courseId, panel) {
+  panel.innerHTML = '<p class="muted">Načítavam lekcie…</p>';
+  const { lessons } = await api(`/api/dash/courses/${courseId}/lessons`);
+  panel.innerHTML = `
+    <button class="btn secondary new-lesson-btn" style="margin-bottom:.8rem">+ Nová lekcia</button>
+    <div class="lessons-inner">${lessons.map(l => lessonFormHtml(l)).join('')}</div>`;
+  $('.new-lesson-btn', panel).onclick = () => {
+    $('.lessons-inner', panel).insertAdjacentHTML('afterbegin', lessonFormHtml({ id: '', course_id: courseId, sort_order: lessons.length }, true));
+    bindLessonForms(courseId, panel);
+  };
+  bindLessonForms(courseId, panel);
+}
+
+function lessonFormHtml(l, isNew) {
+  return `<div class="lesson-item" data-id="${l.id||''}" data-new="${!!isNew}">
+    <div class="formrow">
+      <input class="lf-title" placeholder="Názov lekcie" value="${(l.title||'').replace(/"/g,'&quot;')}" style="flex:1;min-width:200px">
+      <input class="lf-sort" type="number" placeholder="poradie" value="${l.sort_order ?? 0}" style="width:100px">
+    </div>
+    <div class="formrow">
+      <input class="lf-video" placeholder="URL videa (napr. https://cestak.online/video.mp4)" value="${(l.video_url||'').replace(/"/g,'&quot;')}" style="flex:1;min-width:280px">
+      <input class="lf-doc" placeholder="URL dokumentu / PDF (voliteľné)" value="${(l.doc_url||'').replace(/"/g,'&quot;')}" style="flex:1;min-width:220px">
+    </div>
+    <input class="lf-question" placeholder="Otázka kvízu" value="${(l.quiz_question||'').replace(/"/g,'&quot;')}" style="width:100%;padding:.6rem .8rem;background:var(--black3);border:1px solid var(--border2);border-radius:8px;margin-bottom:.6rem">
+    <div class="formrow">
+      <input class="lf-a" placeholder="A" value="${(l.quiz_option_a||'').replace(/"/g,'&quot;')}" style="flex:1;min-width:110px">
+      <input class="lf-b" placeholder="B" value="${(l.quiz_option_b||'').replace(/"/g,'&quot;')}" style="flex:1;min-width:110px">
+      <input class="lf-c" placeholder="C" value="${(l.quiz_option_c||'').replace(/"/g,'&quot;')}" style="flex:1;min-width:110px">
+      <input class="lf-d" placeholder="D" value="${(l.quiz_option_d||'').replace(/"/g,'&quot;')}" style="flex:1;min-width:110px">
+      <select class="lf-correct" style="width:140px">
+        <option value="">správna: —</option>
+        ${['a','b','c','d'].map(o => `<option value="${o}" ${l.quiz_correct===o?'selected':''}>správna: ${o.toUpperCase()}</option>`).join('')}
+      </select>
+    </div>
+    <div style="display:flex;gap:.6rem;margin-top:.6rem">
+      <button class="btn save-lesson-btn">Uložiť</button>
+      ${isNew ? '' : '<button class="btn danger delete-lesson-btn">Zmazať</button>'}
+    </div>
+  </div>`;
+}
+
+function bindLessonForms(courseId, panel) {
+  $$('.save-lesson-btn', panel).forEach(btn => btn.onclick = async () => {
+    const item = btn.closest('.lesson-item');
+    const isNew = item.dataset.new === 'true';
+    const body = {
+      title: $('.lf-title', item).value, videoUrl: $('.lf-video', item).value, docUrl: $('.lf-doc', item).value,
+      quizQuestion: $('.lf-question', item).value, quizOptionA: $('.lf-a', item).value, quizOptionB: $('.lf-b', item).value,
+      quizOptionC: $('.lf-c', item).value, quizOptionD: $('.lf-d', item).value, quizCorrect: $('.lf-correct', item).value || undefined,
+      sortOrder: Number($('.lf-sort', item).value) || 0
+    };
+    try {
+      if (isNew) await api(`/api/dash/courses/${courseId}/lessons`, { method: 'POST', body: JSON.stringify(body) });
+      else await api(`/api/dash/courses/${courseId}/lessons/${item.dataset.id}`, { method: 'PUT', body: JSON.stringify(body) });
+      const panelEl = btn.closest('.lessons-panel');
+      await renderCourseLessons(courseId, panelEl);
+    } catch (err) { alert(err.message); }
+  });
+  $$('.delete-lesson-btn', panel).forEach(btn => btn.onclick = async () => {
+    if (!confirm('Zmazať lekciu?')) return;
+    const item = btn.closest('.lesson-item');
+    try {
+      await api(`/api/dash/courses/${courseId}/lessons/${item.dataset.id}`, { method: 'DELETE' });
+      const panelEl = btn.closest('.lessons-panel');
+      await renderCourseLessons(courseId, panelEl);
+    } catch (err) { alert(err.message); }
   });
 }
 
