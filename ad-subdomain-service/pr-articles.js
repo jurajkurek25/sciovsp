@@ -439,8 +439,10 @@ async function handlePrArticlePaid(prArticleId, paymentIntentId) {
 
     // Článok prešiel automatickou kontrolou — namiesto rovno publikovania
     // čaká na schválenie Inzerentom v dashboarde (pozri /approve, /reject).
+    // draft_ready_at slúži automation.js na zistenie, ako dlho tam už
+    // nečinne čaká, aby vedel poslať pripomienku.
     await db.query(
-      `UPDATE pr_articles SET status = 'pending_approval', moderation_allowed = 1, draft_json = ? WHERE id = ?`,
+      `UPDATE pr_articles SET status = 'pending_approval', moderation_allowed = 1, draft_json = ?, draft_ready_at = NOW() WHERE id = ?`,
       [JSON.stringify(article), pr.id]
     );
 
