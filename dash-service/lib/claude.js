@@ -3,16 +3,21 @@
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 const MODEL = 'claude-sonnet-5';
 
-async function callClaude({ system, messages, maxTokens = 1500 }) {
+async function callClaude({ system, messages, maxTokens = 1500, tools }) {
   if (!ANTHROPIC_API_KEY) throw new Error('ANTHROPIC_API_KEY nie je nastavený.');
   const controller = new AbortController();
-  const t = setTimeout(() => controller.abort(), 60000);
+  // Web search predlžuje odpoveď (viacero serverových vyhľadávaní pred finálnou
+  // odpoveďou) — dlhší timeout len keď je tools naozaj použité.
+  const timeoutMs = tools && tools.length ? 120000 : 60000;
+  const t = setTimeout(() => controller.abort(), timeoutMs);
   let res;
   try {
+    const body = { model: MODEL, max_tokens: maxTokens, system, messages };
+    if (tools && tools.length) body.tools = tools;
     res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'x-api-key': ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
-      body: JSON.stringify({ model: MODEL, max_tokens: maxTokens, system, messages }),
+      body: JSON.stringify(body),
       signal: controller.signal
     });
   } finally {

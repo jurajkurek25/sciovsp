@@ -56,15 +56,23 @@ async function runBlogTrendPublisher() {
       .select('title, tag').order('created_at', { ascending: false }).limit(12);
     if (titlesErr) throw new Error(titlesErr.message);
 
-    const system = `Si obsahový editor blogu SP Tréner (príprava na VŠP/SCIO prijímacie testy pre SR/ČR stredoškolákov). Na základe zoznamu tém/tagov, ktoré sa dlho nepokrývali, a nedávnych titulkov (aby si sa neopakoval), navrhni JEDEN nový blogový článok.
+    const system = `Si obsahový editor blogu SP Tréner (príprava na VŠP/SCIO prijímacie testy pre SR/ČR stredoškolákov, ktorí zvažujú kúpu prípravného kurzu). Tvoja úloha: zisti, čo si potenciálni zákazníci (uchádzači a ich rodičia) AKTUÁLNE vyhľadávajú na internete ohľadom prijímačiek na vysoké školy, VŠP, SCIO testov, prijímacieho konania — a na základe toho navrhni a napíš JEDEN nový blogový článok, ktorý na to reálne odpovedá.
 
-Dlho nepokryté tagy: ${JSON.stringify(tagRows)}
-Nedávne články (neopakuj tému): ${JSON.stringify(recentTitles)}
+Postup:
+1. Použi web_search na zistenie aktuálnych vyhľadávaní/otázok/trendov okolo VŠP, SCIO testov, prijímačiek na VŠ v SR/ČR (termíny, zmeny formátu, časté otázky uchádzačov, diskusie na fórach a Redditoch). Urob aspoň 2-3 vyhľadávania s rôznymi dopytmi.
+2. Zváž aj interné dáta: tagy, ktoré sa na blogu dlho nepokrývali: ${JSON.stringify(tagRows)}
+3. Neopakuj témy nedávnych článkov: ${JSON.stringify(recentTitles)}
+4. Vyber tému, ktorá reálne rieši niečo, čo ľudia teraz vyhľadávajú (nie hocijakú z dlho-nepokrytých tagov, ak po nej nie je dopyt).
 
-Odpovedz IBA validným JSON objektom (žiadny iný text) v tvare:
-{"title":"...", "slug":"kebab-case-slug-bez-diakritiky", "excerpt":"1-2 vety", "content":"plnohodnotný HTML článok, min 4 odseky, slovensky", "tag":"jeden z existujúcich alebo nový vhodný tag", "readTime":"X min čítania"}`;
+Na konci — a IBA na konci, po dokončení vyhľadávania — odpovedz POSLEDNÝM textovým blokom, ktorý obsahuje IBA validný JSON objekt a nič iné (žiadny komentár pred ani za ním), v tvare:
+{"title":"...", "slug":"kebab-case-slug-bez-diakritiky", "excerpt":"1-2 vety", "content":"plnohodnotný HTML článok, min 4 odseky, slovensky", "tag":"jeden z existujúcich alebo nový vhodný tag", "readTime":"X min čítania", "trendReason":"1 veta - aký konkrétny vyhľadávací trend/otázku článok rieši"}`;
 
-    const raw = await callClaude({ system, messages: [{ role: 'user', content: 'Navrhni článok.' }], maxTokens: 2500 });
+    const raw = await callClaude({
+      system,
+      messages: [{ role: 'user', content: 'Zisti aktuálne trendy vo vyhľadávaní a navrhni článok.' }],
+      maxTokens: 4000,
+      tools: [{ type: 'web_search_20260209', name: 'web_search', max_uses: 5 }]
+    });
     const jsonMatch = raw.match(/\{[\s\S]*\}/);
     if (!jsonMatch) throw new Error('AI nevrátila platný JSON.');
     const draft = JSON.parse(jsonMatch[0]);
@@ -83,8 +91,10 @@ Odpovedz IBA validným JSON objektom (žiadny iný text) v tvare:
     await logAction({
       actionType: AUTO_PUBLISH_BLOG ? 'blog_draft_published' : 'blog_draft_created',
       targetSystem: 'main', targetId: inserted.id,
-      reasoning: `Tag/téma "${draft.tag}" sa dlho nepokrývala (najstarší dlho-nepokrytý tag z DB). AI vygenerovala nový článok a ${AUTO_PUBLISH_BLOG ? 'rovno ho publikovala' : 'uložila ako draft na schválenie'}.`,
-      result: 'success', detail: { slug, title: draft.title, tag: draft.tag }
+      reasoning: draft.trendReason
+        ? `Na základe web vyhľadávania: ${draft.trendReason}. AI vygenerovala nový článok a ${AUTO_PUBLISH_BLOG ? 'rovno ho publikovala' : 'uložila ako draft na schválenie'}.`
+        : `Tag/téma "${draft.tag}" sa dlho nepokrývala. AI vygenerovala nový článok a ${AUTO_PUBLISH_BLOG ? 'rovno ho publikovala' : 'uložila ako draft na schválenie'}.`,
+      result: 'success', detail: { slug, title: draft.title, tag: draft.tag, trendReason: draft.trendReason || null }
     });
     return { ok: true, slug, title: draft.title, published: AUTO_PUBLISH_BLOG };
   } catch (err) {
