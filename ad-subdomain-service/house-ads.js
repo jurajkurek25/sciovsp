@@ -34,7 +34,9 @@ async function getHouseAdvertiserId() {
   return houseAdvertiserId;
 }
 
-const FAR_FUTURE = '2099-12-31 00:00:00';
+// MySQL TIMESTAMP je 32-bit (Y2038 limit, max 2038-01-19 03:14:07) — nedá sa
+// dať naozaj "navždy", len čo najviac do budúcnosti v rámci rozsahu.
+const FAR_FUTURE = '2037-12-31 23:59:59';
 const BANNER_MIME = ['image/png', 'image/gif', 'video/mp4'];
 const MAX_BANNER_SIZE = 8 * 1024 * 1024;
 const MAX_VIDEO_SIZE = 25 * 1024 * 1024;
