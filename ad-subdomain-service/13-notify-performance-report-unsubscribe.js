@@ -4,10 +4,10 @@
 // priamo týkajú advertiserovej vlastnej platenej kampane a opt-out nemajú.
 //
 // Presný textový match proti overenému živému súboru notify.js (po
-// aplikovaní 11-notify-performance-report.js).
+// aplikovaní 12-notify-performance-report.js).
 //
 // Spusti z /home/sptrener-ad/htdocs/ad.sptrener.online:
-//   node /root/ad-subdomain-service/12-notify-performance-report-unsubscribe.js
+//   node /root/ad-subdomain-service/13-notify-performance-report-unsubscribe.js
 
 const fs = require('fs');
 const path = require('path');
@@ -43,7 +43,7 @@ const OLD = `async function notifyAdvertiserPerformanceReport({ advertiserEmail,
 
 if (!src.includes(OLD)) {
   console.error('❌ Nenašiel som presný očakávaný text notifyAdvertiserPerformanceReport v notify.js. Nič som nezmenil.');
-  console.error('   Over, či už bol aplikovaný 11-notify-performance-report.js.');
+  console.error('   Over, či už bol aplikovaný 12-notify-performance-report.js.');
   process.exit(1);
 }
 

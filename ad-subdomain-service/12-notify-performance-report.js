@@ -3,10 +3,10 @@
 // automation.js -> sendPerformanceReports().
 //
 // Presný textový match proti overenému živému súboru notify.js (po
-// aplikovaní 09-notify-automation.js).
+// aplikovaní 10-notify-automation.js).
 //
 // Spusti z /home/sptrener-ad/htdocs/ad.sptrener.online:
-//   node /root/ad-subdomain-service/11-notify-performance-report.js
+//   node /root/ad-subdomain-service/12-notify-performance-report.js
 
 const fs = require('fs');
 const path = require('path');
@@ -23,7 +23,7 @@ const OLD = `module.exports = { notifyAdminRejection, notifyAdvertiserPrArticleP
 
 if (!src.includes(OLD)) {
   console.error('❌ Nenašiel som presný očakávaný export riadok na konci notify.js. Nič som nezmenil.');
-  console.error('   Over, či už bol aplikovaný 09-notify-automation.js.');
+  console.error('   Over, či už bol aplikovaný 10-notify-automation.js.');
   process.exit(1);
 }
 

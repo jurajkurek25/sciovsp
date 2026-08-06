@@ -6,9 +6,9 @@
 // aplikovaní 03-server-wire-pr-articles.js).
 //
 // Spusti z /home/sptrener-ad/htdocs/ad.sptrener.online:
-//   node /root/ad-subdomain-service/10-server-wire-automation.js
+//   node /root/ad-subdomain-service/11-server-wire-automation.js
 // (predpokladá, že automation.js je skopírovaný do tohto priečinka a že
-//  09-notify-automation.js aj schema-ad-automation.sql už boli aplikované)
+//  10-notify-automation.js aj schema-ad-automation.sql už boli aplikované)
 
 const fs = require('fs');
 const path = require('path');

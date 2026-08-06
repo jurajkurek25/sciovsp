@@ -10,7 +10,7 @@
 // aplikovaní 02-notify-pr-article.js a 08-notify-pr-article-approval.js).
 //
 // Spusti z /home/sptrener-ad/htdocs/ad.sptrener.online:
-//   node /root/ad-subdomain-service/09-notify-automation.js
+//   node /root/ad-subdomain-service/10-notify-automation.js
 
 const fs = require('fs');
 const path = require('path');
