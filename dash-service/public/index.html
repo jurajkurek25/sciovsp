@@ -117,6 +117,7 @@ textarea{width:100%;min-height:110px;padding:.7rem;background:var(--black3);bord
     <a class="navlink" data-page="academy">Akadémia</a>
     <a class="navlink" data-page="courses">Kurzy</a>
     <a class="navlink" data-page="blog">Blog</a>
+    <a class="navlink" data-page="houseads">Vlastné reklamy</a>
     <a class="navlink" data-page="giftcards">Darčekové karty</a>
     <a class="navlink" data-page="payouts">Výplaty (PAY by square)</a>
     <a class="navlink" data-page="bugs">Nahlásené chyby</a>
@@ -183,7 +184,7 @@ function showApp() {
 }
 
 // ─────────────────────────── ROUTER ───────────────────────────
-const PAGES = { overview: renderOverview, trends: renderTrends, academy: renderAcademy, courses: renderCourses, blog: renderBlog, giftcards: renderGiftcards, payouts: renderPayouts, bugs: renderBugs, advisor: renderAdvisor, aiops: renderAiops };
+const PAGES = { overview: renderOverview, trends: renderTrends, academy: renderAcademy, courses: renderCourses, blog: renderBlog, houseads: renderHouseAds, giftcards: renderGiftcards, payouts: renderPayouts, bugs: renderBugs, advisor: renderAdvisor, aiops: renderAiops };
 
 $$('.navlink[data-page]').forEach(a => a.addEventListener('click', () => navigate(a.dataset.page)));
 
@@ -648,6 +649,110 @@ function bindPostForm(post) {
     } catch (err) { alert(err.message); }
   };
   $('.pf-cancel', root).onclick = () => { root.innerHTML = ''; };
+}
+
+// ─────────────────────────── VLASTNÉ (HOUSE) REKLAMY ───────────────────────────
+async function renderHouseAds() {
+  $('#main').innerHTML = '<p class="muted">Načítavam…</p>';
+  try {
+    const { banners, videos } = await api('/api/dash/ads/house');
+    $('#main').innerHTML = `
+      <div class="pagehead"><h2>Vlastné reklamy</h2></div>
+      <p class="muted" style="margin-bottom:1.2rem">Zadarmo, bez Stripe. Vypĺňajú voľné miesta v rotácii (max 4 bannery, max 3 videá) — platiaci klient má vždy prednosť a automaticky vytlačí tvoju reklamu, keď si kúpi miesto.</p>
+
+      <div class="card" style="margin-bottom:1.4rem">
+        <h3>Nový banner</h3>
+        <div class="formrow">
+          <input type="file" class="ha-banner-file" accept="image/png,image/gif,video/mp4">
+          <input class="ha-banner-link" placeholder="Cieľová URL (https://...)" style="flex:1;min-width:220px">
+          <select class="ha-banner-lang" style="width:110px">
+            <option value="both">both</option><option value="sk">sk</option><option value="cz">cz</option>
+          </select>
+          <button class="btn" id="haBannerBtn">Nahrať banner</button>
+        </div>
+        <p class="muted">PNG, GIF alebo MP4, max 8 MB.</p>
+      </div>
+
+      <div class="card" style="margin-bottom:1.4rem">
+        <h3>Nové video</h3>
+        <div class="formrow">
+          <input type="file" class="ha-video-file" accept="video/mp4">
+          <input class="ha-video-link" placeholder="Cieľová URL (https://...)" style="flex:1;min-width:220px">
+          <input class="ha-video-duration" type="number" placeholder="Dĺžka v sekundách" style="width:160px">
+          <select class="ha-video-lang" style="width:110px">
+            <option value="both">both</option><option value="sk">sk</option><option value="cz">cz</option>
+          </select>
+          <button class="btn" id="haVideoBtn">Nahrať video</button>
+        </div>
+        <p class="muted">MP4, max 25 MB, 5–180 sekúnd.</p>
+      </div>
+
+      <h3 style="margin-bottom:.8rem">Bannery (${banners.length})</h3>
+      <div id="haBannersList">${banners.map(b => houseAdItemHtml('banner', b)).join('') || '<p class="muted">Žiadne.</p>'}</div>
+
+      <h3 style="margin:1.6rem 0 .8rem">Videá (${videos.length})</h3>
+      <div id="haVideosList">${videos.map(v => houseAdItemHtml('video', v)).join('') || '<p class="muted">Žiadne.</p>'}</div>
+    `;
+
+    $('#haBannerBtn').onclick = async () => {
+      const file = $('.ha-banner-file').files[0];
+      if (!file) { alert('Vyber súbor.'); return; }
+      const fd = new FormData();
+      fd.append('file', file);
+      fd.append('linkUrl', $('.ha-banner-link').value);
+      fd.append('targetLang', $('.ha-banner-lang').value);
+      try { await fetch('/api/dash/ads/house/banner', { method: 'POST', body: fd, credentials: 'same-origin' }).then(async r => { const d = await r.json(); if (!r.ok) throw new Error(d.error || 'Chyba.'); }); navigate('houseads'); }
+      catch (err) { alert(err.message); }
+    };
+
+    $('#haVideoBtn').onclick = async () => {
+      const file = $('.ha-video-file').files[0];
+      if (!file) { alert('Vyber súbor.'); return; }
+      const fd = new FormData();
+      fd.append('file', file);
+      fd.append('linkUrl', $('.ha-video-link').value);
+      fd.append('durationS', $('.ha-video-duration').value);
+      fd.append('targetLang', $('.ha-video-lang').value);
+      try { await fetch('/api/dash/ads/house/video', { method: 'POST', body: fd, credentials: 'same-origin' }).then(async r => { const d = await r.json(); if (!r.ok) throw new Error(d.error || 'Chyba.'); }); navigate('houseads'); }
+      catch (err) { alert(err.message); }
+    };
+
+    bindHouseAdActions();
+  } catch (err) {
+    $('#main').innerHTML = `<p style="color:var(--red)">${err.message}</p>`;
+  }
+}
+
+function houseAdItemHtml(type, item) {
+  const preview = type === 'banner'
+    ? (item.mime_type === 'video/mp4'
+        ? `<video src="${item.public_url}" style="width:160px;border-radius:8px" muted></video>`
+        : `<img src="${item.public_url}" style="width:160px;border-radius:8px">`)
+    : `<video src="${item.public_url}" style="width:160px;border-radius:8px" muted></video>`;
+  return `<div class="card-item" data-id="${item.id}" data-type="${type}" style="display:flex;gap:1rem;align-items:center">
+    ${preview}
+    <div style="flex:1">
+      <p class="muted">${item.link_url}</p>
+      <p class="muted">${item.target_lang}${type === 'video' ? ' · ' + item.duration_s + 's' : ''} · <span class="pill ${item.active ? 'resolved' : 'pending'}">${item.active ? 'aktívne' : 'vypnuté'}</span></p>
+    </div>
+    <button class="btn secondary ha-toggle-btn" data-active="${item.active}">${item.active ? 'Vypnúť' : 'Zapnúť'}</button>
+    <button class="btn danger ha-delete-btn">Zmazať</button>
+  </div>`;
+}
+
+function bindHouseAdActions() {
+  $$('.ha-toggle-btn').forEach(btn => btn.onclick = async () => {
+    const item = btn.closest('.card-item');
+    const nowActive = btn.dataset.active === '1' || btn.dataset.active === 'true';
+    try { await api(`/api/dash/ads/house/${item.dataset.type}/${item.dataset.id}`, { method: 'PATCH', body: JSON.stringify({ active: !nowActive }) }); navigate('houseads'); }
+    catch (err) { alert(err.message); }
+  });
+  $$('.ha-delete-btn').forEach(btn => btn.onclick = async () => {
+    if (!confirm('Zmazať túto reklamu?')) return;
+    const item = btn.closest('.card-item');
+    try { await api(`/api/dash/ads/house/${item.dataset.type}/${item.dataset.id}`, { method: 'DELETE' }); navigate('houseads'); }
+    catch (err) { alert(err.message); }
+  });
 }
 
 // ─────────────────────────── GIFT CARDS ───────────────────────────

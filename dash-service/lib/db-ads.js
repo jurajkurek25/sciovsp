@@ -18,10 +18,11 @@ const AD_APP_URL = process.env.AD_APP_URL || 'https://ad.sptrener.online';
 const AD_ADMIN_KEY = process.env.AD_ADMIN_KEY;
 
 async function adAdminFetch(path, opts = {}) {
+  const isFormData = typeof FormData !== 'undefined' && opts.body instanceof FormData;
   const res = await fetch(`${AD_APP_URL}${path}`, {
     ...opts,
     headers: {
-      'content-type': 'application/json',
+      ...(isFormData ? {} : { 'content-type': 'application/json' }),
       'x-admin-key': AD_ADMIN_KEY,
       ...(opts.headers || {})
     }

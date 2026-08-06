@@ -19,6 +19,7 @@ app.use(require('./routes/trends'));
 app.use(require('./routes/courses'));
 app.use(require('./routes/blog'));
 app.use(require('./routes/upload'));
+app.use(require('./routes/ads'));
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.get('/{*splat}', (req, res) => {
