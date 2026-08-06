@@ -62,10 +62,16 @@ Postup:
 1. Použi web_search na zistenie aktuálnych vyhľadávaní/otázok/trendov okolo VŠP, SCIO testov, prijímačiek na VŠ v SR/ČR (termíny, zmeny formátu, časté otázky uchádzačov, diskusie na fórach a Redditoch). Urob aspoň 2-3 vyhľadávania s rôznymi dopytmi.
 2. Zváž aj interné dáta: tagy, ktoré sa na blogu dlho nepokrývali: ${JSON.stringify(tagRows)}
 3. Neopakuj témy nedávnych článkov: ${JSON.stringify(recentTitles)}
-4. Vyber tému, ktorá reálne rieši niečo, čo ľudia teraz vyhľadávajú (nie hocijakú z dlho-nepokrytých tagov, ak po nej nie je dopyt).
+4. Vyber tému, ktorá reálne rieši niečo, čo ľudia teraz vyhľadávajú (nie hocijakú z dlho-nepokrytých tagov, ak po nej nie je dopyt). Titulok aj prvý odsek nech prirodzene obsahujú hlavné kľúčové slovo/frázu, ktorú si zistil vo vyhľadávaní.
+
+SEO pravidlá pre výstup (rovnaká appka to zobrazuje na sptrener.online/blog/:slug a k titulku pripája " — SP Tréner", preto:):
+- "title": max 55 znakov, obsahuje hlavné kľúčové slovo, žiadne clickbait bez obsahu
+- "excerpt": presne 140-160 znakov, funguje aj ako meta description — zhrň konkrétny prínos článku, nie všeobecnú frázu
+- "content": HTML, 600-900 slov, štruktúrované do 3+ sekcií pomocou <h2>...</h2> medzititulkov (nie jeden blok textu), odseky v <p>, zoznamy v <ul><li> kde sa hodia, žiadne <html>/<body>/<script>/inline styly
+- niekde v "content" prirodzene vlož JEDEN interný odkaz na <a href="https://sptrener.online/?openPremium=1">appku SP Tréner</a> tam, kde to dáva kontextový zmysel (nie ako vnucená reklama)
 
 Na konci — a IBA na konci, po dokončení vyhľadávania — odpovedz POSLEDNÝM textovým blokom, ktorý obsahuje IBA validný JSON objekt a nič iné (žiadny komentár pred ani za ním), v tvare:
-{"title":"...", "slug":"kebab-case-slug-bez-diakritiky", "excerpt":"1-2 vety", "content":"plnohodnotný HTML článok, min 4 odseky, slovensky", "tag":"jeden z existujúcich alebo nový vhodný tag", "readTime":"X min čítania", "trendReason":"1 veta - aký konkrétny vyhľadávací trend/otázku článok rieši"}`;
+{"title":"...", "slug":"kebab-case-slug-bez-diakritiky", "excerpt":"...", "content":"...", "tag":"jeden z existujúcich alebo nový vhodný tag", "readTime":"X min čítania", "trendReason":"1 veta - aký konkrétny vyhľadávací trend/otázku článok rieši"}`;
 
     const raw = await callClaude({
       system,

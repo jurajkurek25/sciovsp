@@ -171,6 +171,7 @@ HTML konvencie, ktoré MUSÍŠ dodržať v obsahových poliach:
 - usporiadaný zoznam presne takto: <ol style="margin-left:1.2rem;color:var(--text2)"><li>...</li></ol>
 - žiadne iné HTML značky, žiadne <html>/<body>/<script>
 - článok má cca 500-800 slov, viacero <h2> sekcií
+- SEO: titulok aj druhý odsek (hneď po disclosure) obsahujú prirodzene hlavnú tému/kľúčovú frázu článku (napr. názov produktu + čo rieši) — nie len vo výplňových vetách
 - PRVÝ odsek (<p>) v každom vyplnenom obsahovom poli MUSÍ byť presne toto (disclosure, nič nemeň, len použi disclosure v JAZYKU DANÉHO POĽA — teda ak do poľa "content" píšeš český text pre výhradne české publikum, použi ČESKÚ verziu disclosure aj v poli "content"):
   slovenský text: <p style="font-family:var(--mono);font-size:.75rem;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">Partnerský obsah — v spolupráci s ${companyName}</p>
   český text: <p style="font-family:var(--mono);font-size:.75rem;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">Partnerský obsah — ve spolupráci s ${companyName}</p>
@@ -199,13 +200,13 @@ Napíš NOVÝ návrh, ktorý konkrétne rieši uvedený dôvod zamietnutia — o
 Napíš kompletný PR článok. Odpovedz VÝHRADNE validným JSON v tomto tvare (žiadny text okolo):
 {
   "slug": "kratky-vystizny-slug-len-malymi-pismenami-a-pomlckami",
-  "title": "SK titulok (do 70 znakov)",
-  "excerpt": "SK popis 1-2 vety (do 160 znakov)",
+  "title": "SK titulok (max 55 znakov — appka k nemu pripája \" — SP Tréner\" v zobrazení, dlhší titulok sa oreže v Google výsledkoch)",
+  "excerpt": "SK popis presne 140-160 znakov — funguje aj ako meta description, zhrň konkrétny prínos, nie všeobecnú frázu",
   "tag": "SK kategória, napr. Príprava alebo Partnerský obsah",
   "readTime": "napr. 5 min čítania",
   "content": "SK HTML obsah podľa konvencií vyššie",
-  "titleCs": "CZ titulok",
-  "excerptCs": "CZ popis",
+  "titleCs": "CZ titulok (rovnaké SEO pravidlá ako title — max 55 znakov)",
+  "excerptCs": "CZ popis (rovnaké SEO pravidlá ako excerpt — 140-160 znakov)",
   "tagCs": "CZ kategória",
   "readTimeCs": "napr. 5 min čtení",
   "contentCs": "CZ HTML obsah podľa konvencií vyššie"
