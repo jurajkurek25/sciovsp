@@ -3,10 +3,16 @@
 // takže dash vie čítať aj zapisovať priamo, plus volá partnerov existujúce
 // /api/partner/admin/* endpointy pre akcie so side-effectami (emaily).
 const { createClient } = require('@supabase/supabase-js');
+const ws = require('ws');
 
+// Node 20 has no native WebSocket global (that lands in Node 22) —
+// supabase-js's RealtimeClient constructor requires one even though this
+// app never uses Realtime subscriptions, so it must be supplied explicitly
+// or createClient() throws at startup.
 const supabase = createClient(
   process.env.PARTNER_SUPABASE_URL,
-  process.env.PARTNER_SUPABASE_SERVICE_ROLE_KEY
+  process.env.PARTNER_SUPABASE_SERVICE_ROLE_KEY,
+  { realtime: { transport: ws } }
 );
 
 const PARTNER_APP_URL = process.env.PARTNER_APP_URL || 'https://partner.sptrener.online';
