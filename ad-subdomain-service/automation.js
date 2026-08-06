@@ -21,15 +21,19 @@ const {
 } = require('./notify');
 
 const ADMIN_KEY = process.env.ADMIN_KEY;
-const EXPIRY_WARNING_DAYS = 3;
-const PR_APPROVAL_REMINDER_HOURS = 48;
+const JWT_SECRET = process.env.JWT_SECRET;
+const APP_URL = process.env.APP_URL || 'https://ad.sptrener.online';
+// Všetky prahy nižšie sú odhadnuté hodnoty — dajú sa doladiť cez .env bez
+// zásahu do kódu/redeployu, keď sa v praxi ukáže, že sú príliš prísne/voľné.
+const EXPIRY_WARNING_DAYS = Number(process.env.AD_EXPIRY_WARNING_DAYS) || 3;
+const PR_APPROVAL_REMINDER_HOURS = Number(process.env.AD_PR_APPROVAL_REMINDER_HOURS) || 48;
 // "campaign live" sa posiela len pre nedávno vytvorené kampane, nech pri
 // prvom nasadení cronu nezaplaví dávno bežiace kampane falošným
 // "práve sa spustila" oznámením.
-const RECENT_CAMPAIGN_DAYS = 2;
-const FRAUD_REJECTION_THRESHOLD = 3;
-const FRAUD_REJECTION_WINDOW_DAYS = 7;
-const REPORT_WINDOW_DAYS = 7;
+const RECENT_CAMPAIGN_DAYS = Number(process.env.AD_RECENT_CAMPAIGN_DAYS) || 2;
+const FRAUD_REJECTION_THRESHOLD = Number(process.env.AD_FRAUD_REJECTION_THRESHOLD) || 3;
+const FRAUD_REJECTION_WINDOW_DAYS = Number(process.env.AD_FRAUD_REJECTION_WINDOW_DAYS) || 7;
+const REPORT_WINDOW_DAYS = Number(process.env.AD_REPORT_WINDOW_DAYS) || 7;
 
 function checkAdminKey(req) {
   const key = req.headers['x-admin-key'];
@@ -38,6 +42,44 @@ function checkAdminKey(req) {
   const b = Buffer.from(String(ADMIN_KEY));
   if (a.length !== b.length) return false;
   return crypto.timingSafeEqual(a, b);
+}
+
+// Bezstavový odhlasovací token pre týždenný report výkonu — odvodený z
+// advertiser ID + JWT_SECRET, overiteľný bez prihlásenia (klik z emailu).
+// Expirácia/kampaň-live/PR-pripomienka opt-out nemajú, lebo sa priamo
+// týkajú advertiserovej vlastnej platenej kampane, nie sú "marketing".
+function unsubscribeToken(advertiserId) {
+  return crypto.createHmac('sha256', JWT_SECRET || '').update(String(advertiserId)).digest('hex').slice(0, 32);
+}
+function checkUnsubscribeToken(advertiserId, token) {
+  const expected = Buffer.from(unsubscribeToken(advertiserId));
+  const given = Buffer.from(String(token || ''));
+  if (expected.length !== given.length) return false;
+  return crypto.timingSafeEqual(expected, given);
+}
+
+router.get('/api/ads/unsubscribe', async (req, res) => {
+  const { id, token } = req.query;
+  res.set('Content-Type', 'text/html; charset=utf-8');
+  if (!id || !checkUnsubscribeToken(id, token)) {
+    return res.status(400).send(unsubscribePageHtml('Neplatný alebo expirovaný odkaz na odhlásenie.', false));
+  }
+  try {
+    await db.query('UPDATE advertisers SET marketing_emails_opt_in = 0 WHERE id = ?', [id]);
+  } catch (e) {
+    console.error('unsubscribe error:', e);
+  }
+  res.send(unsubscribePageHtml('Už ti nebudeme posielať týždenné reporty výkonu emailom. Upozornenia o konci kampane, spustení a PR článku ti budeme posielať naďalej — tie sa priamo týkajú tvojej platenej reklamy.', true));
+});
+function unsubscribePageHtml(message, ok) {
+  return `<!DOCTYPE html><html lang="sk"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Odhlásenie — SP Tréner Ads</title></head>
+<body style="font-family:-apple-system,sans-serif;background:#0b0b12;color:#ededf5;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;padding:2rem">
+<div style="max-width:420px;text-align:center">
+<div style="font-size:2rem;margin-bottom:1rem">${ok ? '✓' : '⚠️'}</div>
+<h1 style="font-size:1.2rem;margin-bottom:.75rem">${ok ? 'Odhlásené' : 'Chyba'}</h1>
+<p style="color:#a3a3bd;font-size:.9rem;line-height:1.6">${message}</p>
+<a href="/dashboard" style="display:inline-block;margin-top:1.5rem;color:#c8ff00;text-decoration:none">← Späť do dashboardu</a>
+</div></body></html>`;
 }
 
 async function tryLogNotification(itemType, itemId, notificationType, period) {
@@ -152,8 +194,9 @@ async function checkRepeatedRejections() {
 async function sendPerformanceReports() {
   const [advertisers] = await db.query(
     `SELECT DISTINCT a.id, a.email FROM advertisers a
-     WHERE EXISTS (SELECT 1 FROM ad_banners b WHERE b.advertiser_id = a.id)
-        OR EXISTS (SELECT 1 FROM video_ads v WHERE v.advertiser_id = a.id)`
+     WHERE a.marketing_emails_opt_in = 1
+       AND (EXISTS (SELECT 1 FROM ad_banners b WHERE b.advertiser_id = a.id)
+        OR EXISTS (SELECT 1 FROM video_ads v WHERE v.advertiser_id = a.id))`
   );
   const period = new Date().toISOString().slice(0, 10);
 
@@ -187,7 +230,8 @@ async function sendPerformanceReports() {
 
     notifyAdvertiserPerformanceReport({
       advertiserEmail: adv.email, days: REPORT_WINDOW_DAYS,
-      impressions, clicks, views, videoClicks: videoClicks
+      impressions, clicks, views, videoClicks: videoClicks,
+      unsubscribeUrl: `${APP_URL}/api/ads/unsubscribe?id=${adv.id}&token=${unsubscribeToken(adv.id)}`
     }).catch(() => {});
     sent++;
   }
