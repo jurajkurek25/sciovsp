@@ -1,12 +1,14 @@
 // Jediný superadmin účet (Juraj) — žiadna registrácia, žiadny druhý účet.
-// Heslo je bcrypt hash v env (DASH_ADMIN_PASSWORD_HASH), session token sa
-// ukladá do dash_admin_sessions (partner Supabase projekt).
+// Prihlásenie je cez Google (rovnaký Supabase projekt/OAuth ako hlavná
+// appka) obmedzené na presne jeden e-mail (DASH_ALLOWED_EMAIL). Session
+// token sa ukladá do dash_admin_sessions (partner Supabase projekt).
 const crypto = require('crypto');
-const bcrypt = require('bcryptjs');
 const { supabase } = require('./db-partner');
+const { supabase: mainDb } = require('./db-main');
 
 const SESSION_COOKIE = 'dash_session';
 const SESSION_DAYS = 7;
+const ALLOWED_EMAIL = (process.env.DASH_ALLOWED_EMAIL || 'jurajkurek2006@gmail.com').toLowerCase();
 
 function timingSafeEqualStr(a, b) {
   const bufA = Buffer.from(String(a || ''));
@@ -15,16 +17,18 @@ function timingSafeEqualStr(a, b) {
   return crypto.timingSafeEqual(bufA, bufB);
 }
 
-async function login(password) {
-  const hash = process.env.DASH_ADMIN_PASSWORD_HASH;
-  if (!hash) throw new Error('DASH_ADMIN_PASSWORD_HASH nie je nastavený.');
-  const ok = await bcrypt.compare(String(password || ''), hash);
-  if (!ok) return null;
+async function loginWithGoogle(supabaseAccessToken) {
+  if (!supabaseAccessToken) throw new Error('Chýba prihlasovací token.');
+  const { data, error } = await mainDb.auth.getUser(supabaseAccessToken);
+  if (error || !data?.user?.email) throw new Error('Neplatný alebo expirovaný Google token.');
+  if (data.user.email.toLowerCase() !== ALLOWED_EMAIL) {
+    throw new Error('Tento Google účet nemá prístup do dash.');
+  }
 
   const token = crypto.randomBytes(32).toString('hex');
   const expiresAt = new Date(Date.now() + SESSION_DAYS * 24 * 60 * 60 * 1000).toISOString();
-  const { error } = await supabase.from('dash_admin_sessions').insert({ token, expires_at: expiresAt });
-  if (error) throw new Error(error.message);
+  const { error: insErr } = await supabase.from('dash_admin_sessions').insert({ token, expires_at: expiresAt });
+  if (insErr) throw new Error(insErr.message);
   return { token, expiresAt };
 }
 
@@ -52,4 +56,4 @@ async function requireDashAuth(req, res, next) {
   next();
 }
 
-module.exports = { SESSION_COOKIE, SESSION_DAYS, login, logout, verifySession, requireDashAuth, timingSafeEqualStr };
+module.exports = { SESSION_COOKIE, SESSION_DAYS, loginWithGoogle, logout, verifySession, requireDashAuth, timingSafeEqualStr };

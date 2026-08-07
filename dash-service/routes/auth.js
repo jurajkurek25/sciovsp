@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { login, logout, SESSION_COOKIE, SESSION_DAYS, requireDashAuth } = require('../lib/auth');
+const { loginWithGoogle, logout, SESSION_COOKIE, SESSION_DAYS, requireDashAuth } = require('../lib/auth');
 
 const isProd = process.env.NODE_ENV === 'production';
 const COOKIE_OPTS = {
@@ -12,12 +12,11 @@ const COOKIE_OPTS = {
 
 router.post('/api/dash/login', async (req, res) => {
   try {
-    const session = await login(req.body?.password);
-    if (!session) return res.status(401).json({ error: 'Nesprávne heslo.' });
+    const session = await loginWithGoogle(req.body?.token);
     res.cookie(SESSION_COOKIE, session.token, COOKIE_OPTS);
     res.json({ ok: true });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(403).json({ error: err.message });
   }
 });
 
