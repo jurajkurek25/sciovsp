@@ -118,9 +118,8 @@ function renderLessons(data, token) {
   data.lessons.forEach(l => {
     if (!l.unlocked || l.completed) return;
     const hasQuiz = (l.quizQuestions || []).length > 0;
-    const needsQuiz = hasQuiz && !l.quizPassed;
-    if (needsQuiz) bindQuiz(l, token);
-    else if (l.requiresUpload) bindUpload(l, token);
+    if (hasQuiz && !l.quizPassed) bindQuiz(l, token);
+    if (l.requiresUpload && !l.uploadPassed) bindUpload(l, token);
   });
 }
 function escapeHtml(s) { return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
@@ -136,9 +135,11 @@ function lessonHtml(l) {
   }
   const hasQuiz = (l.quizQuestions || []).length > 0;
   const needsQuiz = hasQuiz && !l.quizPassed;
+  const needsUpload = l.requiresUpload && !l.uploadPassed;
 
+  let gatesBlock = '';
   if (needsQuiz) {
-    const quizBlock = `<div class="quiz" id="quiz-${l.id}">
+    gatesBlock += `<div class="quiz" id="quiz-${l.id}">
       ${l.quizQuestions.map((q, qi) => `
         <div class="quiz-q" data-qid="${q.id}">
           <p class="q">${qi + 1}. ${escapeHtml(q.question)}</p>
@@ -147,21 +148,26 @@ function lessonHtml(l) {
       <div><button class="quiz-submit" disabled>Odoslať odpovede</button></div>
       <div class="feedback"></div>
     </div>`;
-    return `<div class="lesson" id="lesson-${l.id}"><h3>${escapeHtml(l.title)}</h3>${videoBlock}${docBlock}${quizBlock}</div>`;
+  } else if (hasQuiz && l.quizPassed) {
+    gatesBlock += `<p class="completed-note" style="margin-bottom:.9rem">Kvíz splnený ✓</p>`;
   }
-  if (l.requiresUpload) {
+  if (needsUpload) {
     const prevFeedback = l.lastSubmission && l.lastSubmission.verdict === 'fail'
       ? `<div class="feedback err">${escapeHtml(l.lastSubmission.feedback || 'Skús to znova.')}</div>` : '';
-    const uploadBlock = `<div class="upload-box" id="upload-${l.id}">
+    gatesBlock += `<div class="upload-box" id="upload-${l.id}" style="margin-top:${needsQuiz ? '1rem' : '0'}">
       <p class="instr">${escapeHtml(l.uploadInstructions || 'Nahraj materiál podľa pokynov lektora.')}</p>
       <input type="file" class="upload-file" accept="image/png,image/jpeg,image/webp,application/pdf">
       <button class="upload-submit" disabled>Nahrať a vyhodnotiť</button>
       <div class="feedback"></div>
       ${prevFeedback}
     </div>`;
-    return `<div class="lesson" id="lesson-${l.id}"><h3>${escapeHtml(l.title)}</h3>${videoBlock}${docBlock}${uploadBlock}</div>`;
+  } else if (l.requiresUpload && l.uploadPassed) {
+    gatesBlock += `<p class="completed-note">Nahraný materiál schválený ✓</p>`;
   }
-  return `<div class="lesson" id="lesson-${l.id}"><h3>${escapeHtml(l.title)}</h3>${videoBlock}${docBlock}<p class="muted">Táto lekcia nemá kvíz — pokračuj ďalej.</p></div>`;
+  if (!hasQuiz && !l.requiresUpload) {
+    gatesBlock = '<p class="muted">Táto lekcia nemá kvíz — pokračuj ďalej.</p>';
+  }
+  return `<div class="lesson" id="lesson-${l.id}"><h3>${escapeHtml(l.title)}</h3>${videoBlock}${docBlock}${gatesBlock}</div>`;
 }
 
 function bindQuiz(l, token) {
