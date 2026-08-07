@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Kurz — SP Tréner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@300;400;500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
+<style>
+:root{--black:#08080d;--black2:#0f0f18;--border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.13);--text:#eeeef5;--text2:#a1a1bc;--text3:#5c5c7a;--volt:#c8ff00;--purple:#7c5cff;--purple2:#b09bff;--red:#ff3f5e;--green:#36e896;--serif:'Instrument Serif',Georgia,serif;--mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--black);color:var(--text);font-family:var(--sans);line-height:1.6;min-height:100vh}
+a{color:var(--purple2)}
+.wrap{max-width:820px;margin:0 auto;padding:2rem 1.2rem 5rem}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem}
+.top a{font-family:var(--mono);font-size:.8rem;color:var(--text2);text-decoration:none}
+h1{font-family:var(--serif);font-size:2rem;margin-bottom:.3rem}
+.muted{color:var(--text3);font-size:.85rem}
+.gate{text-align:center;padding:4rem 1rem}
+.gate button{margin-top:1.2rem;padding:.85rem 1.6rem;background:var(--volt);color:var(--black);border:none;border-radius:9px;font-weight:700;font-family:var(--mono);font-size:.85rem;cursor:pointer}
+.lesson{background:var(--black2);border:1px solid var(--border);border-radius:14px;padding:1.4rem;margin-bottom:1.1rem}
+.lesson.locked{opacity:.45}
+.lesson h3{font-family:var(--serif);font-size:1.3rem;margin-bottom:.6rem;display:flex;align-items:center;gap:.5rem}
+.badge{font-family:var(--mono);font-size:.65rem;padding:.15rem .5rem;border-radius:20px;background:rgba(54,232,150,.15);color:var(--green)}
+.badge.locked{background:rgba(255,255,255,.08);color:var(--text3)}
+video{width:100%;border-radius:10px;background:#000;display:block;margin-bottom:.9rem}
+.doc-link{display:inline-block;margin-bottom:.9rem;padding:.5rem .9rem;border:1px solid var(--border2);border-radius:8px;font-size:.82rem;text-decoration:none;color:var(--text2)}
+.quiz{background:var(--black);border:1px solid var(--border2);border-radius:10px;padding:1rem}
+.quiz p.q{font-weight:500;margin-bottom:.7rem}
+.opt{display:block;width:100%;text-align:left;padding:.6rem .8rem;margin-bottom:.5rem;background:var(--black2);border:1px solid var(--border2);border-radius:8px;color:var(--text);cursor:pointer;font-size:.87rem}
+.opt.selected{border-color:var(--purple2)}
+.opt.correct{border-color:var(--green);background:rgba(54,232,150,.1)}
+.opt.wrong{border-color:var(--red);background:rgba(255,63,94,.1)}
+.quiz-submit{margin-top:.4rem;padding:.6rem 1.1rem;background:var(--volt);color:var(--black);border:none;border-radius:8px;font-weight:700;font-family:var(--mono);font-size:.78rem;cursor:pointer}
+.quiz-submit:disabled{opacity:.5;cursor:not-allowed}
+.feedback{margin-top:.6rem;font-size:.85rem}
+.feedback.ok{color:var(--green)}
+.feedback.err{color:var(--red)}
+.completed-note{color:var(--green);font-size:.85rem;font-family:var(--mono)}
+.err-box{color:var(--red);text-align:center;padding:3rem 1rem}
+.upload-box{background:var(--black);border:1px solid var(--border2);border-radius:10px;padding:1rem}
+.upload-box p.instr{font-size:.87rem;color:var(--text2);margin-bottom:.8rem;white-space:pre-wrap}
+.upload-box input[type=file]{display:block;width:100%;font-size:.82rem;color:var(--text2);margin-bottom:.7rem}
+.upload-submit{padding:.6rem 1.1rem;background:var(--volt);color:var(--black);border:none;border-radius:8px;font-weight:700;font-family:var(--mono);font-size:.78rem;cursor:pointer}
+.upload-submit:disabled{opacity:.5;cursor:not-allowed}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <a href="/">← SP Tréner</a>
+    <a href="#" id="logoutLink">Odhlásiť sa</a>
+  </div>
+  <div id="root"><p class="muted">Načítavam…</p></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL='https://zrnqiwareacqyndwchsv.supabase.co';
+const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpybnFpd2FyZWFjcXluZHdjaHN2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMDA3NTAsImV4cCI6MjA4OTc3Njc1MH0.iUne23YDxp12Iwxdk9U8MfcV0NTBtrNf9OgsjQdiADk';
+const _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const root = document.getElementById('root');
+const slug = location.pathname.split('/').filter(Boolean)[1];
+
+document.getElementById('logoutLink').addEventListener('click', async (e) => {
+  e.preventDefault();
+  await _supabase.auth.signOut();
+  location.reload();
+});
+
+async function getToken() {
+  const { data: { session } } = await _supabase.auth.getSession();
+  return session?.access_token || null;
+}
+
+async function init() {
+  const token = await getToken();
+  if (!token) { renderGate(); return; }
+  await loadCourse(token);
+}
+
+function renderGate() {
+  root.innerHTML = `<div class="gate">
+    <h1>Prihlás sa</h1>
+    <p class="muted">Prihlás sa rovnakým účtom, akým si kurz kúpil.</p>
+    <button id="googleBtn" style="display:inline-flex;align-items:center;gap:.5rem"><svg width="15" height="15" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg> Prihlásiť sa cez Google</button>
+  </div>`;
+  document.getElementById('googleBtn').onclick = () => {
+    _supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.href } });
+  };
+}
+
+async function loadCourse(token) {
+  try {
+    const res = await fetch(`/api/courses/${slug}/access`, { headers: { Authorization: 'Bearer ' + token } });
+    const data = await res.json();
+    if (!res.ok) {
+      root.innerHTML = `<div class="err-box"><p>${data.error || 'Chyba.'}</p><p class="muted" style="margin-top:.8rem"><a href="/kurzy/${slug}">Späť na stránku kurzu</a></p></div>`;
+      return;
+    }
+    renderLessons(data, token);
+  } catch (e) {
+    root.innerHTML = `<div class="err-box">Chyba servera.</div>`;
+  }
+}
+
+function renderLessons(data, token) {
+  document.title = data.course.title + ' — SP Tréner';
+  root.innerHTML = `<h1>${escapeHtml(data.course.title)}</h1>
+    <p class="muted" style="margin-bottom:1.6rem">${data.lessons.filter(l => l.completed).length} / ${data.lessons.length} lekcií dokončených</p>
+    <div id="lessonsRoot"></div>`;
+  const lroot = document.getElementById('lessonsRoot');
+  lroot.innerHTML = data.lessons.map(l => lessonHtml(l)).join('');
+  data.lessons.forEach(l => {
+    if (!l.unlocked || l.completed) return;
+    if (l.requiresUpload) bindUpload(l, token);
+    else bindQuiz(l, token);
+  });
+}
+function escapeHtml(s) { return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function lessonHtml(l) {
+  if (!l.unlocked) {
+    return `<div class="lesson locked"><h3>🔒 ${escapeHtml(l.title)} <span class="badge locked">zamknuté</span></h3><p class="muted">Dokonči predchádzajúcu lekciu, aby sa táto odomkla.</p></div>`;
+  }
+  const videoBlock = l.videoUrl ? `<video controls controlsList="nodownload noremoteplayback" disablePictureInPicture oncontextmenu="return false" ondragstart="return false" src="${escapeHtml(l.videoUrl)}"></video>` : '';
+  const docBlock = l.docUrl ? `<a class="doc-link" href="${escapeHtml(l.docUrl)}" target="_blank" rel="noopener">📄 Otvoriť materiály (PDF)</a>` : '';
+  if (l.completed) {
+    return `<div class="lesson"><h3>${escapeHtml(l.title)} <span class="badge">hotovo ✓</span></h3>${videoBlock}${docBlock}<p class="completed-note">Lekcia dokončená.</p></div>`;
+  }
+  if (l.requiresUpload) {
+    const prevFeedback = l.lastSubmission && l.lastSubmission.verdict === 'fail'
+      ? `<div class="feedback err">${escapeHtml(l.lastSubmission.feedback || 'Skús to znova.')}</div>` : '';
+    const uploadBlock = `<div class="upload-box" id="upload-${l.id}">
+      <p class="instr">${escapeHtml(l.uploadInstructions || 'Nahraj materiál podľa pokynov lektora.')}</p>
+      <input type="file" class="upload-file" accept="image/png,image/jpeg,image/webp,application/pdf">
+      <button class="upload-submit" disabled>Nahrať a vyhodnotiť</button>
+      <div class="feedback"></div>
+      ${prevFeedback}
+    </div>`;
+    return `<div class="lesson" id="lesson-${l.id}"><h3>${escapeHtml(l.title)}</h3>${videoBlock}${docBlock}${uploadBlock}</div>`;
+  }
+  const quizBlock = l.quizQuestion ? `
+    <div class="quiz" id="quiz-${l.id}">
+      <p class="q">${escapeHtml(l.quizQuestion)}</p>
+      ${['a','b','c','d'].map(o => l['quizOption' + o.toUpperCase()] ? `<button class="opt" data-opt="${o}">${o.toUpperCase()}) ${escapeHtml(l['quizOption' + o.toUpperCase()])}</button>` : '').join('')}
+      <div><button class="quiz-submit" disabled>Odoslať odpoveď</button></div>
+      <div class="feedback"></div>
+    </div>` : '<p class="muted">Táto lekcia nemá kvíz — pokračuj ďalej.</p>';
+  return `<div class="lesson" id="lesson-${l.id}"><h3>${escapeHtml(l.title)}</h3>${videoBlock}${docBlock}${quizBlock}</div>`;
+}
+
+function bindQuiz(l, token) {
+  const quizEl = document.getElementById('quiz-' + l.id);
+  if (!quizEl) return;
+  let selected = null;
+  const opts = quizEl.querySelectorAll('.opt');
+  const submitBtn = quizEl.querySelector('.quiz-submit');
+  const feedback = quizEl.querySelector('.feedback');
+  opts.forEach(btn => btn.onclick = () => {
+    opts.forEach(o => o.classList.remove('selected'));
+    btn.classList.add('selected');
+    selected = btn.dataset.opt;
+    submitBtn.disabled = false;
+  });
+  submitBtn.onclick = async () => {
+    if (!selected) return;
+    submitBtn.disabled = true;
+    try {
+      const res = await fetch(`/api/courses/${slug}/lessons/${l.id}/answer`, {
+        method: 'POST', headers: { 'content-type': 'application/json', Authorization: 'Bearer ' + token },
+        body: JSON.stringify({ option: selected })
+      });
+      const data = await res.json();
+      if (!res.ok) { feedback.textContent = data.error || 'Chyba.'; feedback.className = 'feedback err'; submitBtn.disabled = false; return; }
+      if (data.correct) {
+        opts.forEach(o => { if (o.dataset.opt === selected) o.classList.add('correct'); });
+        feedback.textContent = 'Správne! Odomkýnam ďalšiu lekciu…';
+        feedback.className = 'feedback ok';
+        setTimeout(() => loadCourse(token), 900);
+      } else {
+        opts.forEach(o => { if (o.dataset.opt === selected) o.classList.add('wrong'); });
+        feedback.textContent = 'To nie je správne, skús to znova.';
+        feedback.className = 'feedback err';
+        submitBtn.disabled = false;
+      }
+    } catch (e) {
+      feedback.textContent = 'Chyba servera.'; feedback.className = 'feedback err'; submitBtn.disabled = false;
+    }
+  };
+}
+
+function bindUpload(l, token) {
+  const box = document.getElementById('upload-' + l.id);
+  if (!box) return;
+  const fileInput = box.querySelector('.upload-file');
+  const submitBtn = box.querySelector('.upload-submit');
+  const feedback = box.querySelector('.feedback');
+  fileInput.onchange = () => { submitBtn.disabled = !fileInput.files.length; };
+  submitBtn.onclick = async () => {
+    const file = fileInput.files[0];
+    if (!file) return;
+    submitBtn.disabled = true;
+    feedback.textContent = 'Nahrávam a AI vyhodnocuje…'; feedback.className = 'feedback';
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await fetch(`/api/courses/${slug}/lessons/${l.id}/submit`, {
+        method: 'POST', headers: { Authorization: 'Bearer ' + token }, body: fd
+      });
+      const data = await res.json();
+      if (!res.ok) { feedback.textContent = data.error || 'Chyba.'; feedback.className = 'feedback err'; submitBtn.disabled = false; return; }
+      if (data.verdict === 'pass') {
+        feedback.textContent = (data.feedback || 'Správne!') + ' Odomkýnam ďalšiu lekciu…';
+        feedback.className = 'feedback ok';
+        setTimeout(() => loadCourse(token), 1200);
+      } else {
+        feedback.textContent = data.feedback || 'Ešte to nespĺňa zadanie, skús to znova.';
+        feedback.className = 'feedback err';
+        submitBtn.disabled = false;
+      }
+    } catch (e) {
+      feedback.textContent = 'Chyba servera.'; feedback.className = 'feedback err'; submitBtn.disabled = false;
+    }
+  };
+}
+_supabase.auth.onAuthStateChange((event) => { if (event === 'SIGNED_IN') init(); });
+init();
+</script>
+</body>
+</html>
