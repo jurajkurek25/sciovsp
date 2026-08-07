@@ -33,8 +33,10 @@ router.post('/api/dash/courses', requireDashAuth, async (req, res) => {
   if (!slug) return res.status(400).json({ error: 'Z názvu sa nedá vytvoriť slug.' });
   const { data: existing } = await mainDb.from('courses').select('id').eq('slug', slug);
   if ((existing || []).length) slug = `${slug}-${Date.now().toString(36)}`;
+  const priceCentsValue = priceCents === undefined || priceCents === null || priceCents === ''
+    ? 5700 : Math.max(0, Number(priceCents) || 0);
   const { data, error } = await mainDb.from('courses').insert({
-    slug, title, description: description || '', price_cents: Number(priceCents) || 5700,
+    slug, title, description: description || '', price_cents: priceCentsValue,
     cover_image_url: coverImageUrl || null, sales_content: salesContent || null, published: false
   }).select().single();
   if (error) return res.status(500).json({ error: error.message });

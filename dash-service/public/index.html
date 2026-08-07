@@ -438,7 +438,7 @@ function bindLessonForms() {
 }
 
 // ─────────────────────────── KURZY ───────────────────────────
-function eur(cents) { return (Number(cents || 0) / 100).toFixed(2).replace('.', ',') + ' €'; }
+function eur(cents) { return Number(cents) === 0 ? 'zadarmo' : (Number(cents || 0) / 100).toFixed(2).replace('.', ',') + ' €'; }
 
 async function renderCourses() {
   const { courses } = await api('/api/dash/courses');
@@ -473,8 +473,9 @@ function courseFormHtml(c) {
     <h3>${isEdit ? 'Upraviť kurz' : 'Nový kurz'}</h3>
     <div class="formrow">
       <input class="cf-title" placeholder="Názov kurzu" value="${(c?.title||'').replace(/"/g,'&quot;')}" style="flex:1;min-width:220px">
-      <input class="cf-price" type="number" placeholder="Cena v centoch" value="${c?.price_cents ?? 5700}" style="width:160px">
+      <input class="cf-price" type="number" min="0" placeholder="Cena v centoch" value="${c?.price_cents ?? 5700}" style="width:160px">
     </div>
+    <p class="muted" style="margin-top:-.4rem">0 = kurz zadarmo (prístup len za prihlásenie cez Google, bez platby).</p>
     ${coverFieldHtml('cf-cover', c?.cover_image_url)}
     <textarea class="cf-desc" placeholder="Krátky popis (karta v zozname + meta description, cca 1-2 vety)" style="min-height:60px">${c?.description||''}</textarea>
     <p class="muted" style="margin-top:.6rem">Sales letter — zobrazí sa medzi horným a dolným tlačidlom "Kúpiť kurz".</p>
@@ -492,7 +493,8 @@ function bindCourseForm(course) {
   const salesQuill = initRichEditor(root, 'cf-sales-editor', course?.sales_content);
   $('.cf-save', root).onclick = async () => {
     const body = {
-      title: $('.cf-title', root).value, description: $('.cf-desc', root).value, priceCents: Number($('.cf-price', root).value) || 5700,
+      title: $('.cf-title', root).value, description: $('.cf-desc', root).value,
+      priceCents: $('.cf-price', root).value === '' ? 5700 : Math.max(0, Number($('.cf-price', root).value) || 0),
       coverImageUrl: $('.cf-cover', root).value, salesContent: salesQuill.getText().trim() ? salesQuill.root.innerHTML : ''
     };
     try {
