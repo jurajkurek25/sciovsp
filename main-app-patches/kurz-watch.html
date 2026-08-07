@@ -27,11 +27,11 @@ h1{font-family:var(--serif);font-size:2rem;margin-bottom:.3rem}
 video{width:100%;border-radius:10px;background:#000;display:block;margin-bottom:.9rem}
 .doc-link{display:inline-block;margin-bottom:.9rem;padding:.5rem .9rem;border:1px solid var(--border2);border-radius:8px;font-size:.82rem;text-decoration:none;color:var(--text2)}
 .quiz{background:var(--black);border:1px solid var(--border2);border-radius:10px;padding:1rem}
+.quiz-q{margin-bottom:1.1rem}
+.quiz-q:last-of-type{margin-bottom:0}
 .quiz p.q{font-weight:500;margin-bottom:.7rem}
 .opt{display:block;width:100%;text-align:left;padding:.6rem .8rem;margin-bottom:.5rem;background:var(--black2);border:1px solid var(--border2);border-radius:8px;color:var(--text);cursor:pointer;font-size:.87rem}
 .opt.selected{border-color:var(--purple2)}
-.opt.correct{border-color:var(--green);background:rgba(54,232,150,.1)}
-.opt.wrong{border-color:var(--red);background:rgba(255,63,94,.1)}
 .quiz-submit{margin-top:.4rem;padding:.6rem 1.1rem;background:var(--volt);color:var(--black);border:none;border-radius:8px;font-weight:700;font-family:var(--mono);font-size:.78rem;cursor:pointer}
 .quiz-submit:disabled{opacity:.5;cursor:not-allowed}
 .feedback{margin-top:.6rem;font-size:.85rem}
@@ -117,8 +117,10 @@ function renderLessons(data, token) {
   lroot.innerHTML = data.lessons.map(l => lessonHtml(l)).join('');
   data.lessons.forEach(l => {
     if (!l.unlocked || l.completed) return;
-    if (l.requiresUpload) bindUpload(l, token);
-    else bindQuiz(l, token);
+    const hasQuiz = (l.quizQuestions || []).length > 0;
+    const needsQuiz = hasQuiz && !l.quizPassed;
+    if (needsQuiz) bindQuiz(l, token);
+    else if (l.requiresUpload) bindUpload(l, token);
   });
 }
 function escapeHtml(s) { return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
@@ -132,6 +134,21 @@ function lessonHtml(l) {
   if (l.completed) {
     return `<div class="lesson"><h3>${escapeHtml(l.title)} <span class="badge">hotovo ✓</span></h3>${videoBlock}${docBlock}<p class="completed-note">Lekcia dokončená.</p></div>`;
   }
+  const hasQuiz = (l.quizQuestions || []).length > 0;
+  const needsQuiz = hasQuiz && !l.quizPassed;
+
+  if (needsQuiz) {
+    const quizBlock = `<div class="quiz" id="quiz-${l.id}">
+      ${l.quizQuestions.map((q, qi) => `
+        <div class="quiz-q" data-qid="${q.id}">
+          <p class="q">${qi + 1}. ${escapeHtml(q.question)}</p>
+          ${['A','B','C','D'].map(o => q['option' + o] ? `<button class="opt" data-opt="${o.toLowerCase()}">${o}) ${escapeHtml(q['option' + o])}</button>` : '').join('')}
+        </div>`).join('')}
+      <div><button class="quiz-submit" disabled>Odoslať odpovede</button></div>
+      <div class="feedback"></div>
+    </div>`;
+    return `<div class="lesson" id="lesson-${l.id}"><h3>${escapeHtml(l.title)}</h3>${videoBlock}${docBlock}${quizBlock}</div>`;
+  }
   if (l.requiresUpload) {
     const prevFeedback = l.lastSubmission && l.lastSubmission.verdict === 'fail'
       ? `<div class="feedback err">${escapeHtml(l.lastSubmission.feedback || 'Skús to znova.')}</div>` : '';
@@ -144,47 +161,42 @@ function lessonHtml(l) {
     </div>`;
     return `<div class="lesson" id="lesson-${l.id}"><h3>${escapeHtml(l.title)}</h3>${videoBlock}${docBlock}${uploadBlock}</div>`;
   }
-  const quizBlock = l.quizQuestion ? `
-    <div class="quiz" id="quiz-${l.id}">
-      <p class="q">${escapeHtml(l.quizQuestion)}</p>
-      ${['a','b','c','d'].map(o => l['quizOption' + o.toUpperCase()] ? `<button class="opt" data-opt="${o}">${o.toUpperCase()}) ${escapeHtml(l['quizOption' + o.toUpperCase()])}</button>` : '').join('')}
-      <div><button class="quiz-submit" disabled>Odoslať odpoveď</button></div>
-      <div class="feedback"></div>
-    </div>` : '<p class="muted">Táto lekcia nemá kvíz — pokračuj ďalej.</p>';
-  return `<div class="lesson" id="lesson-${l.id}"><h3>${escapeHtml(l.title)}</h3>${videoBlock}${docBlock}${quizBlock}</div>`;
+  return `<div class="lesson" id="lesson-${l.id}"><h3>${escapeHtml(l.title)}</h3>${videoBlock}${docBlock}<p class="muted">Táto lekcia nemá kvíz — pokračuj ďalej.</p></div>`;
 }
 
 function bindQuiz(l, token) {
   const quizEl = document.getElementById('quiz-' + l.id);
   if (!quizEl) return;
-  let selected = null;
-  const opts = quizEl.querySelectorAll('.opt');
+  const selections = {};
+  const groups = quizEl.querySelectorAll('.quiz-q');
   const submitBtn = quizEl.querySelector('.quiz-submit');
   const feedback = quizEl.querySelector('.feedback');
-  opts.forEach(btn => btn.onclick = () => {
-    opts.forEach(o => o.classList.remove('selected'));
-    btn.classList.add('selected');
-    selected = btn.dataset.opt;
-    submitBtn.disabled = false;
+  function checkReady() { submitBtn.disabled = Object.keys(selections).length !== groups.length; }
+  groups.forEach(group => {
+    const qid = group.dataset.qid;
+    const opts = group.querySelectorAll('.opt');
+    opts.forEach(btn => btn.onclick = () => {
+      opts.forEach(o => o.classList.remove('selected'));
+      btn.classList.add('selected');
+      selections[qid] = btn.dataset.opt;
+      checkReady();
+    });
   });
   submitBtn.onclick = async () => {
-    if (!selected) return;
     submitBtn.disabled = true;
     try {
-      const res = await fetch(`/api/courses/${slug}/lessons/${l.id}/answer`, {
+      const res = await fetch(`/api/courses/${slug}/lessons/${l.id}/quiz-answer`, {
         method: 'POST', headers: { 'content-type': 'application/json', Authorization: 'Bearer ' + token },
-        body: JSON.stringify({ option: selected })
+        body: JSON.stringify({ answers: selections })
       });
       const data = await res.json();
       if (!res.ok) { feedback.textContent = data.error || 'Chyba.'; feedback.className = 'feedback err'; submitBtn.disabled = false; return; }
-      if (data.correct) {
-        opts.forEach(o => { if (o.dataset.opt === selected) o.classList.add('correct'); });
-        feedback.textContent = 'Správne! Odomkýnam ďalšiu lekciu…';
+      if (data.quizPassed) {
+        feedback.textContent = 'Správne! ' + (data.completed ? 'Odomkýnam ďalšiu lekciu…' : 'Ešte treba nahrať materiál nižšie…');
         feedback.className = 'feedback ok';
         setTimeout(() => loadCourse(token), 900);
       } else {
-        opts.forEach(o => { if (o.dataset.opt === selected) o.classList.add('wrong'); });
-        feedback.textContent = 'To nie je správne, skús to znova.';
+        feedback.textContent = 'Niektorá odpoveď nie je správna, skús to znova.';
         feedback.className = 'feedback err';
         submitBtn.disabled = false;
       }
@@ -215,7 +227,7 @@ function bindUpload(l, token) {
       const data = await res.json();
       if (!res.ok) { feedback.textContent = data.error || 'Chyba.'; feedback.className = 'feedback err'; submitBtn.disabled = false; return; }
       if (data.verdict === 'pass') {
-        feedback.textContent = (data.feedback || 'Správne!') + ' Odomkýnam ďalšiu lekciu…';
+        feedback.textContent = (data.feedback || 'Správne!') + ' ' + (data.completed ? 'Odomkýnam ďalšiu lekciu…' : 'Ešte treba spraviť kvíz nižšie…');
         feedback.className = 'feedback ok';
         setTimeout(() => loadCourse(token), 1200);
       } else {
