@@ -501,7 +501,7 @@ async function loadBanners(){
     const list = document.getElementById('bannerList');
     if (!data.banners.length) { list.innerHTML = `<p style="color:var(--text3);font-size:.85rem">${t('noBanners')}</p>`; return; }
     list.innerHTML = data.banners.map(b => {
-      const media = b.mime_type === 'video/mp4' ? `<video src="${b.public_url}" muted></video>` : `<img src="${b.public_url}">`;
+      const media = b.mime_type === 'video/mp4' ? `<video src="${b.public_url}" muted disablePictureInPicture oncontextmenu="return false" ondragstart="return false"></video>` : `<img src="${b.public_url}" oncontextmenu="return false" ondragstart="return false">`;
       return `<div class="banner-item"><div class="banner-thumb">${media}</div>
         <div class="banner-info"><span class="banner-link">${b.link_url}</span>
           <div class="banner-stats">${t('impressionsClicks')(b.impressions, b.clicks)} ${langPill(b.target_lang)}</div>
@@ -531,7 +531,7 @@ async function loadVideoAds(){
     const data = await api('/api/video-ads');
     const list = document.getElementById('videoList');
     if (!data.videoAds.length) { list.innerHTML = `<p style="color:var(--text3);font-size:.85rem">${t('noVideos')}</p>`; return; }
-    list.innerHTML = data.videoAds.map(v => `<div class="banner-item"><div class="banner-thumb"><video src="${v.public_url}" muted></video></div>
+    list.innerHTML = data.videoAds.map(v => `<div class="banner-item"><div class="banner-thumb"><video src="${v.public_url}" muted disablePictureInPicture oncontextmenu="return false" ondragstart="return false"></video></div>
       <div class="banner-info"><span class="banner-link">${v.link_url}</span>
         <div class="banner-stats">${t('videoStats')(v.duration_s, v.views, v.clicks)} ${langPill(v.target_lang)}</div>
         <div class="banner-billing">${billingBadge(v,'startVideoCheckout','149€/mesiac')}</div></div>
