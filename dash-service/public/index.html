@@ -95,6 +95,34 @@ textarea{width:100%;min-height:110px;padding:.7rem;background:var(--black3);bord
 .rich-editor .ql-editor a{color:var(--purple2)}
 .rich-editor .ql-picker-options{background:var(--black2);border:1px solid var(--border2)}
 .rich-editor .ql-picker-item{color:var(--text2)}
+
+/* mobile */
+.mobile-topbar{display:none}
+.nav-overlay{display:none}
+#navToggle{display:none}
+@media (max-width:860px){
+  .mobile-topbar{display:flex;align-items:center;justify-content:space-between;padding:.7rem 1rem;background:var(--black2);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:40}
+  .mobile-topbar .brand{padding:0}
+  #navToggle{display:inline-flex;align-items:center;justify-content:center;width:2.4rem;height:2.4rem;background:transparent;border:1px solid var(--border2);color:var(--text);border-radius:8px;font-size:1.2rem;cursor:pointer;line-height:1}
+  #app{flex-direction:column}
+  nav.side{position:fixed;top:0;left:0;height:100vh;width:78vw;max-width:280px;transform:translateX(-100%);transition:transform .25s ease;z-index:50;box-shadow:2px 0 24px rgba(0,0,0,.5)}
+  nav.side.open{transform:translateX(0)}
+  .nav-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:45;display:block}
+  .nav-overlay.hidden{display:none}
+  main{padding:1.2rem 1rem 3rem;width:100%}
+}
+@media (max-width:480px){
+  main{padding:1rem .8rem 3rem}
+  .pagehead{gap:.4rem}
+  .pagehead h2{font-size:1.4rem}
+  .grid{grid-template-columns:1fr}
+  table{font-size:.76rem}
+  th,td{padding:.45rem .4rem}
+  .chat{height:78vh}
+  .msg{max-width:92%}
+  .qr-modal{padding:1.2rem}
+  .qr-modal img{width:170px;height:170px}
+}
 </style>
 </head>
 <body>
@@ -110,7 +138,12 @@ textarea{width:100%;min-height:110px;padding:.7rem;background:var(--black3);bord
 </div>
 
 <div id="app" class="hidden">
-  <nav class="side">
+  <div class="mobile-topbar">
+    <div class="brand">dash<span>.</span>sptrener</div>
+    <button id="navToggle" type="button" aria-label="Menu">☰</button>
+  </div>
+  <div class="nav-overlay hidden" id="navOverlay"></div>
+  <nav class="side" id="sideNav">
     <div class="brand">dash<span>.</span>sptrener</div>
     <a class="navlink" data-page="overview">Prehľad</a>
     <a class="navlink" data-page="trends">Trendy</a>
@@ -186,7 +219,19 @@ function showApp() {
 // ─────────────────────────── ROUTER ───────────────────────────
 const PAGES = { overview: renderOverview, trends: renderTrends, academy: renderAcademy, courses: renderCourses, blog: renderBlog, houseads: renderHouseAds, giftcards: renderGiftcards, payouts: renderPayouts, bugs: renderBugs, advisor: renderAdvisor, aiops: renderAiops };
 
-$$('.navlink[data-page]').forEach(a => a.addEventListener('click', () => navigate(a.dataset.page)));
+$$('.navlink[data-page]').forEach(a => a.addEventListener('click', () => { navigate(a.dataset.page); closeMobileNav(); }));
+
+// ─────────────────────────── MOBILE NAV DRAWER ───────────────────────────
+function openMobileNav() {
+  $('#sideNav').classList.add('open');
+  $('#navOverlay').classList.remove('hidden');
+}
+function closeMobileNav() {
+  $('#sideNav').classList.remove('open');
+  $('#navOverlay').classList.add('hidden');
+}
+$('#navToggle').addEventListener('click', openMobileNav);
+$('#navOverlay').addEventListener('click', closeMobileNav);
 
 let currentOverviewSnapshot = null;
 
