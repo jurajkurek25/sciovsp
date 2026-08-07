@@ -70,7 +70,7 @@ router.get('/api/dash/courses/:id/lessons', requireDashAuth, async (req, res) =>
 });
 
 router.post('/api/dash/courses/:id/lessons', requireDashAuth, async (req, res) => {
-  const { title, videoUrl, docUrl, quizQuestion, quizOptionA, quizOptionB, quizOptionC, quizOptionD, quizCorrect, sortOrder } = req.body || {};
+  const { title, videoUrl, docUrl, quizQuestion, quizOptionA, quizOptionB, quizOptionC, quizOptionD, quizCorrect, sortOrder, requiresUpload, uploadInstructions } = req.body || {};
   if (!title || !videoUrl) return res.status(400).json({ error: 'Chýba title alebo videoUrl.' });
   if (quizCorrect && !['a', 'b', 'c', 'd'].includes(quizCorrect)) return res.status(400).json({ error: 'quizCorrect musí byť a/b/c/d.' });
   let order = sortOrder;
@@ -82,14 +82,14 @@ router.post('/api/dash/courses/:id/lessons', requireDashAuth, async (req, res) =
     course_id: req.params.id, title, video_url: videoUrl, doc_url: docUrl || null,
     quiz_question: quizQuestion || null, quiz_option_a: quizOptionA || null, quiz_option_b: quizOptionB || null,
     quiz_option_c: quizOptionC || null, quiz_option_d: quizOptionD || null, quiz_correct: quizCorrect || null,
-    sort_order: order
+    sort_order: order, requires_upload: !!requiresUpload, upload_instructions: uploadInstructions || null
   }).select().single();
   if (error) return res.status(500).json({ error: error.message });
   res.json({ ok: true, lesson: data });
 });
 
 router.put('/api/dash/courses/:id/lessons/:lessonId', requireDashAuth, async (req, res) => {
-  const { title, videoUrl, docUrl, quizQuestion, quizOptionA, quizOptionB, quizOptionC, quizOptionD, quizCorrect, sortOrder } = req.body || {};
+  const { title, videoUrl, docUrl, quizQuestion, quizOptionA, quizOptionB, quizOptionC, quizOptionD, quizCorrect, sortOrder, requiresUpload, uploadInstructions } = req.body || {};
   if (quizCorrect && !['a', 'b', 'c', 'd'].includes(quizCorrect)) return res.status(400).json({ error: 'quizCorrect musí byť a/b/c/d.' });
   const update = {};
   if (title !== undefined) update.title = title;
@@ -102,6 +102,8 @@ router.put('/api/dash/courses/:id/lessons/:lessonId', requireDashAuth, async (re
   if (quizOptionD !== undefined) update.quiz_option_d = quizOptionD;
   if (quizCorrect !== undefined) update.quiz_correct = quizCorrect;
   if (sortOrder !== undefined) update.sort_order = sortOrder;
+  if (requiresUpload !== undefined) update.requires_upload = !!requiresUpload;
+  if (uploadInstructions !== undefined) update.upload_instructions = uploadInstructions;
   const { data, error } = await mainDb.from('course_lessons').update(update).eq('id', req.params.lessonId).eq('course_id', req.params.id).select().single();
   if (error) return res.status(500).json({ error: error.message });
   res.json({ ok: true, lesson: data });

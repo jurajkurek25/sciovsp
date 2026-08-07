@@ -570,6 +570,11 @@ function lessonFormHtml(l, isNew) {
         ${['a','b','c','d'].map(o => `<option value="${o}" ${l.quiz_correct===o?'selected':''}>správna: ${o.toUpperCase()}</option>`).join('')}
       </select>
     </div>
+    <label style="display:flex;align-items:center;gap:.5rem;margin:.4rem 0;font-size:.85rem;cursor:pointer">
+      <input type="checkbox" class="lf-requires-upload" ${l.requires_upload ? 'checked' : ''}>
+      Vyžaduje nahratie materiálu od žiaka (AI ho vyhodnotí namiesto/popri kvíze)
+    </label>
+    <textarea class="lf-upload-instructions ${l.requires_upload ? '' : 'hidden'}" placeholder="Pokyny pre žiaka + kritériá hodnotenia pre AI (napr. 'Žiak má nahrať fotku vyriešeného cvičenia na str. 12. Musí mať vypočítané všetky 4 príklady so správnym postupom.')" style="min-height:70px">${l.upload_instructions||''}</textarea>
     <div style="display:flex;gap:.6rem;margin-top:.6rem">
       <button class="btn save-lesson-btn">Uložiť</button>
       ${isNew ? '' : '<button class="btn danger delete-lesson-btn">Zmazať</button>'}
@@ -578,6 +583,10 @@ function lessonFormHtml(l, isNew) {
 }
 
 function bindLessonForms(courseId, panel) {
+  $$('.lf-requires-upload', panel).forEach(cb => cb.onchange = () => {
+    const item = cb.closest('.lesson-item');
+    $('.lf-upload-instructions', item).classList.toggle('hidden', !cb.checked);
+  });
   $$('.save-lesson-btn', panel).forEach(btn => btn.onclick = async () => {
     const item = btn.closest('.lesson-item');
     const isNew = item.dataset.new === 'true';
@@ -585,7 +594,9 @@ function bindLessonForms(courseId, panel) {
       title: $('.lf-title', item).value, videoUrl: $('.lf-video', item).value, docUrl: $('.lf-doc', item).value,
       quizQuestion: $('.lf-question', item).value, quizOptionA: $('.lf-a', item).value, quizOptionB: $('.lf-b', item).value,
       quizOptionC: $('.lf-c', item).value, quizOptionD: $('.lf-d', item).value, quizCorrect: $('.lf-correct', item).value || undefined,
-      sortOrder: Number($('.lf-sort', item).value) || 0
+      sortOrder: Number($('.lf-sort', item).value) || 0,
+      requiresUpload: $('.lf-requires-upload', item).checked,
+      uploadInstructions: $('.lf-upload-instructions', item).value
     };
     try {
       if (isNew) await api(`/api/dash/courses/${courseId}/lessons`, { method: 'POST', body: JSON.stringify(body) });
