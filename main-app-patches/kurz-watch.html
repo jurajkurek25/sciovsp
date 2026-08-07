@@ -74,10 +74,13 @@ async function getToken() {
   return session?.access_token || null;
 }
 
+let hasLoadedCourse = false;
+
 async function init() {
   const token = await getToken();
   if (!token) { renderGate(); return; }
   await loadCourse(token);
+  hasLoadedCourse = true;
 }
 
 function renderGate() {
@@ -225,7 +228,12 @@ function bindUpload(l, token) {
     }
   };
 }
-_supabase.auth.onAuthStateChange((event) => { if (event === 'SIGNED_IN') init(); });
+_supabase.auth.onAuthStateChange((event) => {
+  // Supabase vie znovu vystrelit SIGNED_IN pri navrate fokusu do okna
+  // (napr. po vybere suboru cez systemovy dialog) — bez tejto strazky
+  // by to znovu prekreslilo cely zoznam lekcii a zmazalo rozpracovany upload.
+  if (event === 'SIGNED_IN' && !hasLoadedCourse) init();
+});
 init();
 </script>
 </body>
