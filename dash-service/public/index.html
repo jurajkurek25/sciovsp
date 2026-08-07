@@ -549,7 +549,26 @@ async function renderCourseLessons(courseId, panel) {
   bindLessonForms(courseId, panel);
 }
 
+function quizQuestionRowHtml(q) {
+  q = q || {};
+  return `<div class="quiz-question-row" style="background:var(--black3);border:1px solid var(--border2);border-radius:8px;padding:.7rem;margin-bottom:.6rem">
+    <input class="qq-question" placeholder="Otázka" value="${(q.question||'').replace(/"/g,'&quot;')}" style="width:100%;padding:.5rem .7rem;background:var(--black2);border:1px solid var(--border2);border-radius:6px;margin-bottom:.5rem">
+    <div class="formrow">
+      <input class="qq-a" placeholder="A" value="${(q.optionA||'').replace(/"/g,'&quot;')}" style="flex:1;min-width:100px">
+      <input class="qq-b" placeholder="B" value="${(q.optionB||'').replace(/"/g,'&quot;')}" style="flex:1;min-width:100px">
+      <input class="qq-c" placeholder="C" value="${(q.optionC||'').replace(/"/g,'&quot;')}" style="flex:1;min-width:100px">
+      <input class="qq-d" placeholder="D" value="${(q.optionD||'').replace(/"/g,'&quot;')}" style="flex:1;min-width:100px">
+      <select class="qq-correct" style="width:130px">
+        <option value="">správna: —</option>
+        ${['a','b','c','d'].map(o => `<option value="${o}" ${q.correct===o?'selected':''}>správna: ${o.toUpperCase()}</option>`).join('')}
+      </select>
+      <button class="btn danger qq-remove-btn" type="button" style="padding:.4rem .7rem">✕</button>
+    </div>
+  </div>`;
+}
+
 function lessonFormHtml(l, isNew) {
+  const questions = l.quizQuestions || [];
   return `<div class="lesson-item" data-id="${l.id||''}" data-new="${!!isNew}">
     <div class="formrow">
       <input class="lf-title" placeholder="Názov lekcie" value="${(l.title||'').replace(/"/g,'&quot;')}" style="flex:1;min-width:200px">
@@ -559,23 +578,20 @@ function lessonFormHtml(l, isNew) {
       <input class="lf-video" placeholder="URL videa (napr. https://cestak.online/video.mp4)" value="${(l.video_url||'').replace(/"/g,'&quot;')}" style="flex:1;min-width:280px">
       <input class="lf-doc" placeholder="URL dokumentu / PDF (voliteľné)" value="${(l.doc_url||'').replace(/"/g,'&quot;')}" style="flex:1;min-width:220px">
     </div>
-    <input class="lf-question" placeholder="Otázka kvízu" value="${(l.quiz_question||'').replace(/"/g,'&quot;')}" style="width:100%;padding:.6rem .8rem;background:var(--black3);border:1px solid var(--border2);border-radius:8px;margin-bottom:.6rem">
-    <div class="formrow">
-      <input class="lf-a" placeholder="A" value="${(l.quiz_option_a||'').replace(/"/g,'&quot;')}" style="flex:1;min-width:110px">
-      <input class="lf-b" placeholder="B" value="${(l.quiz_option_b||'').replace(/"/g,'&quot;')}" style="flex:1;min-width:110px">
-      <input class="lf-c" placeholder="C" value="${(l.quiz_option_c||'').replace(/"/g,'&quot;')}" style="flex:1;min-width:110px">
-      <input class="lf-d" placeholder="D" value="${(l.quiz_option_d||'').replace(/"/g,'&quot;')}" style="flex:1;min-width:110px">
-      <select class="lf-correct" style="width:140px">
-        <option value="">správna: —</option>
-        ${['a','b','c','d'].map(o => `<option value="${o}" ${l.quiz_correct===o?'selected':''}>správna: ${o.toUpperCase()}</option>`).join('')}
-      </select>
+    <div style="margin:.8rem 0 .4rem;display:flex;align-items:center;justify-content:space-between">
+      <span class="muted" style="font-family:var(--mono);font-size:.72rem;text-transform:uppercase;letter-spacing:.05em">Otázky kvízu (voliteľné, môže byť aj viac)</span>
+      <button class="btn secondary add-question-btn" type="button" style="padding:.4rem .8rem">+ Otázka</button>
     </div>
-    <label style="display:flex;align-items:center;gap:.5rem;margin:.4rem 0;font-size:.85rem;cursor:pointer">
+    <div class="quiz-questions-list">${questions.map(q => quizQuestionRowHtml(q)).join('')}</div>
+    <label style="display:flex;align-items:center;gap:.5rem;margin:.8rem 0 .4rem;font-size:.85rem;cursor:pointer">
       <input type="checkbox" class="lf-requires-upload" ${l.requires_upload ? 'checked' : ''}>
-      Vyžaduje nahratie materiálu od žiaka (AI ho vyhodnotí namiesto/popri kvíze)
+      Vyžaduje nahratie materiálu od žiaka (AI ho vyhodnotí) — dá sa skombinovať aj s kvízom vyššie
     </label>
-    <textarea class="lf-upload-instructions ${l.requires_upload ? '' : 'hidden'}" placeholder="Pokyny pre žiaka + kritériá hodnotenia pre AI (napr. 'Žiak má nahrať fotku vyriešeného cvičenia na str. 12. Musí mať vypočítané všetky 4 príklady so správnym postupom.')" style="min-height:70px">${l.upload_instructions||''}</textarea>
-    <div style="display:flex;gap:.6rem;margin-top:.6rem">
+    <div class="upload-fields ${l.requires_upload ? '' : 'hidden'}">
+      <textarea class="lf-upload-instructions" placeholder="Pokyny pre žiaka — TOTO ŽIAK VIDÍ (napr. 'Nahraj foto vyriešeného cvičenia na str. 12.')" style="min-height:60px">${l.upload_instructions||''}</textarea>
+      <textarea class="lf-ai-criteria" placeholder="Skryté kritériá hodnotenia pre AI — ŽIAK TOTO NEVIDÍ (napr. presné správne výsledky, na čo si má AI dať pozor)" style="min-height:60px;margin-top:.5rem">${l.ai_grading_criteria||''}</textarea>
+    </div>
+    <div style="display:flex;gap:.6rem;margin-top:.8rem">
       <button class="btn save-lesson-btn">Uložiť</button>
       ${isNew ? '' : '<button class="btn danger delete-lesson-btn">Zmazať</button>'}
     </div>
@@ -583,37 +599,59 @@ function lessonFormHtml(l, isNew) {
 }
 
 function bindLessonForms(courseId, panel) {
-  $$('.lf-requires-upload', panel).forEach(cb => cb.onchange = () => {
-    const item = cb.closest('.lesson-item');
-    $('.lf-upload-instructions', item).classList.toggle('hidden', !cb.checked);
-  });
-  $$('.save-lesson-btn', panel).forEach(btn => btn.onclick = async () => {
-    const item = btn.closest('.lesson-item');
-    const isNew = item.dataset.new === 'true';
-    const body = {
-      title: $('.lf-title', item).value, videoUrl: $('.lf-video', item).value, docUrl: $('.lf-doc', item).value,
-      quizQuestion: $('.lf-question', item).value, quizOptionA: $('.lf-a', item).value, quizOptionB: $('.lf-b', item).value,
-      quizOptionC: $('.lf-c', item).value, quizOptionD: $('.lf-d', item).value, quizCorrect: $('.lf-correct', item).value || undefined,
-      sortOrder: Number($('.lf-sort', item).value) || 0,
-      requiresUpload: $('.lf-requires-upload', item).checked,
-      uploadInstructions: $('.lf-upload-instructions', item).value
-    };
-    try {
-      if (isNew) await api(`/api/dash/courses/${courseId}/lessons`, { method: 'POST', body: JSON.stringify(body) });
-      else await api(`/api/dash/courses/${courseId}/lessons/${item.dataset.id}`, { method: 'PUT', body: JSON.stringify(body) });
-      const panelEl = btn.closest('.lessons-panel');
-      await renderCourseLessons(courseId, panelEl);
-    } catch (err) { alert(err.message); }
-  });
-  $$('.delete-lesson-btn', panel).forEach(btn => btn.onclick = async () => {
-    if (!confirm('Zmazať lekciu?')) return;
-    const item = btn.closest('.lesson-item');
-    try {
-      await api(`/api/dash/courses/${courseId}/lessons/${item.dataset.id}`, { method: 'DELETE' });
-      const panelEl = btn.closest('.lessons-panel');
-      await renderCourseLessons(courseId, panelEl);
-    } catch (err) { alert(err.message); }
-  });
+  panel.onclick = async (e) => {
+    const addBtn = e.target.closest('.add-question-btn');
+    if (addBtn) {
+      const item = addBtn.closest('.lesson-item');
+      $('.quiz-questions-list', item).insertAdjacentHTML('beforeend', quizQuestionRowHtml());
+      return;
+    }
+    const rmBtn = e.target.closest('.qq-remove-btn');
+    if (rmBtn) { rmBtn.closest('.quiz-question-row').remove(); return; }
+
+    const saveBtn = e.target.closest('.save-lesson-btn');
+    if (saveBtn) {
+      const item = saveBtn.closest('.lesson-item');
+      const isNew = item.dataset.new === 'true';
+      const quizQuestions = $$('.quiz-question-row', item).map(row => ({
+        question: $('.qq-question', row).value,
+        optionA: $('.qq-a', row).value, optionB: $('.qq-b', row).value,
+        optionC: $('.qq-c', row).value, optionD: $('.qq-d', row).value,
+        correct: $('.qq-correct', row).value
+      })).filter(q => q.question.trim());
+      const body = {
+        title: $('.lf-title', item).value, videoUrl: $('.lf-video', item).value, docUrl: $('.lf-doc', item).value,
+        quizQuestions,
+        sortOrder: Number($('.lf-sort', item).value) || 0,
+        requiresUpload: $('.lf-requires-upload', item).checked,
+        uploadInstructions: $('.lf-upload-instructions', item).value,
+        aiGradingCriteria: $('.lf-ai-criteria', item).value
+      };
+      try {
+        if (isNew) await api(`/api/dash/courses/${courseId}/lessons`, { method: 'POST', body: JSON.stringify(body) });
+        else await api(`/api/dash/courses/${courseId}/lessons/${item.dataset.id}`, { method: 'PUT', body: JSON.stringify(body) });
+        await renderCourseLessons(courseId, panel);
+      } catch (err) { alert(err.message); }
+      return;
+    }
+
+    const delBtn = e.target.closest('.delete-lesson-btn');
+    if (delBtn) {
+      if (!confirm('Zmazať lekciu?')) return;
+      const item = delBtn.closest('.lesson-item');
+      try {
+        await api(`/api/dash/courses/${courseId}/lessons/${item.dataset.id}`, { method: 'DELETE' });
+        await renderCourseLessons(courseId, panel);
+      } catch (err) { alert(err.message); }
+      return;
+    }
+  };
+  panel.onchange = (e) => {
+    if (e.target.classList.contains('lf-requires-upload')) {
+      const item = e.target.closest('.lesson-item');
+      $('.upload-fields', item).classList.toggle('hidden', !e.target.checked);
+    }
+  };
 }
 
 // ─────────────────────────── BLOG ───────────────────────────

@@ -1,6 +1,8 @@
 // Editor video kurzov (sptrener.online/kurzy) — CRUD nad courses + course_lessons
 // v hlavnej appke. Kurz = jednorázová platba 57 €, lekcie = video + PDF + kvíz
-// (jedna otázka A/B/C/D), postupné odomykanie po správnej odpovedi.
+// (viacero otázok A/B/C/D na lekciu) a/alebo nahratie materiálu, ktoré
+// vyhodnotí AI. "aiGradingCriteria" sú skryté kritériá pre AI, ktoré žiak
+// nikdy nevidí — samostatné od "uploadInstructions" (tie žiak vidí).
 const express = require('express');
 const router = express.Router();
 const { requireDashAuth } = require('../lib/auth');
@@ -13,6 +15,28 @@ function slugify(s) {
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
     .slice(0, 100);
+}
+
+function validateQuizQuestions(quizQuestions) {
+  if (quizQuestions === undefined) return null;
+  if (!Array.isArray(quizQuestions)) return 'quizQuestions musí byť pole.';
+  for (const q of quizQuestions) {
+    if (!q || !q.question) return 'Každá otázka musí mať text.';
+    if (!['a', 'b', 'c', 'd'].includes(q.correct)) return 'Každá otázka musí mať správnu odpoveď a/b/c/d.';
+  }
+  return null;
+}
+
+async function replaceQuizQuestions(lessonId, quizQuestions) {
+  await mainDb.from('course_lesson_quiz_questions').delete().eq('lesson_id', lessonId);
+  if (!Array.isArray(quizQuestions) || !quizQuestions.length) return;
+  const rows = quizQuestions.map((q, i) => ({
+    lesson_id: lessonId, sort_order: i, question: q.question,
+    option_a: q.optionA || null, option_b: q.optionB || null,
+    option_c: q.optionC || null, option_d: q.optionD || null,
+    correct: q.correct
+  }));
+  await mainDb.from('course_lesson_quiz_questions').insert(rows);
 }
 
 router.get('/api/dash/courses', requireDashAuth, async (req, res) => {
@@ -64,15 +88,26 @@ router.delete('/api/dash/courses/:id', requireDashAuth, async (req, res) => {
 });
 
 router.get('/api/dash/courses/:id/lessons', requireDashAuth, async (req, res) => {
-  const { data, error } = await mainDb.from('course_lessons').select('*').eq('course_id', req.params.id).order('sort_order');
+  const { data: lessons, error } = await mainDb.from('course_lessons').select('*').eq('course_id', req.params.id).order('sort_order');
   if (error) return res.status(500).json({ error: error.message });
-  res.json({ lessons: data || [] });
+  const withQuiz = await Promise.all((lessons || []).map(async l => {
+    const { data: qs } = await mainDb.from('course_lesson_quiz_questions').select('*').eq('lesson_id', l.id).order('sort_order');
+    return {
+      ...l,
+      quizQuestions: (qs || []).map(q => ({
+        id: q.id, question: q.question, optionA: q.option_a, optionB: q.option_b,
+        optionC: q.option_c, optionD: q.option_d, correct: q.correct
+      }))
+    };
+  }));
+  res.json({ lessons: withQuiz });
 });
 
 router.post('/api/dash/courses/:id/lessons', requireDashAuth, async (req, res) => {
-  const { title, videoUrl, docUrl, quizQuestion, quizOptionA, quizOptionB, quizOptionC, quizOptionD, quizCorrect, sortOrder, requiresUpload, uploadInstructions } = req.body || {};
+  const { title, videoUrl, docUrl, quizQuestions, sortOrder, requiresUpload, uploadInstructions, aiGradingCriteria } = req.body || {};
   if (!title || !videoUrl) return res.status(400).json({ error: 'Chýba title alebo videoUrl.' });
-  if (quizCorrect && !['a', 'b', 'c', 'd'].includes(quizCorrect)) return res.status(400).json({ error: 'quizCorrect musí byť a/b/c/d.' });
+  const qErr = validateQuizQuestions(quizQuestions);
+  if (qErr) return res.status(400).json({ error: qErr });
   let order = sortOrder;
   if (order === undefined || order === null) {
     const { data: existing } = await mainDb.from('course_lessons').select('sort_order').eq('course_id', req.params.id).order('sort_order', { ascending: false }).limit(1);
@@ -80,36 +115,34 @@ router.post('/api/dash/courses/:id/lessons', requireDashAuth, async (req, res) =
   }
   const { data, error } = await mainDb.from('course_lessons').insert({
     course_id: req.params.id, title, video_url: videoUrl, doc_url: docUrl || null,
-    quiz_question: quizQuestion || null, quiz_option_a: quizOptionA || null, quiz_option_b: quizOptionB || null,
-    quiz_option_c: quizOptionC || null, quiz_option_d: quizOptionD || null, quiz_correct: quizCorrect || null,
-    sort_order: order, requires_upload: !!requiresUpload, upload_instructions: uploadInstructions || null
+    sort_order: order, requires_upload: !!requiresUpload, upload_instructions: uploadInstructions || null,
+    ai_grading_criteria: aiGradingCriteria || null
   }).select().single();
   if (error) return res.status(500).json({ error: error.message });
-  res.json({ ok: true, lesson: data });
+  await replaceQuizQuestions(data.id, quizQuestions);
+  res.json({ ok: true, lesson: { ...data, quizQuestions: quizQuestions || [] } });
 });
 
 router.put('/api/dash/courses/:id/lessons/:lessonId', requireDashAuth, async (req, res) => {
-  const { title, videoUrl, docUrl, quizQuestion, quizOptionA, quizOptionB, quizOptionC, quizOptionD, quizCorrect, sortOrder, requiresUpload, uploadInstructions } = req.body || {};
-  if (quizCorrect && !['a', 'b', 'c', 'd'].includes(quizCorrect)) return res.status(400).json({ error: 'quizCorrect musí byť a/b/c/d.' });
+  const { title, videoUrl, docUrl, quizQuestions, sortOrder, requiresUpload, uploadInstructions, aiGradingCriteria } = req.body || {};
+  const qErr = validateQuizQuestions(quizQuestions);
+  if (qErr) return res.status(400).json({ error: qErr });
   const update = {};
   if (title !== undefined) update.title = title;
   if (videoUrl !== undefined) update.video_url = videoUrl;
   if (docUrl !== undefined) update.doc_url = docUrl;
-  if (quizQuestion !== undefined) update.quiz_question = quizQuestion;
-  if (quizOptionA !== undefined) update.quiz_option_a = quizOptionA;
-  if (quizOptionB !== undefined) update.quiz_option_b = quizOptionB;
-  if (quizOptionC !== undefined) update.quiz_option_c = quizOptionC;
-  if (quizOptionD !== undefined) update.quiz_option_d = quizOptionD;
-  if (quizCorrect !== undefined) update.quiz_correct = quizCorrect;
   if (sortOrder !== undefined) update.sort_order = sortOrder;
   if (requiresUpload !== undefined) update.requires_upload = !!requiresUpload;
   if (uploadInstructions !== undefined) update.upload_instructions = uploadInstructions;
+  if (aiGradingCriteria !== undefined) update.ai_grading_criteria = aiGradingCriteria;
   const { data, error } = await mainDb.from('course_lessons').update(update).eq('id', req.params.lessonId).eq('course_id', req.params.id).select().single();
   if (error) return res.status(500).json({ error: error.message });
-  res.json({ ok: true, lesson: data });
+  if (quizQuestions !== undefined) await replaceQuizQuestions(req.params.lessonId, quizQuestions);
+  res.json({ ok: true, lesson: { ...data, quizQuestions: quizQuestions !== undefined ? quizQuestions : undefined } });
 });
 
 router.delete('/api/dash/courses/:id/lessons/:lessonId', requireDashAuth, async (req, res) => {
+  await mainDb.from('course_lesson_quiz_questions').delete().eq('lesson_id', req.params.lessonId);
   const { error } = await mainDb.from('course_lessons').delete().eq('id', req.params.lessonId).eq('course_id', req.params.id);
   if (error) return res.status(500).json({ error: error.message });
   res.json({ ok: true });
