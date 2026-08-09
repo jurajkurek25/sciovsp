@@ -44,6 +44,20 @@ h1{font-family:var(--serif);font-size:2rem;margin-bottom:.3rem}
 .upload-box input[type=file]{display:block;width:100%;font-size:.82rem;color:var(--text2);margin-bottom:.7rem}
 .upload-submit{padding:.6rem 1.1rem;background:var(--volt);color:var(--black);border:none;border-radius:8px;font-weight:700;font-family:var(--mono);font-size:.78rem;cursor:pointer}
 .upload-submit:disabled{opacity:.5;cursor:not-allowed}
+.comments{margin-top:1.1rem;border-top:1px solid var(--border);padding-top:1rem}
+.comments-title{font-family:var(--serif);font-size:1rem;font-weight:400;margin-bottom:.7rem}
+.comment-thread{margin-bottom:.9rem}
+.comment{background:var(--black);border:1px solid var(--border2);border-radius:8px;padding:.7rem .8rem;font-size:.87rem}
+.comment.instructor{border-color:rgba(124,92,255,.4);background:rgba(124,92,255,.06)}
+.comment-reply{margin-left:1.2rem;margin-top:.5rem}
+.comment-head{display:flex;justify-content:space-between;gap:.6rem;margin-bottom:.35rem;font-family:var(--mono);font-size:.72rem;color:var(--text3)}
+.comment-author{color:var(--text2);font-weight:500}
+.comment.instructor .comment-author{color:var(--purple2)}
+.comment-body{white-space:pre-wrap}
+.comment-form{margin-top:.9rem}
+.comment-input{width:100%;min-height:70px;background:var(--black);border:1px solid var(--border2);border-radius:8px;padding:.6rem .7rem;color:var(--text);font-family:var(--sans);font-size:.87rem;resize:vertical;margin-bottom:.5rem}
+.comment-submit{padding:.55rem 1rem;background:var(--volt);color:var(--black);border:none;border-radius:8px;font-weight:700;font-family:var(--mono);font-size:.76rem;cursor:pointer}
+.comment-submit:disabled{opacity:.5;cursor:not-allowed}
 </style>
 </head>
 <body>
@@ -128,6 +142,7 @@ function renderLessons(data, token) {
     if (hasQuiz && !l.quizPassed) bindQuiz(l, token);
     if (l.requiresUpload && !l.uploadPassed) bindUpload(l, token);
   });
+  data.lessons.forEach(l => { if (l.unlocked) loadComments(l, token); });
   loadFinalTest(token);
 }
 
@@ -240,8 +255,9 @@ function lessonHtml(l) {
   }
   const videoBlock = l.videoUrl ? `<div class="bp-mount" id="bp-${l.id}" data-src="${escapeHtml(l.videoUrl)}"></div>` : '';
   const docBlock = l.docUrl ? `<a class="doc-link" href="${escapeHtml(l.docUrl)}" target="_blank" rel="noopener">📄 Otvoriť materiály (PDF)</a>` : '';
+  const commentsMount = `<div class="comments-mount" id="comments-${l.id}"></div>`;
   if (l.completed) {
-    return `<div class="lesson"><h3>${escapeHtml(l.title)} <span class="badge">hotovo ✓</span></h3>${videoBlock}${docBlock}<p class="completed-note">Lekcia dokončená.</p></div>`;
+    return `<div class="lesson"><h3>${escapeHtml(l.title)} <span class="badge">hotovo ✓</span></h3>${videoBlock}${docBlock}<p class="completed-note">Lekcia dokončená.</p>${commentsMount}</div>`;
   }
   const hasQuiz = (l.quizQuestions || []).length > 0;
   const needsQuiz = hasQuiz && !l.quizPassed;
@@ -277,7 +293,69 @@ function lessonHtml(l) {
   if (!hasQuiz && !l.requiresUpload) {
     gatesBlock = '<p class="muted">Táto lekcia nemá kvíz — pokračuj ďalej.</p>';
   }
-  return `<div class="lesson" id="lesson-${l.id}"><h3>${escapeHtml(l.title)}</h3>${videoBlock}${docBlock}${gatesBlock}</div>`;
+  return `<div class="lesson" id="lesson-${l.id}"><h3>${escapeHtml(l.title)}</h3>${videoBlock}${docBlock}${gatesBlock}${commentsMount}</div>`;
+}
+
+function commentsListHtml(comments) {
+  if (!comments.length) return '<p class="muted">Zatiaľ žiadne otázky. Buď prvý!</p>';
+  const byParent = {};
+  comments.forEach(c => { if (c.parentId) (byParent[c.parentId] = byParent[c.parentId] || []).push(c); });
+  function one(c) {
+    const label = c.isInstructor ? 'Lektor' : (c.isOwn ? 'Ty' : c.authorLabel);
+    return `<div class="comment${c.isInstructor ? ' instructor' : ''}">
+      <div class="comment-head"><span class="comment-author">${escapeHtml(label)}</span><span>${new Date(c.createdAt).toLocaleDateString('sk-SK')}</span></div>
+      <div class="comment-body">${escapeHtml(c.body)}</div>
+    </div>`;
+  }
+  return comments.filter(c => !c.parentId).map(c => `<div class="comment-thread">${one(c)}${(byParent[c.id] || []).map(r => `<div class="comment-reply">${one(r)}</div>`).join('')}</div>`).join('');
+}
+
+async function loadComments(l, token) {
+  const mount = document.getElementById('comments-' + l.id);
+  if (!mount) return;
+  mount.innerHTML = `<div class="comments">
+    <h4 class="comments-title">💬 Otázky a komentáre</h4>
+    <div class="comments-list"><p class="muted">Načítavam…</p></div>
+    <div class="comment-form">
+      <textarea class="comment-input" placeholder="Napíš otázku alebo poznámku k tejto lekcii…"></textarea>
+      <button class="comment-submit">Odoslať</button>
+      <div class="feedback"></div>
+    </div>
+  </div>`;
+  const listEl = mount.querySelector('.comments-list');
+  try {
+    const res = await fetch(`/api/courses/${slug}/lessons/${l.id}/comments`, { headers: { Authorization: 'Bearer ' + token } });
+    const data = await res.json();
+    listEl.innerHTML = res.ok ? commentsListHtml(data.comments || []) : '<p class="muted">Komentáre sa nepodarilo načítať.</p>';
+  } catch (e) {
+    listEl.innerHTML = '<p class="muted">Komentáre sa nepodarilo načítať.</p>';
+  }
+  bindCommentForm(mount, l, token);
+}
+
+function bindCommentForm(mount, l, token) {
+  const input = mount.querySelector('.comment-input');
+  const btn = mount.querySelector('.comment-submit');
+  const feedback = mount.querySelector('.comment-form .feedback');
+  btn.onclick = async () => {
+    const body = input.value.trim();
+    if (!body) return;
+    btn.disabled = true;
+    try {
+      const res = await fetch(`/api/courses/${slug}/lessons/${l.id}/comments`, {
+        method: 'POST', headers: { 'content-type': 'application/json', Authorization: 'Bearer ' + token },
+        body: JSON.stringify({ body })
+      });
+      const data = await res.json();
+      if (!res.ok) { feedback.textContent = data.error || 'Chyba.'; feedback.className = 'feedback err'; btn.disabled = false; return; }
+      input.value = '';
+      feedback.textContent = '';
+      feedback.className = 'feedback';
+      await loadComments(l, token);
+    } catch (e) {
+      feedback.textContent = 'Chyba servera.'; feedback.className = 'feedback err'; btn.disabled = false;
+    }
+  };
 }
 
 function bindQuiz(l, token) {

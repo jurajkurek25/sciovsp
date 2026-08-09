@@ -475,12 +475,14 @@ async function renderCourses() {
         <div style="display:flex;gap:.6rem;flex-wrap:wrap">
           <button class="btn secondary open-lessons-btn">Lekcie (${c.lessonCount})</button>
           <button class="btn secondary open-final-test-btn">Záverečný test</button>
+          <button class="btn secondary open-comments-btn">Otázky</button>
           <button class="btn secondary edit-course-btn">Upraviť</button>
           <button class="btn ${c.published ? 'secondary' : ''} toggle-publish-btn" data-published="${c.published}">${c.published ? 'Zrušiť publikovanie' : 'Publikovať'}</button>
           <button class="btn danger delete-course-btn">Zmazať</button>
         </div>
         <div class="lessons-panel hidden" style="margin-top:1rem"></div>
         <div class="final-test-panel hidden" style="margin-top:1rem"></div>
+        <div class="comments-panel hidden" style="margin-top:1rem"></div>
       </div>`).join('') || '<p class="muted">Zatiaľ žiadne kurzy.</p>'}</div>`;
 
   $('#newCourseBtn').onclick = () => {
@@ -574,6 +576,61 @@ function bindCourseListActions() {
     if (!panel.classList.contains('hidden')) { panel.classList.add('hidden'); panel.innerHTML = ''; return; }
     panel.classList.remove('hidden');
     await renderCourseFinalTest(item.dataset.id, panel);
+  });
+  $$('.open-comments-btn').forEach(btn => btn.onclick = async () => {
+    const item = btn.closest('.card-item');
+    const panel = $('.comments-panel', item);
+    if (!panel.classList.contains('hidden')) { panel.classList.add('hidden'); panel.innerHTML = ''; return; }
+    panel.classList.remove('hidden');
+    await renderCourseComments(item.dataset.id, panel);
+  });
+}
+
+async function renderCourseComments(courseId, panel) {
+  panel.innerHTML = '<p class="muted">Načítavam otázky…</p>';
+  const [{ comments }, { lessons }] = await Promise.all([
+    api(`/api/dash/courses/${courseId}/comments`),
+    api(`/api/dash/courses/${courseId}/lessons`)
+  ]);
+  const byParent = {};
+  comments.forEach(c => { if (c.parentId) (byParent[c.parentId] = byParent[c.parentId] || []).push(c); });
+  const top = comments.filter(c => !c.parentId);
+  function row(c, isReply) {
+    return `<div class="card-item" style="margin-top:.6rem;${isReply ? 'margin-left:1.4rem;' : ''}${c.isInstructor ? 'background:rgba(124,92,255,.08)' : ''}">
+      <p class="muted" style="margin-bottom:.3rem">${c.isInstructor ? 'Lektor' : (c.email || '').replace(/</g, '&lt;')} · ${(c.lessonTitle || '').replace(/</g, '&lt;')} · ${new Date(c.createdAt).toLocaleString('sk-SK')}</p>
+      <p>${(c.body || '').replace(/</g, '&lt;')}</p>
+      ${!c.isInstructor && !isReply ? `<button class="btn secondary reply-comment-btn" data-comment-id="${c.id}" data-lesson-id="${c.lessonId}" style="margin-top:.5rem">Odpovedať</button><div class="reply-form-${c.id} hidden" style="margin-top:.6rem"></div>` : ''}
+    </div>`;
+  }
+  panel.innerHTML = `
+    <p class="muted" style="margin-bottom:.8rem">Otázky a komentáre študentov ku všetkým lekciám tohto kurzu. Poznámka nižšie sa pridá ako samostatný príspevok lektora k vybranej lekcii.</p>
+    <div class="formrow">
+      <select class="note-lesson-select">${(lessons || []).map(l => `<option value="${l.id}">${(l.title || '').replace(/</g, '&lt;')}</option>`).join('')}</select>
+    </div>
+    <textarea class="note-body-input" placeholder="Napíš poznámku k lekcii (viditeľná pre všetkých študentov s prístupom)" style="min-height:60px;margin-top:.5rem"></textarea>
+    <button class="btn add-note-btn" style="margin-top:.5rem">Pridať poznámku</button>
+    <div style="margin-top:1rem">
+      ${top.length ? top.map(c => row(c, false) + (byParent[c.id] || []).map(r => row(r, true)).join('')).join('') : '<p class="muted">Zatiaľ žiadne otázky.</p>'}
+    </div>`;
+  $('.add-note-btn', panel).onclick = async () => {
+    const lessonId = $('.note-lesson-select', panel).value;
+    const body = $('.note-body-input', panel).value.trim();
+    if (!lessonId || !body) return;
+    try { await api(`/api/dash/courses/${courseId}/comments`, { method: 'POST', body: JSON.stringify({ lessonId, body }) }); await renderCourseComments(courseId, panel); }
+    catch (err) { alert(err.message); }
+  };
+  $$('.reply-comment-btn', panel).forEach(btn => btn.onclick = () => {
+    const commentId = btn.dataset.commentId, lessonId = btn.dataset.lessonId;
+    const holder = panel.querySelector('.reply-form-' + commentId);
+    if (!holder.classList.contains('hidden')) { holder.classList.add('hidden'); holder.innerHTML = ''; return; }
+    holder.classList.remove('hidden');
+    holder.innerHTML = `<textarea class="reply-input" placeholder="Odpoveď…" style="min-height:50px"></textarea><button class="btn reply-send-btn" style="margin-top:.4rem">Odoslať</button>`;
+    holder.querySelector('.reply-send-btn').onclick = async () => {
+      const body = holder.querySelector('.reply-input').value.trim();
+      if (!body) return;
+      try { await api(`/api/dash/courses/${courseId}/comments`, { method: 'POST', body: JSON.stringify({ lessonId, parentId: commentId, body }) }); await renderCourseComments(courseId, panel); }
+      catch (err) { alert(err.message); }
+    };
   });
 }
 
