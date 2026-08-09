@@ -5,7 +5,7 @@
 
   const CSS = `
 .bp-wrap{position:relative;width:100%;background:#000;border-radius:12px;overflow:hidden;user-select:none}
-.bp-wrap video{width:100%;display:block;background:#000}
+.bp-wrap video{width:100%;max-width:100%;display:block;background:#000}
 .bp-bar{position:absolute;left:0;right:0;bottom:0;padding:.6rem .7rem .55rem;background:linear-gradient(to top,rgba(0,0,0,.85),rgba(0,0,0,0));display:flex;align-items:center;gap:.55rem;opacity:0;transition:opacity .2s;font-family:'DM Mono',monospace}
 .bp-wrap:hover .bp-bar,.bp-wrap.bp-touched .bp-bar,.bp-wrap.bp-paused .bp-bar{opacity:1}
 .bp-btn{background:none;border:none;color:#eeeef5;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;width:26px;height:26px;flex-shrink:0}
