@@ -34,7 +34,7 @@
     });
     document.querySelectorAll('.js-buy-btn').forEach(btn => btn.onclick = buyCourse);
     document.querySelectorAll('.js-google-btn').forEach(btn => btn.onclick = () => {
-      _supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.href } });
+      _supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.origin + location.pathname } });
     });
   }
 

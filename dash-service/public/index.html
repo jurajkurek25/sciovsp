@@ -188,7 +188,7 @@ async function api(path, opts = {}) {
 $('#loginGoogleBtn').addEventListener('click', () => {
   $('#loginError').textContent = '';
   if (!_dashAuth) { $('#loginError').textContent = 'Google prihlásenie sa nepodarilo načítať, skús obnoviť stránku.'; return; }
-  _dashAuth.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.href } });
+  _dashAuth.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.origin + location.pathname } });
 });
 
 async function completeGoogleLogin(accessToken) {
