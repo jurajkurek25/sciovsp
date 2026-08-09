@@ -39,11 +39,27 @@
   }
 
   async function checkPurchased(token) {
-    try {
+    // Len explicitné 403 od servera znamená "kurz nie je zakúpený" — hocijaká
+    // iná chyba (výpadok siete, dočasné zlyhanie overenia session na serveri)
+    // sa raz zopakuje, aby prechodná chyba nikdy neukázala tlačidlo "Kúpiť"
+    // niekomu, kto kurz už má.
+    const attempt = async () => {
       const res = await fetch('/api/courses/' + slug + '/access', { headers: { Authorization: 'Bearer ' + token } });
-      purchased = res.ok;
+      if (res.status === 403) return false;
+      if (res.ok) return true;
+      return null;
+    };
+    try {
+      let result = await attempt();
+      if (result === null) result = await attempt();
+      purchased = result === true;
     } catch (e) {
-      purchased = false;
+      try {
+        const res = await fetch('/api/courses/' + slug + '/access', { headers: { Authorization: 'Bearer ' + token } });
+        purchased = res.status === 403 ? false : res.ok;
+      } catch (e2) {
+        purchased = false;
+      }
     }
   }
 
