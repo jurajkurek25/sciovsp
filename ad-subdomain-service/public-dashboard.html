@@ -241,6 +241,7 @@ footer{border-top:1px solid var(--border);padding:2rem clamp(1rem,4vw,2rem);padd
 
 <footer><div class="footer-logo">SP TRÉNER ADS © 2026</div><a href="/terms" style="font-family:var(--mono);font-size:12px;color:var(--text3);text-decoration:none" data-i18n="footerTerms">Podmienky využívania</a></footer>
 
+<script src="/branded-player.js"></script>
 <script>
 const DASH_I18N = {
   sk: {
@@ -501,7 +502,7 @@ async function loadBanners(){
     const list = document.getElementById('bannerList');
     if (!data.banners.length) { list.innerHTML = `<p style="color:var(--text3);font-size:.85rem">${t('noBanners')}</p>`; return; }
     list.innerHTML = data.banners.map(b => {
-      const media = b.mime_type === 'video/mp4' ? `<video src="${b.public_url}" muted disablePictureInPicture oncontextmenu="return false" ondragstart="return false"></video>` : `<img src="${b.public_url}" oncontextmenu="return false" ondragstart="return false">`;
+      const media = b.mime_type === 'video/mp4' ? `<div class="bp-mount" data-src="${b.public_url}" id="bp-banner-${b.id}"></div>` : `<img src="${b.public_url}" oncontextmenu="return false" ondragstart="return false">`;
       return `<div class="banner-item"><div class="banner-thumb">${media}</div>
         <div class="banner-info"><span class="banner-link">${b.link_url}</span>
           <div class="banner-stats">${t('impressionsClicks')(b.impressions, b.clicks)} ${langPill(b.target_lang)}</div>
@@ -511,6 +512,11 @@ async function loadBanners(){
           <button class="icon-btn" onclick="deleteBanner('${b.id}')">${t('btnDelete')}</button>
         </div></div>`;
     }).join('');
+    data.banners.forEach(b => {
+      if (b.mime_type !== 'video/mp4') return;
+      const mount = document.getElementById('bp-banner-' + b.id);
+      if (mount) mountBrandedPlayer(mount, mount.dataset.src, { compact: true, muted: true });
+    });
   } catch(e) {}
 }
 async function toggleBanner(id, active){ try { await api(`/api/ads/banners/${id}`, {method:'PATCH', body: JSON.stringify({active})}); loadBanners(); } catch(e){} }
@@ -531,7 +537,7 @@ async function loadVideoAds(){
     const data = await api('/api/video-ads');
     const list = document.getElementById('videoList');
     if (!data.videoAds.length) { list.innerHTML = `<p style="color:var(--text3);font-size:.85rem">${t('noVideos')}</p>`; return; }
-    list.innerHTML = data.videoAds.map(v => `<div class="banner-item"><div class="banner-thumb"><video src="${v.public_url}" muted disablePictureInPicture oncontextmenu="return false" ondragstart="return false"></video></div>
+    list.innerHTML = data.videoAds.map(v => `<div class="banner-item"><div class="banner-thumb"><div class="bp-mount" data-src="${v.public_url}" id="bp-video-${v.id}"></div></div>
       <div class="banner-info"><span class="banner-link">${v.link_url}</span>
         <div class="banner-stats">${t('videoStats')(v.duration_s, v.views, v.clicks)} ${langPill(v.target_lang)}</div>
         <div class="banner-billing">${billingBadge(v,'startVideoCheckout','149€/mesiac')}</div></div>
@@ -539,6 +545,10 @@ async function loadVideoAds(){
         <button class="icon-btn ${v.active?'on':''}" onclick="toggleVideoAd('${v.id}',${!v.active})">${v.active?t('statActive'):t('statInactive')}</button>
         <button class="icon-btn" onclick="deleteVideoAd('${v.id}')">${t('btnDelete')}</button>
       </div></div>`).join('');
+    data.videoAds.forEach(v => {
+      const mount = document.getElementById('bp-video-' + v.id);
+      if (mount) mountBrandedPlayer(mount, mount.dataset.src, { compact: true, muted: true });
+    });
   } catch(e) {}
 }
 async function toggleVideoAd(id, active){ try { await api(`/api/video-ads/${id}`, {method:'PATCH', body: JSON.stringify({active})}); loadVideoAds(); } catch(e){} }
