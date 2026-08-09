@@ -20,6 +20,7 @@ app.use(require('./routes/courses'));
 app.use(require('./routes/blog'));
 app.use(require('./routes/upload'));
 app.use(require('./routes/ads'));
+app.use(require('./routes/giftcardsales'));
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.get('/{*splat}', (req, res) => {

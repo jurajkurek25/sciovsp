@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Darčeková karta — SP Tréner</title>
+<meta name="description" content="Daruj prístup k SP Tréner — Premium na vybranú dĺžku alebo 1 online kurz podľa vlastného výberu.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@300;400;500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
+<style>
+:root{--black:#08080d;--black2:#0f0f18;--black3:#15151f;--border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.13);--text:#eeeef5;--text2:#a1a1bc;--text3:#5c5c7a;--volt:#c8ff00;--purple:#7c5cff;--purple2:#b09bff;--red:#ff3f5e;--green:#36e896;--serif:'Instrument Serif',Georgia,serif;--mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--black);color:var(--text);font-family:var(--sans);line-height:1.6;min-height:100vh}
+a{color:var(--purple2)}
+.wrap{max-width:640px;margin:0 auto;padding:3rem 1.2rem 5rem}
+.top a{font-family:var(--mono);font-size:.8rem;color:var(--text2);text-decoration:none}
+h1{font-family:var(--serif);font-size:2.3rem;margin:1.2rem 0 .4rem}
+.sub{color:var(--text2);margin-bottom:2rem}
+.section-label{font-family:var(--mono);font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);margin:1.8rem 0 .8rem}
+.opt-card{display:flex;align-items:center;justify-content:space-between;gap:1rem;background:var(--black2);border:1px solid var(--border2);border-radius:12px;padding:1rem 1.2rem;margin-bottom:.7rem;cursor:pointer}
+.opt-card.selected{border-color:var(--volt);background:rgba(200,255,0,.05)}
+.opt-card .label{font-weight:500}
+.opt-card .price{font-family:var(--mono);color:var(--volt);font-weight:700;white-space:nowrap}
+.form-block{margin-top:2rem;background:var(--black2);border:1px solid var(--border);border-radius:14px;padding:1.5rem}
+label{display:block;font-size:.82rem;color:var(--text2);margin-bottom:.35rem;margin-top:.9rem}
+label:first-child{margin-top:0}
+input,textarea{width:100%;padding:.7rem .9rem;background:var(--black3);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:inherit;font-size:.9rem}
+textarea{min-height:80px;resize:vertical}
+.buy-btn{width:100%;margin-top:1.4rem;padding:.9rem;background:var(--volt);color:var(--black);border:none;border-radius:9px;font-weight:700;font-family:var(--mono);font-size:.85rem;cursor:pointer}
+.buy-btn:disabled{opacity:.5;cursor:not-allowed}
+.err{color:var(--red);font-size:.85rem;margin-top:.8rem;min-height:1em}
+.muted{color:var(--text3);font-size:.85rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><a href="/">← SP Tréner</a></div>
+  <h1>Darčeková karta</h1>
+  <p class="sub">Daruj niekomu prístup k SP Tréner — Premium na vybranú dĺžku, alebo 1 online kurz podľa jeho vlastného výberu. Po zaplatení dostaneš PDF kartu s kódom na vytlačenie.</p>
+  <div id="optionsRoot"><p class="muted">Načítavam možnosti…</p></div>
+  <div class="form-block" id="formBlock" style="display:none">
+    <label for="buyerEmail">Tvoj e-mail (potvrdenie platby)</label>
+    <input type="email" id="buyerEmail" placeholder="tvoj@email.sk" required>
+    <label for="recipientName">Meno obdarovaného (voliteľné, zobrazí sa na karte)</label>
+    <input type="text" id="recipientName" placeholder="napr. Janko">
+    <label for="giftMessage">Odkaz (voliteľné)</label>
+    <textarea id="giftMessage" placeholder="Krátky odkaz pre obdarovaného…"></textarea>
+    <button class="buy-btn" id="buyBtn">Kúpiť darčekovú kartu</button>
+    <div class="err" id="formErr"></div>
+  </div>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+let selectedOption = null;
+
+function eur(cents) { return (cents / 100).toFixed(2).replace('.', ',') + ' €'; }
+
+async function loadOptions() {
+  try {
+    const res = await fetch('/api/gift-cards/options');
+    const data = await res.json();
+    const root = $('#optionsRoot');
+    if (!data.options || !data.options.length) {
+      root.innerHTML = '<p class="muted">Momentálne nie sú dostupné žiadne darčekové karty.</p>';
+      return;
+    }
+    const premiumOpts = data.options.filter(o => o.kind === 'premium');
+    const courseOpts = data.options.filter(o => o.kind === 'course');
+    let html = '';
+    if (premiumOpts.length) {
+      html += '<div class="section-label">Premium predplatné</div>' + premiumOpts.map(o => optCardHtml(o)).join('');
+    }
+    if (courseOpts.length) {
+      html += '<div class="section-label">Online kurz</div>' + courseOpts.map(o => optCardHtml(o)).join('');
+    }
+    root.innerHTML = html;
+    document.querySelectorAll('.opt-card').forEach(card => card.onclick = () => selectOption(card.dataset.id, data.options));
+  } catch (e) {
+    $('#optionsRoot').innerHTML = '<p class="err">Chyba pri načítaní.</p>';
+  }
+}
+
+function optCardHtml(o) {
+  return `<div class="opt-card" data-id="${o.id}">
+    <span class="label">${escapeHtml(o.label)}</span>
+    <span class="price">${eur(o.price_cents)}</span>
+  </div>`;
+}
+function escapeHtml(s) { return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function selectOption(id, options) {
+  selectedOption = options.find(o => o.id === id);
+  document.querySelectorAll('.opt-card').forEach(c => c.classList.toggle('selected', c.dataset.id === id));
+  $('#formBlock').style.display = 'block';
+}
+
+$('#buyBtn').addEventListener('click', async () => {
+  const buyerEmail = $('#buyerEmail').value.trim();
+  $('#formErr').textContent = '';
+  if (!selectedOption) { $('#formErr').textContent = 'Vyber si darčekovú kartu vyššie.'; return; }
+  if (!buyerEmail.includes('@')) { $('#formErr').textContent = 'Zadaj platný e-mail.'; return; }
+  const btn = $('#buyBtn');
+  btn.disabled = true; btn.textContent = 'Chvíľu strpenia…';
+  try {
+    const res = await fetch('/api/gift-cards/checkout', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        optionId: selectedOption.id, buyerEmail,
+        recipientName: $('#recipientName').value.trim(), message: $('#giftMessage').value.trim()
+      })
+    });
+    const data = await res.json();
+    if (data.url) { location.href = data.url; }
+    else { $('#formErr').textContent = data.error || 'Chyba pri vytváraní platby.'; btn.disabled = false; btn.textContent = 'Kúpiť darčekovú kartu'; }
+  } catch (e) {
+    $('#formErr').textContent = 'Chyba servera.'; btn.disabled = false; btn.textContent = 'Kúpiť darčekovú kartu';
+  }
+});
+
+loadOptions();
+</script>
+</body>
+</html>

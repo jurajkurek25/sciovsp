@@ -150,7 +150,8 @@ textarea{width:100%;min-height:110px;padding:.7rem;background:var(--black3);bord
     <a class="navlink" data-page="courses">Kurzy</a>
     <a class="navlink" data-page="blog">Blog</a>
     <a class="navlink" data-page="houseads">Vlastné reklamy</a>
-    <a class="navlink" data-page="giftcards">Darčekové karty</a>
+    <a class="navlink" data-page="giftcards">Darčekové karty (partner shop)</a>
+    <a class="navlink" data-page="giftcardsales">Darčekové karty (predaj)</a>
     <a class="navlink" data-page="payouts">Výplaty (PAY by square)</a>
     <a class="navlink" data-page="bugs">Nahlásené chyby</a>
     <a class="navlink" data-page="advisor">AI poradca</a>
@@ -237,7 +238,7 @@ function showApp() {
 }
 
 // ─────────────────────────── ROUTER ───────────────────────────
-const PAGES = { overview: renderOverview, trends: renderTrends, academy: renderAcademy, courses: renderCourses, blog: renderBlog, houseads: renderHouseAds, giftcards: renderGiftcards, payouts: renderPayouts, bugs: renderBugs, advisor: renderAdvisor, aiops: renderAiops };
+const PAGES = { overview: renderOverview, trends: renderTrends, academy: renderAcademy, courses: renderCourses, blog: renderBlog, houseads: renderHouseAds, giftcards: renderGiftcards, giftcardsales: renderGiftCardSales, payouts: renderPayouts, bugs: renderBugs, advisor: renderAdvisor, aiops: renderAiops };
 
 $$('.navlink[data-page]').forEach(a => a.addEventListener('click', () => { navigate(a.dataset.page); closeMobileNav(); }));
 
@@ -913,6 +914,78 @@ async function renderGiftcards() {
       return { code, redeemUrl: redeemUrl || undefined };
     });
     try { await api(`/api/dash/giftcards/${btn.dataset.id}/codes`, { method: 'POST', body: JSON.stringify({ codes }) }); navigate('giftcards'); }
+    catch (err) { alert(err.message); }
+  });
+}
+
+// ─────────────────────────── GIFT CARD SALES (sptrener.online/darcekova-karta) ───────────────────────────
+function gcEur(cents) { return (Number(cents || 0) / 100).toFixed(2).replace('.', ',') + ' €'; }
+
+async function renderGiftCardSales() {
+  const [{ options }, { cards }] = await Promise.all([
+    api('/api/dash/gift-card-options'),
+    api('/api/dash/gift-cards-sold')
+  ]);
+  $('#main').innerHTML = `
+    <div class="pagehead"><h2>Darčekové karty — predaj</h2></div>
+    <p class="muted" style="margin-bottom:1.2rem">Cenník, ktorý vidia kupujúci na /darcekova-karta. "Premium" udelí Premium prístup na X dní po uplatnení (rovnaký mechanizmus ako referral bonus dni), "kurz" umožní príjemcovi vybrať si ľubovoľný 1 publikovaný kurz.</p>
+    <div class="card" style="margin-bottom:1.4rem">
+      <h3>Nová možnosť</h3>
+      <div class="formrow">
+        <select id="gcKind" style="padding:.6rem .8rem;background:var(--black3);border:1px solid var(--border2);border-radius:8px">
+          <option value="premium">Premium (dni)</option>
+          <option value="course">Kurz podľa výberu</option>
+        </select>
+        <input id="gcLabel" placeholder="Popis (napr. Premium darček — 3 mesiace)" style="flex:1;min-width:220px">
+        <input id="gcDuration" type="number" placeholder="Dní (len pre Premium)" style="width:150px">
+        <input id="gcPrice" type="number" placeholder="Cena v centoch" style="width:150px">
+        <button class="btn" id="gcAddBtn">Pridať</button>
+      </div>
+    </div>
+    <div id="gcOptionsList">${options.map(o => `
+      <div class="card-item" data-id="${o.id}">
+        <h4>${(o.label||'').replace(/</g,'&lt;')} ${o.active ? '<span class="pill resolved">aktívna</span>' : '<span class="pill pending">vypnutá</span>'}</h4>
+        <p class="muted">${o.kind === 'premium' ? o.duration_days + ' dní' : '1 kurz podľa výberu'} · ${gcEur(o.price_cents)}</p>
+        <div style="display:flex;gap:.6rem">
+          <button class="btn secondary gc-toggle-btn" data-active="${o.active}">${o.active ? 'Vypnúť' : 'Zapnúť'}</button>
+          <button class="btn danger gc-delete-btn">Zmazať</button>
+        </div>
+      </div>`).join('') || '<p class="muted">Zatiaľ žiadne možnosti.</p>'}</div>
+
+    <h3 style="font-family:var(--serif);font-size:1.3rem;margin:2rem 0 1rem">Predané karty</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Kód</th><th>Typ</th><th>Suma</th><th>Kupujúci</th><th>Stav</th><th>Uplatnil</th></tr></thead>
+        <tbody>${cards.map(c => `<tr>
+          <td>${c.code}</td>
+          <td class="muted">${c.kind === 'premium' ? c.duration_days + ' dní premium' : 'kurz podľa výberu'}</td>
+          <td>${gcEur(c.amount_cents)}</td>
+          <td class="muted">${c.buyer_email}</td>
+          <td><span class="pill ${c.status === 'redeemed' ? 'resolved' : 'pending'}">${c.status === 'redeemed' ? 'uplatnená' : 'neuplatnená'}</span></td>
+          <td class="muted">${c.redeemed_by_email || '—'}</td>
+        </tr>`).join('') || '<tr><td class="muted" colspan="6">Zatiaľ žiadne predané karty.</td></tr>'}</tbody>
+      </table>
+    </div>`;
+
+  $('#gcAddBtn').onclick = async () => {
+    try {
+      await api('/api/dash/gift-card-options', { method: 'POST', body: JSON.stringify({
+        kind: $('#gcKind').value, label: $('#gcLabel').value,
+        durationDays: $('#gcDuration').value || undefined, priceCents: $('#gcPrice').value
+      }) });
+      navigate('giftcardsales');
+    } catch (err) { alert(err.message); }
+  };
+  $$('.gc-toggle-btn').forEach(btn => btn.onclick = async () => {
+    const item = btn.closest('.card-item');
+    const nowActive = btn.dataset.active === 'true';
+    try { await api(`/api/dash/gift-card-options/${item.dataset.id}`, { method: 'PUT', body: JSON.stringify({ active: !nowActive }) }); navigate('giftcardsales'); }
+    catch (err) { alert(err.message); }
+  });
+  $$('.gc-delete-btn').forEach(btn => btn.onclick = async () => {
+    if (!confirm('Zmazať túto možnosť?')) return;
+    const item = btn.closest('.card-item');
+    try { await api(`/api/dash/gift-card-options/${item.dataset.id}`, { method: 'DELETE' }); navigate('giftcardsales'); }
     catch (err) { alert(err.message); }
   });
 }
