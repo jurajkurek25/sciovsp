@@ -92,25 +92,28 @@ async function checkCode(token) {
     const data = await res.json();
     if (!res.ok) { err.textContent = data.error || 'Kód nenájdený.'; return; }
     if (data.status === 'redeemed') { err.textContent = 'Táto karta je už uplatnená.'; return; }
-    if (data.kind === 'premium') {
+    if (data.kind === 'premium' && !data.includes_course) {
       await redeem(token, code, null);
     } else {
-      await showCoursePicker(token, code);
+      await showCoursePicker(token, code, data.kind === 'premium');
     }
   } catch (e) {
     err.textContent = 'Chyba servera.';
   }
 }
 
-async function showCoursePicker(token, code) {
+async function showCoursePicker(token, code, combo) {
   const picker = document.getElementById('coursePickerRoot');
   picker.innerHTML = '<p class="muted" style="margin-top:1rem">Načítavam kurzy…</p>';
   const res = await fetch('/api/courses');
   const data = await res.json();
   if (!data.courses || !data.courses.length) { picker.innerHTML = '<p class="err">Momentálne nie sú dostupné žiadne kurzy.</p>'; return; }
-  picker.innerHTML = '<p class="muted" style="margin:1rem 0 .6rem">Táto karta je na 1 kurz podľa vlastného výberu — vyber si:</p>'
+  const introText = combo
+    ? 'Táto karta obsahuje Premium predplatné AJ 1 kurz podľa vlastného výberu — vyber si kurz:'
+    : 'Táto karta je na 1 kurz podľa vlastného výberu — vyber si:';
+  picker.innerHTML = '<p class="muted" style="margin:1rem 0 .6rem">' + introText + '</p>'
     + data.courses.map(c => `<button class="course-pick" data-slug="${c.slug}" data-id="${c.id}">${escapeHtml(c.title)}</button>`).join('')
-    + '<button class="btn" id="confirmCourseBtn" disabled>Uplatniť kurz</button>';
+    + '<button class="btn" id="confirmCourseBtn" disabled>' + (combo ? 'Uplatniť kartu' : 'Uplatniť kurz') + '</button>';
   let selectedId = null;
   document.querySelectorAll('.course-pick').forEach(btn => btn.onclick = () => {
     document.querySelectorAll('.course-pick').forEach(b => b.classList.remove('selected'));
@@ -131,7 +134,9 @@ async function redeem(token, code, courseId) {
     });
     const data = await res.json();
     if (!res.ok) { err.textContent = data.error || 'Chyba.'; return; }
-    if (data.kind === 'premium') {
+    if (data.kind === 'premium' && data.courseSlug) {
+      root.innerHTML = `<div class="card"><p class="ok" style="font-size:1.1rem;margin-bottom:.6rem">Hotovo! Premium aktivované aj kurz je tvoj.</p><p class="muted">Premium platí do ${new Date(data.premiumExpiresAt).toLocaleDateString('sk-SK')}.</p><a class="btn" style="display:block;text-align:center;text-decoration:none;margin-top:1rem" href="/app">Prejsť do appky</a><a class="btn secondary" style="display:block;text-align:center;text-decoration:none;margin-top:.6rem" href="/kurzy/${data.courseSlug}/watch">Spustiť kurz</a></div>`;
+    } else if (data.kind === 'premium') {
       root.innerHTML = `<div class="card"><p class="ok" style="font-size:1.1rem;margin-bottom:.6rem">Hotovo! Premium aktivované.</p><p class="muted">Platí do ${new Date(data.premiumExpiresAt).toLocaleDateString('sk-SK')}.</p><a class="btn" style="display:block;text-align:center;text-decoration:none;margin-top:1rem" href="/app">Prejsť do appky</a></div>`;
     } else {
       root.innerHTML = `<div class="card"><p class="ok" style="font-size:1.1rem;margin-bottom:.6rem">Hotovo! Kurz je tvoj.</p><a class="btn" style="display:block;text-align:center;text-decoration:none;margin-top:1rem" href="/kurzy/${data.courseSlug}/watch">Spustiť kurz</a></div>`;

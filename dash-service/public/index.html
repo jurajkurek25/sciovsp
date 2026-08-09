@@ -958,7 +958,7 @@ async function renderGiftCardSales() {
         <thead><tr><th>Kód</th><th>Typ</th><th>Suma</th><th>Kupujúci</th><th>Stav</th><th>Uplatnil</th></tr></thead>
         <tbody>${cards.map(c => `<tr>
           <td>${c.code}</td>
-          <td class="muted">${c.kind === 'premium' ? c.duration_days + ' dní premium' : 'kurz podľa výberu'}</td>
+          <td class="muted">${c.kind === 'premium' ? c.duration_days + ' dní premium' + (c.includes_course ? ' + kurz' : '') : 'kurz podľa výberu'}</td>
           <td>${gcEur(c.amount_cents)}</td>
           <td class="muted">${c.buyer_email}</td>
           <td><span class="pill ${c.status === 'redeemed' ? 'resolved' : 'pending'}">${c.status === 'redeemed' ? 'uplatnená' : 'neuplatnená'}</span></td>
