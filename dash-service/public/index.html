@@ -498,6 +498,7 @@ function courseFormHtml(c) {
     </div>
     <p class="muted" style="margin-top:-.4rem">0 = kurz zadarmo (prístup len za prihlásenie cez Google, bez platby).</p>
     ${coverFieldHtml('cf-cover', c?.cover_image_url)}
+    <input class="cf-intro-video" placeholder="URL úvodného videa (sales letter video, voliteľné)" value="${(c?.intro_video_url||'').replace(/"/g,'&quot;')}" style="margin-top:.6rem">
     <textarea class="cf-desc" placeholder="Krátky popis (karta v zozname + meta description, cca 1-2 vety)" style="min-height:60px">${c?.description||''}</textarea>
     <p class="muted" style="margin-top:.6rem">Sales letter — zobrazí sa medzi horným a dolným tlačidlom "Kúpiť kurz".</p>
     ${richEditorHtml('cf-sales-editor', 'Napíš predajný text kurzu — nadpisy, tučné písmo, zoznamy...')}
@@ -516,7 +517,8 @@ function bindCourseForm(course) {
     const body = {
       title: $('.cf-title', root).value, description: $('.cf-desc', root).value,
       priceCents: $('.cf-price', root).value === '' ? 5700 : Math.max(0, Number($('.cf-price', root).value) || 0),
-      coverImageUrl: $('.cf-cover', root).value, salesContent: salesQuill.getText().trim() ? salesQuill.root.innerHTML : ''
+      coverImageUrl: $('.cf-cover', root).value, introVideoUrl: $('.cf-intro-video', root).value.trim(),
+      salesContent: salesQuill.getText().trim() ? salesQuill.root.innerHTML : ''
     };
     try {
       if (course) await api(`/api/dash/courses/${course.id}`, { method: 'PUT', body: JSON.stringify(body) });

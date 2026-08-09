@@ -51,7 +51,7 @@ router.get('/api/dash/courses', requireDashAuth, async (req, res) => {
 });
 
 router.post('/api/dash/courses', requireDashAuth, async (req, res) => {
-  const { title, description, priceCents, coverImageUrl, salesContent } = req.body || {};
+  const { title, description, priceCents, coverImageUrl, salesContent, introVideoUrl } = req.body || {};
   if (!title) return res.status(400).json({ error: 'Chýba title.' });
   let slug = slugify(title);
   if (!slug) return res.status(400).json({ error: 'Z názvu sa nedá vytvoriť slug.' });
@@ -61,20 +61,22 @@ router.post('/api/dash/courses', requireDashAuth, async (req, res) => {
     ? 5700 : Math.max(0, Number(priceCents) || 0);
   const { data, error } = await mainDb.from('courses').insert({
     slug, title, description: description || '', price_cents: priceCentsValue,
-    cover_image_url: coverImageUrl || null, sales_content: salesContent || null, published: false
+    cover_image_url: coverImageUrl || null, sales_content: salesContent || null,
+    intro_video_url: introVideoUrl || null, published: false
   }).select().single();
   if (error) return res.status(500).json({ error: error.message });
   res.json({ ok: true, course: data });
 });
 
 router.put('/api/dash/courses/:id', requireDashAuth, async (req, res) => {
-  const { title, description, priceCents, coverImageUrl, salesContent, published } = req.body || {};
+  const { title, description, priceCents, coverImageUrl, salesContent, introVideoUrl, published } = req.body || {};
   const update = {};
   if (title !== undefined) update.title = title;
   if (description !== undefined) update.description = description;
   if (priceCents !== undefined) update.price_cents = Number(priceCents);
   if (coverImageUrl !== undefined) update.cover_image_url = coverImageUrl;
   if (salesContent !== undefined) update.sales_content = salesContent;
+  if (introVideoUrl !== undefined) update.intro_video_url = introVideoUrl;
   if (published !== undefined) update.published = !!published;
   const { data, error } = await mainDb.from('courses').update(update).eq('id', req.params.id).select().single();
   if (error) return res.status(500).json({ error: error.message });

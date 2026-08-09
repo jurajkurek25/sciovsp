@@ -24,7 +24,7 @@ h1{font-family:var(--serif);font-size:2rem;margin-bottom:.3rem}
 .lesson h3{font-family:var(--serif);font-size:1.3rem;margin-bottom:.6rem;display:flex;align-items:center;gap:.5rem}
 .badge{font-family:var(--mono);font-size:.65rem;padding:.15rem .5rem;border-radius:20px;background:rgba(54,232,150,.15);color:var(--green)}
 .badge.locked{background:rgba(255,255,255,.08);color:var(--text3)}
-video{width:100%;border-radius:10px;background:#000;display:block;margin-bottom:.9rem}
+.bp-mount{margin-bottom:.9rem}
 .doc-link{display:inline-block;margin-bottom:.9rem;padding:.5rem .9rem;border:1px solid var(--border2);border-radius:8px;font-size:.82rem;text-decoration:none;color:var(--text2)}
 .quiz{background:var(--black);border:1px solid var(--border2);border-radius:10px;padding:1rem}
 .quiz-q{margin-bottom:1.1rem}
@@ -56,6 +56,7 @@ video{width:100%;border-radius:10px;background:#000;display:block;margin-bottom:
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/branded-player.js"></script>
 <script>
 const SUPABASE_URL='https://zrnqiwareacqyndwchsv.supabase.co';
 const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpybnFpd2FyZWFjcXluZHdjaHN2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMDA3NTAsImV4cCI6MjA4OTc3Njc1MH0.iUne23YDxp12Iwxdk9U8MfcV0NTBtrNf9OgsjQdiADk';
@@ -115,6 +116,11 @@ function renderLessons(data, token) {
     <div id="lessonsRoot"></div>`;
   const lroot = document.getElementById('lessonsRoot');
   lroot.innerHTML = data.lessons.map(l => lessonHtml(l)).join('');
+  data.lessons.forEach(l => {
+    if (!l.unlocked || !l.videoUrl) return;
+    const mount = document.getElementById('bp-' + l.id);
+    if (mount) mountBrandedPlayer(mount, mount.dataset.src);
+  });
   data.lessons.forEach(l => {
     if (!l.unlocked || l.completed) return;
     const hasQuiz = (l.quizQuestions || []).length > 0;

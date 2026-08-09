@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Darčeková karta pre niekoho blízkeho — SP Tréner</title>
+<meta name="description" content="Daruj niekomu skutočnú prípravu na prijímačky, nie ďalšiu vec, ktorú nepoužije. Premium prístup alebo online kurz podľa jeho vlastného výberu.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@300;400;500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
+<style>
+:root{--black:#08080d;--black2:#0f0f18;--black3:#15151f;--border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.13);--text:#eeeef5;--text2:#a1a1bc;--text3:#5c5c7a;--volt:#c8ff00;--purple:#7c5cff;--purple2:#b09bff;--red:#ff3f5e;--green:#36e896;--serif:'Instrument Serif',Georgia,serif;--mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--black);color:var(--text);font-family:var(--sans);line-height:1.6;min-height:100vh;background-image:radial-gradient(circle at 15% 0%, rgba(124,92,255,.14), transparent 45%),radial-gradient(circle at 85% 10%, rgba(200,255,0,.08), transparent 40%)}
+a{color:var(--purple2)}
+.top{max-width:900px;margin:0 auto;padding:1.6rem 1.2rem 0;display:flex;justify-content:space-between;align-items:center}
+.top a.back{font-family:var(--mono);font-size:.8rem;color:var(--text2);text-decoration:none}
+.lang-switch{display:flex;gap:.35rem}
+.lang-switch button{font-family:var(--mono);font-size:.72rem;padding:.3rem .6rem;background:var(--black2);border:1px solid var(--border2);border-radius:6px;color:var(--text2);cursor:pointer}
+.lang-switch button.active{color:var(--volt);border-color:var(--volt)}
+.wrap{max-width:900px;margin:0 auto;padding:2.4rem 1.2rem 6rem}
+.hero{padding:2.4rem 0 1.6rem;text-align:center}
+.eyebrow{display:inline-block;font-family:var(--mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--volt);background:rgba(200,255,0,.08);border:1px solid rgba(200,255,0,.25);padding:.3rem .8rem;border-radius:99px;margin-bottom:1rem}
+h1{font-family:var(--serif);font-size:clamp(2.2rem,5vw,3.2rem);line-height:1.1;margin-bottom:.9rem}
+.sub{color:var(--text2);max-width:560px;margin:0 auto;font-size:1.05rem}
+.cta-row{margin-top:2rem;display:flex;justify-content:center;gap:.8rem;flex-wrap:wrap}
+.btn-primary{padding:1rem 1.8rem;background:var(--volt);color:var(--black);border:none;border-radius:10px;font-weight:700;font-family:var(--mono);font-size:.9rem;cursor:pointer;text-decoration:none;display:inline-block}
+.btn-secondary{padding:1rem 1.6rem;background:transparent;border:1px solid var(--border2);color:var(--text);border-radius:10px;font-family:var(--mono);font-size:.85rem;text-decoration:none;display:inline-block}
+.reasons{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin:3.5rem 0}
+.reason{background:var(--black2);border:1px solid var(--border);border-radius:14px;padding:1.5rem}
+.reason .icon{font-size:1.6rem;margin-bottom:.7rem;display:block}
+.reason h3{font-size:1rem;margin-bottom:.5rem}
+.reason p{color:var(--text2);font-size:.85rem;line-height:1.55}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin:2.2rem 0 3rem}
+.step{background:var(--black3);border:1px solid var(--border);border-radius:12px;padding:1.1rem;text-align:center}
+.step .n{font-family:var(--mono);color:var(--volt);font-size:.75rem;margin-bottom:.35rem}
+.step .t{font-size:.85rem;color:var(--text2)}
+.options-preview{display:flex;gap:.9rem;justify-content:center;flex-wrap:wrap;margin:2.5rem 0}
+.opt-chip{background:var(--black2);border:1px solid var(--border2);border-radius:99px;padding:.6rem 1.2rem;font-size:.85rem;display:flex;align-items:center;gap:.5rem}
+.final{text-align:center;margin-top:3.5rem;padding-top:2.5rem;border-top:1px solid var(--border)}
+.final h2{font-family:var(--serif);font-size:2rem;margin-bottom:.8rem}
+.final p{color:var(--text2);margin-bottom:1.6rem}
+@media(max-width:720px){.reasons,.steps{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="top">
+  <a class="back" href="/">← SP Tréner</a>
+  <div class="lang-switch">
+    <button id="langSkBtn" onclick="setLang('sk')">SK</button>
+    <button id="langCsBtn" onclick="setLang('cs')">CZ</button>
+  </div>
+</div>
+<div class="wrap">
+  <div class="hero">
+    <span class="eyebrow" id="tEyebrow">Darčeková karta</span>
+    <h1 id="tH1">Daruj úspech,<br>nie ďalšiu vec</h1>
+    <p class="sub" id="tSub">Namiesto knihy, ktorú nikdy neotvorí, mu daruj skutočnú prípravu na prijímačky — Premium prístup na vybranú dĺžku, alebo online kurz podľa jeho vlastného výberu.</p>
+    <div class="cta-row">
+      <a class="btn-primary" href="/darcekova-karta" id="tCta1">Vybrať darčekovú kartu →</a>
+      <a class="btn-secondary" href="#ako-to-funguje" id="tCta2">Ako to funguje ↓</a>
+    </div>
+  </div>
+
+  <div class="options-preview">
+    <div class="opt-chip">💎 <span id="tChip1">Premium na mesiace</span></div>
+    <div class="opt-chip">🎓 <span id="tChip2">1 kurz podľa výberu</span></div>
+    <div class="opt-chip">⚡ <span id="tChip3">Kombinácia oboch</span></div>
+  </div>
+
+  <div class="reasons">
+    <div class="reason">
+      <span class="icon">🎯</span>
+      <h3 id="tR1Title">Skutočne to použije</h3>
+      <p id="tR1Desc">Žiadna vec, čo skončí v šuflíku. Prístup, ktorý mu reálne pomôže pripraviť sa a uspieť.</p>
+    </div>
+    <div class="reason">
+      <span class="icon">🧩</span>
+      <h3 id="tR2Title">Vyberie si sám, čo potrebuje</h3>
+      <p id="tR2Desc">Ty daruješ kartu, on/ona si pri uplatnení vyberie presne ten kurz alebo dĺžku, ktorá mu sedí.</p>
+    </div>
+    <div class="reason">
+      <span class="icon">🖨️</span>
+      <h3 id="tR3Title">Máš čo vytlačiť a odovzdať</h3>
+      <p id="tR3Desc">Po zaplatení dostaneš PDF kartu s kódom — vytlačíš, zabalíš, alebo pošleš ďalej.</p>
+    </div>
+  </div>
+
+  <div id="ako-to-funguje">
+    <h2 style="font-family:var(--serif);font-size:1.6rem;text-align:center;margin-bottom:.5rem" id="tHowTitle">Ako to funguje</h2>
+    <div class="steps">
+      <div class="step"><div class="n">01</div><div class="t" id="tStep1">Vyberieš typ a dĺžku karty</div></div>
+      <div class="step"><div class="n">02</div><div class="t" id="tStep2">Zaplatíš bezpečne cez Stripe</div></div>
+      <div class="step"><div class="n">03</div><div class="t" id="tStep3">Dostaneš PDF na vytlačenie s kódom</div></div>
+    </div>
+  </div>
+
+  <div class="final">
+    <h2 id="tFinalTitle">Priprav niekoho na najdôležitejšiu skúšku</h2>
+    <p id="tFinalSub">Vyber darčekovú kartu za pár minút.</p>
+    <a class="btn-primary" href="/darcekova-karta" id="tFinalCta">Vybrať darčekovú kartu →</a>
+  </div>
+</div>
+
+<script>
+const T = {
+  sk: {
+    eyebrow: 'Darčeková karta', h1: 'Daruj úspech,<br>nie ďalšiu vec',
+    sub: 'Namiesto knihy, ktorú nikdy neotvorí, mu daruj skutočnú prípravu na prijímačky — Premium prístup na vybranú dĺžku, alebo online kurz podľa jeho vlastného výberu.',
+    cta1: 'Vybrať darčekovú kartu →', cta2: 'Ako to funguje ↓',
+    chip1: 'Premium na mesiace', chip2: '1 kurz podľa výberu', chip3: 'Kombinácia oboch',
+    r1Title: 'Skutočne to použije', r1Desc: 'Žiadna vec, čo skončí v šuflíku. Prístup, ktorý mu reálne pomôže pripraviť sa a uspieť.',
+    r2Title: 'Vyberie si sám, čo potrebuje', r2Desc: 'Ty daruješ kartu, on/ona si pri uplatnení vyberie presne ten kurz alebo dĺžku, ktorá mu sedí.',
+    r3Title: 'Máš čo vytlačiť a odovzdať', r3Desc: 'Po zaplatení dostaneš PDF kartu s kódom — vytlačíš, zabalíš, alebo pošleš ďalej.',
+    howTitle: 'Ako to funguje',
+    step1: 'Vyberieš typ a dĺžku karty', step2: 'Zaplatíš bezpečne cez Stripe', step3: 'Dostaneš PDF na vytlačenie s kódom',
+    finalTitle: 'Priprav niekoho na najdôležitejšiu skúšku', finalSub: 'Vyber darčekovú kartu za pár minút.', finalCta: 'Vybrať darčekovú kartu →',
+    pageTitle: 'Darčeková karta pre niekoho blízkeho — SP Tréner'
+  },
+  cs: {
+    eyebrow: 'Dárková karta', h1: 'Daruj úspěch,<br>ne další věc',
+    sub: 'Místo knihy, kterou nikdy neotevře, mu daruj skutečnou přípravu na přijímačky — Premium přístup na vybranou délku, nebo online kurz podle jeho vlastního výběru.',
+    cta1: 'Vybrat dárkovou kartu →', cta2: 'Jak to funguje ↓',
+    chip1: 'Premium na měsíce', chip2: '1 kurz dle výběru', chip3: 'Kombinace obojího',
+    r1Title: 'Opravdu to použije', r1Desc: 'Žádná věc, co skončí v šuplíku. Přístup, který mu reálně pomůže připravit se a uspět.',
+    r2Title: 'Vybere si sám, co potřebuje', r2Desc: 'Ty daruješ kartu, on/ona si při uplatnění vybere přesně ten kurz nebo délku, která mu sedí.',
+    r3Title: 'Máš co vytisknout a předat', r3Desc: 'Po zaplacení dostaneš PDF kartu s kódem — vytiskneš, zabalíš, nebo pošleš dál.',
+    howTitle: 'Jak to funguje',
+    step1: 'Vybereš typ a délku karty', step2: 'Zaplatíš bezpečně přes Stripe', step3: 'Dostaneš PDF k vytisknutí s kódem',
+    finalTitle: 'Priprav někoho na nejdůležitější zkoušku', finalSub: 'Vyber dárkovou kartu za pár minut.', finalCta: 'Vybrat dárkovou kartu →',
+    pageTitle: 'Dárková karta pro někoho blízkého — SP Tréner'
+  }
+};
+
+function setLang(lang) {
+  const t = T[lang] || T.sk;
+  localStorage.setItem('vsp-lang', lang);
+  document.documentElement.lang = lang;
+  document.title = t.pageTitle;
+  document.getElementById('langSkBtn').classList.toggle('active', lang === 'sk');
+  document.getElementById('langCsBtn').classList.toggle('active', lang === 'cs');
+  document.getElementById('tEyebrow').textContent = t.eyebrow;
+  document.getElementById('tH1').innerHTML = t.h1;
+  document.getElementById('tSub').textContent = t.sub;
+  document.getElementById('tCta1').textContent = t.cta1;
+  document.getElementById('tCta2').textContent = t.cta2;
+  document.getElementById('tChip1').textContent = t.chip1;
+  document.getElementById('tChip2').textContent = t.chip2;
+  document.getElementById('tChip3').textContent = t.chip3;
+  document.getElementById('tR1Title').textContent = t.r1Title; document.getElementById('tR1Desc').textContent = t.r1Desc;
+  document.getElementById('tR2Title').textContent = t.r2Title; document.getElementById('tR2Desc').textContent = t.r2Desc;
+  document.getElementById('tR3Title').textContent = t.r3Title; document.getElementById('tR3Desc').textContent = t.r3Desc;
+  document.getElementById('tHowTitle').textContent = t.howTitle;
+  document.getElementById('tStep1').textContent = t.step1; document.getElementById('tStep2').textContent = t.step2; document.getElementById('tStep3').textContent = t.step3;
+  document.getElementById('tFinalTitle').textContent = t.finalTitle; document.getElementById('tFinalSub').textContent = t.finalSub; document.getElementById('tFinalCta').textContent = t.finalCta;
+}
+
+function detectInitialLang() {
+  const saved = localStorage.getItem('vsp-lang');
+  if (saved === 'sk' || saved === 'cs') return saved;
+  return (navigator.language || '').toLowerCase().startsWith('cs') ? 'cs' : 'sk';
+}
+setLang(detectInitialLang());
+</script>
+</body>
+</html>
