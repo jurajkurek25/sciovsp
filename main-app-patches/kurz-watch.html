@@ -134,7 +134,7 @@ function lessonHtml(l) {
   if (!l.unlocked) {
     return `<div class="lesson locked"><h3>🔒 ${escapeHtml(l.title)} <span class="badge locked">zamknuté</span></h3><p class="muted">Dokonči predchádzajúcu lekciu, aby sa táto odomkla.</p></div>`;
   }
-  const videoBlock = l.videoUrl ? `<video controls controlsList="nodownload noremoteplayback" disablePictureInPicture oncontextmenu="return false" ondragstart="return false" src="${escapeHtml(l.videoUrl)}"></video>` : '';
+  const videoBlock = l.videoUrl ? `<div class="bp-mount" id="bp-${l.id}" data-src="${escapeHtml(l.videoUrl)}"></div>` : '';
   const docBlock = l.docUrl ? `<a class="doc-link" href="${escapeHtml(l.docUrl)}" target="_blank" rel="noopener">📄 Otvoriť materiály (PDF)</a>` : '';
   if (l.completed) {
     return `<div class="lesson"><h3>${escapeHtml(l.title)} <span class="badge">hotovo ✓</span></h3>${videoBlock}${docBlock}<p class="completed-note">Lekcia dokončená.</p></div>`;
