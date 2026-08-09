@@ -19,6 +19,11 @@
 .bp-center-play svg{width:52px;height:52px;fill:#c8ff00;filter:drop-shadow(0 2px 10px rgba(0,0,0,.5))}
 .bp-wrap.bp-compact .bp-bar{padding:.4rem .5rem}
 .bp-wrap.bp-compact .bp-vol,.bp-wrap.bp-compact .bp-fs{display:none}
+.bp-wrap:focus{outline:none}
+.bp-wrap:focus-visible{outline:2px solid rgba(200,255,0,.5);outline-offset:2px}
+.bp-flash{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.65);color:#eeeef5;border-radius:50%;width:56px;height:56px;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .15s}
+.bp-flash.bp-show{opacity:1}
+.bp-flash svg{width:26px;height:26px;fill:#c8ff00}
 `;
 
   function injectCss() {
@@ -34,7 +39,9 @@
     pause: '<svg viewBox="0 0 24 24"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>',
     volOn: '<svg viewBox="0 0 24 24"><path d="M3 10v4h4l5 5V5L7 10H3zm13.5 2A4.5 4.5 0 0 0 14 7.97v8.05A4.5 4.5 0 0 0 16.5 12z"/></svg>',
     volOff: '<svg viewBox="0 0 24 24"><path d="M3 10v4h4l5 5V5L7 10H3zm15.27 2 2.13 2.12-1.41 1.41L17 15.41l-2.12 2.12-1.41-1.41L15.59 14l-2.12-2.12 1.41-1.41L17 12.59l2.12-2.12 1.41 1.41z"/></svg>',
-    fs: '<svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>'
+    fs: '<svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>',
+    seekFwd: '<svg viewBox="0 0 24 24"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>',
+    seekBack: '<svg viewBox="0 0 24 24" style="transform:scaleX(-1)"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>'
   };
 
   function fmt(s) {
@@ -49,6 +56,7 @@
     container.innerHTML = '';
     container.classList.add('bp-wrap');
     if (opts.compact) container.classList.add('bp-compact');
+    container.tabIndex = 0;
 
     const video = document.createElement('video');
     video.src = src;
@@ -67,6 +75,17 @@
     centerPlay.className = 'bp-center-play';
     centerPlay.innerHTML = ICONS.play;
     container.appendChild(centerPlay);
+
+    const flash = document.createElement('div');
+    flash.className = 'bp-flash';
+    container.appendChild(flash);
+    let flashTimer = null;
+    function showFlash(iconHtml) {
+      flash.innerHTML = iconHtml;
+      flash.classList.add('bp-show');
+      clearTimeout(flashTimer);
+      flashTimer = setTimeout(() => flash.classList.remove('bp-show'), 450);
+    }
 
     const bar = document.createElement('div');
     bar.className = 'bp-bar';
@@ -112,6 +131,7 @@
     playBtn.onclick = togglePlay;
     centerPlay.onclick = togglePlay;
     video.onclick = togglePlay;
+    container.addEventListener('click', () => container.focus());
     video.onplay = updatePlayIcon;
     video.onpause = updatePlayIcon;
     video.ontimeupdate = () => {
@@ -124,17 +144,24 @@
       const pct = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width));
       if (video.duration) video.currentTime = pct * video.duration;
     };
-    volBtn.onclick = () => {
+    function toggleMute() {
       video.muted = !video.muted;
       volBtn.innerHTML = video.muted ? ICONS.volOff : ICONS.volOn;
       vol.value = video.muted ? '0' : video.volume;
-    };
+    }
+    volBtn.onclick = toggleMute;
     vol.oninput = () => {
       video.volume = Number(vol.value);
       video.muted = video.volume === 0;
       volBtn.innerHTML = video.muted ? ICONS.volOff : ICONS.volOn;
     };
-    fsBtn.onclick = () => {
+    function setVolume(v) {
+      video.volume = Math.min(1, Math.max(0, v));
+      video.muted = video.volume === 0;
+      vol.value = video.muted ? '0' : video.volume;
+      volBtn.innerHTML = video.muted ? ICONS.volOff : ICONS.volOn;
+    }
+    function toggleFullscreen() {
       const fsEl = document.fullscreenElement || document.webkitFullscreenElement;
       if (fsEl) {
         if (document.exitFullscreen) document.exitFullscreen();
@@ -144,8 +171,64 @@
       } else if (video.webkitEnterFullscreen) {
         video.webkitEnterFullscreen();
       }
-    };
+    }
+    fsBtn.onclick = toggleFullscreen;
+    function seek(delta) {
+      if (!isFinite(video.duration)) return;
+      video.currentTime = Math.min(video.duration, Math.max(0, video.currentTime + delta));
+    }
     container.addEventListener('touchstart', () => container.classList.add('bp-touched'), { passive: true });
+    container.addEventListener('keydown', (e) => {
+      const tag = (document.activeElement || {}).tagName;
+      if (tag === 'INPUT' && document.activeElement !== container) return;
+      switch (e.key) {
+        case ' ':
+        case 'k':
+        case 'K':
+          e.preventDefault(); togglePlay();
+          showFlash(video.paused ? ICONS.pause : ICONS.play);
+          break;
+        case 'ArrowLeft':
+          e.preventDefault(); seek(-5); showFlash(ICONS.seekBack);
+          break;
+        case 'ArrowRight':
+          e.preventDefault(); seek(5); showFlash(ICONS.seekFwd);
+          break;
+        case 'j':
+        case 'J':
+          e.preventDefault(); seek(-10); showFlash(ICONS.seekBack);
+          break;
+        case 'l':
+        case 'L':
+          e.preventDefault(); seek(10); showFlash(ICONS.seekFwd);
+          break;
+        case 'ArrowUp':
+          e.preventDefault(); setVolume(video.volume + 0.1);
+          break;
+        case 'ArrowDown':
+          e.preventDefault(); setVolume(video.volume - 0.1);
+          break;
+        case 'm':
+        case 'M':
+          e.preventDefault(); toggleMute();
+          break;
+        case 'f':
+        case 'F':
+          e.preventDefault(); toggleFullscreen();
+          break;
+        case 'Home':
+          e.preventDefault(); video.currentTime = 0;
+          break;
+        case 'End':
+          e.preventDefault(); if (isFinite(video.duration)) video.currentTime = video.duration;
+          break;
+        default:
+          if (e.key >= '0' && e.key <= '9' && isFinite(video.duration)) {
+            e.preventDefault();
+            video.currentTime = (Number(e.key) / 10) * video.duration;
+          }
+      }
+    });
 
     updatePlayIcon();
     return video;
