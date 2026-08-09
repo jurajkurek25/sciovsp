@@ -135,8 +135,15 @@
       volBtn.innerHTML = video.muted ? ICONS.volOff : ICONS.volOn;
     };
     fsBtn.onclick = () => {
-      if (container.requestFullscreen) container.requestFullscreen();
-      else if (video.webkitEnterFullscreen) video.webkitEnterFullscreen();
+      const fsEl = document.fullscreenElement || document.webkitFullscreenElement;
+      if (fsEl) {
+        if (document.exitFullscreen) document.exitFullscreen();
+        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+      } else if (container.requestFullscreen) {
+        container.requestFullscreen();
+      } else if (video.webkitEnterFullscreen) {
+        video.webkitEnterFullscreen();
+      }
     };
     container.addEventListener('touchstart', () => container.classList.add('bp-touched'), { passive: true });
 
