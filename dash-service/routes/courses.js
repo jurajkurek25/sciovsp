@@ -51,7 +51,7 @@ router.get('/api/dash/courses', requireDashAuth, async (req, res) => {
 });
 
 router.post('/api/dash/courses', requireDashAuth, async (req, res) => {
-  const { title, description, priceCents, coverImageUrl, salesContent, introVideoUrl } = req.body || {};
+  const { title, description, priceCents, coverImageUrl, salesContent, introVideoUrl, instructorName, instructorBio, instructorPhotoUrl } = req.body || {};
   if (!title) return res.status(400).json({ error: 'Chýba title.' });
   let slug = slugify(title);
   if (!slug) return res.status(400).json({ error: 'Z názvu sa nedá vytvoriť slug.' });
@@ -62,14 +62,15 @@ router.post('/api/dash/courses', requireDashAuth, async (req, res) => {
   const { data, error } = await mainDb.from('courses').insert({
     slug, title, description: description || '', price_cents: priceCentsValue,
     cover_image_url: coverImageUrl || null, sales_content: salesContent || null,
-    intro_video_url: introVideoUrl || null, published: false
+    intro_video_url: introVideoUrl || null, published: false,
+    instructor_name: instructorName || null, instructor_bio: instructorBio || null, instructor_photo_url: instructorPhotoUrl || null
   }).select().single();
   if (error) return res.status(500).json({ error: error.message });
   res.json({ ok: true, course: data });
 });
 
 router.put('/api/dash/courses/:id', requireDashAuth, async (req, res) => {
-  const { title, description, priceCents, coverImageUrl, salesContent, introVideoUrl, published } = req.body || {};
+  const { title, description, priceCents, coverImageUrl, salesContent, introVideoUrl, published, instructorName, instructorBio, instructorPhotoUrl } = req.body || {};
   const update = {};
   if (title !== undefined) update.title = title;
   if (description !== undefined) update.description = description;
@@ -78,6 +79,9 @@ router.put('/api/dash/courses/:id', requireDashAuth, async (req, res) => {
   if (salesContent !== undefined) update.sales_content = salesContent;
   if (introVideoUrl !== undefined) update.intro_video_url = introVideoUrl;
   if (published !== undefined) update.published = !!published;
+  if (instructorName !== undefined) update.instructor_name = instructorName;
+  if (instructorBio !== undefined) update.instructor_bio = instructorBio;
+  if (instructorPhotoUrl !== undefined) update.instructor_photo_url = instructorPhotoUrl;
   const { data, error } = await mainDb.from('courses').update(update).eq('id', req.params.id).select().single();
   if (error) return res.status(500).json({ error: error.message });
   res.json({ ok: true, course: data });
