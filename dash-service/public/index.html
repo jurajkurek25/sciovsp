@@ -474,11 +474,13 @@ async function renderCourses() {
         <p style="margin:.5rem 0">${(c.description||'').replace(/</g,'&lt;')}</p>
         <div style="display:flex;gap:.6rem;flex-wrap:wrap">
           <button class="btn secondary open-lessons-btn">Lekcie (${c.lessonCount})</button>
+          <button class="btn secondary open-final-test-btn">Záverečný test</button>
           <button class="btn secondary edit-course-btn">Upraviť</button>
           <button class="btn ${c.published ? 'secondary' : ''} toggle-publish-btn" data-published="${c.published}">${c.published ? 'Zrušiť publikovanie' : 'Publikovať'}</button>
           <button class="btn danger delete-course-btn">Zmazať</button>
         </div>
         <div class="lessons-panel hidden" style="margin-top:1rem"></div>
+        <div class="final-test-panel hidden" style="margin-top:1rem"></div>
       </div>`).join('') || '<p class="muted">Zatiaľ žiadne kurzy.</p>'}</div>`;
 
   $('#newCourseBtn').onclick = () => {
@@ -557,6 +559,55 @@ function bindCourseListActions() {
     panel.classList.remove('hidden');
     await renderCourseLessons(item.dataset.id, panel);
   });
+  $$('.open-final-test-btn').forEach(btn => btn.onclick = async () => {
+    const item = btn.closest('.card-item');
+    const panel = $('.final-test-panel', item);
+    if (!panel.classList.contains('hidden')) { panel.classList.add('hidden'); panel.innerHTML = ''; return; }
+    panel.classList.remove('hidden');
+    await renderCourseFinalTest(item.dataset.id, panel);
+  });
+}
+
+async function renderCourseFinalTest(courseId, panel) {
+  panel.innerHTML = '<p class="muted">Načítavam záverečný test…</p>';
+  const data = await api(`/api/dash/courses/${courseId}/final-test`);
+  panel.innerHTML = `
+    <p class="muted" style="margin-bottom:.8rem">Záverečný test sa žiakovi odomkne až po dokončení všetkých lekcií. Ak nenastavíš časový limit, test sa nebude ponúkať.</p>
+    <div class="formrow">
+      <input class="ft-time-limit" type="number" min="1" placeholder="Časový limit (minúty)" value="${data.timeLimitMinutes ?? ''}" style="width:220px">
+      <button class="btn secondary add-final-question-btn" type="button">+ Otázka</button>
+    </div>
+    <div class="final-questions-list" style="margin-top:.6rem">${(data.questions || []).map(q => quizQuestionRowHtml(q)).join('')}</div>
+    <button class="btn save-final-test-btn" style="margin-top:.8rem">Uložiť záverečný test</button>`;
+  bindFinalTestForm(courseId, panel);
+}
+
+function bindFinalTestForm(courseId, panel) {
+  panel.onclick = async (e) => {
+    const addBtn = e.target.closest('.add-final-question-btn');
+    if (addBtn) {
+      $('.final-questions-list', panel).insertAdjacentHTML('beforeend', quizQuestionRowHtml());
+      return;
+    }
+    const rmBtn = e.target.closest('.qq-remove-btn');
+    if (rmBtn) { rmBtn.closest('.quiz-question-row').remove(); return; }
+
+    const saveBtn = e.target.closest('.save-final-test-btn');
+    if (saveBtn) {
+      const questions = $$('.quiz-question-row', panel).map(row => ({
+        question: $('.qq-question', row).value,
+        optionA: $('.qq-a', row).value, optionB: $('.qq-b', row).value,
+        optionC: $('.qq-c', row).value, optionD: $('.qq-d', row).value,
+        correct: $('.qq-correct', row).value
+      })).filter(q => q.question.trim());
+      const timeLimitMinutes = $('.ft-time-limit', panel).value;
+      try {
+        await api(`/api/dash/courses/${courseId}/final-test`, { method: 'PUT', body: JSON.stringify({ timeLimitMinutes: timeLimitMinutes || null, questions }) });
+        await renderCourseFinalTest(courseId, panel);
+      } catch (err) { alert(err.message); }
+      return;
+    }
+  };
 }
 
 async function renderCourseLessons(courseId, panel) {

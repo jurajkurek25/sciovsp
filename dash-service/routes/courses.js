@@ -150,4 +150,30 @@ router.delete('/api/dash/courses/:id/lessons/:lessonId', requireDashAuth, async 
   res.json({ ok: true });
 });
 
+router.get('/api/dash/courses/:id/final-test', requireDashAuth, async (req, res) => {
+  const { data: course } = await mainDb.from('courses').select('final_test_time_limit_minutes').eq('id', req.params.id).single();
+  const { data: qs } = await mainDb.from('course_final_test_questions').select('*').eq('course_id', req.params.id).order('sort_order');
+  res.json({
+    timeLimitMinutes: course?.final_test_time_limit_minutes ?? null,
+    questions: (qs || []).map(q => ({ id: q.id, question: q.question, optionA: q.option_a, optionB: q.option_b, optionC: q.option_c, optionD: q.option_d, correct: q.correct }))
+  });
+});
+
+router.put('/api/dash/courses/:id/final-test', requireDashAuth, async (req, res) => {
+  const { timeLimitMinutes, questions } = req.body || {};
+  const qErr = validateQuizQuestions(questions);
+  if (qErr) return res.status(400).json({ error: qErr });
+  await mainDb.from('courses').update({ final_test_time_limit_minutes: timeLimitMinutes ? Number(timeLimitMinutes) : null }).eq('id', req.params.id);
+  await mainDb.from('course_final_test_questions').delete().eq('course_id', req.params.id);
+  if (Array.isArray(questions) && questions.length) {
+    const rows = questions.map((q, i) => ({
+      course_id: req.params.id, sort_order: i, question: q.question,
+      option_a: q.optionA || null, option_b: q.optionB || null, option_c: q.optionC || null, option_d: q.optionD || null,
+      correct: q.correct
+    }));
+    await mainDb.from('course_final_test_questions').insert(rows);
+  }
+  res.json({ ok: true });
+});
+
 module.exports = router;

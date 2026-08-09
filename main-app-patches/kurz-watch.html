@@ -113,7 +113,8 @@ function renderLessons(data, token) {
   document.title = data.course.title + ' — SP Tréner';
   root.innerHTML = `<h1>${escapeHtml(data.course.title)}</h1>
     <p class="muted" style="margin-bottom:1.6rem">${data.lessons.filter(l => l.completed).length} / ${data.lessons.length} lekcií dokončených</p>
-    <div id="lessonsRoot"></div>`;
+    <div id="lessonsRoot"></div>
+    <div id="finalTestRoot"></div>`;
   const lroot = document.getElementById('lessonsRoot');
   lroot.innerHTML = data.lessons.map(l => lessonHtml(l)).join('');
   data.lessons.forEach(l => {
@@ -127,6 +128,109 @@ function renderLessons(data, token) {
     if (hasQuiz && !l.quizPassed) bindQuiz(l, token);
     if (l.requiresUpload && !l.uploadPassed) bindUpload(l, token);
   });
+  loadFinalTest(token);
+}
+
+async function loadFinalTest(token) {
+  const ftRoot = document.getElementById('finalTestRoot');
+  if (!ftRoot) return;
+  try {
+    const res = await fetch(`/api/courses/${slug}/final-test`, { headers: { Authorization: 'Bearer ' + token } });
+    const data = await res.json();
+    if (!res.ok || !data.hasFinalTest) { ftRoot.innerHTML = ''; return; }
+    if (!data.unlocked) {
+      ftRoot.innerHTML = `<div class="lesson locked"><h3>🔒 Záverečný test</h3><p class="muted">Odomkne sa po dokončení všetkých lekcií.</p></div>`;
+      return;
+    }
+    renderFinalTestIntro(data, token);
+  } catch (e) { ftRoot.innerHTML = ''; }
+}
+
+function fmtTime(s) {
+  s = Math.max(0, s);
+  const m = Math.floor(s / 60), sec = s % 60;
+  return m + ':' + (sec < 10 ? '0' : '') + sec;
+}
+
+function renderFinalTestIntro(data, token) {
+  const ftRoot = document.getElementById('finalTestRoot');
+  const last = data.lastResult;
+  const lastNote = last ? `<p class="completed-note" style="margin-bottom:.8rem">Posledný pokus: ${last.score_percent}% — ${last.passed ? 'úspešne absolvovaný ✓' : 'neúspešný'}</p>` : '';
+  ftRoot.innerHTML = `<div class="lesson">
+    <h3>🏁 Záverečný test</h3>
+    ${lastNote}
+    <p class="muted" style="margin-bottom:1rem">${data.questions.length} otázok · časový limit ${data.timeLimitMinutes} minút. Po spustení beží čas, kým test neodošleš.</p>
+    <button class="quiz-submit" id="startFinalTestBtn">Spustiť záverečný test</button>
+  </div>`;
+  document.getElementById('startFinalTestBtn').onclick = () => runFinalTest(data, token);
+}
+
+function runFinalTest(data, token) {
+  const ftRoot = document.getElementById('finalTestRoot');
+  const selections = {};
+  let secondsLeft = data.timeLimitMinutes * 60;
+  const startedAt = Date.now();
+  ftRoot.innerHTML = `<div class="lesson">
+    <h3>🏁 Záverečný test <span class="badge" id="ftTimer">${fmtTime(secondsLeft)}</span></h3>
+    <div class="quiz" id="finalTestQuiz">
+      ${data.questions.map((q, qi) => `
+        <div class="quiz-q" data-qid="${q.id}">
+          <p class="q">${qi + 1}. ${escapeHtml(q.question)}</p>
+          ${['A','B','C','D'].map(o => q['option' + o] ? `<button class="opt" data-opt="${o.toLowerCase()}">${o}) ${escapeHtml(q['option' + o])}</button>` : '').join('')}
+        </div>`).join('')}
+      <div><button class="quiz-submit" id="ftSubmitBtn">Odoslať test</button></div>
+      <div class="feedback" id="ftFeedback"></div>
+    </div>
+  </div>`;
+  const quizEl = document.getElementById('finalTestQuiz');
+  const groups = quizEl.querySelectorAll('.quiz-q');
+  groups.forEach(group => {
+    const qid = group.dataset.qid;
+    const opts = group.querySelectorAll('.opt');
+    opts.forEach(btn => btn.onclick = () => {
+      opts.forEach(o => o.classList.remove('selected'));
+      btn.classList.add('selected');
+      selections[qid] = btn.dataset.opt;
+    });
+  });
+  const timerEl = document.getElementById('ftTimer');
+  const timer = setInterval(() => {
+    secondsLeft--;
+    if (timerEl) timerEl.textContent = fmtTime(secondsLeft);
+    if (secondsLeft <= 0) {
+      clearInterval(timer);
+      submitFinalTest(token, selections, startedAt, true);
+    }
+  }, 1000);
+  document.getElementById('ftSubmitBtn').onclick = () => { clearInterval(timer); submitFinalTest(token, selections, startedAt, false); };
+}
+
+async function submitFinalTest(token, selections, startedAt, autoSubmitted) {
+  const feedback = document.getElementById('ftFeedback');
+  const submitBtn = document.getElementById('ftSubmitBtn');
+  if (submitBtn) submitBtn.disabled = true;
+  const elapsedSeconds = Math.round((Date.now() - startedAt) / 1000);
+  try {
+    const res = await fetch(`/api/courses/${slug}/final-test/submit`, {
+      method: 'POST', headers: { 'content-type': 'application/json', Authorization: 'Bearer ' + token },
+      body: JSON.stringify({ answers: selections, elapsedSeconds })
+    });
+    const data = await res.json();
+    const ftRoot = document.getElementById('finalTestRoot');
+    if (!res.ok) {
+      ftRoot.innerHTML = `<div class="lesson"><h3>🏁 Záverečný test</h3><p class="feedback err">${escapeHtml(data.error || 'Chyba.')}</p></div>`;
+      return;
+    }
+    ftRoot.innerHTML = `<div class="lesson">
+      <h3>🏁 Záverečný test</h3>
+      <p class="${data.passed ? 'completed-note' : 'feedback err'}" style="font-size:1rem">${autoSubmitted ? 'Čas vypršal. ' : ''}Výsledok: ${data.scorePercent}% (${data.correctCount}/${data.totalQuestions}) — ${data.passed ? 'Úspešne absolvované! 🎉' : 'Neúspešné, skús to znova.'}</p>
+      <button class="quiz-submit" id="ftRetryBtn" style="margin-top:1rem">Skúsiť znova</button>
+    </div>`;
+    document.getElementById('ftRetryBtn').onclick = () => loadFinalTest(token);
+  } catch (e) {
+    if (feedback) { feedback.textContent = 'Chyba servera.'; feedback.className = 'feedback err'; }
+    if (submitBtn) submitBtn.disabled = false;
+  }
 }
 function escapeHtml(s) { return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
