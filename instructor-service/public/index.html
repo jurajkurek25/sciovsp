@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Inštruktor — SP Tréner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@300;400;500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
+<style>
+:root{--black:#08080d;--black2:#0f0f18;--black3:#171724;--border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.13);--text:#eeeef5;--text2:#a1a1bc;--text3:#5c5c7a;--volt:#c8ff00;--purple:#7c5cff;--purple2:#b09bff;--red:#ff3f5e;--green:#36e896;--serif:'Instrument Serif',Georgia,serif;--mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--black);color:var(--text);font-family:var(--sans);line-height:1.6;min-height:100vh}
+a{color:var(--purple2)}
+input,textarea,select{font-family:var(--sans);background:var(--black2);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:.55rem .7rem;font-size:.87rem;width:100%}
+textarea{resize:vertical;min-height:70px}
+label{display:block;font-family:var(--mono);font-size:.72rem;color:var(--text3);margin-bottom:.3rem;text-transform:uppercase;letter-spacing:.04em}
+.field{margin-bottom:.9rem}
+button{font-family:var(--mono);cursor:pointer}
+.btn{padding:.6rem 1.1rem;background:var(--volt);color:var(--black);border:none;border-radius:8px;font-weight:700;font-size:.78rem}
+.btn.secondary{background:var(--black2);color:var(--text);border:1px solid var(--border2)}
+.btn.danger{background:rgba(255,63,94,.15);color:var(--red);border:1px solid rgba(255,63,94,.4)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.wrap{max-width:1100px;margin:0 auto;padding:1.5rem 1.2rem 5rem}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem}
+.topbar h1{font-family:var(--serif);font-size:1.6rem}
+.tabs{display:flex;gap:.5rem;overflow-x:auto;margin-bottom:1.5rem;border-bottom:1px solid var(--border)}
+.tab{padding:.7rem 1rem;font-family:var(--mono);font-size:.78rem;color:var(--text3);cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent}
+.tab.active{color:var(--text);border-color:var(--volt)}
+.card{background:var(--black2);border:1px solid var(--border);border-radius:14px;padding:1.2rem;margin-bottom:1rem}
+.muted{color:var(--text3);font-size:.85rem}
+.badge{font-family:var(--mono);font-size:.65rem;padding:.15rem .5rem;border-radius:20px;background:rgba(54,232,150,.15);color:var(--green);display:inline-block}
+.badge.pending{background:rgba(200,255,0,.15);color:var(--volt)}
+.badge.draft{background:rgba(255,255,255,.08);color:var(--text3)}
+.course-row{display:flex;justify-content:space-between;align-items:center;gap:1rem;padding:.9rem 0;border-bottom:1px solid var(--border)}
+.course-row:last-child{border-bottom:none}
+.course-row-title{font-weight:500}
+.gate{text-align:center;padding:5rem 1rem}
+.lesson-item{background:var(--black);border:1px solid var(--border2);border-radius:10px;padding:.9rem;margin-bottom:.7rem}
+.lesson-item h4{font-size:.95rem;margin-bottom:.3rem}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:.9rem}
+@media(max-width:640px){.row2{grid-template-columns:1fr}}
+.feedback{margin-top:.6rem;font-size:.85rem}
+.feedback.ok{color:var(--green)}
+.feedback.err{color:var(--red)}
+.stat{font-family:var(--serif);font-size:2rem}
+.comment-thread{margin-bottom:.9rem}
+.comment{background:var(--black);border:1px solid var(--border2);border-radius:8px;padding:.7rem .8rem;font-size:.87rem;margin-bottom:.4rem}
+.comment.instructor{border-color:rgba(124,92,255,.4);background:rgba(124,92,255,.06)}
+.comment-head{display:flex;justify-content:space-between;gap:.6rem;margin-bottom:.35rem;font-family:var(--mono);font-size:.72rem;color:var(--text3)}
+.quiz-q{background:var(--black);border:1px solid var(--border2);border-radius:8px;padding:.8rem;margin-bottom:.6rem}
+.quiz-q .opts{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-top:.5rem}
+</style>
+</head>
+<body>
+<div class="wrap"><div id="root"><p class="muted">Načítavam…</p></div></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL='https://zrnqiwareacqyndwchsv.supabase.co';
+const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpybnFpd2FyZWFjcXluZHdjaHN2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMDA3NTAsImV4cCI6MjA4OTc3Njc1MH0.iUne23YDxp12Iwxdk9U8MfcV0NTBtrNf9OgsjQdiADk';
+const _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const root = document.getElementById('root');
+let token = null;
+let me = null;
+let activeTab = 'courses';
+let coursesCache = [];
+let activeCourseId = null;
+
+function escapeHtml(s) { return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function eur(cents) { return ((cents || 0) / 100).toFixed(2) + ' €'; }
+function referralLinkFor(course) { return `${location.origin.replace('instructor.', '')}/kurzy/${course.slug}?ref=${me.referralCode}`; }
+
+async function api(path, opts = {}) {
+  const res = await fetch(path, {
+    ...opts,
+    headers: { 'content-type': 'application/json', Authorization: 'Bearer ' + token, ...(opts.headers || {}) }
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Chyba servera.');
+  return data;
+}
+
+async function init() {
+  const { data: { session } } = await _supabase.auth.getSession();
+  if (!session) { renderGate(); return; }
+  token = session.access_token;
+  try {
+    const data = await api('/api/instructor/me');
+    me = data.instructor;
+    renderShell();
+  } catch (e) {
+    root.innerHTML = `<div class="gate"><p class="feedback err">${escapeHtml(e.message)}</p></div>`;
+  }
+}
+
+function renderGate() {
+  root.innerHTML = `<div class="gate">
+    <h1 style="font-family:var(--serif);font-size:2rem;margin-bottom:.5rem">Inštruktorský portál</h1>
+    <p class="muted" style="margin-bottom:1.2rem">Prihlás sa cez Google — rovnaký účet, aký chceš používať ako inštruktor.</p>
+    <button class="btn" id="googleBtn">Prihlásiť sa cez Google</button>
+  </div>`;
+  document.getElementById('googleBtn').onclick = () => {
+    _supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.origin + location.pathname } });
+  };
+}
+
+_supabase.auth.onAuthStateChange((event, session) => {
+  if (event === 'SIGNED_IN' && !token && session) init();
+});
+
+function renderShell() {
+  root.innerHTML = `
+    <div class="topbar">
+      <h1>Vitaj, ${escapeHtml(me.name || me.email)}</h1>
+      <a href="#" id="logoutLink" class="muted">Odhlásiť sa</a>
+    </div>
+    <div class="tabs">
+      <div class="tab" data-tab="courses">Moje kurzy</div>
+      <div class="tab" data-tab="earnings">Zárobky</div>
+      <div class="tab" data-tab="profile">Profil</div>
+    </div>
+    <div id="tabRoot"></div>`;
+  document.getElementById('logoutLink').onclick = async (e) => { e.preventDefault(); await _supabase.auth.signOut(); location.reload(); };
+  document.querySelectorAll('.tab').forEach(t => t.onclick = () => { activeTab = t.dataset.tab; activeCourseId = null; renderTabs(); });
+  renderTabs();
+}
+
+function renderTabs() {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === activeTab));
+  if (activeTab === 'courses') renderCoursesTab();
+  else if (activeTab === 'earnings') renderEarningsTab();
+  else if (activeTab === 'profile') renderProfileTab();
+}
+
+// ---------- Kurzy ----------
+async function renderCoursesTab() {
+  const tabRoot = document.getElementById('tabRoot');
+  if (activeCourseId) return renderCourseDetail(activeCourseId);
+  tabRoot.innerHTML = `<p class="muted">Načítavam kurzy…</p>`;
+  const data = await api('/api/instructor/courses');
+  coursesCache = data.courses || [];
+  tabRoot.innerHTML = `
+    <div class="card">
+      <button class="btn" id="newCourseBtn">+ Nový kurz</button>
+    </div>
+    <div class="card">
+      ${coursesCache.length ? coursesCache.map(courseRowHtml).join('') : '<p class="muted">Zatiaľ nemáš žiadny kurz.</p>'}
+    </div>`;
+  document.getElementById('newCourseBtn').onclick = createCourse;
+  coursesCache.forEach(c => {
+    const el = document.getElementById('course-row-' + c.id);
+    if (el) el.onclick = () => { activeCourseId = c.id; renderTabs(); };
+  });
+}
+
+function courseStatusBadge(c) {
+  if (c.published) return '<span class="badge">zverejnený</span>';
+  if (c.submitted_for_review) return '<span class="badge pending">čaká na schválenie</span>';
+  return '<span class="badge draft">koncept</span>';
+}
+
+function courseRowHtml(c) {
+  return `<div class="course-row" id="course-row-${c.id}" style="cursor:pointer">
+    <div><div class="course-row-title">${escapeHtml(c.title)}</div><div class="muted">${eur(c.price_cents)} · ${c.lessonCount} lekcií · ${c.purchaseCount} predajov</div></div>
+    ${courseStatusBadge(c)}
+  </div>`;
+}
+
+async function createCourse() {
+  const title = prompt('Názov kurzu:');
+  if (!title || !title.trim()) return;
+  try {
+    await api('/api/instructor/courses', { method: 'POST', body: JSON.stringify({ title: title.trim() }) });
+    renderCoursesTab();
+  } catch (e) { alert(e.message); }
+}
+
+async function renderCourseDetail(id) {
+  const tabRoot = document.getElementById('tabRoot');
+  tabRoot.innerHTML = `<p class="muted">Načítavam…</p>`;
+  const [coursesData, lessonsData] = await Promise.all([
+    api('/api/instructor/courses'), api(`/api/instructor/courses/${id}/lessons`)
+  ]);
+  const course = (coursesData.courses || []).find(c => c.id === id);
+  if (!course) { activeCourseId = null; return renderCoursesTab(); }
+  const lessons = lessonsData.lessons || [];
+
+  tabRoot.innerHTML = `
+    <button class="btn secondary" id="backBtn" style="margin-bottom:1rem">← Späť na zoznam</button>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.8rem">
+        <h2 style="font-family:var(--serif);font-size:1.4rem">${escapeHtml(course.title)}</h2>
+        ${courseStatusBadge(course)}
+      </div>
+      <div class="row2">
+        <div class="field"><label>Názov</label><input id="f-title" value="${escapeHtml(course.title)}"></div>
+        <div class="field"><label>Cena (€)</label><input id="f-price" type="number" min="0" step="0.01" value="${(course.price_cents / 100).toFixed(2)}"></div>
+      </div>
+      <div class="field"><label>Popis</label><textarea id="f-desc">${escapeHtml(course.description || '')}</textarea></div>
+      <div class="row2">
+        <div class="field"><label>Obrázok (URL)</label><input id="f-cover" value="${escapeHtml(course.cover_image_url || '')}"></div>
+        <div class="field"><label>Úvodné video (URL)</label><input id="f-intro" value="${escapeHtml(course.intro_video_url || '')}"></div>
+      </div>
+      <div class="field"><label>Predajný text</label><textarea id="f-sales" style="min-height:140px">${escapeHtml(course.sales_content || '')}</textarea></div>
+      <button class="btn" id="saveCourseBtn">Uložiť</button>
+      ${!course.published ? `<button class="btn secondary" id="submitReviewBtn" style="margin-left:.6rem">${course.submitted_for_review ? 'Odoslané na schválenie ✓' : 'Odoslať na schválenie'}</button>` : ''}
+      ${!course.published ? `<button class="btn danger" id="deleteCourseBtn" style="margin-left:.6rem">Zmazať</button>` : ''}
+      <div class="feedback" id="courseFeedback"></div>
+      ${course.published ? `<div style="margin-top:1rem"><label>Tvoj referral odkaz na tento kurz (platforma si necháva len ${course.referral_cut_percent}%, zvyšok je tvoj)</label><input readonly value="${escapeHtml(referralLinkFor(course))}" onclick="this.select()"></div>` : ''}
+    </div>
+
+    <div class="card">
+      <h3 style="font-family:var(--serif);font-size:1.2rem;margin-bottom:.9rem">Lekcie</h3>
+      <div id="lessonsList">${lessons.map(lessonEditHtml).join('') || '<p class="muted">Zatiaľ žiadne lekcie.</p>'}</div>
+      <button class="btn secondary" id="addLessonBtn">+ Pridať lekciu</button>
+    </div>
+
+    <div class="card">
+      <h3 style="font-family:var(--serif);font-size:1.2rem;margin-bottom:.9rem">💬 Otázky od študentov</h3>
+      <div id="commentsRoot"><p class="muted">Načítavam…</p></div>
+    </div>
+
+    <div class="card">
+      <h3 style="font-family:var(--serif);font-size:1.2rem;margin-bottom:.9rem">📎 Nahraté materiály (AI vyhodnotenie)</h3>
+      <div id="submissionsRoot"><p class="muted">Načítavam…</p></div>
+    </div>`;
+
+  document.getElementById('backBtn').onclick = () => { activeCourseId = null; renderCoursesTab(); };
+  document.getElementById('saveCourseBtn').onclick = () => saveCourse(course.id);
+  const submitBtn = document.getElementById('submitReviewBtn');
+  if (submitBtn) submitBtn.onclick = () => submitForReview(course.id, !course.submitted_for_review);
+  const delBtn = document.getElementById('deleteCourseBtn');
+  if (delBtn) delBtn.onclick = () => deleteCourse(course.id);
+  document.getElementById('addLessonBtn').onclick = () => editLessonForm(course.id, null);
+  lessons.forEach(l => {
+    const editBtn = document.getElementById('edit-lesson-' + l.id);
+    if (editBtn) editBtn.onclick = () => editLessonForm(course.id, l);
+    const delLBtn = document.getElementById('del-lesson-' + l.id);
+    if (delLBtn) delLBtn.onclick = () => deleteLesson(course.id, l.id);
+  });
+
+  loadCourseComments(course.id, lessons);
+  loadCourseSubmissions(course.id);
+}
+
+function lessonEditHtml(l) {
+  return `<div class="lesson-item">
+    <h4>${escapeHtml(l.title)}</h4>
+    <p class="muted">${(l.quizQuestions || []).length} otázok v kvíze ${l.requires_upload ? '· vyžaduje nahratie materiálu' : ''}</p>
+    <button class="btn secondary" id="edit-lesson-${l.id}" style="margin-top:.5rem">Upraviť</button>
+    <button class="btn danger" id="del-lesson-${l.id}" style="margin-top:.5rem;margin-left:.5rem">Zmazať</button>
+  </div>`;
+}
+
+async function saveCourse(id) {
+  const feedback = document.getElementById('courseFeedback');
+  try {
+    await api(`/api/instructor/courses/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify({
+        title: document.getElementById('f-title').value,
+        priceCents: Math.round(Number(document.getElementById('f-price').value) * 100),
+        description: document.getElementById('f-desc').value,
+        coverImageUrl: document.getElementById('f-cover').value,
+        introVideoUrl: document.getElementById('f-intro').value,
+        salesContent: document.getElementById('f-sales').value
+      })
+    });
+    feedback.textContent = 'Uložené.'; feedback.className = 'feedback ok';
+  } catch (e) { feedback.textContent = e.message; feedback.className = 'feedback err'; }
+}
+
+async function submitForReview(id, value) {
+  try {
+    await api(`/api/instructor/courses/${id}`, { method: 'PUT', body: JSON.stringify({ submittedForReview: value }) });
+    renderCourseDetail(id);
+  } catch (e) { alert(e.message); }
+}
+
+async function deleteCourse(id) {
+  if (!confirm('Naozaj zmazať tento kurz aj s lekciami?')) return;
+  try {
+    await api(`/api/instructor/courses/${id}`, { method: 'DELETE' });
+    activeCourseId = null; renderCoursesTab();
+  } catch (e) { alert(e.message); }
+}
+
+function editLessonForm(courseId, lesson) {
+  const isNew = !lesson;
+  const qs = lesson?.quizQuestions || [];
+  const formHtml = `<div class="card" id="lessonForm">
+    <h4 style="margin-bottom:.8rem">${isNew ? 'Nová lekcia' : 'Upraviť lekciu'}</h4>
+    <div class="field"><label>Názov</label><input id="lf-title" value="${escapeHtml(lesson?.title || '')}"></div>
+    <div class="row2">
+      <div class="field"><label>Video (URL)</label><input id="lf-video" value="${escapeHtml(lesson?.video_url || '')}"></div>
+      <div class="field"><label>PDF materiály (URL)</label><input id="lf-doc" value="${escapeHtml(lesson?.doc_url || '')}"></div>
+    </div>
+    <div class="field"><label><input type="checkbox" id="lf-upload" style="width:auto" ${lesson?.requires_upload ? 'checked' : ''}> Vyžaduje nahratie materiálu od študenta</label></div>
+    <div class="field"><label>Pokyny pre nahratie (vidí ich študent)</label><textarea id="lf-upload-instr">${escapeHtml(lesson?.upload_instructions || '')}</textarea></div>
+    <div class="field"><label>AI kritériá hodnotenia (skryté, študent nevidí)</label><textarea id="lf-ai-criteria">${escapeHtml(lesson?.ai_grading_criteria || '')}</textarea></div>
+    <div class="field"><label>Kvíz — otázky (A/B/C/D, správna odpoveď)</label><div id="lf-quiz"></div>
+      <button class="btn secondary" id="lf-add-q" type="button" style="margin-top:.4rem">+ Pridať otázku</button>
+    </div>
+    <button class="btn" id="lf-save">Uložiť lekciu</button>
+    <button class="btn secondary" id="lf-cancel" style="margin-left:.5rem">Zrušiť</button>
+    <div class="feedback" id="lf-feedback"></div>
+  </div>`;
+  const list = document.getElementById('lessonsList');
+  const existingForm = document.getElementById('lessonForm');
+  if (existingForm) existingForm.remove();
+  list.insertAdjacentHTML('afterend', formHtml);
+
+  let quizState = qs.map(q => ({ ...q }));
+  function renderQuiz() {
+    document.getElementById('lf-quiz').innerHTML = quizState.map((q, i) => quizQEditHtml(q, i)).join('');
+    quizState.forEach((q, i) => {
+      document.getElementById('lf-q-question-' + i).oninput = e => q.question = e.target.value;
+      ['a', 'b', 'c', 'd'].forEach(opt => {
+        document.getElementById(`lf-q-opt${opt}-${i}`).oninput = e => q['option' + opt.toUpperCase()] = e.target.value;
+      });
+      document.getElementById('lf-q-correct-' + i).onchange = e => q.correct = e.target.value;
+      document.getElementById('lf-q-remove-' + i).onclick = () => { quizState.splice(i, 1); renderQuiz(); };
+    });
+  }
+  renderQuiz();
+  document.getElementById('lf-add-q').onclick = () => { quizState.push({ question: '', optionA: '', optionB: '', optionC: '', optionD: '', correct: 'a' }); renderQuiz(); };
+  document.getElementById('lf-cancel').onclick = () => document.getElementById('lessonForm').remove();
+  document.getElementById('lf-save').onclick = async () => {
+    const feedback = document.getElementById('lf-feedback');
+    const payload = {
+      title: document.getElementById('lf-title').value,
+      videoUrl: document.getElementById('lf-video').value,
+      docUrl: document.getElementById('lf-doc').value,
+      requiresUpload: document.getElementById('lf-upload').checked,
+      uploadInstructions: document.getElementById('lf-upload-instr').value,
+      aiGradingCriteria: document.getElementById('lf-ai-criteria').value,
+      quizQuestions: quizState
+    };
+    try {
+      if (isNew) await api(`/api/instructor/courses/${courseId}/lessons`, { method: 'POST', body: JSON.stringify(payload) });
+      else await api(`/api/instructor/courses/${courseId}/lessons/${lesson.id}`, { method: 'PUT', body: JSON.stringify(payload) });
+      renderCourseDetail(courseId);
+    } catch (e) { feedback.textContent = e.message; feedback.className = 'feedback err'; }
+  };
+}
+
+function quizQEditHtml(q, i) {
+  return `<div class="quiz-q">
+    <input id="lf-q-question-${i}" placeholder="Text otázky" value="${escapeHtml(q.question || '')}">
+    <div class="opts">
+      <input id="lf-q-opta-${i}" placeholder="A" value="${escapeHtml(q.optionA || '')}">
+      <input id="lf-q-optb-${i}" placeholder="B" value="${escapeHtml(q.optionB || '')}">
+      <input id="lf-q-optc-${i}" placeholder="C" value="${escapeHtml(q.optionC || '')}">
+      <input id="lf-q-optd-${i}" placeholder="D" value="${escapeHtml(q.optionD || '')}">
+    </div>
+    <div style="margin-top:.5rem;display:flex;align-items:center;gap:.6rem">
+      <label style="margin:0">Správna:</label>
+      <select id="lf-q-correct-${i}" style="width:auto">
+        ${['a', 'b', 'c', 'd'].map(o => `<option value="${o}" ${q.correct === o ? 'selected' : ''}>${o.toUpperCase()}</option>`).join('')}
+      </select>
+      <button class="btn danger" id="lf-q-remove-${i}" type="button" style="margin-left:auto">Odstrániť</button>
+    </div>
+  </div>`;
+}
+
+async function deleteLesson(courseId, lessonId) {
+  if (!confirm('Naozaj zmazať túto lekciu?')) return;
+  try {
+    await api(`/api/instructor/courses/${courseId}/lessons/${lessonId}`, { method: 'DELETE' });
+    renderCourseDetail(courseId);
+  } catch (e) { alert(e.message); }
+}
+
+// ---------- Otázky ----------
+async function loadCourseComments(courseId, lessons) {
+  const mount = document.getElementById('commentsRoot');
+  try {
+    const data = await api(`/api/instructor/courses/${courseId}/comments`);
+    const comments = data.comments || [];
+    const byParent = {};
+    comments.forEach(c => { if (c.parentId) (byParent[c.parentId] = byParent[c.parentId] || []).push(c); });
+    function one(c) {
+      return `<div class="comment${c.isInstructor ? ' instructor' : ''}">
+        <div class="comment-head"><span>${c.isInstructor ? 'Ty (lektor)' : escapeHtml(c.email)} · ${escapeHtml(c.lessonTitle)}</span><span>${new Date(c.createdAt).toLocaleDateString('sk-SK')}</span></div>
+        <div>${escapeHtml(c.body)}</div>
+        ${!c.isInstructor ? `<div style="margin-top:.5rem"><input placeholder="Odpovedať…" id="reply-${c.id}" style="margin-bottom:.4rem"><button class="btn secondary" id="reply-btn-${c.id}">Odpovedať</button></div>` : ''}
+      </div>`;
+    }
+    const roots = comments.filter(c => !c.parentId);
+    mount.innerHTML = roots.length
+      ? roots.map(c => `<div class="comment-thread">${one(c)}${(byParent[c.id] || []).map(r => `<div style="margin-left:1.2rem">${one(r)}</div>`).join('')}</div>`).join('')
+      : '<p class="muted">Zatiaľ žiadne otázky.</p>';
+    roots.forEach(c => {
+      const btn = document.getElementById('reply-btn-' + c.id);
+      if (btn) btn.onclick = async () => {
+        const input = document.getElementById('reply-' + c.id);
+        if (!input.value.trim()) return;
+        try {
+          await api(`/api/instructor/courses/${courseId}/comments`, { method: 'POST', body: JSON.stringify({ lessonId: c.lessonId, parentId: c.id, body: input.value.trim() }) });
+          loadCourseComments(courseId, lessons);
+        } catch (e) { alert(e.message); }
+      };
+    });
+  } catch (e) { mount.innerHTML = `<p class="feedback err">${escapeHtml(e.message)}</p>`; }
+}
+
+// ---------- Nahraté materiály ----------
+async function loadCourseSubmissions(courseId) {
+  const mount = document.getElementById('submissionsRoot');
+  try {
+    const data = await api(`/api/instructor/courses/${courseId}/submissions`);
+    const subs = data.submissions || [];
+    mount.innerHTML = subs.length ? subs.map(s => `
+      <div class="comment">
+        <div class="comment-head"><span>${escapeHtml(s.email)} · ${escapeHtml(s.lessonTitle)}</span><span>${new Date(s.createdAt).toLocaleDateString('sk-SK')}</span></div>
+        <div>Verdikt AI: <strong style="color:${s.aiVerdict === 'pass' ? 'var(--green)' : 'var(--red)'}">${s.aiVerdict === 'pass' ? 'úspešné' : 'neúspešné'}</strong></div>
+        <div class="muted" style="margin-top:.3rem">${escapeHtml(s.aiFeedback || '')}</div>
+        ${s.fileUrl ? `<a href="${s.fileUrl}" target="_blank" rel="noopener" style="display:inline-block;margin-top:.5rem">Otvoriť súbor →</a>` : ''}
+      </div>`).join('') : '<p class="muted">Zatiaľ žiadne nahraté materiály.</p>';
+  } catch (e) { mount.innerHTML = `<p class="feedback err">${escapeHtml(e.message)}</p>`; }
+}
+
+// ---------- Zárobky ----------
+async function renderEarningsTab() {
+  const tabRoot = document.getElementById('tabRoot');
+  tabRoot.innerHTML = `<p class="muted">Načítavam…</p>`;
+  const data = await api('/api/instructor/earnings');
+  tabRoot.innerHTML = `
+    <div class="card">
+      <div class="stat">${eur(data.unpaidCents)}</div>
+      <p class="muted">nevyplatené (${data.unpaidSaleCount} predajov)</p>
+      <div class="field" style="margin-top:1rem;max-width:320px"><label>IBAN pre výplatu</label><input id="payoutIban" value="${escapeHtml(me.iban || '')}"></div>
+      <button class="btn" id="requestPayoutBtn" ${data.unpaidCents ? '' : 'disabled'}>Požiadať o výplatu</button>
+      <div class="feedback" id="payoutFeedback"></div>
+    </div>
+    <div class="card">
+      <h3 style="font-family:var(--serif);font-size:1.2rem;margin-bottom:.8rem">Posledné predaje</h3>
+      ${data.recentSales.length ? data.recentSales.map(s => `
+        <div class="course-row"><div>${escapeHtml(s.courseTitle)} ${s.viaReferral ? '<span class="badge" style="margin-left:.4rem">referral</span>' : ''}</div><div>${eur(s.shareCents)}</div></div>
+      `).join('') : '<p class="muted">Zatiaľ žiadne predaje.</p>'}
+    </div>
+    <div class="card">
+      <h3 style="font-family:var(--serif);font-size:1.2rem;margin-bottom:.8rem">História výplat</h3>
+      ${data.payouts.length ? data.payouts.map(p => `
+        <div class="course-row"><div>${new Date(p.requestedAt).toLocaleDateString('sk-SK')}</div><div>${eur(p.amountCents)} · ${p.status === 'completed' ? '<span class="badge">vyplatené</span>' : '<span class="badge pending">čaká</span>'}</div></div>
+      `).join('') : '<p class="muted">Zatiaľ žiadne výplaty.</p>'}
+    </div>`;
+  document.getElementById('requestPayoutBtn').onclick = async () => {
+    const feedback = document.getElementById('payoutFeedback');
+    try {
+      await api('/api/instructor/payouts', { method: 'POST', body: JSON.stringify({ iban: document.getElementById('payoutIban').value }) });
+      feedback.textContent = 'Žiadosť odoslaná.'; feedback.className = 'feedback ok';
+      renderEarningsTab();
+    } catch (e) { feedback.textContent = e.message; feedback.className = 'feedback err'; }
+  };
+}
+
+// ---------- Profil ----------
+function renderProfileTab() {
+  const tabRoot = document.getElementById('tabRoot');
+  tabRoot.innerHTML = `
+    <div class="card">
+      <div class="field"><label>Meno</label><input id="p-name" value="${escapeHtml(me.name || '')}"></div>
+      <div class="field"><label>Bio (zobrazí sa pri kurze)</label><textarea id="p-bio">${escapeHtml(me.bio || '')}</textarea></div>
+      <div class="field"><label>Fotka (URL)</label><input id="p-photo" value="${escapeHtml(me.photoUrl || '')}"></div>
+      <div class="field"><label>IBAN pre výplaty</label><input id="p-iban" value="${escapeHtml(me.iban || '')}"></div>
+      <button class="btn" id="saveProfileBtn">Uložiť</button>
+      <div class="feedback" id="profileFeedback"></div>
+    </div>
+    <div class="card">
+      <p class="muted">Referral odkaz nájdeš pri každom zverejnenom kurze na jeho stránke (Moje kurzy → otvor kurz). Keď niekto kúpi kurz cez tento odkaz, platforma si necháva len malý podiel — zvyšok je tvoj, lebo si zákazníka priviedol ty.</p>
+    </div>`;
+  document.getElementById('saveProfileBtn').onclick = async () => {
+    const feedback = document.getElementById('profileFeedback');
+    try {
+      const data = await api('/api/instructor/me', {
+        method: 'PUT',
+        body: JSON.stringify({
+          name: document.getElementById('p-name').value,
+          bio: document.getElementById('p-bio').value,
+          photoUrl: document.getElementById('p-photo').value,
+          iban: document.getElementById('p-iban').value
+        })
+      });
+      me = data.instructor;
+      feedback.textContent = 'Uložené.'; feedback.className = 'feedback ok';
+    } catch (e) { feedback.textContent = e.message; feedback.className = 'feedback err'; }
+  };
+}
+
+init();
+</script>
+</body>
+</html>
