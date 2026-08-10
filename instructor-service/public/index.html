@@ -72,6 +72,7 @@ button{font-family:var(--mono);cursor:pointer}
 .terms-box p{margin-bottom:.7rem}
 .terms-box ul,.terms-box ol{padding-left:1.4rem;margin-bottom:.7rem}
 .hold-btn{position:relative;width:100%;padding:1.1rem;background:var(--black2);border:1px solid var(--border2);border-radius:10px;color:var(--text);font-family:var(--mono);font-size:.85rem;cursor:pointer;overflow:hidden;user-select:none;-webkit-user-select:none;text-align:center}
+.hold-btn.hold-btn-locked{opacity:.4;cursor:not-allowed}
 .hold-fill{position:absolute;inset:0;background:var(--volt);width:0%;z-index:0}
 .hold-btn span{position:relative;z-index:1;mix-blend-mode:difference;color:#fff}
 </style>
@@ -252,7 +253,7 @@ function bindHoldButton(btnId, fillId, labelId, statusId, durationMs, onComplete
   }
   function start(e) {
     e.preventDefault();
-    if (holding) return;
+    if (holding || btn.disabled) return;
     holding = true;
     startTime = Date.now();
     status.textContent = '';
@@ -274,14 +275,37 @@ function bindHoldButton(btnId, fillId, labelId, statusId, durationMs, onComplete
   btn.addEventListener('touchcancel', cancel);
 }
 
+// Tlačidlo na potvrdenie ostáva zamknuté, kým používateľ nedoscroluje
+// text podmienok úplne dole — má to zabrániť potvrdeniu bez prečítania.
+function bindScrollGate(boxId, btnId, hintId) {
+  const box = document.getElementById(boxId);
+  const btn = document.getElementById(btnId);
+  const hint = document.getElementById(hintId);
+  function atBottom() { return box.scrollTop + box.clientHeight >= box.scrollHeight - 4; }
+  function check() {
+    if (atBottom()) {
+      btn.disabled = false;
+      btn.classList.remove('hold-btn-locked');
+      hint.textContent = '';
+    }
+  }
+  btn.disabled = true;
+  btn.classList.add('hold-btn-locked');
+  hint.textContent = 'Doscroluj text podmienok úplne dole, aby sa tlačidlo sprístupnilo.';
+  box.addEventListener('scroll', check);
+  check(); // krátky text sa nemusí dať scrollovať vôbec — vtedy odomkni rovno
+}
+
 function renderTermsGate(termsData) {
   root.innerHTML = `<div class="gate" style="text-align:left;max-width:680px;margin:0 auto;padding-top:2rem">
     <h1 style="font-family:var(--serif);font-size:1.8rem;margin-bottom:.4rem">Zmluvné podmienky pre inštruktorov</h1>
     <p class="muted" style="margin-bottom:1rem">Verzia ${termsData.version}. Pred prvým použitím portálu si prosím pozorne prečítaj celý text nižšie — potvrdením vzniká právne záväzná dohoda medzi tebou a SP Tréner.</p>
-    <div class="terms-box">${termsData.content}</div>
+    <div class="terms-box" id="termsBox">${termsData.content}</div>
+    <p class="muted" id="termsScrollHint" style="margin-bottom:.5rem"></p>
     <button class="hold-btn" id="termsHoldBtn"><div class="hold-fill" id="termsHoldFill"></div><span id="termsHoldLabel">Podrž 10 sekúnd — potvrdzujem, že som si podmienky prečítal(a) a rozumiem im</span></button>
     <p class="muted" id="termsHoldStatus" style="margin-top:.6rem;min-height:1.2em"></p>
   </div>`;
+  bindScrollGate('termsBox', 'termsHoldBtn', 'termsScrollHint');
   bindHoldButton('termsHoldBtn', 'termsHoldFill', 'termsHoldLabel', 'termsHoldStatus', 10000, async () => {
     try { await api('/api/instructor/accept-terms', { method: 'POST' }); checkLegalGates(); }
     catch (e) { document.getElementById('termsHoldStatus').textContent = e.message; }
@@ -292,10 +316,12 @@ function renderAgreementGate(agreement) {
   root.innerHTML = `<div class="gate" style="text-align:left;max-width:680px;margin:0 auto;padding-top:2rem">
     <h1 style="font-family:var(--serif);font-size:1.8rem;margin-bottom:.4rem">${escapeHtml(agreement.title)}</h1>
     <p class="muted" style="margin-bottom:1rem">Individuálna dohoda pripravená pre tvoj účet, navyše k štandardným podmienkam. Prečítaj si ju prosím celú — potvrdením vzniká právne záväzná dohoda.</p>
-    <div class="terms-box">${agreement.content}</div>
+    <div class="terms-box" id="agBox">${agreement.content}</div>
+    <p class="muted" id="agScrollHint" style="margin-bottom:.5rem"></p>
     <button class="hold-btn" id="agHoldBtn"><div class="hold-fill" id="agHoldFill"></div><span id="agHoldLabel">Podrž 10 sekúnd na potvrdenie</span></button>
     <p class="muted" id="agHoldStatus" style="margin-top:.6rem;min-height:1.2em"></p>
   </div>`;
+  bindScrollGate('agBox', 'agHoldBtn', 'agScrollHint');
   bindHoldButton('agHoldBtn', 'agHoldFill', 'agHoldLabel', 'agHoldStatus', 10000, async () => {
     try { await api(`/api/instructor/custom-agreement/${agreement.id}/accept`, { method: 'POST' }); checkLegalGates(); }
     catch (e) { document.getElementById('agHoldStatus').textContent = e.message; }
