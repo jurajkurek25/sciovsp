@@ -519,7 +519,7 @@ function renderProfileTab() {
     </div>
     <div class="card">
       <h3 style="font-family:var(--serif);font-size:1.2rem;margin-bottom:.4rem">Reklamný banner</h3>
-      <p class="muted" style="margin-bottom:.8rem">Zobrazí sa pod tvojou kartou lektora na stránke každého zverejneného kurzu ako "Tento kurz ti prináša…" — ponúkni tu vlastné doučovacie alebo iné služby.</p>
+      <p class="muted" style="margin-bottom:.8rem">Zobrazí sa pod tvojou kartou lektora na stránke každého zverejneného kurzu ako "Tento kurz ti prináša…" — ponúkni tu vlastné doučovacie alebo iné služby. Odporúčaná veľkosť <strong>1200 × 400 px</strong> (pomer strán 3:1) — iný pomer sa na stránke automaticky oreže na túto šírku, nech všetky kurzy vyzerajú rovnako.</p>
       ${fileUploadField('p-banner', 'Obrázok banneru', 'image', me.bannerImageUrl)}
       <div class="field"><label>Odkaz (kam sa má kliknutím prejsť)</label><input id="p-banner-link" placeholder="https://…" value="${escapeHtml(me.bannerLinkUrl || '')}"></div>
       <button class="btn" id="saveBannerBtn">Uložiť banner</button>
