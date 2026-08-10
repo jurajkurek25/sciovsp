@@ -153,6 +153,7 @@ textarea{width:100%;min-height:110px;padding:.7rem;background:var(--black3);bord
     <a class="navlink" data-page="giftcards">Darčekové karty (partner shop)</a>
     <a class="navlink" data-page="giftcardsales">Darčekové karty (predaj)</a>
     <a class="navlink" data-page="payouts">Výplaty (PAY by square)</a>
+    <a class="navlink" data-page="instructorpayouts">Výplaty inštruktorov</a>
     <a class="navlink" data-page="bugs">Nahlásené chyby</a>
     <a class="navlink" data-page="advisor">AI poradca</a>
     <a class="navlink" data-page="aiops">AI ops log</a>
@@ -238,7 +239,7 @@ function showApp() {
 }
 
 // ─────────────────────────── ROUTER ───────────────────────────
-const PAGES = { overview: renderOverview, trends: renderTrends, academy: renderAcademy, courses: renderCourses, blog: renderBlog, houseads: renderHouseAds, giftcards: renderGiftcards, giftcardsales: renderGiftCardSales, payouts: renderPayouts, bugs: renderBugs, advisor: renderAdvisor, aiops: renderAiops };
+const PAGES = { overview: renderOverview, trends: renderTrends, academy: renderAcademy, courses: renderCourses, blog: renderBlog, houseads: renderHouseAds, giftcards: renderGiftcards, giftcardsales: renderGiftCardSales, payouts: renderPayouts, instructorpayouts: renderInstructorPayouts, bugs: renderBugs, advisor: renderAdvisor, aiops: renderAiops };
 
 $$('.navlink[data-page]').forEach(a => a.addEventListener('click', () => { navigate(a.dataset.page); closeMobileNav(); }));
 
@@ -1160,6 +1161,53 @@ async function openQrModal(payoutId) {
     $('#qrPaidBtn').onclick = async () => {
       if (!confirm('Naozaj si prevod už potvrdil vo svojej bankovej appke?')) return;
       try { await api(`/api/dash/payouts/${payoutId}/mark-paid`, { method: 'POST', body: JSON.stringify({}) }); root.innerHTML = ''; navigate('payouts'); }
+      catch (err) { alert(err.message); }
+    };
+  } catch (err) {
+    root.innerHTML = `<div class="qr-modal-bg"><div class="qr-modal"><p style="color:var(--red)">${err.message}</p><button class="btn secondary" onclick="document.getElementById('qrModalRoot').innerHTML=''">Zavrieť</button></div></div>`;
+  }
+}
+
+// ─────────────────────────── VÝPLATY INŠTRUKTOROV ───────────────────────────
+async function renderInstructorPayouts() {
+  const { payouts } = await api('/api/dash/instructor-payouts?status=pending');
+  $('#main').innerHTML = `
+    <div class="pagehead"><h2>Výplaty inštruktorov</h2><span class="muted">Rovnaký princíp ako affil partneri — PAY by square QR, prevod potvrdzuješ ty sám vo svojej bankovej appke</span></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Inštruktor</th><th>Suma</th><th>IBAN</th><th>Žiadané</th><th></th></tr></thead>
+        <tbody>${payouts.map(p => `<tr>
+          <td>${p.instructors?.name || p.instructors?.email || '—'}<br><span class="muted">${p.instructors?.email||''}</span></td>
+          <td>${(p.amount_cents/100).toFixed(2)}€</td><td class="muted">${p.iban || '—'}</td>
+          <td class="muted">${new Date(p.requested_at).toLocaleDateString('sk-SK')}</td>
+          <td>${p.iban ? `<button class="btn instr-qr-btn" data-id="${p.id}">QR na výplatu</button>` : '<span class="muted">n/a</span>'}</td>
+        </tr>`).join('') || '<tr><td class="muted" colspan="5">Žiadne čakajúce výbery.</td></tr>'}</tbody>
+      </table>
+    </div>`;
+  $$('.instr-qr-btn').forEach(btn => btn.onclick = () => openInstructorQrModal(btn.dataset.id));
+}
+
+async function openInstructorQrModal(payoutId) {
+  const root = $('#qrModalRoot');
+  root.innerHTML = `<div class="qr-modal-bg"><div class="qr-modal"><p class="muted">Generujem QR…</p></div></div>`;
+  try {
+    const data = await api(`/api/dash/instructor-payouts/${payoutId}/qr`);
+    root.innerHTML = `<div class="qr-modal-bg">
+      <div class="qr-modal">
+        <h3 style="font-family:var(--serif);font-size:1.3rem;margin:0">${data.amount}€ → ${data.instructorName}</h3>
+        <img src="${data.qrDataUrl}" alt="PAY by square QR">
+        <p class="muted" style="word-break:break-all;font-family:var(--mono);font-size:.7rem">${data.iban}</p>
+        <p class="muted">Naskenuj v bankovej appke a potvrď prevod. Až POTOM klikni nižšie.</p>
+        <div style="display:flex;gap:.6rem;margin-top:.8rem">
+          <button class="btn secondary" id="instrQrCloseBtn" style="flex:1">Zavrieť</button>
+          <button class="btn" id="instrQrPaidBtn" style="flex:1">Označiť ako vyplatené</button>
+        </div>
+      </div>
+    </div>`;
+    $('#instrQrCloseBtn').onclick = () => { root.innerHTML = ''; };
+    $('#instrQrPaidBtn').onclick = async () => {
+      if (!confirm('Naozaj si prevod už potvrdil vo svojej bankovej appke?')) return;
+      try { await api(`/api/dash/instructor-payouts/${payoutId}/mark-paid`, { method: 'POST', body: JSON.stringify({}) }); root.innerHTML = ''; navigate('instructorpayouts'); }
       catch (err) { alert(err.message); }
     };
   } catch (err) {

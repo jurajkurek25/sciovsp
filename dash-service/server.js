@@ -12,6 +12,7 @@ app.use(require('./routes/overview'));
 app.use(require('./routes/academy'));
 app.use(require('./routes/giftcards'));
 app.use(require('./routes/payouts'));
+app.use(require('./routes/instructorpayouts'));
 app.use(require('./routes/bugs'));
 app.use(require('./routes/advisor'));
 app.use(require('./routes/aiops'));
