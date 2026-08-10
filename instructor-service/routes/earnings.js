@@ -11,7 +11,7 @@ const { supabase: mainDb } = require('../lib/db-main');
 router.get('/api/instructor/earnings', requireInstructorAuth, async (req, res) => {
   const instructorId = req.instructor.id;
   const { data: unpaidRows, error } = await mainDb.from('course_purchases')
-    .select('instructor_share_cents, created_at, via_instructor_referral, courses(title)')
+    .select('instructor_share_cents, purchased_at, via_instructor_referral, courses(title)')
     .eq('instructor_id', instructorId).is('instructor_payout_id', null);
   if (error) { console.error(error); return res.status(500).json({ error: error.message }); }
 
@@ -24,9 +24,9 @@ router.get('/api/instructor/earnings', requireInstructorAuth, async (req, res) =
     unpaidCents,
     unpaidSaleCount: (unpaidRows || []).length,
     recentSales: (unpaidRows || [])
-      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+      .sort((a, b) => new Date(b.purchased_at) - new Date(a.purchased_at))
       .slice(0, 50)
-      .map(r => ({ courseTitle: r.courses?.title || '', shareCents: r.instructor_share_cents, viaReferral: r.via_instructor_referral, createdAt: r.created_at })),
+      .map(r => ({ courseTitle: r.courses?.title || '', shareCents: r.instructor_share_cents, viaReferral: r.via_instructor_referral, createdAt: r.purchased_at })),
     payouts: (payouts || []).map(p => ({ id: p.id, amountCents: p.amount_cents, status: p.status, requestedAt: p.requested_at, completedAt: p.completed_at }))
   });
 });
