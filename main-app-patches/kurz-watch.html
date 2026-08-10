@@ -63,7 +63,7 @@ h1{font-family:var(--serif);font-size:2rem;margin-bottom:.3rem}
 <body>
 <div class="wrap">
   <div class="top">
-    <a href="/">← SP Tréner</a>
+    <a href="/" id="backLink">← Späť na kurz</a>
     <a href="#" id="logoutLink">Odhlásiť sa</a>
   </div>
   <div id="root"><p class="muted">Načítavam…</p></div>
@@ -77,6 +77,7 @@ const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYm
 const _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const root = document.getElementById('root');
 const slug = location.pathname.split('/').filter(Boolean)[1];
+document.getElementById('backLink').href = '/kurzy/' + slug;
 
 document.getElementById('logoutLink').addEventListener('click', async (e) => {
   e.preventDefault();
