@@ -516,8 +516,18 @@ function renderProfileTab() {
     </div>
     <div class="card">
       <p class="muted">Referral odkaz nájdeš pri každom zverejnenom kurze na jeho stránke (Moje kurzy → otvor kurz). Keď niekto kúpi kurz cez tento odkaz, platforma si necháva len malý podiel — zvyšok je tvoj, lebo si zákazníka priviedol ty.</p>
+    </div>
+    <div class="card">
+      <h3 style="font-family:var(--serif);font-size:1.2rem;margin-bottom:.4rem">Reklamný banner</h3>
+      <p class="muted" style="margin-bottom:.8rem">Zobrazí sa pod tvojou kartou lektora na stránke každého zverejneného kurzu ako "Tento kurz ti prináša…" — ponúkni tu vlastné doučovacie alebo iné služby.</p>
+      ${fileUploadField('p-banner', 'Obrázok banneru', 'image', me.bannerImageUrl)}
+      <div class="field"><label>Odkaz (kam sa má kliknutím prejsť)</label><input id="p-banner-link" placeholder="https://…" value="${escapeHtml(me.bannerLinkUrl || '')}"></div>
+      <button class="btn" id="saveBannerBtn">Uložiť banner</button>
+      <div class="feedback" id="bannerFeedback"></div>
+      <div id="bannerStatsRoot" style="margin-top:1rem"><p class="muted">Načítavam štatistiky…</p></div>
     </div>`;
   bindFileUpload('p-photo', 'image');
+  bindFileUpload('p-banner', 'image');
   document.getElementById('saveProfileBtn').onclick = async () => {
     const feedback = document.getElementById('profileFeedback');
     try {
@@ -534,6 +544,34 @@ function renderProfileTab() {
       feedback.textContent = 'Uložené.'; feedback.className = 'feedback ok';
     } catch (e) { feedback.textContent = e.message; feedback.className = 'feedback err'; }
   };
+  document.getElementById('saveBannerBtn').onclick = async () => {
+    const feedback = document.getElementById('bannerFeedback');
+    try {
+      const data = await api('/api/instructor/me', {
+        method: 'PUT',
+        body: JSON.stringify({
+          bannerImageUrl: document.getElementById('p-banner').value,
+          bannerLinkUrl: document.getElementById('p-banner-link').value.trim()
+        })
+      });
+      me = data.instructor;
+      feedback.textContent = 'Uložené.'; feedback.className = 'feedback ok';
+    } catch (e) { feedback.textContent = e.message; feedback.className = 'feedback err'; }
+  };
+  loadBannerStats();
+}
+
+async function loadBannerStats() {
+  const mount = document.getElementById('bannerStatsRoot');
+  try {
+    const data = await api('/api/instructor/banner-stats');
+    mount.innerHTML = `
+      <div class="stat">${data.totalClicks}</div>
+      <p class="muted" style="margin-bottom:.6rem">preklikov na banner celkovo</p>
+      ${data.byCourse.length ? data.byCourse.map(c => `
+        <div class="course-row"><div>${escapeHtml(c.courseTitle)}</div><div>${c.count}</div></div>
+      `).join('') : ''}`;
+  } catch (e) { mount.innerHTML = `<p class="feedback err">${escapeHtml(e.message)}</p>`; }
 }
 
 init();
