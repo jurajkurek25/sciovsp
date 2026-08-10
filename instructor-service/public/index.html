@@ -50,6 +50,30 @@ button{font-family:var(--mono);cursor:pointer}
 .comment-head{display:flex;justify-content:space-between;gap:.6rem;margin-bottom:.35rem;font-family:var(--mono);font-size:.72rem;color:var(--text3)}
 .quiz-q{background:var(--black);border:1px solid var(--border2);border-radius:8px;padding:.8rem;margin-bottom:.6rem}
 .quiz-q .opts{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-top:.5rem}
+
+.landing{max-width:1000px;margin:0 auto;padding:0 0 4rem}
+.landing-nav{display:flex;justify-content:space-between;align-items:center;padding:1.5rem 0;margin-bottom:2rem}
+.landing-logo{font-family:var(--mono);font-size:.85rem;color:var(--text2)}
+.landing-hero{text-align:center;padding:2rem 1rem 3rem}
+.landing-hero h1{font-family:var(--serif);font-size:2.4rem;line-height:1.25;margin-bottom:1rem;max-width:760px;margin-left:auto;margin-right:auto}
+.landing-lead{color:var(--text2);font-size:1.05rem;max-width:620px;margin:0 auto 1.6rem;line-height:1.7}
+.landing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.1rem;margin-bottom:3rem}
+.landing-card{background:var(--black2);border:1px solid var(--border);border-radius:14px;padding:1.4rem}
+.landing-icon{font-size:1.6rem;margin-bottom:.6rem}
+.landing-card h3{font-family:var(--serif);font-size:1.15rem;margin-bottom:.5rem}
+.landing-card p{color:var(--text2);font-size:.9rem;line-height:1.6}
+.landing-how{background:var(--black2);border:1px solid var(--border);border-radius:14px;padding:1.6rem;margin-bottom:2.5rem}
+.landing-how h2{font-family:var(--serif);font-size:1.4rem;margin-bottom:1rem}
+.landing-how ol{padding-left:1.3rem;color:var(--text2);line-height:2}
+.landing-footer{text-align:center}
+
+.terms-box{max-height:340px;overflow-y:auto;background:var(--black);border:1px solid var(--border2);border-radius:10px;padding:1.2rem;margin:1rem 0;font-size:.87rem;line-height:1.7}
+.terms-box h1,.terms-box h2,.terms-box h3{font-family:var(--serif);margin:1rem 0 .5rem}
+.terms-box p{margin-bottom:.7rem}
+.terms-box ul,.terms-box ol{padding-left:1.4rem;margin-bottom:.7rem}
+.hold-btn{position:relative;width:100%;padding:1.1rem;background:var(--black2);border:1px solid var(--border2);border-radius:10px;color:var(--text);font-family:var(--mono);font-size:.85rem;cursor:pointer;overflow:hidden;user-select:none;-webkit-user-select:none;text-align:center}
+.hold-fill{position:absolute;inset:0;background:var(--volt);width:0%;z-index:0}
+.hold-btn span{position:relative;z-index:1;mix-blend-mode:difference;color:#fff}
 </style>
 </head>
 <body>
@@ -123,26 +147,160 @@ async function init() {
   try {
     const data = await api('/api/instructor/me');
     me = data.instructor;
-    renderShell();
+    await checkLegalGates();
   } catch (e) {
     root.innerHTML = `<div class="gate"><p class="feedback err">${escapeHtml(e.message)}</p></div>`;
   }
 }
 
 function renderGate() {
-  root.innerHTML = `<div class="gate">
-    <h1 style="font-family:var(--serif);font-size:2rem;margin-bottom:.5rem">Inštruktorský portál</h1>
-    <p class="muted" style="margin-bottom:1.2rem">Prihlás sa cez Google — rovnaký účet, aký chceš používať ako inštruktor.</p>
-    <button class="btn" id="googleBtn">Prihlásiť sa cez Google</button>
-  </div>`;
-  document.getElementById('googleBtn').onclick = () => {
-    _supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.origin + location.pathname } });
-  };
+  root.innerHTML = `
+    <div class="landing">
+      <nav class="landing-nav"><span class="landing-logo">SP Tréner — Inštruktori</span><button class="btn" id="googleBtnTop">Prihlásiť sa cez Google</button></nav>
+      <header class="landing-hero">
+        <h1>Nauč ostatných to, čo vieš najlepšie. My sa postaráme o zvyšok.</h1>
+        <p class="landing-lead">Postav si vlastný video kurz na SP Tréner — platformu, ktorú už dôveruje tisíce študentov pripravujúcich sa na prijímačky a testy. Ty sa staráš o obsah, my o platby, hosting videa, kvízy aj podporu.</p>
+        <button class="btn" id="googleBtnHero">Stať sa inštruktorom cez Google</button>
+        <p class="muted" style="margin-top:.6rem">Bez papierovačiek, bez poplatkov za založenie účtu. Registrácia trvá 10 sekúnd.</p>
+      </header>
+      <section class="landing-grid">
+        <div class="landing-card">
+          <div class="landing-icon">💶</div>
+          <h3>Zarábaš na každom predaji</h3>
+          <p>Dostávaš podiel z ceny každého predaného kurzu — presnú sadzbu vidíš vopred pri každom kurze. Keď si zákazníka privedieš sám cez svoj vlastný odkaz, tvoj podiel sa výrazne zvýši (bežne až 90 %), lebo si urobil marketing sám.</p>
+        </div>
+        <div class="landing-card">
+          <div class="landing-icon">🔗</div>
+          <h3>Vlastný referral odkaz</h3>
+          <p>Ku každému zverejnenému kurzu dostaneš svoj osobný odkaz. Zdieľaj ho svojim študentom, na sociálnych sieťach, kdekoľvek — sledovanie predajov je automatické.</p>
+        </div>
+        <div class="landing-card">
+          <div class="landing-icon">📢</div>
+          <h3>Reklamný priestor zadarmo</h3>
+          <p>Pod každým svojím kurzom môžeš zobraziť vlastný reklamný banner — ponúkni napríklad svoje doučovanie 1:1. Presne vidíš, koľko ľudí z kurzu prešlo k tvojim ďalším službám.</p>
+        </div>
+        <div class="landing-card">
+          <div class="landing-icon">🎬</div>
+          <h3>Nahrávaš priamo, žiadne odkazy</h3>
+          <p>Video, obrázky aj PDF materiály nahrávaš priamo cez portál. Skladáš lekcie, kvízy aj záverečný test — všetko v jednom mieste.</p>
+        </div>
+        <div class="landing-card">
+          <div class="landing-icon">🏷️</div>
+          <h3>Vlastné zľavové kódy</h3>
+          <p>Vytváraj si vlastné zľavové kódy pre svojich študentov — na svoj kurz, s vlastným percentom a limitom použití.</p>
+        </div>
+        <div class="landing-card">
+          <div class="landing-icon">💳</div>
+          <h3>Transparentné výplaty</h3>
+          <p>Výplatu si vyžiadaš jedným klikom, kedykoľvek máš nevyplatený zárobok. Peniaze idú priamo na tvoj IBAN — žiadne skryté poplatky ani platobné brány, ktoré si berú percentá navyše.</p>
+        </div>
+      </section>
+      <section class="landing-how">
+        <h2>Ako to funguje</h2>
+        <ol>
+          <li>Prihlásiš sa cez Google — účet sa založí okamžite.</li>
+          <li>Potvrdíš zmluvné podmienky (raz, trvá to menej ako minútu).</li>
+          <li>Postavíš si kurz — lekcie, video, kvízy, prípadne záverečný test.</li>
+          <li>Odošleš kurz na schválenie — po krátkej kontrole ide živo.</li>
+          <li>Zarábaš na každom predaji a sleduješ všetko v prehľadnom portáli.</li>
+        </ol>
+      </section>
+      <footer class="landing-footer">
+        <button class="btn" id="googleBtnFooter">Stať sa inštruktorom cez Google</button>
+      </footer>
+    </div>`;
+  ['googleBtnTop', 'googleBtnHero', 'googleBtnFooter'].forEach(id => {
+    document.getElementById(id).onclick = () => {
+      _supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.origin + location.pathname } });
+    };
+  });
 }
 
 _supabase.auth.onAuthStateChange((event, session) => {
   if (event === 'SIGNED_IN' && !token && session) init();
 });
+
+// ---------- Zmluvné podmienky (gate pred prvým vstupom do portálu) ----------
+async function checkLegalGates() {
+  const termsData = await api('/api/instructor/terms');
+  if (termsData.version && !termsData.accepted) { renderTermsGate(termsData); return; }
+  const agreementData = await api('/api/instructor/custom-agreement');
+  if (agreementData.agreement && !agreementData.agreement.accepted_at) { renderAgreementGate(agreementData.agreement); return; }
+  renderShell();
+}
+
+function bindHoldButton(btnId, fillId, labelId, statusId, durationMs, onComplete) {
+  const btn = document.getElementById(btnId);
+  const fill = document.getElementById(fillId);
+  const label = document.getElementById(labelId);
+  const status = document.getElementById(statusId);
+  const originalLabel = label.textContent;
+  let startTime = null, raf = null, holding = false;
+
+  function tick() {
+    if (!holding) return;
+    const elapsed = Date.now() - startTime;
+    const pct = Math.min(100, (elapsed / durationMs) * 100);
+    fill.style.width = pct + '%';
+    if (elapsed >= durationMs) {
+      holding = false;
+      label.textContent = 'Ukladám potvrdenie…';
+      onComplete();
+      return;
+    }
+    raf = requestAnimationFrame(tick);
+  }
+  function start(e) {
+    e.preventDefault();
+    if (holding) return;
+    holding = true;
+    startTime = Date.now();
+    status.textContent = '';
+    raf = requestAnimationFrame(tick);
+  }
+  function cancel() {
+    if (!holding) return;
+    holding = false;
+    fill.style.width = '0%';
+    label.textContent = originalLabel;
+    status.textContent = 'Musíš tlačidlo podržať celých 10 sekúnd bez pustenia.';
+    if (raf) cancelAnimationFrame(raf);
+  }
+  btn.addEventListener('mousedown', start);
+  btn.addEventListener('touchstart', start, { passive: false });
+  btn.addEventListener('mouseup', cancel);
+  btn.addEventListener('mouseleave', cancel);
+  btn.addEventListener('touchend', cancel);
+  btn.addEventListener('touchcancel', cancel);
+}
+
+function renderTermsGate(termsData) {
+  root.innerHTML = `<div class="gate" style="text-align:left;max-width:680px;margin:0 auto;padding-top:2rem">
+    <h1 style="font-family:var(--serif);font-size:1.8rem;margin-bottom:.4rem">Zmluvné podmienky pre inštruktorov</h1>
+    <p class="muted" style="margin-bottom:1rem">Verzia ${termsData.version}. Pred prvým použitím portálu si prosím pozorne prečítaj celý text nižšie — potvrdením vzniká právne záväzná dohoda medzi tebou a SP Tréner.</p>
+    <div class="terms-box">${termsData.content}</div>
+    <button class="hold-btn" id="termsHoldBtn"><div class="hold-fill" id="termsHoldFill"></div><span id="termsHoldLabel">Podrž 10 sekúnd — potvrdzujem, že som si podmienky prečítal(a) a rozumiem im</span></button>
+    <p class="muted" id="termsHoldStatus" style="margin-top:.6rem;min-height:1.2em"></p>
+  </div>`;
+  bindHoldButton('termsHoldBtn', 'termsHoldFill', 'termsHoldLabel', 'termsHoldStatus', 10000, async () => {
+    try { await api('/api/instructor/accept-terms', { method: 'POST' }); checkLegalGates(); }
+    catch (e) { document.getElementById('termsHoldStatus').textContent = e.message; }
+  });
+}
+
+function renderAgreementGate(agreement) {
+  root.innerHTML = `<div class="gate" style="text-align:left;max-width:680px;margin:0 auto;padding-top:2rem">
+    <h1 style="font-family:var(--serif);font-size:1.8rem;margin-bottom:.4rem">${escapeHtml(agreement.title)}</h1>
+    <p class="muted" style="margin-bottom:1rem">Individuálna dohoda pripravená pre tvoj účet, navyše k štandardným podmienkam. Prečítaj si ju prosím celú — potvrdením vzniká právne záväzná dohoda.</p>
+    <div class="terms-box">${agreement.content}</div>
+    <button class="hold-btn" id="agHoldBtn"><div class="hold-fill" id="agHoldFill"></div><span id="agHoldLabel">Podrž 10 sekúnd na potvrdenie</span></button>
+    <p class="muted" id="agHoldStatus" style="margin-top:.6rem;min-height:1.2em"></p>
+  </div>`;
+  bindHoldButton('agHoldBtn', 'agHoldFill', 'agHoldLabel', 'agHoldStatus', 10000, async () => {
+    try { await api(`/api/instructor/custom-agreement/${agreement.id}/accept`, { method: 'POST' }); checkLegalGates(); }
+    catch (e) { document.getElementById('agHoldStatus').textContent = e.message; }
+  });
+}
 
 function renderShell() {
   root.innerHTML = `

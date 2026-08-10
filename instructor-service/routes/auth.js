@@ -7,7 +7,8 @@ function serializeInstructor(i) {
   return {
     id: i.id, email: i.email, name: i.name, bio: i.bio, photoUrl: i.photo_url,
     iban: i.iban, defaultCutPercent: i.default_cut_percent, referralCode: i.referral_code,
-    bannerImageUrl: i.banner_image_url, bannerLinkUrl: i.banner_link_url
+    bannerImageUrl: i.banner_image_url, bannerLinkUrl: i.banner_link_url,
+    termsAcceptedAt: i.terms_accepted_at, termsAcceptedVersion: i.terms_accepted_version
   };
 }
 

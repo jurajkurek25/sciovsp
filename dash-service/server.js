@@ -14,6 +14,7 @@ app.use(require('./routes/giftcards'));
 app.use(require('./routes/payouts'));
 app.use(require('./routes/instructorpayouts'));
 app.use(require('./routes/discountcodes'));
+app.use(require('./routes/instructors'));
 app.use(require('./routes/bugs'));
 app.use(require('./routes/advisor'));
 app.use(require('./routes/aiops'));

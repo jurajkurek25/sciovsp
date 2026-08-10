@@ -12,6 +12,7 @@ app.use(require('./routes/submissions'));
 app.use(require('./routes/earnings'));
 app.use(require('./routes/upload'));
 app.use(require('./routes/discountcodes'));
+app.use(require('./routes/legal').router);
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.get('/{*splat}', (req, res) => {

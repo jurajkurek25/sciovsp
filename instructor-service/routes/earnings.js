@@ -6,6 +6,7 @@
 const express = require('express');
 const router = express.Router();
 const { requireInstructorAuth } = require('../lib/auth');
+const { requireTermsAccepted } = require('./legal');
 const { supabase: mainDb } = require('../lib/db-main');
 
 router.get('/api/instructor/earnings', requireInstructorAuth, async (req, res) => {
@@ -31,7 +32,7 @@ router.get('/api/instructor/earnings', requireInstructorAuth, async (req, res) =
   });
 });
 
-router.post('/api/instructor/payouts', requireInstructorAuth, async (req, res) => {
+router.post('/api/instructor/payouts', requireInstructorAuth, requireTermsAccepted, async (req, res) => {
   const instructorId = req.instructor.id;
   const iban = String(req.body?.iban || req.instructor.iban || '').replace(/\s/g, '').toUpperCase();
   if (!iban) return res.status(400).json({ error: 'Chýba IBAN.' });

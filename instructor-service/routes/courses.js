@@ -6,6 +6,7 @@
 const express = require('express');
 const router = express.Router();
 const { requireInstructorAuth } = require('../lib/auth');
+const { requireTermsAccepted } = require('./legal');
 const { supabase: mainDb } = require('../lib/db-main');
 
 function slugify(s) {
@@ -58,7 +59,7 @@ router.get('/api/instructor/courses', requireInstructorAuth, async (req, res) =>
   res.json({ courses: withCounts });
 });
 
-router.post('/api/instructor/courses', requireInstructorAuth, async (req, res) => {
+router.post('/api/instructor/courses', requireInstructorAuth, requireTermsAccepted, async (req, res) => {
   const { title, description, priceCents, coverImageUrl, salesContent, introVideoUrl } = req.body || {};
   if (!title) return res.status(400).json({ error: 'Chýba title.' });
   let slug = slugify(title);
@@ -123,7 +124,7 @@ router.get('/api/instructor/courses/:id/lessons', requireInstructorAuth, async (
   res.json({ lessons: withQuiz });
 });
 
-router.post('/api/instructor/courses/:id/lessons', requireInstructorAuth, async (req, res) => {
+router.post('/api/instructor/courses/:id/lessons', requireInstructorAuth, requireTermsAccepted, async (req, res) => {
   const course = await ownCourseOr404(req, res);
   if (!course) return;
   const { title, videoUrl, docUrl, quizQuestions, sortOrder, requiresUpload, uploadInstructions, aiGradingCriteria } = req.body || {};

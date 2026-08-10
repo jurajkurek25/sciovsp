@@ -155,6 +155,7 @@ textarea{width:100%;min-height:110px;padding:.7rem;background:var(--black3);bord
     <a class="navlink" data-page="payouts">Výplaty (PAY by square)</a>
     <a class="navlink" data-page="instructorpayouts">Výplaty inštruktorov</a>
     <a class="navlink" data-page="discountcodes">Zľavové kódy</a>
+    <a class="navlink" data-page="instructors">Inštruktori</a>
     <a class="navlink" data-page="bugs">Nahlásené chyby</a>
     <a class="navlink" data-page="advisor">AI poradca</a>
     <a class="navlink" data-page="aiops">AI ops log</a>
@@ -240,7 +241,7 @@ function showApp() {
 }
 
 // ─────────────────────────── ROUTER ───────────────────────────
-const PAGES = { overview: renderOverview, trends: renderTrends, academy: renderAcademy, courses: renderCourses, blog: renderBlog, houseads: renderHouseAds, giftcards: renderGiftcards, giftcardsales: renderGiftCardSales, payouts: renderPayouts, instructorpayouts: renderInstructorPayouts, discountcodes: renderDiscountCodes, bugs: renderBugs, advisor: renderAdvisor, aiops: renderAiops };
+const PAGES = { overview: renderOverview, trends: renderTrends, academy: renderAcademy, courses: renderCourses, blog: renderBlog, houseads: renderHouseAds, giftcards: renderGiftcards, giftcardsales: renderGiftCardSales, payouts: renderPayouts, instructorpayouts: renderInstructorPayouts, discountcodes: renderDiscountCodes, instructors: renderInstructors, bugs: renderBugs, advisor: renderAdvisor, aiops: renderAiops };
 
 $$('.navlink[data-page]').forEach(a => a.addEventListener('click', () => { navigate(a.dataset.page); closeMobileNav(); }));
 
@@ -1214,6 +1215,94 @@ async function openInstructorQrModal(payoutId) {
   } catch (err) {
     root.innerHTML = `<div class="qr-modal-bg"><div class="qr-modal"><p style="color:var(--red)">${err.message}</p><button class="btn secondary" onclick="document.getElementById('qrModalRoot').innerHTML=''">Zavrieť</button></div></div>`;
   }
+}
+
+// ─────────────────────────── INŠTRUKTORI ───────────────────────────
+async function renderInstructors() {
+  const { instructors, latestTermsVersion } = await api('/api/dash/instructors');
+  $('#main').innerHTML = `
+    <div class="pagehead"><h2>Inštruktori</h2><span class="muted">${latestTermsVersion ? 'Aktuálna verzia štandardných podmienok: v' + latestTermsVersion : 'Zatiaľ nepublikované žiadne štandardné podmienky'}</span></div>
+    <div class="card" style="margin-bottom:1.4rem">
+      <h3 style="margin-bottom:.6rem">Štandardné zmluvné podmienky</h3>
+      <p class="muted" style="margin-bottom:.8rem">Publikovanie novej verzie donúti VŠETKÝCH inštruktorov znova potvrdiť podmienky (10-sekundové podržanie tlačidla), kým môžu ďalej vytvárať kurzy, zľavové kódy alebo žiadať o výplatu.</p>
+      ${richEditorHtml('it-terms-editor', 'Text štandardných zmluvných podmienok...')}
+      <button class="btn" id="publishTermsBtn" style="margin-top:.8rem">Publikovať novú verziu</button>
+      <div class="feedback" id="termsFeedback"></div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Inštruktor</th><th>Default cut</th><th>Podmienky</th><th>Individuálna dohoda</th><th></th></tr></thead>
+        <tbody>${instructors.map(i => `<tr data-id="${i.id}">
+          <td>${(i.name||'').replace(/</g,'&lt;')||'—'}<br><span class="muted">${i.email}</span></td>
+          <td><input class="cut-input" type="number" min="0" max="100" value="${i.defaultCutPercent}" style="width:70px"> %</td>
+          <td>${!i.termsAcceptedVersion ? '<span class="pill pending">nepotvrdil</span>' : (i.termsCurrent ? '<span class="pill resolved">v' + i.termsAcceptedVersion + ' (aktuálne)</span>' : '<span class="pill pending">v' + i.termsAcceptedVersion + ' (zastarané)</span>')}</td>
+          <td>${i.customAgreement ? `${(i.customAgreement.title||'').replace(/</g,'&lt;')} ${i.customAgreement.accepted_at ? '<span class="pill resolved">potvrdená</span>' : '<span class="pill pending">čaká na potvrdenie</span>'}` : '<span class="muted">žiadna</span>'}</td>
+          <td style="display:flex;gap:.4rem;flex-wrap:wrap">
+            <button class="btn secondary save-cut-btn">Uložiť cut</button>
+            <button class="btn secondary edit-agreement-btn">${i.customAgreement ? 'Upraviť dohodu' : '+ Individuálna dohoda'}</button>
+          </td>
+        </tr>`).join('') || '<tr><td class="muted" colspan="5">Zatiaľ žiadni inštruktori.</td></tr>'}</tbody>
+      </table>
+    </div>
+    <div id="agreementModalRoot"></div>`;
+
+  const termsQuill = initRichEditor($('#main'), 'it-terms-editor', '');
+  $('#publishTermsBtn').onclick = async () => {
+    const feedback = $('#termsFeedback');
+    const content = termsQuill.getText().trim() ? termsQuill.root.innerHTML : '';
+    if (!content) { feedback.textContent = 'Text nemôže byť prázdny.'; feedback.style.color = 'var(--red)'; return; }
+    if (!confirm('Naozaj publikovať novú verziu? Všetci inštruktori budú musieť znova potvrdiť, kým môžu ďalej pracovať.')) return;
+    try {
+      await api('/api/dash/instructor-terms', { method: 'POST', body: JSON.stringify({ content }) });
+      navigate('instructors');
+    } catch (err) { feedback.textContent = err.message; feedback.style.color = 'var(--red)'; }
+  };
+
+  $$('.save-cut-btn').forEach(btn => btn.onclick = async () => {
+    const tr = btn.closest('tr');
+    const id = tr.dataset.id;
+    const value = $('.cut-input', tr).value;
+    try { await api(`/api/dash/instructors/${id}`, { method: 'PUT', body: JSON.stringify({ defaultCutPercent: value }) }); btn.textContent = 'Uložené ✓'; setTimeout(() => btn.textContent = 'Uložiť cut', 1500); }
+    catch (err) { alert(err.message); }
+  });
+
+  $$('.edit-agreement-btn').forEach(btn => btn.onclick = () => {
+    const id = btn.closest('tr').dataset.id;
+    openAgreementModal(id);
+  });
+}
+
+async function openAgreementModal(instructorId) {
+  const root = $('#agreementModalRoot');
+  root.innerHTML = `<div class="qr-modal-bg"><div class="qr-modal"><p class="muted">Načítavam…</p></div></div>`;
+  let existing = null;
+  try { existing = (await api(`/api/dash/instructors/${instructorId}/custom-agreement`)).agreement; } catch (e) {}
+  root.innerHTML = `<div class="qr-modal-bg">
+    <div class="qr-modal" style="max-width:640px;width:90vw">
+      <h3 style="font-family:var(--serif);font-size:1.3rem;margin:0 0 .8rem">Individuálna dohoda</h3>
+      ${existing?.accepted_at ? `<p class="muted" style="margin-bottom:.6rem">Aktuálna dohoda potvrdená inštruktorom ${new Date(existing.accepted_at).toLocaleString('sk-SK')}. Nové znenie nižšie ju nahradí a bude čakať na nové potvrdenie.</p>` : (existing ? '<p class="muted" style="margin-bottom:.6rem">Táto dohoda ešte čaká na potvrdenie inštruktorom.</p>' : '')}
+      <input class="am-title" placeholder="Názov dohody (napr. Osobitné copyright podmienky)" value="${existing ? (existing.title||'').replace(/"/g,'&quot;') : ''}" style="margin-bottom:.7rem">
+      ${richEditorHtml('am-content-editor', 'Text individuálnej dohody...')}
+      <div style="display:flex;gap:.6rem;margin-top:.9rem">
+        <button class="btn secondary" id="amCloseBtn" style="flex:1">Zavrieť</button>
+        <button class="btn" id="amSaveBtn" style="flex:1">Publikovať dohodu</button>
+      </div>
+      <div class="feedback" id="amFeedback"></div>
+    </div>
+  </div>`;
+  const quill = initRichEditor(root, 'am-content-editor', existing?.content || '');
+  $('#amCloseBtn').onclick = () => { root.innerHTML = ''; };
+  $('#amSaveBtn').onclick = async () => {
+    const feedback = $('#amFeedback');
+    const title = $('.am-title', root).value.trim();
+    const content = quill.getText().trim() ? quill.root.innerHTML : '';
+    if (!title || !content) { feedback.textContent = 'Vyplň názov aj text dohody.'; feedback.style.color = 'var(--red)'; return; }
+    try {
+      await api(`/api/dash/instructors/${instructorId}/custom-agreement`, { method: 'POST', body: JSON.stringify({ title, content }) });
+      root.innerHTML = '';
+      navigate('instructors');
+    } catch (err) { feedback.textContent = err.message; feedback.style.color = 'var(--red)'; }
+  };
 }
 
 // ─────────────────────────── ZĽAVOVÉ KÓDY ───────────────────────────

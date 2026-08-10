@@ -3,6 +3,7 @@
 const express = require('express');
 const router = express.Router();
 const { requireInstructorAuth } = require('../lib/auth');
+const { requireTermsAccepted } = require('./legal');
 const { supabase: mainDb } = require('../lib/db-main');
 
 async function ownCourseOr404(req, res) {
@@ -20,7 +21,7 @@ router.get('/api/instructor/courses/:id/discount-codes', requireInstructorAuth, 
   res.json({ codes: data || [] });
 });
 
-router.post('/api/instructor/courses/:id/discount-codes', requireInstructorAuth, async (req, res) => {
+router.post('/api/instructor/courses/:id/discount-codes', requireInstructorAuth, requireTermsAccepted, async (req, res) => {
   const course = await ownCourseOr404(req, res);
   if (!course) return;
   const { code, percentOff, maxUses, expiresAt } = req.body || {};
