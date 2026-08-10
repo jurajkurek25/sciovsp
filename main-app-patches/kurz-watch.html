@@ -127,7 +127,19 @@ function renderGate() {
   };
 }
 
+let courseData = null;
+let courseToken = null;
+let courseFinalTest = null;
+
+function lessonUrl(id) { return `/kurzy/${slug}/watch/${id}`; }
+
+function parseLessonIdFromPath() {
+  const parts = location.pathname.split('/').filter(Boolean);
+  return parts[3] || null;
+}
+
 async function loadCourse(token) {
+  courseToken = token;
   try {
     const res = await fetch(`/api/courses/${slug}/access`, { headers: { Authorization: 'Bearer ' + token } });
     const data = await res.json();
@@ -135,62 +147,134 @@ async function loadCourse(token) {
       root.innerHTML = `<div class="err-box"><p>${data.error || 'Chyba.'}</p><p class="muted" style="margin-top:.8rem"><a href="/kurzy/${slug}">Späť na stránku kurzu</a></p></div>`;
       return;
     }
-    renderLessons(data, token);
+    courseData = data;
+    renderShell(data);
+    await loadFinalTestMeta(token);
+    showFromUrl();
   } catch (e) {
     root.innerHTML = `<div class="err-box">Chyba servera.</div>`;
   }
 }
 
-function renderLessons(data, token) {
+function renderShell(data) {
   document.title = data.course.title + ' — SP Tréner';
-  const current = data.lessons.find(l => l.unlocked && !l.completed);
   root.innerHTML = `<h1>${escapeHtml(data.course.title)}</h1>
     <p class="muted" style="margin-bottom:1.6rem">${data.lessons.filter(l => l.completed).length} / ${data.lessons.length} lekcií dokončených</p>
     <div class="layout">
       <nav class="curriculum-nav">
         <p class="curriculum-title">Obsah kurzu</p>
-        <ul class="curriculum-list">${data.lessons.map(l => curriculumItemHtml(l, current)).join('')}</ul>
+        <ul class="curriculum-list" id="curriculumList">${data.lessons.map(l => curriculumItemHtml(l)).join('')}</ul>
       </nav>
-      <div class="main-col">
-        <div id="lessonsRoot"></div>
-        <div id="finalTestRoot"></div>
-      </div>
+      <div class="main-col" id="mainCol"></div>
     </div>`;
-  const lroot = document.getElementById('lessonsRoot');
-  lroot.innerHTML = data.lessons.map(l => lessonHtml(l)).join('');
-  data.lessons.forEach(l => {
-    if (!l.unlocked || !l.videoUrl) return;
-    const mount = document.getElementById('bp-' + l.id);
-    if (mount) mountBrandedPlayer(mount, mount.dataset.src);
-  });
-  data.lessons.forEach(l => {
-    if (!l.unlocked || l.completed) return;
-    const hasQuiz = (l.quizQuestions || []).length > 0;
-    if (hasQuiz && !l.quizPassed) bindQuiz(l, token);
-    if (l.requiresUpload && !l.uploadPassed) bindUpload(l, token);
-  });
-  data.lessons.forEach(l => { if (l.unlocked) loadComments(l, token); });
   bindCurriculumNav();
-  loadFinalTest(token);
 }
 
-function curriculumItemHtml(l, current) {
-  const isCurrent = !!(current && l.id === current.id);
-  const cls = l.completed ? 'completed' : (l.unlocked ? (isCurrent ? 'active' : '') : 'locked');
+function curriculumItemHtml(l) {
+  const cls = l.completed ? 'completed' : (l.unlocked ? '' : 'locked');
   const icon = l.completed ? '✓' : (l.unlocked ? '▶' : '🔒');
-  const attrs = l.unlocked ? `href="#lesson-${l.id}" data-jump="${l.id}"` : 'aria-disabled="true" tabindex="-1"';
+  const attrs = l.unlocked ? `href="${lessonUrl(l.id)}" data-jump="${l.id}"` : 'aria-disabled="true" tabindex="-1"';
   return `<li class="curriculum-item"><a class="curriculum-link ${cls}" ${attrs}>${icon} ${escapeHtml(l.title)}</a></li>`;
+}
+
+function finalTestItemHtml(ft) {
+  const cls = ft.unlocked ? '' : 'locked';
+  const attrs = ft.unlocked ? `href="${lessonUrl('final')}" data-jump="final"` : 'aria-disabled="true" tabindex="-1"';
+  return `<li class="curriculum-item"><a class="curriculum-link ${cls}" ${attrs}>🏁 Záverečný test</a></li>`;
+}
+
+async function loadFinalTestMeta(token) {
+  try {
+    const res = await fetch(`/api/courses/${slug}/final-test`, { headers: { Authorization: 'Bearer ' + token } });
+    const data = await res.json();
+    courseFinalTest = (res.ok && data.hasFinalTest) ? data : null;
+  } catch (e) { courseFinalTest = null; }
+  const list = document.getElementById('curriculumList');
+  if (list && courseFinalTest) {
+    list.insertAdjacentHTML('beforeend', finalTestItemHtml(courseFinalTest));
+    bindCurriculumNav();
+  }
 }
 
 function bindCurriculumNav() {
   document.querySelectorAll('.curriculum-link[data-jump]').forEach(a => {
-    a.addEventListener('click', (e) => {
+    a.onclick = (e) => {
       e.preventDefault();
-      const el = document.getElementById('lesson-' + a.dataset.jump);
-      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
+      const href = a.getAttribute('href');
+      if (location.pathname !== href) history.pushState(null, '', href);
+      showFromUrl();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
   });
 }
+
+function setViewingSidebar(id) {
+  document.querySelectorAll('.curriculum-link[data-jump]').forEach(a => {
+    a.classList.toggle('active', a.dataset.jump === String(id));
+  });
+}
+
+function showFromUrl() {
+  if (!courseData) return;
+  const id = parseLessonIdFromPath();
+  if (id === 'final' && courseFinalTest && courseFinalTest.unlocked) {
+    setViewingSidebar('final');
+    showFinalTestPage();
+    return;
+  }
+  if (id && id !== 'final') {
+    const lesson = courseData.lessons.find(l => String(l.id) === String(id) && l.unlocked);
+    if (lesson) {
+      setViewingSidebar(String(lesson.id));
+      showLesson(lesson);
+      return;
+    }
+  }
+  const current = courseData.lessons.find(l => l.unlocked && !l.completed);
+  if (current) {
+    history.replaceState(null, '', lessonUrl(current.id));
+    setViewingSidebar(String(current.id));
+    showLesson(current);
+    return;
+  }
+  if (courseFinalTest && courseFinalTest.unlocked) {
+    history.replaceState(null, '', lessonUrl('final'));
+    setViewingSidebar('final');
+    showFinalTestPage();
+    return;
+  }
+  const lastCompleted = [...courseData.lessons].reverse().find(l => l.completed);
+  if (lastCompleted) {
+    history.replaceState(null, '', lessonUrl(lastCompleted.id));
+    setViewingSidebar(String(lastCompleted.id));
+    showLesson(lastCompleted);
+    return;
+  }
+  document.getElementById('mainCol').innerHTML = `<p class="muted">Žiadne dostupné lekcie.</p>`;
+}
+
+function showLesson(l) {
+  const mainCol = document.getElementById('mainCol');
+  mainCol.innerHTML = `<div id="lessonsRoot">${lessonHtml(l)}</div>`;
+  if (l.videoUrl) {
+    const mount = document.getElementById('bp-' + l.id);
+    if (mount) mountBrandedPlayer(mount, mount.dataset.src);
+  }
+  if (!l.completed) {
+    const hasQuiz = (l.quizQuestions || []).length > 0;
+    if (hasQuiz && !l.quizPassed) bindQuiz(l, courseToken);
+    if (l.requiresUpload && !l.uploadPassed) bindUpload(l, courseToken);
+  }
+  loadComments(l, courseToken);
+}
+
+function showFinalTestPage() {
+  const mainCol = document.getElementById('mainCol');
+  mainCol.innerHTML = `<div id="finalTestRoot"></div>`;
+  loadFinalTest(courseToken);
+}
+
+window.addEventListener('popstate', () => showFromUrl());
 
 async function loadFinalTest(token) {
   const ftRoot = document.getElementById('finalTestRoot');
