@@ -1240,6 +1240,7 @@ async function renderInstructors() {
           <td style="display:flex;gap:.4rem;flex-wrap:wrap">
             <button class="btn secondary save-cut-btn">Uložiť cut</button>
             <button class="btn secondary edit-agreement-btn">${i.customAgreement ? 'Upraviť dohodu' : '+ Individuálna dohoda'}</button>
+            <button class="btn secondary history-btn">História potvrdení</button>
           </td>
         </tr>`).join('') || '<tr><td class="muted" colspan="5">Zatiaľ žiadni inštruktori.</td></tr>'}</tbody>
       </table>
@@ -1270,6 +1271,40 @@ async function renderInstructors() {
     const id = btn.closest('tr').dataset.id;
     openAgreementModal(id);
   });
+
+  $$('.history-btn').forEach(btn => btn.onclick = () => {
+    const id = btn.closest('tr').dataset.id;
+    openTermsHistoryModal(id);
+  });
+}
+
+async function openTermsHistoryModal(instructorId) {
+  const root = $('#agreementModalRoot');
+  root.innerHTML = `<div class="qr-modal-bg"><div class="qr-modal"><p class="muted">Načítavam…</p></div></div>`;
+  try {
+    const { history } = await api(`/api/dash/instructors/${instructorId}/terms-history`);
+    root.innerHTML = `<div class="qr-modal-bg">
+      <div class="qr-modal" style="max-width:560px;width:90vw">
+        <h3 style="font-family:var(--serif);font-size:1.3rem;margin:0 0 .8rem">História potvrdení podmienok</h3>
+        <p class="muted" style="margin-bottom:.8rem">Trvalý záznam — nová verzia ani opätovné potvrdenie nič nemažú ani neprepisujú.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Verzia</th><th>Potvrdené</th><th>IP</th><th>Prehliadač</th></tr></thead>
+            <tbody>${history.length ? history.map(h => `<tr>
+              <td>v${h.version}</td>
+              <td class="muted">${new Date(h.accepted_at).toLocaleString('sk-SK')}</td>
+              <td class="muted" style="font-family:var(--mono);font-size:.75rem">${h.ip || '—'}</td>
+              <td class="muted" style="font-size:.75rem;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${(h.user_agent||'—').replace(/</g,'&lt;')}</td>
+            </tr>`).join('') : '<tr><td class="muted" colspan="4">Zatiaľ žiadne potvrdenia.</td></tr>'}</tbody>
+          </table>
+        </div>
+        <button class="btn secondary" id="historyCloseBtn" style="margin-top:.9rem;width:100%">Zavrieť</button>
+      </div>
+    </div>`;
+    $('#historyCloseBtn').onclick = () => { root.innerHTML = ''; };
+  } catch (err) {
+    root.innerHTML = `<div class="qr-modal-bg"><div class="qr-modal"><p style="color:var(--red)">${err.message}</p><button class="btn secondary" onclick="document.getElementById('agreementModalRoot').innerHTML=''">Zavrieť</button></div></div>`;
+  }
 }
 
 async function openAgreementModal(instructorId) {

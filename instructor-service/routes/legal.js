@@ -56,13 +56,26 @@ router.post('/api/instructor/accept-terms', requireInstructorAuth, async (req, r
   try { latest = await getLatestTermsVersion(); }
   catch (e) { console.error('POST /api/instructor/accept-terms:', e); return res.status(500).json({ error: 'Nepodarilo sa overiť zmluvné podmienky: ' + e.message }); }
   if (!latest) return res.status(400).json({ error: 'Žiadne podmienky na potvrdenie.' });
+
+  const acceptedAt = new Date().toISOString();
+  const ip = clientIp(req);
+  const userAgent = req.headers['user-agent'] || null;
+
   const { data, error } = await mainDb.from('instructors').update({
-    terms_accepted_at: new Date().toISOString(),
+    terms_accepted_at: acceptedAt,
     terms_accepted_version: latest.version,
-    terms_accept_ip: clientIp(req),
-    terms_accept_user_agent: req.headers['user-agent'] || null
+    terms_accept_ip: ip,
+    terms_accept_user_agent: userAgent
   }).eq('id', req.instructor.id).select().single();
   if (error) { console.error(error); return res.status(500).json({ error: error.message }); }
+
+  // Trvalý audit log — na rozdiel od instructors.terms_accepted_* vyššie
+  // (ktoré sa pri ďalšom potvrdení prepíšu), tento riadok ostáva navždy.
+  const { error: logError } = await mainDb.from('instructor_terms_acceptances').insert({
+    instructor_id: req.instructor.id, version: latest.version, accepted_at: acceptedAt, ip, user_agent: userAgent
+  });
+  if (logError) console.error('terms acceptance audit log insert failed:', logError);
+
   res.json({ ok: true, termsAcceptedVersion: data.terms_accepted_version, termsAcceptedAt: data.terms_accepted_at });
 });
 

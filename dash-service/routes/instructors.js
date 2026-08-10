@@ -52,6 +52,13 @@ router.post('/api/dash/instructor-terms', requireDashAuth, async (req, res) => {
   res.json({ ok: true, terms: data });
 });
 
+router.get('/api/dash/instructors/:id/terms-history', requireDashAuth, async (req, res) => {
+  const { data, error } = await mainDb.from('instructor_terms_acceptances')
+    .select('*').eq('instructor_id', req.params.id).order('accepted_at', { ascending: false });
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ history: data || [] });
+});
+
 router.get('/api/dash/instructors/:id/custom-agreement', requireDashAuth, async (req, res) => {
   const { data, error } = await mainDb.from('instructor_custom_agreements')
     .select('*').eq('instructor_id', req.params.id).is('superseded_at', null)
