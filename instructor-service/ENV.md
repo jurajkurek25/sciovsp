@@ -37,8 +37,10 @@ Inštruktor nahráva súbor priamo (nie URL) — `routes/upload.js` ho
 streamuje cez `multer` (dočasný súbor na disku) do bucketu
 `course-content` a späť vráti verejnú URL, ktorá sa uloží do existujúceho
 `video_url`/`cover_image_url`/`doc_url` textového stĺpca (žiadna zmena
-schémy netreba). Limity: video 500 MB, obrázok 15 MB, PDF 25 MB — appka
-beží na 2 GB RAM VPS, preto sa súbor nikdy nebufferuje celý v pamäti.
+schémy netreba). Limity: video 300 MB, obrázok 15 MB, PDF 25 MB — appka
+beží na 2 GB RAM VPS, takže aj keď sa súbor pred uploadom číta ako
+Buffer (kvôli spoľahlivosti so Supabase SDK), video limit je zámerne
+konzervatívnejší ako pri čistom streamingu.
 
 ## Prihlásenie inštruktorov
 

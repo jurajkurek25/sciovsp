@@ -3,9 +3,13 @@
 // dashboarde ako Public bucket, rovnako ako 'submissions').
 //
 // Súbor sa najprv odloží na disk cez multer (diskStorage) a odtiaľ sa
-// STREAMuje do Supabase, nie bufferuje celý v pamäti — táto appka beží
-// na 2 GB RAM VPS spolu s ~8 ďalšími procesmi, takže načítanie stoviek MB
-// videa naraz do pamäte by ju mohlo zhodiť.
+// číta ako Buffer do Supabase — pôvodne to streamovalo priamo cez
+// fs.createReadStream, ale nebolo isté, či nainštalovaná verzia
+// @supabase/storage-js taký Node stream (s duplex:'half') skutočne
+// posiela ďalej do fetch()-u, a uploady zlyhávali bez zmysluplnej
+// chyby. Buffer je univerzálne podporovaný všade, cena je vyššia
+// špička pamäte na request — preto je video limit nižší (300 MB) ako
+// pôvodných 500 MB, appka beží na 2 GB RAM VPS spolu s ~8 procesmi.
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
@@ -17,7 +21,7 @@ const { requireInstructorAuth } = require('../lib/auth');
 const { supabase: mainDb } = require('../lib/db-main');
 
 const BUCKET = 'course-content';
-const MAX_VIDEO_BYTES = 500 * 1024 * 1024;
+const MAX_VIDEO_BYTES = 300 * 1024 * 1024;
 const MAX_IMAGE_BYTES = 15 * 1024 * 1024;
 const MAX_DOC_BYTES = 25 * 1024 * 1024;
 
@@ -48,15 +52,16 @@ router.post('/api/instructor/upload', requireInstructorAuth, (req, res) => {
 
     const storagePath = `${req.instructor.id}/${Date.now()}-${crypto.randomBytes(6).toString('hex')}${rules.ext[req.file.mimetype]}`;
     try {
-      const stream = fs.createReadStream(req.file.path);
-      const { error: upErr } = await mainDb.storage.from(BUCKET).upload(storagePath, stream, {
-        contentType: req.file.mimetype, upsert: false, duplex: 'half'
+      const buffer = await fs.promises.readFile(req.file.path);
+      const { error: upErr } = await mainDb.storage.from(BUCKET).upload(storagePath, buffer, {
+        contentType: req.file.mimetype, upsert: false
       });
       if (upErr) { console.error(upErr); return res.status(500).json({ error: upErr.message }); }
       const { data: pub } = mainDb.storage.from(BUCKET).getPublicUrl(storagePath);
       res.json({ ok: true, url: pub.publicUrl });
     } catch (e) {
-      res.status(500).json({ error: 'Nahrávanie zlyhalo.' });
+      console.error('upload failed:', e);
+      res.status(500).json({ error: 'Nahrávanie zlyhalo: ' + (e.message || e) });
     } finally {
       cleanup();
     }
