@@ -21,7 +21,7 @@ router.put('/api/instructor/me', requireInstructorAuth, async (req, res) => {
   if (photoUrl !== undefined) update.photo_url = photoUrl;
   if (iban !== undefined) update.iban = iban;
   const { data, error } = await mainDb.from('instructors').update(update).eq('id', req.instructor.id).select().single();
-  if (error) return res.status(500).json({ error: error.message });
+  if (error) { console.error(error); return res.status(500).json({ error: error.message }); }
   res.json({
     ok: true,
     instructor: {

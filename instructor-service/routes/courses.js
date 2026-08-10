@@ -49,7 +49,7 @@ async function ownCourseOr404(req, res) {
 
 router.get('/api/instructor/courses', requireInstructorAuth, async (req, res) => {
   const { data: courses, error } = await mainDb.from('courses').select('*').eq('instructor_id', req.instructor.id).order('created_at', { ascending: false });
-  if (error) return res.status(500).json({ error: error.message });
+  if (error) { console.error(error); return res.status(500).json({ error: error.message }); }
   const withCounts = await Promise.all((courses || []).map(async c => {
     const { count: lessonCount } = await mainDb.from('course_lessons').select('*', { count: 'exact', head: true }).eq('course_id', c.id);
     const { count: purchaseCount } = await mainDb.from('course_purchases').select('*', { count: 'exact', head: true }).eq('course_id', c.id);
@@ -75,7 +75,7 @@ router.post('/api/instructor/courses', requireInstructorAuth, async (req, res) =
     instructor_name: req.instructor.name || null, instructor_bio: req.instructor.bio || null, instructor_photo_url: req.instructor.photo_url || null,
     platform_cut_percent: req.instructor.default_cut_percent
   }).select().single();
-  if (error) return res.status(500).json({ error: error.message });
+  if (error) { console.error(error); return res.status(500).json({ error: error.message }); }
   res.json({ ok: true, course: data });
 });
 
@@ -92,7 +92,7 @@ router.put('/api/instructor/courses/:id', requireInstructorAuth, async (req, res
   if (introVideoUrl !== undefined) update.intro_video_url = introVideoUrl;
   if (submittedForReview !== undefined) update.submitted_for_review = !!submittedForReview;
   const { data, error } = await mainDb.from('courses').update(update).eq('id', course.id).select().single();
-  if (error) return res.status(500).json({ error: error.message });
+  if (error) { console.error(error); return res.status(500).json({ error: error.message }); }
   res.json({ ok: true, course: data });
 });
 
@@ -101,7 +101,7 @@ router.delete('/api/instructor/courses/:id', requireInstructorAuth, async (req, 
   if (!course) return;
   if (course.published) return res.status(400).json({ error: 'Zverejnený kurz nemôžeš zmazať, napíš Jurajovi.' });
   const { error } = await mainDb.from('courses').delete().eq('id', course.id);
-  if (error) return res.status(500).json({ error: error.message });
+  if (error) { console.error(error); return res.status(500).json({ error: error.message }); }
   res.json({ ok: true });
 });
 
@@ -109,7 +109,7 @@ router.get('/api/instructor/courses/:id/lessons', requireInstructorAuth, async (
   const course = await ownCourseOr404(req, res);
   if (!course) return;
   const { data: lessons, error } = await mainDb.from('course_lessons').select('*').eq('course_id', course.id).order('sort_order');
-  if (error) return res.status(500).json({ error: error.message });
+  if (error) { console.error(error); return res.status(500).json({ error: error.message }); }
   const withQuiz = await Promise.all((lessons || []).map(async l => {
     const { data: qs } = await mainDb.from('course_lesson_quiz_questions').select('*').eq('lesson_id', l.id).order('sort_order');
     return {
@@ -140,7 +140,7 @@ router.post('/api/instructor/courses/:id/lessons', requireInstructorAuth, async 
     sort_order: order, requires_upload: !!requiresUpload, upload_instructions: uploadInstructions || null,
     ai_grading_criteria: aiGradingCriteria || null
   }).select().single();
-  if (error) return res.status(500).json({ error: error.message });
+  if (error) { console.error(error); return res.status(500).json({ error: error.message }); }
   await replaceQuizQuestions(data.id, quizQuestions);
   res.json({ ok: true, lesson: { ...data, quizQuestions: quizQuestions || [] } });
 });
@@ -160,7 +160,7 @@ router.put('/api/instructor/courses/:id/lessons/:lessonId', requireInstructorAut
   if (uploadInstructions !== undefined) update.upload_instructions = uploadInstructions;
   if (aiGradingCriteria !== undefined) update.ai_grading_criteria = aiGradingCriteria;
   const { data, error } = await mainDb.from('course_lessons').update(update).eq('id', req.params.lessonId).eq('course_id', course.id).select().single();
-  if (error) return res.status(500).json({ error: error.message });
+  if (error) { console.error(error); return res.status(500).json({ error: error.message }); }
   if (quizQuestions !== undefined) await replaceQuizQuestions(req.params.lessonId, quizQuestions);
   res.json({ ok: true, lesson: { ...data, quizQuestions: quizQuestions !== undefined ? quizQuestions : undefined } });
 });
@@ -170,7 +170,7 @@ router.delete('/api/instructor/courses/:id/lessons/:lessonId', requireInstructor
   if (!course) return;
   await mainDb.from('course_lesson_quiz_questions').delete().eq('lesson_id', req.params.lessonId);
   const { error } = await mainDb.from('course_lessons').delete().eq('id', req.params.lessonId).eq('course_id', course.id);
-  if (error) return res.status(500).json({ error: error.message });
+  if (error) { console.error(error); return res.status(500).json({ error: error.message }); }
   res.json({ ok: true });
 });
 

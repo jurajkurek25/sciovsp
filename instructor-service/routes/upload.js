@@ -52,7 +52,7 @@ router.post('/api/instructor/upload', requireInstructorAuth, (req, res) => {
       const { error: upErr } = await mainDb.storage.from(BUCKET).upload(storagePath, stream, {
         contentType: req.file.mimetype, upsert: false, duplex: 'half'
       });
-      if (upErr) return res.status(500).json({ error: upErr.message });
+      if (upErr) { console.error(upErr); return res.status(500).json({ error: upErr.message }); }
       const { data: pub } = mainDb.storage.from(BUCKET).getPublicUrl(storagePath);
       res.json({ ok: true, url: pub.publicUrl });
     } catch (e) {

@@ -13,12 +13,12 @@ router.get('/api/instructor/earnings', requireInstructorAuth, async (req, res) =
   const { data: unpaidRows, error } = await mainDb.from('course_purchases')
     .select('instructor_share_cents, created_at, via_instructor_referral, courses(title)')
     .eq('instructor_id', instructorId).is('instructor_payout_id', null);
-  if (error) return res.status(500).json({ error: error.message });
+  if (error) { console.error(error); return res.status(500).json({ error: error.message }); }
 
   const unpaidCents = (unpaidRows || []).reduce((sum, r) => sum + (r.instructor_share_cents || 0), 0);
   const { data: payouts, error: payoutErr } = await mainDb.from('instructor_payouts')
     .select('*').eq('instructor_id', instructorId).order('requested_at', { ascending: false });
-  if (payoutErr) return res.status(500).json({ error: payoutErr.message });
+  if (payoutErr) { console.error(payoutErr); return res.status(500).json({ error: payoutErr.message }); }
 
   res.json({
     unpaidCents,
@@ -41,13 +41,13 @@ router.post('/api/instructor/payouts', requireInstructorAuth, async (req, res) =
 
   const { data: unpaidRows, error } = await mainDb.from('course_purchases')
     .select('id, instructor_share_cents').eq('instructor_id', instructorId).is('instructor_payout_id', null);
-  if (error) return res.status(500).json({ error: error.message });
+  if (error) { console.error(error); return res.status(500).json({ error: error.message }); }
   const amountCents = (unpaidRows || []).reduce((sum, r) => sum + (r.instructor_share_cents || 0), 0);
   if (!amountCents) return res.status(400).json({ error: 'Nemáš žiadny nevyplatený zárobok.' });
 
   const { data: payout, error: insErr } = await mainDb.from('instructor_payouts')
     .insert({ instructor_id: instructorId, amount_cents: amountCents, iban }).select().single();
-  if (insErr) return res.status(500).json({ error: insErr.message });
+  if (insErr) { console.error(insErr); return res.status(500).json({ error: insErr.message }); }
 
   const ids = (unpaidRows || []).map(r => r.id);
   await mainDb.from('course_purchases').update({ instructor_payout_id: payout.id }).in('id', ids);

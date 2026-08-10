@@ -173,7 +173,9 @@ async function renderCoursesTab() {
   const tabRoot = document.getElementById('tabRoot');
   if (activeCourseId) return renderCourseDetail(activeCourseId);
   tabRoot.innerHTML = `<p class="muted">Načítavam kurzy…</p>`;
-  const data = await api('/api/instructor/courses');
+  let data;
+  try { data = await api('/api/instructor/courses'); }
+  catch (e) { tabRoot.innerHTML = `<p class="feedback err">${escapeHtml(e.message)}</p>`; return; }
   coursesCache = data.courses || [];
   tabRoot.innerHTML = `
     <div class="card">
@@ -214,9 +216,12 @@ async function createCourse() {
 async function renderCourseDetail(id) {
   const tabRoot = document.getElementById('tabRoot');
   tabRoot.innerHTML = `<p class="muted">Načítavam…</p>`;
-  const [coursesData, lessonsData] = await Promise.all([
-    api('/api/instructor/courses'), api(`/api/instructor/courses/${id}/lessons`)
-  ]);
+  let coursesData, lessonsData;
+  try {
+    [coursesData, lessonsData] = await Promise.all([
+      api('/api/instructor/courses'), api(`/api/instructor/courses/${id}/lessons`)
+    ]);
+  } catch (e) { tabRoot.innerHTML = `<p class="feedback err">${escapeHtml(e.message)}</p>`; return; }
   const course = (coursesData.courses || []).find(c => c.id === id);
   if (!course) { activeCourseId = null; return renderCoursesTab(); }
   const lessons = lessonsData.lessons || [];
@@ -464,7 +469,9 @@ async function loadCourseSubmissions(courseId) {
 async function renderEarningsTab() {
   const tabRoot = document.getElementById('tabRoot');
   tabRoot.innerHTML = `<p class="muted">Načítavam…</p>`;
-  const data = await api('/api/instructor/earnings');
+  let data;
+  try { data = await api('/api/instructor/earnings'); }
+  catch (e) { tabRoot.innerHTML = `<p class="feedback err">${escapeHtml(e.message)}</p>`; return; }
   tabRoot.innerHTML = `
     <div class="card">
       <div class="stat">${eur(data.unpaidCents)}</div>

@@ -16,7 +16,7 @@ router.get('/api/instructor/courses/:id/comments', requireInstructorAuth, async 
   if (!course) return;
   const { data: comments, error } = await mainDb.from('course_lesson_comments')
     .select('*, course_lessons(title)').eq('course_id', course.id).order('created_at');
-  if (error) return res.status(500).json({ error: error.message });
+  if (error) { console.error(error); return res.status(500).json({ error: error.message }); }
   res.json({
     comments: (comments || []).map(c => ({
       id: c.id, lessonId: c.lesson_id, lessonTitle: c.course_lessons?.title || '',
@@ -35,7 +35,7 @@ router.post('/api/instructor/courses/:id/comments', requireInstructorAuth, async
     course_id: course.id, lesson_id: lessonId, parent_id: parentId || null,
     email: req.instructor.email, is_instructor: true, body: body.trim()
   }).select().single();
-  if (error) return res.status(500).json({ error: error.message });
+  if (error) { console.error(error); return res.status(500).json({ error: error.message }); }
   res.json({ ok: true, comment: data });
 });
 
