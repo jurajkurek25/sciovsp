@@ -177,6 +177,11 @@ const T = {
     faq8Q: 'Ako dlho trvá schválenie kurzu?', faq8A: 'Kontrolujeme obsah krátko po odoslaní — zvyčajne v priebehu pár dní. Kým čakáš na schválenie, môžeš kurz naďalej upravovať.',
     faq9Q: 'Čo ak nemám žiadne skúsenosti s nahrávaním videa?', faq9A: 'Stačí telefón alebo webkamera a pokojný priestor. Kvalita obsahu je dôležitejšia než produkčná úroveň — mnoho úspešných kurzov vzniklo takto jednoducho.',
     footerCta: 'Stať sa inštruktorom cez Google',
+    footerTermsLink: 'Zmluvné podmienky pre inštruktorov',
+    backToLanding: '← Späť',
+    termsPublicTitle: 'Zmluvné podmienky pre inštruktorov',
+    termsPublicIntro: 'Aktuálne platná verzia {version}. Toto je informatívny náhľad — pri registrácii ich budeš musieť aktívne potvrdiť.',
+    termsPublicNotPublished: 'Aktuálne nie sú zverejnené žiadne zmluvné podmienky.',
 
     termsGateTitle: 'Zmluvné podmienky pre inštruktorov',
     termsGateIntro: 'Verzia {version}. Pred prvým použitím portálu si prosím pozorne prečítaj celý text nižšie — potvrdením vzniká právne záväzná dohoda medzi tebou a SP Tréner.',
@@ -289,6 +294,11 @@ const T = {
     faq8Q: 'Jak dlouho trvá schválení kurzu?', faq8A: 'Obsah kontrolujeme krátce po odeslání — obvykle v řádu pár dní. Zatímco čekáš na schválení, můžeš kurz dál upravovat.',
     faq9Q: 'Co když nemám žádné zkušenosti s nahráváním videa?', faq9A: 'Stačí telefon nebo webkamera a klidný prostor. Kvalita obsahu je důležitější než produkční úroveň — mnoho úspěšných kurzů vzniklo takhle jednoduše.',
     footerCta: 'Stát se instruktorem přes Google',
+    footerTermsLink: 'Smluvní podmínky pro instruktory',
+    backToLanding: '← Zpět',
+    termsPublicTitle: 'Smluvní podmínky pro instruktory',
+    termsPublicIntro: 'Aktuálně platná verze {version}. Toto je informativní náhled — při registraci je budeš muset aktivně potvrdit.',
+    termsPublicNotPublished: 'Aktuálně nejsou zveřejněny žádné smluvní podmínky.',
 
     termsGateTitle: 'Smluvní podmínky pro instruktory',
     termsGateIntro: 'Verze {version}. Před prvním použitím portálu si prosím pozorně přečti celý text níže — potvrzením vzniká právně závazná dohoda mezi tebou a SP Tréner.',
@@ -384,6 +394,7 @@ function bindLangSwitcher(idPrefix) {
   if (csBtn) csBtn.onclick = () => setLang('cs');
 }
 function rerenderCurrentView() {
+  if (root.querySelector('#termsPublicView')) { renderTermsPublic(); return; }
   if (!token) { renderGate(); return; }
   if (!me) return;
   if (root.querySelector('#termsBox')) { checkLegalGates(); return; }
@@ -534,6 +545,7 @@ function renderGate() {
       </section>
       <footer class="landing-footer">
         <button class="btn" id="googleBtnFooter">${t('footerCta')}</button>
+        <p style="margin-top:1rem"><a href="#" id="footerTermsLink">${t('footerTermsLink')}</a></p>
       </footer>
     </div>`;
   bindLangSwitcher('gate-lang');
@@ -542,6 +554,34 @@ function renderGate() {
       _supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.origin + location.pathname } });
     };
   });
+  document.getElementById('footerTermsLink').onclick = (e) => { e.preventDefault(); renderTermsPublic(); };
+}
+
+// Verejný, informatívny náhľad zmluvných podmienok — prístupný z footeru
+// landing page ešte pred prihlásením (bez potvrdzovania, len na prečítanie).
+async function renderTermsPublic() {
+  root.innerHTML = `<div class="gate" style="text-align:left;max-width:680px;margin:0 auto;padding-top:2rem">${t('loading')}</div>`;
+  let data;
+  try {
+    const res = await fetch('/api/instructor/terms-public');
+    data = await res.json();
+    if (!res.ok) throw new Error(data.error || t('serverError'));
+  } catch (e) {
+    root.innerHTML = `<div class="gate"><p class="feedback err">${escapeHtml(e.message)}</p></div>`;
+    return;
+  }
+  root.innerHTML = `<div class="gate" id="termsPublicView" style="text-align:left;max-width:680px;margin:0 auto;padding-top:2rem">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem">
+      <button class="btn secondary" id="termsPublicBack">${t('backToLanding')}</button>
+      ${langSwitcherHtml('terms-public-lang')}
+    </div>
+    <h1 style="font-family:var(--serif);font-size:1.8rem;margin-bottom:.4rem">${t('termsPublicTitle')}</h1>
+    ${data.version
+      ? `<p class="muted" style="margin-bottom:1rem">${t('termsPublicIntro', { version: data.version })}</p><div class="terms-box">${data.content}</div>`
+      : `<p class="muted">${t('termsPublicNotPublished')}</p>`}
+  </div>`;
+  bindLangSwitcher('terms-public-lang');
+  document.getElementById('termsPublicBack').onclick = () => renderGate();
 }
 
 _supabase.auth.onAuthStateChange((event, session) => {

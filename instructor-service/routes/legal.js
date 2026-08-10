@@ -39,6 +39,17 @@ async function requireTermsAccepted(req, res, next) {
   next();
 }
 
+// Verejný náhľad — dostupný ešte pred prihlásením (napr. odkaz vo footeri
+// landing page), aby si záujemca mohol podmienky prečítať skôr, než sa
+// vôbec zaregistruje. Neprihlasuje ani nič nepotvrdzuje.
+router.get('/api/instructor/terms-public', async (req, res) => {
+  let latest;
+  try { latest = await getLatestTermsVersion(); }
+  catch (e) { console.error('GET /api/instructor/terms-public:', e); return res.status(500).json({ error: 'Nepodarilo sa načítať zmluvné podmienky: ' + e.message }); }
+  if (!latest) return res.json({ version: null, content: '' });
+  res.json({ version: latest.version, content: latest.content });
+});
+
 router.get('/api/instructor/terms', requireInstructorAuth, async (req, res) => {
   let latest;
   try { latest = await getLatestTermsVersion(); }
