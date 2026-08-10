@@ -3,7 +3,7 @@
 > ⚠️ **DÔLEŽITÉ UPOZORNENIE**: Tento dokument je návrh vygenerovaný AI asistentom. **NIE JE** to právne záväzný text vytvorený advokátom. Pred publikovaním cez dash ("Inštruktori" → "Publikovať novú verziu") **dôrazne odporúčam nechať tento text skontrolovať kvalifikovaným právnikom**, najmä v otázkach: ochrany osobných údajov (GDPR), spotrebiteľského práva, daňových povinností a vymáhateľnosti elektronického potvrdenia (10-sekundové podržanie tlačidla). Tento dokument slúži ako pracovný podklad, nie ako finálna zmluva.
 
 **Verzia:** návrh na publikovanie
-**Prevádzkovateľ:** SP Tréner / sptrener.online (ďalej len "Platforma" alebo "my")
+**Prevádzkovateľ:** Ngroup, s. r. o., so sídlom Dunajská 8, 811 08 Bratislava, Slovenská republika, IČO: 53813189, email: juraj@jurajkurek.com — prevádzkovateľ online služby SP Tréner (sptrener.online) a portálu instructor.sptrener.online (ďalej len "Platforma" alebo "my")
 **Druhá strana:** fyzická alebo právnická osoba registrujúca sa ako inštruktor cez instructor.sptrener.online (ďalej len "Inštruktor" alebo "vy")
 
 ---
@@ -12,7 +12,7 @@
 
 1.1. Tieto podmienky upravujú vzťah medzi Platformou a Inštruktorom pri tvorbe, publikovaní a predaji online vzdelávacích kurzov (ďalej len "Kurzy") prostredníctvom portálu instructor.sptrener.online a ich následnom predaji koncovým študentom cez sptrener.online.
 
-1.2. Registráciou na instructor.sptrener.online a potvrdením týchto podmienok (podržaním tlačidla podľa čl. 12) vzniká medzi Platformou a Inštruktorom zmluvný vzťah v rozsahu tu uvedenom.
+1.2. Registráciou na instructor.sptrener.online a potvrdením týchto podmienok (podržaním tlačidla podľa čl. 15) vzniká medzi Platformou a Inštruktorom zmluvný vzťah v rozsahu tu uvedenom.
 
 1.3. Tieto podmienky sa vzťahujú na všetkých registrovaných inštruktorov rovnako, pokiaľ Platforma s konkrétnym Inštruktorom neuzavrie individuálnu dohodu podľa čl. 10, ktorá má v rozsahu svojej úpravy prednosť pred týmito podmienkami.
 
@@ -97,15 +97,15 @@
 
 9.1. Platforma môže tieto štandardné podmienky priebežne aktualizovať. Nová verzia sa uverejní ako nová číslovaná verzia (napr. cez dash "Publikovať novú verziu").
 
-9.2. Pri publikovaní novej verzie je každý Inštruktor povinný ju pred ďalším používaním mutujúcich funkcií portálu (napr. vytvorenie kurzu, lekcie, zľavového kódu, žiadosť o výplatu) opätovne potvrdiť rovnakým postupom ako pri prvom prihlásení (čl. 12). Prehliadanie a čítanie údajov (napr. prehľad zárobkov) zostáva dostupné aj bez opätovného potvrdenia, aby sa Inštruktor mal ako o potvrdenie dozvedieť.
+9.2. Pri publikovaní novej verzie je každý Inštruktor povinný ju pred ďalším používaním mutujúcich funkcií portálu (napr. vytvorenie kurzu, lekcie, zľavového kódu, žiadosť o výplatu) opätovne potvrdiť rovnakým postupom ako pri prvom prihlásení (čl. 15). Prehliadanie a čítanie údajov (napr. prehľad zárobkov) zostáva dostupné aj bez opätovného potvrdenia, aby sa Inštruktor mal ako o potvrdenie dozvedieť.
 
-9.3. Potvrdenie predchádzajúcej verzie zostáva natrvalo evidované (čl. 12.4) a nie je publikovaním novej verzie nijako dotknuté ani prepísané.
+9.3. Potvrdenie predchádzajúcej verzie zostáva natrvalo evidované (čl. 15.2) a nie je publikovaním novej verzie nijako dotknuté ani prepísané.
 
 ## 10. Individuálne dohody
 
 10.1. Platforma môže s konkrétnym Inštruktorom uzavrieť individuálnu dohodu upravujúcu podmienky spolupráce odlišne od týchto štandardných podmienok (napr. špecifické podmienky pri autorských právach, iný spôsob odmeňovania a pod.).
 
-10.2. Individuálna dohoda nadobúda účinnosť až po jej výslovnom potvrdení oboma stranami — Platforma ju vytvorí a zverejní v rozhraní Inštruktora, Inštruktor ju musí samostatne potvrdiť rovnako záväzným spôsobom ako štandardné podmienky (čl. 12).
+10.2. Individuálna dohoda nadobúda účinnosť až po jej výslovnom potvrdení oboma stranami — Platforma ju vytvorí a zverejní v rozhraní Inštruktora, Inštruktor ju musí samostatne potvrdiť rovnako záväzným spôsobom ako štandardné podmienky (čl. 15).
 
 10.3. Ak Platforma vytvorí pre Inštruktora novú individuálnu dohodu, predchádzajúca zostáva evidovaná ako nahradená (nie zmazaná) a Inštruktor je vyzvaný na potvrdenie novej dohody skôr, než bude môcť ďalej vykonávať mutujúce operácie v portáli.
 
@@ -113,7 +113,7 @@
 
 ## 11. Ochrana osobných údajov
 
-11.1. Prevádzkovateľom osobných údajov spracúvaných v súvislosti s touto spoluprácou je Platforma (SP Tréner / sptrener.online).
+11.1. Prevádzkovateľom osobných údajov spracúvaných v súvislosti s touto spoluprácou je **Ngroup, s. r. o.**, so sídlom Dunajská 8, 811 08 Bratislava, Slovenská republika, IČO: 53813189, prevádzkovateľ online služby SP Tréner (sptrener.online) a portálu instructor.sptrener.online, kontaktný email: **juraj@jurajkurek.com**.
 
 11.2. Platforma spracúva o Inštruktorovi najmä tieto osobné údaje:
    a) identifikačné a kontaktné údaje (meno, e-mailová adresa) získané pri registrácii cez prihlásenie,
@@ -131,7 +131,7 @@
 
 11.7. Osobné údaje sú spracúvané pomocou externých poskytovateľov infraštruktúry (najmä hosting databázy a úložiska súborov, spracovanie platieb), s ktorými má Platforma nastavené primerané zmluvné a technické záruky ochrany údajov. Údaje nie sú predávané tretím stranám na marketingové účely.
 
-11.8. Žiadosti týkajúce sa spracúvania osobných údajov môže Inštruktor smerovať na kontaktnú adresu Platformy uvedenú v jeho profile/rozhraní instructor.sptrener.online.
+11.8. Žiadosti týkajúce sa spracúvania osobných údajov môže Inštruktor smerovať na kontaktný email Platformy **juraj@jurajkurek.com**, prípadne cez komunikačné rozhranie instructor.sptrener.online.
 
 ## 12. Riešenie sporov a reklamácie
 
@@ -139,7 +139,9 @@
 
 12.2. Platforma sa zaväzuje na takúto námietku reagovať v primeranej lehote a pokúsiť sa o zmierlivé riešenie.
 
-12.3. Ak sa spor nepodarí vyriešiť dohodou, je príslušný na jeho prejednanie súd podľa čl. 13 (rozhodné právo a príslušnosť). Tým nie sú dotknuté prípadné zákonné práva Inštruktora na alternatívne riešenie sporov, ak sa na daný vzťah vzťahujú (napr. v postavení spotrebiteľa).
+12.3. Ak sa spor nepodarí vyriešiť dohodou, je príslušný na jeho prejednanie vecne a miestne príslušný súd Slovenskej republiky podľa sídla Platformy (čl. 14.2). Tým nie sú dotknuté prípadné zákonné práva Inštruktora na alternatívne riešenie sporov, ak sa na daný vzťah vzťahujú (napr. v postavení spotrebiteľa).
+
+12.4. Otázky týkajúce sa spracúvania osobných údajov rieši Inštruktor primárne kontaktom podľa čl. 11.8; tým nie je dotknuté jeho právo podať podnet alebo sťažnosť dozornému orgánu (Úrad na ochranu osobných údajov Slovenskej republiky).
 
 ## 13. Vyššia moc
 
@@ -151,7 +153,7 @@
 
 14.1. **Salvátorská klauzula** — ak sa niektoré ustanovenie týchto podmienok stane neplatným, neúčinným alebo nevymáhateľným, nemá to vplyv na platnosť ostatných ustanovení. Namiesto neplatného ustanovenia sa použije úprava, ktorá sa svojím zmyslom a účelom neplatnému ustanoveniu čo najviac približuje.
 
-14.2. **Rozhodné právo a jazyk** — tieto podmienky, ako aj vzťah medzi Platformou a Inštruktorom, sa riadia právnym poriadkom Slovenskej republiky. Rozhodujúce je slovenské znenie týchto podmienok; prípadné preklady (napr. do češtiny v rámci lokalizácie portálu) majú len informatívny charakter.
+14.2. **Rozhodné právo, príslušnosť súdu a jazyk** — tieto podmienky, ako aj vzťah medzi Platformou a Inštruktorom, sa riadia právnym poriadkom Slovenskej republiky. Na riešenie sporov je príslušný súd Slovenskej republiky vecne a miestne príslušný podľa sídla Platformy, t. j. **Ngroup, s. r. o.**, Dunajská 8, 811 08 Bratislava, Slovenská republika (IČO: 53813189), pokiaľ kogentné právne predpisy neurčujú inak (napr. v prospech spotrebiteľa). Rozhodujúce je slovenské znenie týchto podmienok; prípadné preklady (napr. do češtiny v rámci lokalizácie portálu) majú len informatívny charakter.
 
 14.3. Tieto podmienky predstavujú úplnú dohodu strán v otázkach, ktoré upravujú, s výnimkou individuálnych dohôd podľa čl. 10, ktoré majú v rozsahu svojej úpravy prednosť.
 
