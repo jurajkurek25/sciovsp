@@ -68,6 +68,15 @@ button{font-family:var(--mono);cursor:pointer}
 .landing-trust-item{font-family:var(--mono);font-size:.78rem;color:var(--text2);display:flex;align-items:center;gap:.5rem}
 .landing-trust-item span.dot{color:var(--volt)}
 .landing-section-title{font-family:var(--serif);font-size:1.7rem;text-align:center;margin-bottom:2rem}
+.landing-who{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin-bottom:3.5rem}
+.landing-who-item{display:flex;gap:.9rem;align-items:flex-start}
+.landing-who-check{flex-shrink:0;width:28px;height:28px;border-radius:50%;background:rgba(200,255,0,.12);color:var(--volt);display:flex;align-items:center;justify-content:center;font-size:.85rem;margin-top:.15rem}
+.landing-who-item h4{font-family:var(--serif);font-size:1.05rem;margin-bottom:.3rem;font-weight:400}
+.landing-who-item p{color:var(--text2);font-size:.87rem;line-height:1.55}
+.landing-checklist{background:var(--black2);border:1px solid var(--border);border-radius:14px;padding:1.8rem;margin-bottom:3.5rem}
+.landing-checklist-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:.9rem;max-width:820px;margin:0 auto}
+.landing-check-item{display:flex;gap:.7rem;align-items:center;color:var(--text2);font-size:.9rem}
+.landing-check-item .mark{color:var(--volt);flex-shrink:0}
 .landing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.1rem;margin-bottom:3.5rem}
 .landing-card{background:var(--black2);border:1px solid var(--border);border-radius:14px;padding:1.4rem}
 .landing-icon{font-size:1.6rem;margin-bottom:.6rem}
@@ -130,6 +139,11 @@ const T = {
     heroCta: 'Stať sa inštruktorom cez Google',
     heroNote: 'Bez papierovačiek, bez poplatkov za založenie účtu. Registrácia trvá menej ako minútu.',
     trust1: '0 € vstupný poplatok', trust2: 'Podiel až 90 % pri vlastnom predaji', trust3: 'Výplata na tvoj IBAN, kedykoľvek chceš', trust4: 'Hotová platforma — platby, video, AI vyhodnotenie',
+    whoTitle: 'Pre koho je tento portál',
+    who1Title: 'Doučuješ 1:1', who1Body: 'Máš už skúsenosť s individuálnym doučovaním a chceš osloviť viac študentov naraz bez toho, aby si musel(a) byť pri každej lekcii osobne.',
+    who2Title: 'Si odborník na konkrétnu tému', who2Body: 'Rozumieš danej oblasti do hĺbky — biológia, fyzika, dejiny, prijímačky na konkrétnu školu — a vieš to vysvetliť zrozumiteľne.',
+    who3Title: 'Tvoríš už vzdelávací obsah', who3Body: 'Máš YouTube kanál, blog alebo sociálne siete a chceš z existujúceho publika získať aj priamy príjem z predaja kurzu.',
+    who4Title: 'Chceš vyskúšať online vzdelávanie', who4Body: 'Nikdy si kurz netvoril(a), ale chceš to skúsiť — platforma sa postará o technickú stránku, ty sa sústredíš na obsah.',
     benefitsTitle: 'Prečo tvoriť kurz práve tu',
     card1Title: 'Zarábaš na každom predaji', card1Body: 'Dostávaš podiel z ceny každého predaného kurzu — presnú sadzbu vidíš vopred pri každom kurze. Keď si zákazníka privedieš sám cez svoj vlastný odkaz, tvoj podiel sa výrazne zvýši (bežne až 90 %), lebo si urobil marketing sám.',
     card2Title: 'Vlastný referral odkaz', card2Body: 'Ku každému zverejnenému kurzu dostaneš svoj osobný odkaz. Zdieľaj ho svojim študentom, na sociálnych sieťach, kdekoľvek — sledovanie predajov je automatické.',
@@ -137,6 +151,11 @@ const T = {
     card4Title: 'Nahrávaš priamo, žiadne odkazy', card4Body: 'Video, obrázky aj PDF materiály nahrávaš priamo cez portál. Skladáš lekcie, kvízy aj záverečný test — všetko v jednom mieste.',
     card5Title: 'Vlastné zľavové kódy', card5Body: 'Vytváraj si vlastné zľavové kódy pre svojich študentov — na svoj kurz, s vlastným percentom a limitom použití.',
     card6Title: 'Transparentné výplaty', card6Body: 'Výplatu si vyžiadaš jedným klikom, kedykoľvek máš nevyplatený zárobok. Peniaze idú priamo na tvoj IBAN — žiadne skryté poplatky ani platobné brány, ktoré si berú percentá navyše.',
+    checklistTitle: 'Čo všetko vieš v portáli spraviť',
+    check1: 'Nahrať video priamo, bez externých odkazov', check2: 'Pridať PDF materiály ku každej lekcii',
+    check3: 'Vytvoriť kvízy s automatickým vyhodnotením', check4: 'Nechať AI vyhodnotiť nahraté úlohy študentov',
+    check5: 'Pridať záverečný test s časovým limitom', check6: 'Odpovedať študentom priamo pod lekciou',
+    check7: 'Vytvárať vlastné zľavové kódy', check8: 'Sledovať kliknutia na svoj reklamný banner',
     exampleTitle: 'Koľko si reálne zarobíš', exampleIntro: 'Konkrétny príklad na kurze za 50 €:',
     exampleNormalLabel: 'Bežný predaj', exampleNormalAmount: '25 €', exampleNormalBody: 'Platforma si necháva svoj podiel (bežne 50 %), zvyšok je tvoj.',
     exampleReferralLabel: 'Predaj cez tvoj odkaz', exampleReferralAmount: '45 €', exampleReferralBody: 'Priviedol si zákazníka sám — platforma si necháva len malý podiel (bežne 10 %).',
@@ -154,6 +173,9 @@ const T = {
     faq4Q: 'Môžem kurz kedykoľvek stiahnuť?', faq4A: 'Áno, spoluprácu môžeš kedykoľvek ukončiť. Študenti, ktorí si kurz už kúpili, si zachovávajú prístup, a tvoj doposiaľ nevyplatený zárobok ti patrí.',
     faq5Q: 'Kto schvaľuje obsah kurzu?', faq5A: 'Pred zverejnením kurz krátko skontrolujeme — chceme, aby si študenti mohli byť istí kvalitou. Nič sa nezverejní bez tvojho vedomia.',
     faq6Q: 'Som zodpovedný za dane z tohto príjmu?', faq6A: 'Áno — vystupuješ ako nezávislý poskytovateľ obsahu, nie zamestnanec, takže daňové a odvodové povinnosti sú na tebe. Presné znenie nájdeš v zmluvných podmienkach.',
+    faq7Q: 'Môžem mať viac kurzov naraz?', faq7A: 'Áno, počet kurzov nie je obmedzený. Každý má vlastnú cenu, zľavové kódy aj referral odkaz.',
+    faq8Q: 'Ako dlho trvá schválenie kurzu?', faq8A: 'Kontrolujeme obsah krátko po odoslaní — zvyčajne v priebehu pár dní. Kým čakáš na schválenie, môžeš kurz naďalej upravovať.',
+    faq9Q: 'Čo ak nemám žiadne skúsenosti s nahrávaním videa?', faq9A: 'Stačí telefón alebo webkamera a pokojný priestor. Kvalita obsahu je dôležitejšia než produkčná úroveň — mnoho úspešných kurzov vzniklo takto jednoducho.',
     footerCta: 'Stať sa inštruktorom cez Google',
 
     termsGateTitle: 'Zmluvné podmienky pre inštruktorov',
@@ -229,6 +251,11 @@ const T = {
     heroCta: 'Stát se instruktorem přes Google',
     heroNote: 'Bez papírování, bez poplatků za založení účtu. Registrace trvá méně než minutu.',
     trust1: '0 € vstupní poplatek', trust2: 'Podíl až 90 % při vlastním prodeji', trust3: 'Výplata na tvůj IBAN, kdykoli chceš', trust4: 'Hotová platforma — platby, video, AI vyhodnocení',
+    whoTitle: 'Pro koho je tento portál',
+    who1Title: 'Doučuješ 1:1', who1Body: 'Máš už zkušenost s individuálním doučováním a chceš oslovit víc studentů najednou, aniž bys musel(a) být u každé lekce osobně.',
+    who2Title: 'Jsi odborník na konkrétní téma', who2Body: 'Rozumíš dané oblasti do hloubky — biologie, fyzika, dějiny, přijímačky na konkrétní školu — a umíš to vysvětlit srozumitelně.',
+    who3Title: 'Tvoříš už vzdělávací obsah', who3Body: 'Máš YouTube kanál, blog nebo sociální sítě a chceš z existujícího publika získat i přímý příjem z prodeje kurzu.',
+    who4Title: 'Chceš vyzkoušet online vzdělávání', who4Body: 'Nikdy jsi kurz netvořil(a), ale chceš to zkusit — platforma se postará o technickou stránku, ty se soustředíš na obsah.',
     benefitsTitle: 'Proč tvořit kurz právě tady',
     card1Title: 'Vyděláváš na každém prodeji', card1Body: 'Dostáváš podíl z ceny každého prodaného kurzu — přesnou sazbu vidíš předem u každého kurzu. Když si zákazníka přivedeš sám přes svůj vlastní odkaz, tvůj podíl se výrazně zvýší (běžně až 90 %), protože jsi udělal marketing sám.',
     card2Title: 'Vlastní referral odkaz', card2Body: 'Ke každému zveřejněnému kurzu dostaneš svůj osobní odkaz. Sdílej ho svým studentům, na sociálních sítích, kdekoli — sledování prodejů je automatické.',
@@ -236,6 +263,11 @@ const T = {
     card4Title: 'Nahráváš přímo, žádné odkazy', card4Body: 'Video, obrázky i PDF materiály nahráváš přímo přes portál. Skládáš lekce, kvízy i závěrečný test — všechno na jednom místě.',
     card5Title: 'Vlastní slevové kódy', card5Body: 'Vytvářej si vlastní slevové kódy pro své studenty — na svůj kurz, s vlastním procentem a limitem použití.',
     card6Title: 'Transparentní výplaty', card6Body: 'Výplatu si vyžádáš jedním kliknutím, kdykoli máš nevyplacený výdělek. Peníze jdou přímo na tvůj IBAN — žádné skryté poplatky ani platební brány, které si berou procenta navíc.',
+    checklistTitle: 'Co všechno umíš v portálu udělat',
+    check1: 'Nahrát video přímo, bez externích odkazů', check2: 'Přidat PDF materiály ke každé lekci',
+    check3: 'Vytvořit kvízy s automatickým vyhodnocením', check4: 'Nechat AI vyhodnotit nahrané úkoly studentů',
+    check5: 'Přidat závěrečný test s časovým limitem', check6: 'Odpovídat studentům přímo pod lekcí',
+    check7: 'Vytvářet vlastní slevové kódy', check8: 'Sledovat kliknutí na svůj reklamní banner',
     exampleTitle: 'Kolik si reálně vyděláš', exampleIntro: 'Konkrétní příklad na kurzu za 50 €:',
     exampleNormalLabel: 'Běžný prodej', exampleNormalAmount: '25 €', exampleNormalBody: 'Platforma si nechává svůj podíl (běžně 50 %), zbytek je tvůj.',
     exampleReferralLabel: 'Prodej přes tvůj odkaz', exampleReferralAmount: '45 €', exampleReferralBody: 'Přivedl jsi zákazníka sám — platforma si nechává jen malý podíl (běžně 10 %).',
@@ -253,6 +285,9 @@ const T = {
     faq4Q: 'Můžu kurz kdykoli stáhnout?', faq4A: 'Ano, spolupráci můžeš kdykoli ukončit. Studenti, kteří si kurz už koupili, si zachovávají přístup, a tvůj dosud nevyplacený výdělek ti patří.',
     faq5Q: 'Kdo schvaluje obsah kurzu?', faq5A: 'Před zveřejněním kurz krátce zkontrolujeme — chceme, aby si studenti mohli být jistí kvalitou. Nic se nezveřejní bez tvého vědomí.',
     faq6Q: 'Jsem zodpovědný za daně z tohoto příjmu?', faq6A: 'Ano — vystupuješ jako nezávislý poskytovatel obsahu, ne zaměstnanec, takže daňové a odvodové povinnosti jsou na tobě. Přesné znění najdeš ve smluvních podmínkách.',
+    faq7Q: 'Můžu mít víc kurzů najednou?', faq7A: 'Ano, počet kurzů není omezen. Každý má vlastní cenu, slevové kódy i referral odkaz.',
+    faq8Q: 'Jak dlouho trvá schválení kurzu?', faq8A: 'Obsah kontrolujeme krátce po odeslání — obvykle v řádu pár dní. Zatímco čekáš na schválení, můžeš kurz dál upravovat.',
+    faq9Q: 'Co když nemám žádné zkušenosti s nahráváním videa?', faq9A: 'Stačí telefon nebo webkamera a klidný prostor. Kvalita obsahu je důležitější než produkční úroveň — mnoho úspěšných kurzů vzniklo takhle jednoduše.',
     footerCta: 'Stát se instruktorem přes Google',
 
     termsGateTitle: 'Smluvní podmínky pro instruktory',
@@ -447,6 +482,10 @@ function renderGate() {
         <div class="landing-trust-item"><span class="dot">●</span> ${t('trust3')}</div>
         <div class="landing-trust-item"><span class="dot">●</span> ${t('trust4')}</div>
       </div>
+      <h2 class="landing-section-title">${t('whoTitle')}</h2>
+      <section class="landing-who">
+        ${[1,2,3,4].map(n => `<div class="landing-who-item"><div class="landing-who-check">✓</div><div><h4>${t('who' + n + 'Title')}</h4><p>${t('who' + n + 'Body')}</p></div></div>`).join('')}
+      </section>
       <h2 class="landing-section-title" id="benefits">${t('benefitsTitle')}</h2>
       <section class="landing-grid">
         <div class="landing-card"><div class="landing-icon">💶</div><h3>${t('card1Title')}</h3><p>${t('card1Body')}</p></div>
@@ -455,6 +494,12 @@ function renderGate() {
         <div class="landing-card"><div class="landing-icon">🎬</div><h3>${t('card4Title')}</h3><p>${t('card4Body')}</p></div>
         <div class="landing-card"><div class="landing-icon">🏷️</div><h3>${t('card5Title')}</h3><p>${t('card5Body')}</p></div>
         <div class="landing-card"><div class="landing-icon">💳</div><h3>${t('card6Title')}</h3><p>${t('card6Body')}</p></div>
+      </section>
+      <section class="landing-checklist">
+        <h2 class="landing-section-title" style="margin-bottom:1.4rem">${t('checklistTitle')}</h2>
+        <div class="landing-checklist-grid">
+          ${[1,2,3,4,5,6,7,8].map(n => `<div class="landing-check-item"><span class="mark">✓</span> ${t('check' + n)}</div>`).join('')}
+        </div>
       </section>
       <section class="landing-example">
         <h2 class="landing-example-title">${t('exampleTitle')}</h2>
@@ -485,7 +530,7 @@ function renderGate() {
       </section>
       <section class="landing-faq" id="faq">
         <h2 class="landing-section-title">${t('faqTitle')}</h2>
-        ${[1,2,3,4,5,6].map(n => `<div class="landing-faq-item"><h4>${t('faq' + n + 'Q')}</h4><p>${t('faq' + n + 'A')}</p></div>`).join('')}
+        ${[1,2,3,4,5,6,7,8,9].map(n => `<div class="landing-faq-item"><h4>${t('faq' + n + 'Q')}</h4><p>${t('faq' + n + 'A')}</p></div>`).join('')}
       </section>
       <footer class="landing-footer">
         <button class="btn" id="googleBtnFooter">${t('footerCta')}</button>
