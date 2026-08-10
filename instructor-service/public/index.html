@@ -257,6 +257,11 @@ async function renderCourseDetail(id) {
     </div>
 
     <div class="card">
+      <h3 style="font-family:var(--serif);font-size:1.2rem;margin-bottom:.9rem">🏷️ Zľavové kódy</h3>
+      <div id="discountCodesRoot"><p class="muted">Načítavam…</p></div>
+    </div>
+
+    <div class="card">
       <h3 style="font-family:var(--serif);font-size:1.2rem;margin-bottom:.9rem">💬 Otázky od študentov</h3>
       <div id="commentsRoot"><p class="muted">Načítavam…</p></div>
     </div>
@@ -282,6 +287,7 @@ async function renderCourseDetail(id) {
     if (delLBtn) delLBtn.onclick = () => deleteLesson(course.id, l.id);
   });
 
+  loadCourseDiscountCodes(course.id);
   loadCourseComments(course.id, lessons);
   loadCourseSubmissions(course.id);
 }
@@ -414,6 +420,74 @@ async function deleteLesson(courseId, lessonId) {
     await api(`/api/instructor/courses/${courseId}/lessons/${lessonId}`, { method: 'DELETE' });
     renderCourseDetail(courseId);
   } catch (e) { alert(e.message); }
+}
+
+// ---------- Zľavové kódy ----------
+async function loadCourseDiscountCodes(courseId) {
+  const mount = document.getElementById('discountCodesRoot');
+  try {
+    const data = await api(`/api/instructor/courses/${courseId}/discount-codes`);
+    renderDiscountCodesList(mount, courseId, data.codes || []);
+  } catch (e) { mount.innerHTML = `<p class="feedback err">${escapeHtml(e.message)}</p>`; }
+}
+
+function renderDiscountCodesList(mount, courseId, codes) {
+  mount.innerHTML = `
+    <div id="dcList">${codes.length ? codes.map(c => `
+      <div class="course-row">
+        <div>
+          <span style="font-family:var(--mono)">${escapeHtml(c.code)}</span> — ${c.percent_off}%
+          <span class="muted">${c.used_count}${c.max_uses ? ' / ' + c.max_uses : ''} použití${c.expires_at ? ', platí do ' + new Date(c.expires_at).toLocaleDateString('sk-SK') : ''}</span>
+          ${c.active ? '<span class="badge" style="margin-left:.4rem">aktívny</span>' : '<span class="badge locked" style="margin-left:.4rem">vypnutý</span>'}
+        </div>
+        <div style="display:flex;gap:.4rem">
+          <button class="btn secondary dc-toggle-btn" data-id="${c.id}" data-active="${c.active}">${c.active ? 'Vypnúť' : 'Zapnúť'}</button>
+          <button class="btn danger dc-delete-btn" data-id="${c.id}">Zmazať</button>
+        </div>
+      </div>`).join('') : '<p class="muted">Zatiaľ žiadne zľavové kódy.</p>'}</div>
+    <div class="field" style="margin-top:.9rem"><label>Nový kód</label>
+      <div class="row2">
+        <input id="dc-code" placeholder="KÓD (napr. LETO2025)">
+        <input id="dc-percent" type="number" min="1" max="100" placeholder="% zľava">
+      </div>
+    </div>
+    <div class="field">
+      <div class="row2">
+        <input id="dc-maxuses" type="number" min="1" placeholder="Max. počet použití (voliteľné)">
+        <input id="dc-expires" type="date">
+      </div>
+    </div>
+    <button class="btn secondary" id="dc-create-btn">Vytvoriť kód</button>
+    <div class="feedback" id="dcFeedback"></div>`;
+
+  mount.querySelectorAll('.dc-toggle-btn').forEach(btn => btn.onclick = async () => {
+    try {
+      await api(`/api/instructor/courses/${courseId}/discount-codes/${btn.dataset.id}`, { method: 'PUT', body: JSON.stringify({ active: btn.dataset.active !== 'true' }) });
+      loadCourseDiscountCodes(courseId);
+    } catch (e) { alert(e.message); }
+  });
+  mount.querySelectorAll('.dc-delete-btn').forEach(btn => btn.onclick = async () => {
+    if (!confirm('Zmazať tento kód?')) return;
+    try {
+      await api(`/api/instructor/courses/${courseId}/discount-codes/${btn.dataset.id}`, { method: 'DELETE' });
+      loadCourseDiscountCodes(courseId);
+    } catch (e) { alert(e.message); }
+  });
+  document.getElementById('dc-create-btn').onclick = async () => {
+    const feedback = document.getElementById('dcFeedback');
+    try {
+      await api(`/api/instructor/courses/${courseId}/discount-codes`, {
+        method: 'POST',
+        body: JSON.stringify({
+          code: document.getElementById('dc-code').value,
+          percentOff: document.getElementById('dc-percent').value,
+          maxUses: document.getElementById('dc-maxuses').value || null,
+          expiresAt: document.getElementById('dc-expires').value || null
+        })
+      });
+      loadCourseDiscountCodes(courseId);
+    } catch (e) { feedback.textContent = e.message; feedback.className = 'feedback err'; }
+  };
 }
 
 // ---------- Otázky ----------

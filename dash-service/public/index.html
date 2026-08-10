@@ -154,6 +154,7 @@ textarea{width:100%;min-height:110px;padding:.7rem;background:var(--black3);bord
     <a class="navlink" data-page="giftcardsales">Darčekové karty (predaj)</a>
     <a class="navlink" data-page="payouts">Výplaty (PAY by square)</a>
     <a class="navlink" data-page="instructorpayouts">Výplaty inštruktorov</a>
+    <a class="navlink" data-page="discountcodes">Zľavové kódy</a>
     <a class="navlink" data-page="bugs">Nahlásené chyby</a>
     <a class="navlink" data-page="advisor">AI poradca</a>
     <a class="navlink" data-page="aiops">AI ops log</a>
@@ -239,7 +240,7 @@ function showApp() {
 }
 
 // ─────────────────────────── ROUTER ───────────────────────────
-const PAGES = { overview: renderOverview, trends: renderTrends, academy: renderAcademy, courses: renderCourses, blog: renderBlog, houseads: renderHouseAds, giftcards: renderGiftcards, giftcardsales: renderGiftCardSales, payouts: renderPayouts, instructorpayouts: renderInstructorPayouts, bugs: renderBugs, advisor: renderAdvisor, aiops: renderAiops };
+const PAGES = { overview: renderOverview, trends: renderTrends, academy: renderAcademy, courses: renderCourses, blog: renderBlog, houseads: renderHouseAds, giftcards: renderGiftcards, giftcardsales: renderGiftCardSales, payouts: renderPayouts, instructorpayouts: renderInstructorPayouts, discountcodes: renderDiscountCodes, bugs: renderBugs, advisor: renderAdvisor, aiops: renderAiops };
 
 $$('.navlink[data-page]').forEach(a => a.addEventListener('click', () => { navigate(a.dataset.page); closeMobileNav(); }));
 
@@ -1213,6 +1214,71 @@ async function openInstructorQrModal(payoutId) {
   } catch (err) {
     root.innerHTML = `<div class="qr-modal-bg"><div class="qr-modal"><p style="color:var(--red)">${err.message}</p><button class="btn secondary" onclick="document.getElementById('qrModalRoot').innerHTML=''">Zavrieť</button></div></div>`;
   }
+}
+
+// ─────────────────────────── ZĽAVOVÉ KÓDY ───────────────────────────
+async function renderDiscountCodes() {
+  const [{ codes }, { courses }] = await Promise.all([api('/api/dash/discount-codes'), api('/api/dash/courses')]);
+  $('#main').innerHTML = `
+    <div class="pagehead"><h2>Zľavové kódy</h2></div>
+    <div class="card" style="margin-bottom:1.4rem">
+      <div class="formrow">
+        <input class="dc-code" placeholder="KÓD (napr. LETO2025)" style="flex:1;min-width:160px">
+        <input class="dc-percent" type="number" min="1" max="100" placeholder="% zľava" style="width:120px">
+      </div>
+      <div class="formrow" style="margin-top:.6rem">
+        <select class="dc-course" style="flex:1;min-width:220px">
+          <option value="">Platí na všetky kurzy</option>
+          ${courses.map(c => `<option value="${c.id}">${(c.title||'').replace(/</g,'&lt;')}</option>`).join('')}
+        </select>
+        <input class="dc-maxuses" type="number" min="1" placeholder="Max. počet použití (voliteľné)" style="width:200px">
+        <input class="dc-expires" type="date" style="width:160px">
+      </div>
+      <button class="btn dc-create" style="margin-top:.6rem">Vytvoriť kód</button>
+      <div class="feedback" id="dcFeedback"></div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Kód</th><th>Kurz</th><th>Zľava</th><th>Použité</th><th>Platnosť</th><th>Stav</th><th></th></tr></thead>
+        <tbody>${codes.map(c => `<tr data-id="${c.id}">
+          <td style="font-family:var(--mono)">${c.code}</td>
+          <td class="muted">${c.courses?.title || 'všetky kurzy'}</td>
+          <td>${c.percent_off}%</td>
+          <td class="muted">${c.used_count}${c.max_uses ? ' / ' + c.max_uses : ''}</td>
+          <td class="muted">${c.expires_at ? new Date(c.expires_at).toLocaleDateString('sk-SK') : '—'}</td>
+          <td>${c.active ? '<span class="pill resolved">aktívny</span>' : '<span class="pill pending">vypnutý</span>'}</td>
+          <td style="display:flex;gap:.4rem;flex-wrap:wrap">
+            <button class="btn secondary dc-toggle" data-active="${c.active}">${c.active ? 'Vypnúť' : 'Zapnúť'}</button>
+            <button class="btn danger dc-delete">Zmazať</button>
+          </td>
+        </tr>`).join('') || '<tr><td class="muted" colspan="7">Zatiaľ žiadne kódy.</td></tr>'}</tbody>
+      </table>
+    </div>`;
+  $('.dc-create').onclick = async () => {
+    const feedback = $('#dcFeedback');
+    feedback.textContent = ''; feedback.style.color = '';
+    try {
+      await api('/api/dash/discount-codes', { method: 'POST', body: JSON.stringify({
+        code: $('.dc-code').value, percentOff: $('.dc-percent').value,
+        courseId: $('.dc-course').value || null,
+        maxUses: $('.dc-maxuses').value || null,
+        expiresAt: $('.dc-expires').value || null
+      }) });
+      navigate('discountcodes');
+    } catch (err) { feedback.textContent = err.message; feedback.style.color = 'var(--red)'; }
+  };
+  $$('.dc-toggle').forEach(btn => btn.onclick = async () => {
+    const id = btn.closest('tr').dataset.id;
+    const nowActive = btn.dataset.active === 'true';
+    try { await api(`/api/dash/discount-codes/${id}`, { method: 'PUT', body: JSON.stringify({ active: !nowActive }) }); navigate('discountcodes'); }
+    catch (err) { alert(err.message); }
+  });
+  $$('.dc-delete').forEach(btn => btn.onclick = async () => {
+    if (!confirm('Zmazať tento kód?')) return;
+    const id = btn.closest('tr').dataset.id;
+    try { await api(`/api/dash/discount-codes/${id}`, { method: 'DELETE' }); navigate('discountcodes'); }
+    catch (err) { alert(err.message); }
+  });
 }
 
 // ─────────────────────────── BUGS ───────────────────────────
