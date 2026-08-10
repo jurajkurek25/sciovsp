@@ -509,7 +509,7 @@ function renderProfileTab() {
     <div class="card">
       <div class="field"><label>Meno</label><input id="p-name" value="${escapeHtml(me.name || '')}"></div>
       <div class="field"><label>Bio (zobrazí sa pri kurze)</label><textarea id="p-bio">${escapeHtml(me.bio || '')}</textarea></div>
-      <div class="field"><label>Fotka (URL)</label><input id="p-photo" value="${escapeHtml(me.photoUrl || '')}"></div>
+      ${fileUploadField('p-photo', 'Fotka', 'image', me.photoUrl)}
       <div class="field"><label>IBAN pre výplaty</label><input id="p-iban" value="${escapeHtml(me.iban || '')}"></div>
       <button class="btn" id="saveProfileBtn">Uložiť</button>
       <div class="feedback" id="profileFeedback"></div>
@@ -517,6 +517,7 @@ function renderProfileTab() {
     <div class="card">
       <p class="muted">Referral odkaz nájdeš pri každom zverejnenom kurze na jeho stránke (Moje kurzy → otvor kurz). Keď niekto kúpi kurz cez tento odkaz, platforma si necháva len malý podiel — zvyšok je tvoj, lebo si zákazníka priviedol ty.</p>
     </div>`;
+  bindFileUpload('p-photo', 'image');
   document.getElementById('saveProfileBtn').onclick = async () => {
     const feedback = document.getElementById('profileFeedback');
     try {
