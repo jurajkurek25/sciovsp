@@ -22,11 +22,23 @@ tabuľkami, ktoré používa aj dash-service.
    `platform_cut_percent` / `referral_cut_percent` / `submitted_for_review`
    na `courses` a `instructor_id` / `instructor_share_cents` /
    `via_instructor_referral` / `instructor_payout_id` na `course_purchases`.
-2. `npm install` v `instructor-service/`
-3. Nastaviť `.env` podľa vyššie, spustiť cez PM2 (rovnaký princíp ako dash):
+2. V Supabase dashboarde (Storage) vytvoriť **Public** bucket `course-content`
+   (rovnaký projekt ako `submissions`, ale na rozdiel od neho verejný — video
+   aj obrázky kurzu musia byť prehrateľné bez podpísaného odkazu).
+3. `npm install` v `instructor-service/`
+4. Nastaviť `.env` podľa vyššie, spustiť cez PM2 (rovnaký princíp ako dash):
    `pm2 start server.js --name sptrener-instructor`
-4. Nasmerovať `instructor.sptrener.online` na tento proces (reverse proxy /
+5. Nasmerovať `instructor.sptrener.online` na tento proces (reverse proxy /
    CloudPanel vhost, rovnako ako `dash.sptrener.online`).
+
+## Upload videí/obrázkov/PDF
+
+Inštruktor nahráva súbor priamo (nie URL) — `routes/upload.js` ho
+streamuje cez `multer` (dočasný súbor na disku) do bucketu
+`course-content` a späť vráti verejnú URL, ktorá sa uloží do existujúceho
+`video_url`/`cover_image_url`/`doc_url` textového stĺpca (žiadna zmena
+schémy netreba). Limity: video 500 MB, obrázok 15 MB, PDF 25 MB — appka
+beží na 2 GB RAM VPS, preto sa súbor nikdy nebufferuje celý v pamäti.
 
 ## Prihlásenie inštruktorov
 
@@ -39,8 +51,6 @@ neschváli Juraj — inštruktor si ho vie len označiť ako
 
 ## Čo ešte chýba (nasleduje v ďalších fázach)
 
-- Nahrávanie videa súborom (zatiaľ len URL pole) — plánované cez Supabase
-  Storage.
 - Prepojenie referral odkazu (`?ref=KOD` na `/kurzy/:slug`) do checkoutu
   hlavnej appky, aby sa `via_instructor_referral`/`referral_cut_percent`
   reálne uplatnili pri kúpe.

@@ -71,6 +71,41 @@ function escapeHtml(s) { return String(s || '').replace(/[&<>"']/g, c => ({'&':'
 function eur(cents) { return ((cents || 0) / 100).toFixed(2) + ' €'; }
 function referralLinkFor(course) { return `${location.origin.replace('instructor.', '')}/kurzy/${course.slug}?ref=${me.referralCode}`; }
 
+function fileUploadField(id, label, kind, currentUrl) {
+  return `<div class="field">
+    <label>${label}</label>
+    <input type="file" id="${id}-file" accept="${kind === 'video' ? 'video/mp4,video/webm,video/quicktime' : kind === 'image' ? 'image/png,image/jpeg,image/webp' : 'application/pdf'}">
+    <input type="hidden" id="${id}" value="${escapeHtml(currentUrl || '')}">
+    <div class="muted" id="${id}-status" style="margin-top:.3rem">${currentUrl ? `Aktuálne nahraté: <a href="${escapeHtml(currentUrl)}" target="_blank" rel="noopener">otvoriť →</a>` : 'Zatiaľ nič nenahraté.'}</div>
+  </div>`;
+}
+
+function bindFileUpload(id, kind) {
+  const fileInput = document.getElementById(id + '-file');
+  const hidden = document.getElementById(id);
+  const status = document.getElementById(id + '-status');
+  fileInput.onchange = async () => {
+    const file = fileInput.files[0];
+    if (!file) return;
+    status.textContent = 'Nahrávam… (pri videu to môže chvíľu trvať)';
+    status.className = 'muted';
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      fd.append('kind', kind);
+      const res = await fetch('/api/instructor/upload', { method: 'POST', headers: { Authorization: 'Bearer ' + token }, body: fd });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Nahrávanie zlyhalo.');
+      hidden.value = data.url;
+      status.innerHTML = `Nahraté: <a href="${data.url}" target="_blank" rel="noopener">otvoriť →</a>`;
+      status.className = 'muted';
+    } catch (e) {
+      status.textContent = e.message;
+      status.className = 'feedback err';
+    }
+  };
+}
+
 async function api(path, opts = {}) {
   const res = await fetch(path, {
     ...opts,
@@ -199,8 +234,8 @@ async function renderCourseDetail(id) {
       </div>
       <div class="field"><label>Popis</label><textarea id="f-desc">${escapeHtml(course.description || '')}</textarea></div>
       <div class="row2">
-        <div class="field"><label>Obrázok (URL)</label><input id="f-cover" value="${escapeHtml(course.cover_image_url || '')}"></div>
-        <div class="field"><label>Úvodné video (URL)</label><input id="f-intro" value="${escapeHtml(course.intro_video_url || '')}"></div>
+        ${fileUploadField('f-cover', 'Obrázok kurzu', 'image', course.cover_image_url)}
+        ${fileUploadField('f-intro', 'Úvodné video', 'video', course.intro_video_url)}
       </div>
       <div class="field"><label>Predajný text</label><textarea id="f-sales" style="min-height:140px">${escapeHtml(course.sales_content || '')}</textarea></div>
       <button class="btn" id="saveCourseBtn">Uložiť</button>
@@ -228,6 +263,8 @@ async function renderCourseDetail(id) {
 
   document.getElementById('backBtn').onclick = () => { activeCourseId = null; renderCoursesTab(); };
   document.getElementById('saveCourseBtn').onclick = () => saveCourse(course.id);
+  bindFileUpload('f-cover', 'image');
+  bindFileUpload('f-intro', 'video');
   const submitBtn = document.getElementById('submitReviewBtn');
   if (submitBtn) submitBtn.onclick = () => submitForReview(course.id, !course.submitted_for_review);
   const delBtn = document.getElementById('deleteCourseBtn');
@@ -293,8 +330,8 @@ function editLessonForm(courseId, lesson) {
     <h4 style="margin-bottom:.8rem">${isNew ? 'Nová lekcia' : 'Upraviť lekciu'}</h4>
     <div class="field"><label>Názov</label><input id="lf-title" value="${escapeHtml(lesson?.title || '')}"></div>
     <div class="row2">
-      <div class="field"><label>Video (URL)</label><input id="lf-video" value="${escapeHtml(lesson?.video_url || '')}"></div>
-      <div class="field"><label>PDF materiály (URL)</label><input id="lf-doc" value="${escapeHtml(lesson?.doc_url || '')}"></div>
+      ${fileUploadField('lf-video', 'Video lekcie', 'video', lesson?.video_url)}
+      ${fileUploadField('lf-doc', 'PDF materiály', 'doc', lesson?.doc_url)}
     </div>
     <div class="field"><label><input type="checkbox" id="lf-upload" style="width:auto" ${lesson?.requires_upload ? 'checked' : ''}> Vyžaduje nahratie materiálu od študenta</label></div>
     <div class="field"><label>Pokyny pre nahratie (vidí ich študent)</label><textarea id="lf-upload-instr">${escapeHtml(lesson?.upload_instructions || '')}</textarea></div>
@@ -310,6 +347,8 @@ function editLessonForm(courseId, lesson) {
   const existingForm = document.getElementById('lessonForm');
   if (existingForm) existingForm.remove();
   list.insertAdjacentHTML('afterend', formHtml);
+  bindFileUpload('lf-video', 'video');
+  bindFileUpload('lf-doc', 'doc');
 
   let quizState = qs.map(q => ({ ...q }));
   function renderQuiz() {
