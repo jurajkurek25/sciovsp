@@ -21,9 +21,12 @@ button{font-family:var(--mono);cursor:pointer}
 .btn.secondary{background:var(--black2);color:var(--text);border:1px solid var(--border2)}
 .btn.danger{background:rgba(255,63,94,.15);color:var(--red);border:1px solid rgba(255,63,94,.4)}
 .btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.lang-btn{background:transparent;color:var(--text2);border:1px solid var(--border2);padding:.4rem .7rem;font-size:.72rem}
+.btn.lang-btn.active{color:var(--volt);border-color:var(--volt)}
 .wrap{max-width:1100px;margin:0 auto;padding:1.5rem 1.2rem 5rem}
 .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem}
 .topbar h1{font-family:var(--serif);font-size:1.6rem}
+.topbar-right{display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
 .tabs{display:flex;gap:.5rem;overflow-x:auto;margin-bottom:1.5rem;border-bottom:1px solid var(--border)}
 .tab{padding:.7rem 1rem;font-family:var(--mono);font-size:.78rem;color:var(--text3);cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent}
 .tab.active{color:var(--text);border-color:var(--volt)}
@@ -51,21 +54,42 @@ button{font-family:var(--mono);cursor:pointer}
 .quiz-q{background:var(--black);border:1px solid var(--border2);border-radius:8px;padding:.8rem;margin-bottom:.6rem}
 .quiz-q .opts{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-top:.5rem}
 
-.landing{max-width:1000px;margin:0 auto;padding:0 0 4rem}
-.landing-nav{display:flex;justify-content:space-between;align-items:center;padding:1.5rem 0;margin-bottom:2rem}
+.landing{max-width:1080px;margin:0 auto;padding:0 0 4rem}
+.landing-nav{display:flex;justify-content:space-between;align-items:center;padding:1.5rem 0;margin-bottom:1.5rem;gap:1rem;flex-wrap:wrap}
 .landing-logo{font-family:var(--mono);font-size:.85rem;color:var(--text2)}
-.landing-hero{text-align:center;padding:2rem 1rem 3rem}
-.landing-hero h1{font-family:var(--serif);font-size:2.4rem;line-height:1.25;margin-bottom:1rem;max-width:760px;margin-left:auto;margin-right:auto}
-.landing-lead{color:var(--text2);font-size:1.05rem;max-width:620px;margin:0 auto 1.6rem;line-height:1.7}
-.landing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.1rem;margin-bottom:3rem}
+.landing-nav-links{display:flex;gap:1.4rem;align-items:center;flex-wrap:wrap}
+.landing-nav-links a{color:var(--text2);font-size:.85rem;text-decoration:none}
+.landing-nav-links a:hover{color:var(--text)}
+.landing-nav-right{display:flex;align-items:center;gap:.7rem}
+.landing-hero{text-align:center;padding:2.5rem 1rem 2rem}
+.landing-hero h1{font-family:var(--serif);font-size:2.6rem;line-height:1.22;margin-bottom:1.1rem;max-width:800px;margin-left:auto;margin-right:auto}
+.landing-lead{color:var(--text2);font-size:1.08rem;max-width:640px;margin:0 auto 1.8rem;line-height:1.75}
+.landing-trust{display:flex;justify-content:center;gap:2rem;flex-wrap:wrap;margin:2.2rem auto 3rem;max-width:900px;padding:1.3rem 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.landing-trust-item{font-family:var(--mono);font-size:.78rem;color:var(--text2);display:flex;align-items:center;gap:.5rem}
+.landing-trust-item span.dot{color:var(--volt)}
+.landing-section-title{font-family:var(--serif);font-size:1.7rem;text-align:center;margin-bottom:2rem}
+.landing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.1rem;margin-bottom:3.5rem}
 .landing-card{background:var(--black2);border:1px solid var(--border);border-radius:14px;padding:1.4rem}
 .landing-icon{font-size:1.6rem;margin-bottom:.6rem}
 .landing-card h3{font-family:var(--serif);font-size:1.15rem;margin-bottom:.5rem}
 .landing-card p{color:var(--text2);font-size:.9rem;line-height:1.6}
-.landing-how{background:var(--black2);border:1px solid var(--border);border-radius:14px;padding:1.6rem;margin-bottom:2.5rem}
-.landing-how h2{font-family:var(--serif);font-size:1.4rem;margin-bottom:1rem}
-.landing-how ol{padding-left:1.3rem;color:var(--text2);line-height:2}
-.landing-footer{text-align:center}
+.landing-example{background:linear-gradient(155deg,rgba(200,255,0,.08),rgba(124,92,255,.06));border:1px solid var(--border2);border-radius:16px;padding:2rem;margin-bottom:3.5rem}
+.landing-example-title{font-family:var(--serif);font-size:1.5rem;text-align:center;margin-bottom:.3rem}
+.landing-example-intro{text-align:center;color:var(--text2);font-size:.92rem;margin-bottom:1.6rem}
+.landing-example-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;max-width:640px;margin:0 auto}
+@media(max-width:600px){.landing-example-grid{grid-template-columns:1fr}}
+.landing-example-box{background:var(--black);border:1px solid var(--border2);border-radius:12px;padding:1.3rem;text-align:center}
+.landing-example-amount{font-family:var(--serif);font-size:2.2rem;color:var(--volt);margin:.4rem 0}
+.landing-example-label{font-family:var(--mono);font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;color:var(--text3)}
+.landing-example-body{color:var(--text2);font-size:.85rem;margin-top:.5rem;line-height:1.5}
+.landing-example-note{text-align:center;color:var(--text3);font-size:.8rem;margin-top:1.3rem}
+.landing-how{background:var(--black2);border:1px solid var(--border);border-radius:14px;padding:1.8rem;margin-bottom:3.5rem}
+.landing-how ol{padding-left:1.3rem;color:var(--text2);line-height:2.1;max-width:560px;margin:0 auto}
+.landing-faq{margin-bottom:3rem}
+.landing-faq-item{border-bottom:1px solid var(--border);padding:1.1rem 0}
+.landing-faq-item h4{font-family:var(--serif);font-size:1.05rem;margin-bottom:.4rem;font-weight:400}
+.landing-faq-item p{color:var(--text2);font-size:.9rem;line-height:1.6}
+.landing-footer{text-align:center;padding-top:1rem}
 
 .terms-box{max-height:340px;overflow-y:auto;background:var(--black);border:1px solid var(--border2);border-radius:10px;padding:1.2rem;margin:1rem 0;font-size:.87rem;line-height:1.7}
 .terms-box h1,.terms-box h2,.terms-box h3{font-family:var(--serif);margin:1rem 0 .5rem}
@@ -92,6 +116,247 @@ let activeTab = 'courses';
 let coursesCache = [];
 let activeCourseId = null;
 
+// ==================== i18n ====================
+const T = {
+  sk: {
+    pageTitle: 'Inštruktor — SP Tréner',
+    loading: 'Načítavam…',
+    langLabel: 'SK',
+    landingLogo: 'SP Tréner — Inštruktori',
+    landingNavBenefits: 'Výhody', landingNavHow: 'Ako to funguje', landingNavFaq: 'Časté otázky',
+    loginBtn: 'Prihlásiť sa cez Google',
+    heroTitle: 'Nauč ostatných to, čo vieš najlepšie. My sa postaráme o zvyšok.',
+    heroLead: 'Postav si vlastný video kurz na SP Tréner — platformu, ktorú využívajú študenti pripravujúci sa na prijímačky a testy. Ty sa staráš o obsah, my o platby, hosting videa, kvízy aj podporu.',
+    heroCta: 'Stať sa inštruktorom cez Google',
+    heroNote: 'Bez papierovačiek, bez poplatkov za založenie účtu. Registrácia trvá menej ako minútu.',
+    trust1: '0 € vstupný poplatok', trust2: 'Podiel až 90 % pri vlastnom predaji', trust3: 'Výplata na tvoj IBAN, kedykoľvek chceš', trust4: 'Hotová platforma — platby, video, AI vyhodnotenie',
+    benefitsTitle: 'Prečo tvoriť kurz práve tu',
+    card1Title: 'Zarábaš na každom predaji', card1Body: 'Dostávaš podiel z ceny každého predaného kurzu — presnú sadzbu vidíš vopred pri každom kurze. Keď si zákazníka privedieš sám cez svoj vlastný odkaz, tvoj podiel sa výrazne zvýši (bežne až 90 %), lebo si urobil marketing sám.',
+    card2Title: 'Vlastný referral odkaz', card2Body: 'Ku každému zverejnenému kurzu dostaneš svoj osobný odkaz. Zdieľaj ho svojim študentom, na sociálnych sieťach, kdekoľvek — sledovanie predajov je automatické.',
+    card3Title: 'Reklamný priestor zadarmo', card3Body: 'Pod každým svojím kurzom môžeš zobraziť vlastný reklamný banner — ponúkni napríklad svoje doučovanie 1:1. Presne vidíš, koľko ľudí z kurzu prešlo k tvojim ďalším službám.',
+    card4Title: 'Nahrávaš priamo, žiadne odkazy', card4Body: 'Video, obrázky aj PDF materiály nahrávaš priamo cez portál. Skladáš lekcie, kvízy aj záverečný test — všetko v jednom mieste.',
+    card5Title: 'Vlastné zľavové kódy', card5Body: 'Vytváraj si vlastné zľavové kódy pre svojich študentov — na svoj kurz, s vlastným percentom a limitom použití.',
+    card6Title: 'Transparentné výplaty', card6Body: 'Výplatu si vyžiadaš jedným klikom, kedykoľvek máš nevyplatený zárobok. Peniaze idú priamo na tvoj IBAN — žiadne skryté poplatky ani platobné brány, ktoré si berú percentá navyše.',
+    exampleTitle: 'Koľko si reálne zarobíš', exampleIntro: 'Konkrétny príklad na kurze za 50 €:',
+    exampleNormalLabel: 'Bežný predaj', exampleNormalAmount: '25 €', exampleNormalBody: 'Platforma si necháva svoj podiel (bežne 50 %), zvyšok je tvoj.',
+    exampleReferralLabel: 'Predaj cez tvoj odkaz', exampleReferralAmount: '45 €', exampleReferralBody: 'Priviedol si zákazníka sám — platforma si necháva len malý podiel (bežne 10 %).',
+    exampleNote: 'Presné percentá vidíš vopred pri každom kurze — môžu sa individuálne líšiť.',
+    howTitle: 'Ako to funguje',
+    how1: 'Prihlásiš sa cez Google — účet sa založí okamžite.',
+    how2: 'Potvrdíš zmluvné podmienky (raz, trvá to menej ako minútu).',
+    how3: 'Postavíš si kurz — lekcie, video, kvízy, prípadne záverečný test.',
+    how4: 'Odošleš kurz na schválenie — po krátkej kontrole ide živo.',
+    how5: 'Zarábaš na každom predaji a sleduješ všetko v prehľadnom portáli.',
+    faqTitle: 'Časté otázky',
+    faq1Q: 'Stojí založenie účtu niečo?', faq1A: 'Nie. Registrácia aj vytvorenie kurzu je úplne zadarmo — neplatíš nič vopred, nič priebežne.',
+    faq2Q: 'Kedy dostanem peniaze?', faq2A: 'Kedykoľvek si o výplatu požiadaš v portáli, pošleme ju na tvoj IBAN. Žiadne pevné výplatné termíny, na ktoré musíš čakať.',
+    faq3Q: 'Musím mať už vlastné publikum?', faq3A: 'Nie, ale pomáha to. Bez vlastného publika zarábaš na bežnom predaji cez platformu; ak vieš priviesť vlastných študentov, tvoj podiel z ich nákupov je výrazne vyšší.',
+    faq4Q: 'Môžem kurz kedykoľvek stiahnuť?', faq4A: 'Áno, spoluprácu môžeš kedykoľvek ukončiť. Študenti, ktorí si kurz už kúpili, si zachovávajú prístup, a tvoj doposiaľ nevyplatený zárobok ti patrí.',
+    faq5Q: 'Kto schvaľuje obsah kurzu?', faq5A: 'Pred zverejnením kurz krátko skontrolujeme — chceme, aby si študenti mohli byť istí kvalitou. Nič sa nezverejní bez tvojho vedomia.',
+    faq6Q: 'Som zodpovedný za dane z tohto príjmu?', faq6A: 'Áno — vystupuješ ako nezávislý poskytovateľ obsahu, nie zamestnanec, takže daňové a odvodové povinnosti sú na tebe. Presné znenie nájdeš v zmluvných podmienkach.',
+    footerCta: 'Stať sa inštruktorom cez Google',
+
+    termsGateTitle: 'Zmluvné podmienky pre inštruktorov',
+    termsGateIntro: 'Verzia {version}. Pred prvým použitím portálu si prosím pozorne prečítaj celý text nižšie — potvrdením vzniká právne záväzná dohoda medzi tebou a SP Tréner.',
+    termsHoldLabel: 'Podrž 10 sekúnd — potvrdzujem, že som si podmienky prečítal(a) a rozumiem im',
+    agreementGateIntro: 'Individuálna dohoda pripravená pre tvoj účet, navyše k štandardným podmienkam. Prečítaj si ju prosím celú — potvrdením vzniká právne záväzná dohoda.',
+    agreementHoldLabel: 'Podrž 10 sekúnd na potvrdenie',
+    savingConfirmation: 'Ukladám potvrdenie…',
+    releasedEarly: 'Musíš tlačidlo podržať celých 10 sekúnd bez pustenia.',
+    scrollHint: 'Doscroluj text podmienok úplne dole, aby sa tlačidlo sprístupnilo.',
+
+    welcome: 'Vitaj, {name}', logout: 'Odhlásiť sa',
+    tabCourses: 'Moje kurzy', tabEarnings: 'Zárobky', tabProfile: 'Profil',
+
+    coursesLoading: 'Načítavam kurzy…', newCourseBtn: '+ Nový kurz', noCourses: 'Zatiaľ nemáš žiadny kurz.',
+    promptNewTitle: 'Názov kurzu:',
+    badgePublished: 'zverejnený', badgePending: 'čaká na schválenie', badgeDraft: 'koncept',
+    rowMeta: '{lessons} lekcií · {sales} predajov',
+
+    back: '← Späť na zoznam',
+    fieldTitle: 'Názov', fieldPrice: 'Cena (€)', fieldDesc: 'Popis', fieldCover: 'Obrázok kurzu', fieldIntroVideo: 'Úvodné video', fieldSales: 'Predajný text',
+    saveBtn: 'Uložiť', submitReviewBtn: 'Odoslať na schválenie', submittedReviewBtn: 'Odoslané na schválenie ✓', deleteBtn: 'Zmazať',
+    referralLabel: 'Tvoj referral odkaz na tento kurz (platforma si necháva len {percent}%, zvyšok je tvoj)',
+    lessonsTitle: 'Lekcie', noLessons: 'Zatiaľ žiadne lekcie.', addLessonBtn: '+ Pridať lekciu',
+    discountTitle: '🏷️ Zľavové kódy', commentsTitle: '💬 Otázky od študentov', submissionsTitle: '📎 Nahraté materiály (AI vyhodnotenie)',
+    confirmDeleteCourse: 'Naozaj zmazať tento kurz aj s lekciami?',
+    quizCount: '{n} otázok v kvíze', requiresUploadNote: '· vyžaduje nahratie materiálu',
+    editBtn: 'Upraviť', saved: 'Uložené.',
+
+    lessonNewTitle: 'Nová lekcia', lessonEditTitle: 'Upraviť lekciu',
+    lessonFieldVideo: 'Video lekcie', lessonFieldDoc: 'PDF materiály',
+    lessonRequiresUpload: 'Vyžaduje nahratie materiálu od študenta',
+    lessonUploadInstr: 'Pokyny pre nahratie (vidí ich študent)',
+    lessonAiCriteria: 'AI kritériá hodnotenia (skryté, študent nevidí)',
+    lessonQuizLabel: 'Kvíz — otázky (A/B/C/D, správna odpoveď)',
+    addQuestionBtn: '+ Pridať otázku', saveLessonBtn: 'Uložiť lekciu', cancelBtn: 'Zrušiť',
+    questionPlaceholder: 'Text otázky', correctLabel: 'Správna:', removeBtn: 'Odstrániť',
+    confirmDeleteLesson: 'Naozaj zmazať túto lekciu?',
+
+    discountNone: 'Zatiaľ žiadne zľavové kódy.', discountUses: 'použití', discountValidUntil: ', platí do {date}',
+    discountActive: 'aktívny', discountInactive: 'vypnutý', discountTurnOff: 'Vypnúť', discountTurnOn: 'Zapnúť',
+    discountNewLabel: 'Nový kód', discountCodePlaceholder: 'KÓD (napr. LETO2025)', discountPercentPlaceholder: '% zľava',
+    discountMaxUsesPlaceholder: 'Max. počet použití (voliteľné)', discountCreateBtn: 'Vytvoriť kód', discountConfirmDelete: 'Zmazať tento kód?',
+
+    commentYou: 'Ty (lektor)', commentsNone: 'Zatiaľ žiadne otázky.', replyPlaceholder: 'Odpovedať…', replyBtn: 'Odpovedať',
+
+    submissionVerdict: 'Verdikt AI:', submissionPass: 'úspešné', submissionFail: 'neúspešné', submissionOpenFile: 'Otvoriť súbor →', submissionsNone: 'Zatiaľ žiadne nahraté materiály.',
+
+    earningsUnpaidNote: 'nevyplatené ({n} predajov)', ibanLabel: 'IBAN pre výplatu', requestPayoutBtn: 'Požiadať o výplatu',
+    recentSalesTitle: 'Posledné predaje', noSales: 'Zatiaľ žiadne predaje.', referralBadge: 'referral',
+    payoutHistoryTitle: 'História výplat', noPayouts: 'Zatiaľ žiadne výplaty.', payoutPaid: 'vyplatené', payoutPending: 'čaká', requestSent: 'Žiadosť odoslaná.',
+
+    profileNameLabel: 'Meno', profileBioLabel: 'Bio (zobrazí sa pri kurze)', profilePhotoLabel: 'Fotka', profileIbanLabel: 'IBAN pre výplaty',
+    referralNote: 'Referral odkaz nájdeš pri každom zverejnenom kurze na jeho stránke (Moje kurzy → otvor kurz). Keď niekto kúpi kurz cez tento odkaz, platforma si necháva len malý podiel — zvyšok je tvoj, lebo si zákazníka priviedol ty.',
+    bannerTitle: 'Reklamný banner',
+    bannerIntro: 'Zobrazí sa pod tvojou kartou lektora na stránke každého zverejneného kurzu ako "Tento kurz ti prináša…" — ponúkni tu vlastné doučovacie alebo iné služby. Odporúčaná veľkosť 1200 × 400 px (pomer strán 3:1) — iný pomer sa na stránke automaticky oreže na túto šírku, nech všetky kurzy vyzerajú rovnako.',
+    bannerImageLabel: 'Obrázok banneru', bannerLinkLabel: 'Odkaz (kam sa má kliknutím prejsť)', saveBannerBtn: 'Uložiť banner',
+    bannerStatsLoading: 'Načítavam štatistiky…', totalClicksNote: 'preklikov na banner celkovo',
+
+    fileNotUploaded: 'Zatiaľ nič nenahraté.', fileCurrentlyUploaded: 'Aktuálne nahraté:', fileOpen: 'otvoriť →',
+    fileUploading: 'Nahrávam… (pri videu to môže chvíľu trvať)', fileUploaded: 'Nahraté:', fileUploadFailed: 'Nahrávanie zlyhalo.',
+    serverError: 'Chyba servera.'
+  },
+  cs: {
+    pageTitle: 'Instruktor — SP Tréner',
+    loading: 'Načítám…',
+    langLabel: 'CS',
+    landingLogo: 'SP Tréner — Instruktoři',
+    landingNavBenefits: 'Výhody', landingNavHow: 'Jak to funguje', landingNavFaq: 'Časté otázky',
+    loginBtn: 'Přihlásit se přes Google',
+    heroTitle: 'Nauč ostatní to, co umíš nejlépe. My se postaráme o zbytek.',
+    heroLead: 'Postav si vlastní video kurz na SP Tréner — platformě, kterou využívají studenti připravující se na přijímačky a testy. Ty se staráš o obsah, my o platby, hosting videa, kvízy i podporu.',
+    heroCta: 'Stát se instruktorem přes Google',
+    heroNote: 'Bez papírování, bez poplatků za založení účtu. Registrace trvá méně než minutu.',
+    trust1: '0 € vstupní poplatek', trust2: 'Podíl až 90 % při vlastním prodeji', trust3: 'Výplata na tvůj IBAN, kdykoli chceš', trust4: 'Hotová platforma — platby, video, AI vyhodnocení',
+    benefitsTitle: 'Proč tvořit kurz právě tady',
+    card1Title: 'Vyděláváš na každém prodeji', card1Body: 'Dostáváš podíl z ceny každého prodaného kurzu — přesnou sazbu vidíš předem u každého kurzu. Když si zákazníka přivedeš sám přes svůj vlastní odkaz, tvůj podíl se výrazně zvýší (běžně až 90 %), protože jsi udělal marketing sám.',
+    card2Title: 'Vlastní referral odkaz', card2Body: 'Ke každému zveřejněnému kurzu dostaneš svůj osobní odkaz. Sdílej ho svým studentům, na sociálních sítích, kdekoli — sledování prodejů je automatické.',
+    card3Title: 'Reklamní prostor zdarma', card3Body: 'Pod každým svým kurzem můžeš zobrazit vlastní reklamní banner — nabídni například svoje doučování 1:1. Přesně vidíš, kolik lidí z kurzu přešlo k tvým dalším službám.',
+    card4Title: 'Nahráváš přímo, žádné odkazy', card4Body: 'Video, obrázky i PDF materiály nahráváš přímo přes portál. Skládáš lekce, kvízy i závěrečný test — všechno na jednom místě.',
+    card5Title: 'Vlastní slevové kódy', card5Body: 'Vytvářej si vlastní slevové kódy pro své studenty — na svůj kurz, s vlastním procentem a limitem použití.',
+    card6Title: 'Transparentní výplaty', card6Body: 'Výplatu si vyžádáš jedním kliknutím, kdykoli máš nevyplacený výdělek. Peníze jdou přímo na tvůj IBAN — žádné skryté poplatky ani platební brány, které si berou procenta navíc.',
+    exampleTitle: 'Kolik si reálně vyděláš', exampleIntro: 'Konkrétní příklad na kurzu za 50 €:',
+    exampleNormalLabel: 'Běžný prodej', exampleNormalAmount: '25 €', exampleNormalBody: 'Platforma si nechává svůj podíl (běžně 50 %), zbytek je tvůj.',
+    exampleReferralLabel: 'Prodej přes tvůj odkaz', exampleReferralAmount: '45 €', exampleReferralBody: 'Přivedl jsi zákazníka sám — platforma si nechává jen malý podíl (běžně 10 %).',
+    exampleNote: 'Přesná procenta vidíš předem u každého kurzu — mohou se individuálně lišit.',
+    howTitle: 'Jak to funguje',
+    how1: 'Přihlásíš se přes Google — účet se založí okamžitě.',
+    how2: 'Potvrdíš smluvní podmínky (jednou, trvá to méně než minutu).',
+    how3: 'Postavíš si kurz — lekce, video, kvízy, případně závěrečný test.',
+    how4: 'Odešleš kurz ke schválení — po krátké kontrole jde naživo.',
+    how5: 'Vyděláváš na každém prodeji a sleduješ všechno v přehledném portálu.',
+    faqTitle: 'Časté otázky',
+    faq1Q: 'Stojí založení účtu něco?', faq1A: 'Ne. Registrace i vytvoření kurzu je úplně zdarma — neplatíš nic předem, nic průběžně.',
+    faq2Q: 'Kdy dostanu peníze?', faq2A: 'Kdykoli si o výplatu požádáš v portálu, pošleme ji na tvůj IBAN. Žádné pevné výplatní termíny, na které musíš čekat.',
+    faq3Q: 'Musím mít už vlastní publikum?', faq3A: 'Ne, ale pomáhá to. Bez vlastního publika vyděláváš na běžném prodeji přes platformu; pokud umíš přivést vlastní studenty, tvůj podíl z jejich nákupů je výrazně vyšší.',
+    faq4Q: 'Můžu kurz kdykoli stáhnout?', faq4A: 'Ano, spolupráci můžeš kdykoli ukončit. Studenti, kteří si kurz už koupili, si zachovávají přístup, a tvůj dosud nevyplacený výdělek ti patří.',
+    faq5Q: 'Kdo schvaluje obsah kurzu?', faq5A: 'Před zveřejněním kurz krátce zkontrolujeme — chceme, aby si studenti mohli být jistí kvalitou. Nic se nezveřejní bez tvého vědomí.',
+    faq6Q: 'Jsem zodpovědný za daně z tohoto příjmu?', faq6A: 'Ano — vystupuješ jako nezávislý poskytovatel obsahu, ne zaměstnanec, takže daňové a odvodové povinnosti jsou na tobě. Přesné znění najdeš ve smluvních podmínkách.',
+    footerCta: 'Stát se instruktorem přes Google',
+
+    termsGateTitle: 'Smluvní podmínky pro instruktory',
+    termsGateIntro: 'Verze {version}. Před prvním použitím portálu si prosím pozorně přečti celý text níže — potvrzením vzniká právně závazná dohoda mezi tebou a SP Tréner.',
+    termsHoldLabel: 'Podrž 10 sekund — potvrzuji, že jsem si podmínky přečetl(a) a rozumím jim',
+    agreementGateIntro: 'Individuální dohoda připravená pro tvůj účet, navíc ke standardním podmínkám. Přečti si ji prosím celou — potvrzením vzniká právně závazná dohoda.',
+    agreementHoldLabel: 'Podrž 10 sekund pro potvrzení',
+    savingConfirmation: 'Ukládám potvrzení…',
+    releasedEarly: 'Musíš tlačítko podržet celých 10 sekund bez puštění.',
+    scrollHint: 'Doscroluj text podmínek úplně dolů, aby se tlačítko zpřístupnilo.',
+
+    welcome: 'Vítej, {name}', logout: 'Odhlásit se',
+    tabCourses: 'Moje kurzy', tabEarnings: 'Výdělky', tabProfile: 'Profil',
+
+    coursesLoading: 'Načítám kurzy…', newCourseBtn: '+ Nový kurz', noCourses: 'Zatím nemáš žádný kurz.',
+    promptNewTitle: 'Název kurzu:',
+    badgePublished: 'zveřejněný', badgePending: 'čeká na schválení', badgeDraft: 'koncept',
+    rowMeta: '{lessons} lekcí · {sales} prodejů',
+
+    back: '← Zpět na seznam',
+    fieldTitle: 'Název', fieldPrice: 'Cena (€)', fieldDesc: 'Popis', fieldCover: 'Obrázek kurzu', fieldIntroVideo: 'Úvodní video', fieldSales: 'Prodejní text',
+    saveBtn: 'Uložit', submitReviewBtn: 'Odeslat ke schválení', submittedReviewBtn: 'Odesláno ke schválení ✓', deleteBtn: 'Smazat',
+    referralLabel: 'Tvůj referral odkaz na tento kurz (platforma si nechává jen {percent}%, zbytek je tvůj)',
+    lessonsTitle: 'Lekce', noLessons: 'Zatím žádné lekce.', addLessonBtn: '+ Přidat lekci',
+    discountTitle: '🏷️ Slevové kódy', commentsTitle: '💬 Dotazy od studentů', submissionsTitle: '📎 Nahrané materiály (AI vyhodnocení)',
+    confirmDeleteCourse: 'Opravdu smazat tento kurz i s lekcemi?',
+    quizCount: '{n} otázek v kvízu', requiresUploadNote: '· vyžaduje nahrání materiálu',
+    editBtn: 'Upravit', saved: 'Uloženo.',
+
+    lessonNewTitle: 'Nová lekce', lessonEditTitle: 'Upravit lekci',
+    lessonFieldVideo: 'Video lekce', lessonFieldDoc: 'PDF materiály',
+    lessonRequiresUpload: 'Vyžaduje nahrání materiálu od studenta',
+    lessonUploadInstr: 'Pokyny pro nahrání (vidí je student)',
+    lessonAiCriteria: 'AI kritéria hodnocení (skrytá, student nevidí)',
+    lessonQuizLabel: 'Kvíz — otázky (A/B/C/D, správná odpověď)',
+    addQuestionBtn: '+ Přidat otázku', saveLessonBtn: 'Uložit lekci', cancelBtn: 'Zrušit',
+    questionPlaceholder: 'Text otázky', correctLabel: 'Správná:', removeBtn: 'Odstranit',
+    confirmDeleteLesson: 'Opravdu smazat tuto lekci?',
+
+    discountNone: 'Zatím žádné slevové kódy.', discountUses: 'použití', discountValidUntil: ', platí do {date}',
+    discountActive: 'aktivní', discountInactive: 'vypnutý', discountTurnOff: 'Vypnout', discountTurnOn: 'Zapnout',
+    discountNewLabel: 'Nový kód', discountCodePlaceholder: 'KÓD (např. LETO2025)', discountPercentPlaceholder: '% sleva',
+    discountMaxUsesPlaceholder: 'Max. počet použití (volitelné)', discountCreateBtn: 'Vytvořit kód', discountConfirmDelete: 'Smazat tento kód?',
+
+    commentYou: 'Ty (lektor)', commentsNone: 'Zatím žádné dotazy.', replyPlaceholder: 'Odpovědět…', replyBtn: 'Odpovědět',
+
+    submissionVerdict: 'Verdikt AI:', submissionPass: 'úspěšné', submissionFail: 'neúspěšné', submissionOpenFile: 'Otevřít soubor →', submissionsNone: 'Zatím žádné nahrané materiály.',
+
+    earningsUnpaidNote: 'nevyplacené ({n} prodejů)', ibanLabel: 'IBAN pro výplatu', requestPayoutBtn: 'Požádat o výplatu',
+    recentSalesTitle: 'Poslední prodeje', noSales: 'Zatím žádné prodeje.', referralBadge: 'referral',
+    payoutHistoryTitle: 'Historie výplat', noPayouts: 'Zatím žádné výplaty.', payoutPaid: 'vyplaceno', payoutPending: 'čeká', requestSent: 'Žádost odeslána.',
+
+    profileNameLabel: 'Jméno', profileBioLabel: 'Bio (zobrazí se u kurzu)', profilePhotoLabel: 'Fotka', profileIbanLabel: 'IBAN pro výplaty',
+    referralNote: 'Referral odkaz najdeš u každého zveřejněného kurzu na jeho stránce (Moje kurzy → otevři kurz). Když někdo koupí kurz přes tento odkaz, platforma si nechává jen malý podíl — zbytek je tvůj, protože jsi zákazníka přivedl ty.',
+    bannerTitle: 'Reklamní banner',
+    bannerIntro: 'Zobrazí se pod tvou kartou lektora na stránce každého zveřejněného kurzu jako "Tento kurz ti přináší…" — nabídni tu vlastní doučování nebo jiné služby. Doporučená velikost 1200 × 400 px (poměr stran 3:1) — jiný poměr se na stránce automaticky ořízne na tuto šířku, ať všechny kurzy vypadají stejně.',
+    bannerImageLabel: 'Obrázek banneru', bannerLinkLabel: 'Odkaz (kam se má kliknutím přejít)', saveBannerBtn: 'Uložit banner',
+    bannerStatsLoading: 'Načítám statistiky…', totalClicksNote: 'prokliků na banner celkem',
+
+    fileNotUploaded: 'Zatím nic nenahráno.', fileCurrentlyUploaded: 'Aktuálně nahráno:', fileOpen: 'otevřít →',
+    fileUploading: 'Nahrávám… (u videa to může chvíli trvat)', fileUploaded: 'Nahráno:', fileUploadFailed: 'Nahrávání selhalo.',
+    serverError: 'Chyba serveru.'
+  }
+};
+
+function detectInitialLang() {
+  const saved = localStorage.getItem('instructorLang');
+  if (saved === 'sk' || saved === 'cs') return saved;
+  return (navigator.language || '').toLowerCase().startsWith('cs') ? 'cs' : 'sk';
+}
+let lang = detectInitialLang();
+function t(key, vars) {
+  let s = (T[lang] && T[lang][key]) || T.sk[key] || key;
+  if (vars) Object.keys(vars).forEach(k => { s = s.split('{' + k + '}').join(vars[k]); });
+  return s;
+}
+function setLang(l) {
+  lang = l;
+  localStorage.setItem('instructorLang', l);
+  document.title = t('pageTitle');
+  document.documentElement.lang = l;
+  rerenderCurrentView();
+}
+function langSwitcherHtml(idPrefix) {
+  return `<span style="display:inline-flex;gap:.35rem">
+    <button class="btn lang-btn ${lang === 'sk' ? 'active' : ''}" id="${idPrefix}-sk">SK</button>
+    <button class="btn lang-btn ${lang === 'cs' ? 'active' : ''}" id="${idPrefix}-cs">CS</button>
+  </span>`;
+}
+function bindLangSwitcher(idPrefix) {
+  const skBtn = document.getElementById(idPrefix + '-sk');
+  const csBtn = document.getElementById(idPrefix + '-cs');
+  if (skBtn) skBtn.onclick = () => setLang('sk');
+  if (csBtn) csBtn.onclick = () => setLang('cs');
+}
+function rerenderCurrentView() {
+  if (!token) { renderGate(); return; }
+  if (!me) return;
+  if (root.querySelector('#termsBox')) { checkLegalGates(); return; }
+  if (root.querySelector('#agBox')) { checkLegalGates(); return; }
+  renderShell();
+}
+
+// ==================== helpers ====================
 function escapeHtml(s) { return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function eur(cents) { return ((cents || 0) / 100).toFixed(2) + ' €'; }
 function referralLinkFor(course) { return `${location.origin.replace('instructor.', '')}/kurzy/${course.slug}?ref=${me.referralCode}`; }
@@ -101,7 +366,7 @@ function fileUploadField(id, label, kind, currentUrl) {
     <label>${label}</label>
     <input type="file" id="${id}-file" accept="${kind === 'video' ? 'video/mp4,video/webm,video/quicktime' : kind === 'image' ? 'image/png,image/jpeg,image/webp' : 'application/pdf'}">
     <input type="hidden" id="${id}" value="${escapeHtml(currentUrl || '')}">
-    <div class="muted" id="${id}-status" style="margin-top:.3rem">${currentUrl ? `Aktuálne nahraté: <a href="${escapeHtml(currentUrl)}" target="_blank" rel="noopener">otvoriť →</a>` : 'Zatiaľ nič nenahraté.'}</div>
+    <div class="muted" id="${id}-status" style="margin-top:.3rem">${currentUrl ? `${t('fileCurrentlyUploaded')} <a href="${escapeHtml(currentUrl)}" target="_blank" rel="noopener">${t('fileOpen')}</a>` : t('fileNotUploaded')}</div>
   </div>`;
 }
 
@@ -112,7 +377,7 @@ function bindFileUpload(id, kind) {
   fileInput.onchange = async () => {
     const file = fileInput.files[0];
     if (!file) return;
-    status.textContent = 'Nahrávam… (pri videu to môže chvíľu trvať)';
+    status.textContent = t('fileUploading');
     status.className = 'muted';
     try {
       const fd = new FormData();
@@ -120,9 +385,9 @@ function bindFileUpload(id, kind) {
       fd.append('kind', kind);
       const res = await fetch('/api/instructor/upload', { method: 'POST', headers: { Authorization: 'Bearer ' + token }, body: fd });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Nahrávanie zlyhalo.');
+      if (!res.ok) throw new Error(data.error || t('fileUploadFailed'));
       hidden.value = data.url;
-      status.innerHTML = `Nahraté: <a href="${data.url}" target="_blank" rel="noopener">otvoriť →</a>`;
+      status.innerHTML = `${t('fileUploaded')} <a href="${data.url}" target="_blank" rel="noopener">${t('fileOpen')}</a>`;
       status.className = 'muted';
     } catch (e) {
       status.textContent = e.message;
@@ -137,11 +402,12 @@ async function api(path, opts = {}) {
     headers: { 'content-type': 'application/json', Authorization: 'Bearer ' + token, ...(opts.headers || {}) }
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || 'Chyba servera.');
+  if (!res.ok) throw new Error(data.error || t('serverError'));
   return data;
 }
 
 async function init() {
+  document.title = t('pageTitle');
   const { data: { session } } = await _supabase.auth.getSession();
   if (!session) { renderGate(); return; }
   token = session.access_token;
@@ -157,59 +423,75 @@ async function init() {
 function renderGate() {
   root.innerHTML = `
     <div class="landing">
-      <nav class="landing-nav"><span class="landing-logo">SP Tréner — Inštruktori</span><button class="btn" id="googleBtnTop">Prihlásiť sa cez Google</button></nav>
+      <nav class="landing-nav">
+        <span class="landing-logo">${t('landingLogo')}</span>
+        <div class="landing-nav-links">
+          <a href="#benefits">${t('landingNavBenefits')}</a>
+          <a href="#how">${t('landingNavHow')}</a>
+          <a href="#faq">${t('landingNavFaq')}</a>
+        </div>
+        <div class="landing-nav-right">
+          ${langSwitcherHtml('gate-lang')}
+          <button class="btn" id="googleBtnTop">${t('loginBtn')}</button>
+        </div>
+      </nav>
       <header class="landing-hero">
-        <h1>Nauč ostatných to, čo vieš najlepšie. My sa postaráme o zvyšok.</h1>
-        <p class="landing-lead">Postav si vlastný video kurz na SP Tréner — platformu, ktorú už dôveruje tisíce študentov pripravujúcich sa na prijímačky a testy. Ty sa staráš o obsah, my o platby, hosting videa, kvízy aj podporu.</p>
-        <button class="btn" id="googleBtnHero">Stať sa inštruktorom cez Google</button>
-        <p class="muted" style="margin-top:.6rem">Bez papierovačiek, bez poplatkov za založenie účtu. Registrácia trvá 10 sekúnd.</p>
+        <h1>${t('heroTitle')}</h1>
+        <p class="landing-lead">${t('heroLead')}</p>
+        <button class="btn" id="googleBtnHero">${t('heroCta')}</button>
+        <p class="muted" style="margin-top:.6rem">${t('heroNote')}</p>
       </header>
+      <div class="landing-trust">
+        <div class="landing-trust-item"><span class="dot">●</span> ${t('trust1')}</div>
+        <div class="landing-trust-item"><span class="dot">●</span> ${t('trust2')}</div>
+        <div class="landing-trust-item"><span class="dot">●</span> ${t('trust3')}</div>
+        <div class="landing-trust-item"><span class="dot">●</span> ${t('trust4')}</div>
+      </div>
+      <h2 class="landing-section-title" id="benefits">${t('benefitsTitle')}</h2>
       <section class="landing-grid">
-        <div class="landing-card">
-          <div class="landing-icon">💶</div>
-          <h3>Zarábaš na každom predaji</h3>
-          <p>Dostávaš podiel z ceny každého predaného kurzu — presnú sadzbu vidíš vopred pri každom kurze. Keď si zákazníka privedieš sám cez svoj vlastný odkaz, tvoj podiel sa výrazne zvýši (bežne až 90 %), lebo si urobil marketing sám.</p>
-        </div>
-        <div class="landing-card">
-          <div class="landing-icon">🔗</div>
-          <h3>Vlastný referral odkaz</h3>
-          <p>Ku každému zverejnenému kurzu dostaneš svoj osobný odkaz. Zdieľaj ho svojim študentom, na sociálnych sieťach, kdekoľvek — sledovanie predajov je automatické.</p>
-        </div>
-        <div class="landing-card">
-          <div class="landing-icon">📢</div>
-          <h3>Reklamný priestor zadarmo</h3>
-          <p>Pod každým svojím kurzom môžeš zobraziť vlastný reklamný banner — ponúkni napríklad svoje doučovanie 1:1. Presne vidíš, koľko ľudí z kurzu prešlo k tvojim ďalším službám.</p>
-        </div>
-        <div class="landing-card">
-          <div class="landing-icon">🎬</div>
-          <h3>Nahrávaš priamo, žiadne odkazy</h3>
-          <p>Video, obrázky aj PDF materiály nahrávaš priamo cez portál. Skladáš lekcie, kvízy aj záverečný test — všetko v jednom mieste.</p>
-        </div>
-        <div class="landing-card">
-          <div class="landing-icon">🏷️</div>
-          <h3>Vlastné zľavové kódy</h3>
-          <p>Vytváraj si vlastné zľavové kódy pre svojich študentov — na svoj kurz, s vlastným percentom a limitom použití.</p>
-        </div>
-        <div class="landing-card">
-          <div class="landing-icon">💳</div>
-          <h3>Transparentné výplaty</h3>
-          <p>Výplatu si vyžiadaš jedným klikom, kedykoľvek máš nevyplatený zárobok. Peniaze idú priamo na tvoj IBAN — žiadne skryté poplatky ani platobné brány, ktoré si berú percentá navyše.</p>
-        </div>
+        <div class="landing-card"><div class="landing-icon">💶</div><h3>${t('card1Title')}</h3><p>${t('card1Body')}</p></div>
+        <div class="landing-card"><div class="landing-icon">🔗</div><h3>${t('card2Title')}</h3><p>${t('card2Body')}</p></div>
+        <div class="landing-card"><div class="landing-icon">📢</div><h3>${t('card3Title')}</h3><p>${t('card3Body')}</p></div>
+        <div class="landing-card"><div class="landing-icon">🎬</div><h3>${t('card4Title')}</h3><p>${t('card4Body')}</p></div>
+        <div class="landing-card"><div class="landing-icon">🏷️</div><h3>${t('card5Title')}</h3><p>${t('card5Body')}</p></div>
+        <div class="landing-card"><div class="landing-icon">💳</div><h3>${t('card6Title')}</h3><p>${t('card6Body')}</p></div>
       </section>
-      <section class="landing-how">
-        <h2>Ako to funguje</h2>
+      <section class="landing-example">
+        <h2 class="landing-example-title">${t('exampleTitle')}</h2>
+        <p class="landing-example-intro">${t('exampleIntro')}</p>
+        <div class="landing-example-grid">
+          <div class="landing-example-box">
+            <div class="landing-example-label">${t('exampleNormalLabel')}</div>
+            <div class="landing-example-amount">${t('exampleNormalAmount')}</div>
+            <p class="landing-example-body">${t('exampleNormalBody')}</p>
+          </div>
+          <div class="landing-example-box">
+            <div class="landing-example-label">${t('exampleReferralLabel')}</div>
+            <div class="landing-example-amount">${t('exampleReferralAmount')}</div>
+            <p class="landing-example-body">${t('exampleReferralBody')}</p>
+          </div>
+        </div>
+        <p class="landing-example-note">${t('exampleNote')}</p>
+      </section>
+      <section class="landing-how" id="how">
+        <h2 class="landing-section-title">${t('howTitle')}</h2>
         <ol>
-          <li>Prihlásiš sa cez Google — účet sa založí okamžite.</li>
-          <li>Potvrdíš zmluvné podmienky (raz, trvá to menej ako minútu).</li>
-          <li>Postavíš si kurz — lekcie, video, kvízy, prípadne záverečný test.</li>
-          <li>Odošleš kurz na schválenie — po krátkej kontrole ide živo.</li>
-          <li>Zarábaš na každom predaji a sleduješ všetko v prehľadnom portáli.</li>
+          <li>${t('how1')}</li>
+          <li>${t('how2')}</li>
+          <li>${t('how3')}</li>
+          <li>${t('how4')}</li>
+          <li>${t('how5')}</li>
         </ol>
       </section>
+      <section class="landing-faq" id="faq">
+        <h2 class="landing-section-title">${t('faqTitle')}</h2>
+        ${[1,2,3,4,5,6].map(n => `<div class="landing-faq-item"><h4>${t('faq' + n + 'Q')}</h4><p>${t('faq' + n + 'A')}</p></div>`).join('')}
+      </section>
       <footer class="landing-footer">
-        <button class="btn" id="googleBtnFooter">Stať sa inštruktorom cez Google</button>
+        <button class="btn" id="googleBtnFooter">${t('footerCta')}</button>
       </footer>
     </div>`;
+  bindLangSwitcher('gate-lang');
   ['googleBtnTop', 'googleBtnHero', 'googleBtnFooter'].forEach(id => {
     document.getElementById(id).onclick = () => {
       _supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.origin + location.pathname } });
@@ -245,7 +527,7 @@ function bindHoldButton(btnId, fillId, labelId, statusId, durationMs, onComplete
     fill.style.width = pct + '%';
     if (elapsed >= durationMs) {
       holding = false;
-      label.textContent = 'Ukladám potvrdenie…';
+      label.textContent = t('savingConfirmation');
       onComplete();
       return;
     }
@@ -264,7 +546,7 @@ function bindHoldButton(btnId, fillId, labelId, statusId, durationMs, onComplete
     holding = false;
     fill.style.width = '0%';
     label.textContent = originalLabel;
-    status.textContent = 'Musíš tlačidlo podržať celých 10 sekúnd bez pustenia.';
+    status.textContent = t('releasedEarly');
     if (raf) cancelAnimationFrame(raf);
   }
   btn.addEventListener('mousedown', start);
@@ -291,20 +573,22 @@ function bindScrollGate(boxId, btnId, hintId) {
   }
   btn.disabled = true;
   btn.classList.add('hold-btn-locked');
-  hint.textContent = 'Doscroluj text podmienok úplne dole, aby sa tlačidlo sprístupnilo.';
+  hint.textContent = t('scrollHint');
   box.addEventListener('scroll', check);
   check(); // krátky text sa nemusí dať scrollovať vôbec — vtedy odomkni rovno
 }
 
 function renderTermsGate(termsData) {
   root.innerHTML = `<div class="gate" style="text-align:left;max-width:680px;margin:0 auto;padding-top:2rem">
-    <h1 style="font-family:var(--serif);font-size:1.8rem;margin-bottom:.4rem">Zmluvné podmienky pre inštruktorov</h1>
-    <p class="muted" style="margin-bottom:1rem">Verzia ${termsData.version}. Pred prvým použitím portálu si prosím pozorne prečítaj celý text nižšie — potvrdením vzniká právne záväzná dohoda medzi tebou a SP Tréner.</p>
+    <div style="display:flex;justify-content:flex-end;margin-bottom:.5rem">${langSwitcherHtml('terms-lang')}</div>
+    <h1 style="font-family:var(--serif);font-size:1.8rem;margin-bottom:.4rem">${t('termsGateTitle')}</h1>
+    <p class="muted" style="margin-bottom:1rem">${t('termsGateIntro', { version: termsData.version })}</p>
     <div class="terms-box" id="termsBox">${termsData.content}</div>
     <p class="muted" id="termsScrollHint" style="margin-bottom:.5rem"></p>
-    <button class="hold-btn" id="termsHoldBtn"><div class="hold-fill" id="termsHoldFill"></div><span id="termsHoldLabel">Podrž 10 sekúnd — potvrdzujem, že som si podmienky prečítal(a) a rozumiem im</span></button>
+    <button class="hold-btn" id="termsHoldBtn"><div class="hold-fill" id="termsHoldFill"></div><span id="termsHoldLabel">${t('termsHoldLabel')}</span></button>
     <p class="muted" id="termsHoldStatus" style="margin-top:.6rem;min-height:1.2em"></p>
   </div>`;
+  bindLangSwitcher('terms-lang');
   bindScrollGate('termsBox', 'termsHoldBtn', 'termsScrollHint');
   bindHoldButton('termsHoldBtn', 'termsHoldFill', 'termsHoldLabel', 'termsHoldStatus', 10000, async () => {
     try { await api('/api/instructor/accept-terms', { method: 'POST' }); checkLegalGates(); }
@@ -314,13 +598,15 @@ function renderTermsGate(termsData) {
 
 function renderAgreementGate(agreement) {
   root.innerHTML = `<div class="gate" style="text-align:left;max-width:680px;margin:0 auto;padding-top:2rem">
+    <div style="display:flex;justify-content:flex-end;margin-bottom:.5rem">${langSwitcherHtml('ag-lang')}</div>
     <h1 style="font-family:var(--serif);font-size:1.8rem;margin-bottom:.4rem">${escapeHtml(agreement.title)}</h1>
-    <p class="muted" style="margin-bottom:1rem">Individuálna dohoda pripravená pre tvoj účet, navyše k štandardným podmienkam. Prečítaj si ju prosím celú — potvrdením vzniká právne záväzná dohoda.</p>
+    <p class="muted" style="margin-bottom:1rem">${t('agreementGateIntro')}</p>
     <div class="terms-box" id="agBox">${agreement.content}</div>
     <p class="muted" id="agScrollHint" style="margin-bottom:.5rem"></p>
-    <button class="hold-btn" id="agHoldBtn"><div class="hold-fill" id="agHoldFill"></div><span id="agHoldLabel">Podrž 10 sekúnd na potvrdenie</span></button>
+    <button class="hold-btn" id="agHoldBtn"><div class="hold-fill" id="agHoldFill"></div><span id="agHoldLabel">${t('agreementHoldLabel')}</span></button>
     <p class="muted" id="agHoldStatus" style="margin-top:.6rem;min-height:1.2em"></p>
   </div>`;
+  bindLangSwitcher('ag-lang');
   bindScrollGate('agBox', 'agHoldBtn', 'agScrollHint');
   bindHoldButton('agHoldBtn', 'agHoldFill', 'agHoldLabel', 'agHoldStatus', 10000, async () => {
     try { await api(`/api/instructor/custom-agreement/${agreement.id}/accept`, { method: 'POST' }); checkLegalGates(); }
@@ -331,22 +617,26 @@ function renderAgreementGate(agreement) {
 function renderShell() {
   root.innerHTML = `
     <div class="topbar">
-      <h1>Vitaj, ${escapeHtml(me.name || me.email)}</h1>
-      <a href="#" id="logoutLink" class="muted">Odhlásiť sa</a>
+      <h1>${t('welcome', { name: escapeHtml(me.name || me.email) })}</h1>
+      <div class="topbar-right">
+        ${langSwitcherHtml('shell-lang')}
+        <a href="#" id="logoutLink" class="muted">${t('logout')}</a>
+      </div>
     </div>
     <div class="tabs">
-      <div class="tab" data-tab="courses">Moje kurzy</div>
-      <div class="tab" data-tab="earnings">Zárobky</div>
-      <div class="tab" data-tab="profile">Profil</div>
+      <div class="tab" data-tab="courses">${t('tabCourses')}</div>
+      <div class="tab" data-tab="earnings">${t('tabEarnings')}</div>
+      <div class="tab" data-tab="profile">${t('tabProfile')}</div>
     </div>
     <div id="tabRoot"></div>`;
+  bindLangSwitcher('shell-lang');
   document.getElementById('logoutLink').onclick = async (e) => { e.preventDefault(); await _supabase.auth.signOut(); location.reload(); };
-  document.querySelectorAll('.tab').forEach(t => t.onclick = () => { activeTab = t.dataset.tab; activeCourseId = null; renderTabs(); });
+  document.querySelectorAll('.tab').forEach(el => el.onclick = () => { activeTab = el.dataset.tab; activeCourseId = null; renderTabs(); });
   renderTabs();
 }
 
 function renderTabs() {
-  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === activeTab));
+  document.querySelectorAll('.tab').forEach(el => el.classList.toggle('active', el.dataset.tab === activeTab));
   if (activeTab === 'courses') renderCoursesTab();
   else if (activeTab === 'earnings') renderEarningsTab();
   else if (activeTab === 'profile') renderProfileTab();
@@ -356,17 +646,17 @@ function renderTabs() {
 async function renderCoursesTab() {
   const tabRoot = document.getElementById('tabRoot');
   if (activeCourseId) return renderCourseDetail(activeCourseId);
-  tabRoot.innerHTML = `<p class="muted">Načítavam kurzy…</p>`;
+  tabRoot.innerHTML = `<p class="muted">${t('coursesLoading')}</p>`;
   let data;
   try { data = await api('/api/instructor/courses'); }
   catch (e) { tabRoot.innerHTML = `<p class="feedback err">${escapeHtml(e.message)}</p>`; return; }
   coursesCache = data.courses || [];
   tabRoot.innerHTML = `
     <div class="card">
-      <button class="btn" id="newCourseBtn">+ Nový kurz</button>
+      <button class="btn" id="newCourseBtn">${t('newCourseBtn')}</button>
     </div>
     <div class="card">
-      ${coursesCache.length ? coursesCache.map(courseRowHtml).join('') : '<p class="muted">Zatiaľ nemáš žiadny kurz.</p>'}
+      ${coursesCache.length ? coursesCache.map(courseRowHtml).join('') : `<p class="muted">${t('noCourses')}</p>`}
     </div>`;
   document.getElementById('newCourseBtn').onclick = createCourse;
   coursesCache.forEach(c => {
@@ -376,20 +666,20 @@ async function renderCoursesTab() {
 }
 
 function courseStatusBadge(c) {
-  if (c.published) return '<span class="badge">zverejnený</span>';
-  if (c.submitted_for_review) return '<span class="badge pending">čaká na schválenie</span>';
-  return '<span class="badge draft">koncept</span>';
+  if (c.published) return `<span class="badge">${t('badgePublished')}</span>`;
+  if (c.submitted_for_review) return `<span class="badge pending">${t('badgePending')}</span>`;
+  return `<span class="badge draft">${t('badgeDraft')}</span>`;
 }
 
 function courseRowHtml(c) {
   return `<div class="course-row" id="course-row-${c.id}" style="cursor:pointer">
-    <div><div class="course-row-title">${escapeHtml(c.title)}</div><div class="muted">${eur(c.price_cents)} · ${c.lessonCount} lekcií · ${c.purchaseCount} predajov</div></div>
+    <div><div class="course-row-title">${escapeHtml(c.title)}</div><div class="muted">${eur(c.price_cents)} · ${t('rowMeta', { lessons: c.lessonCount, sales: c.purchaseCount })}</div></div>
     ${courseStatusBadge(c)}
   </div>`;
 }
 
 async function createCourse() {
-  const title = prompt('Názov kurzu:');
+  const title = prompt(t('promptNewTitle'));
   if (!title || !title.trim()) return;
   try {
     await api('/api/instructor/courses', { method: 'POST', body: JSON.stringify({ title: title.trim() }) });
@@ -399,7 +689,7 @@ async function createCourse() {
 
 async function renderCourseDetail(id) {
   const tabRoot = document.getElementById('tabRoot');
-  tabRoot.innerHTML = `<p class="muted">Načítavam…</p>`;
+  tabRoot.innerHTML = `<p class="muted">${t('loading')}</p>`;
   let coursesData, lessonsData;
   try {
     [coursesData, lessonsData] = await Promise.all([
@@ -411,48 +701,48 @@ async function renderCourseDetail(id) {
   const lessons = lessonsData.lessons || [];
 
   tabRoot.innerHTML = `
-    <button class="btn secondary" id="backBtn" style="margin-bottom:1rem">← Späť na zoznam</button>
+    <button class="btn secondary" id="backBtn" style="margin-bottom:1rem">${t('back')}</button>
     <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.8rem">
         <h2 style="font-family:var(--serif);font-size:1.4rem">${escapeHtml(course.title)}</h2>
         ${courseStatusBadge(course)}
       </div>
       <div class="row2">
-        <div class="field"><label>Názov</label><input id="f-title" value="${escapeHtml(course.title)}"></div>
-        <div class="field"><label>Cena (€)</label><input id="f-price" type="number" min="0" step="0.01" value="${(course.price_cents / 100).toFixed(2)}"></div>
+        <div class="field"><label>${t('fieldTitle')}</label><input id="f-title" value="${escapeHtml(course.title)}"></div>
+        <div class="field"><label>${t('fieldPrice')}</label><input id="f-price" type="number" min="0" step="0.01" value="${(course.price_cents / 100).toFixed(2)}"></div>
       </div>
-      <div class="field"><label>Popis</label><textarea id="f-desc">${escapeHtml(course.description || '')}</textarea></div>
+      <div class="field"><label>${t('fieldDesc')}</label><textarea id="f-desc">${escapeHtml(course.description || '')}</textarea></div>
       <div class="row2">
-        ${fileUploadField('f-cover', 'Obrázok kurzu', 'image', course.cover_image_url)}
-        ${fileUploadField('f-intro', 'Úvodné video', 'video', course.intro_video_url)}
+        ${fileUploadField('f-cover', t('fieldCover'), 'image', course.cover_image_url)}
+        ${fileUploadField('f-intro', t('fieldIntroVideo'), 'video', course.intro_video_url)}
       </div>
-      <div class="field"><label>Predajný text</label><textarea id="f-sales" style="min-height:140px">${escapeHtml(course.sales_content || '')}</textarea></div>
-      <button class="btn" id="saveCourseBtn">Uložiť</button>
-      ${!course.published ? `<button class="btn secondary" id="submitReviewBtn" style="margin-left:.6rem">${course.submitted_for_review ? 'Odoslané na schválenie ✓' : 'Odoslať na schválenie'}</button>` : ''}
-      ${!course.published ? `<button class="btn danger" id="deleteCourseBtn" style="margin-left:.6rem">Zmazať</button>` : ''}
+      <div class="field"><label>${t('fieldSales')}</label><textarea id="f-sales" style="min-height:140px">${escapeHtml(course.sales_content || '')}</textarea></div>
+      <button class="btn" id="saveCourseBtn">${t('saveBtn')}</button>
+      ${!course.published ? `<button class="btn secondary" id="submitReviewBtn" style="margin-left:.6rem">${course.submitted_for_review ? t('submittedReviewBtn') : t('submitReviewBtn')}</button>` : ''}
+      ${!course.published ? `<button class="btn danger" id="deleteCourseBtn" style="margin-left:.6rem">${t('deleteBtn')}</button>` : ''}
       <div class="feedback" id="courseFeedback"></div>
-      ${course.published ? `<div style="margin-top:1rem"><label>Tvoj referral odkaz na tento kurz (platforma si necháva len ${course.referral_cut_percent}%, zvyšok je tvoj)</label><input readonly value="${escapeHtml(referralLinkFor(course))}" onclick="this.select()"></div>` : ''}
+      ${course.published ? `<div style="margin-top:1rem"><label>${t('referralLabel', { percent: course.referral_cut_percent })}</label><input readonly value="${escapeHtml(referralLinkFor(course))}" onclick="this.select()"></div>` : ''}
     </div>
 
     <div class="card">
-      <h3 style="font-family:var(--serif);font-size:1.2rem;margin-bottom:.9rem">Lekcie</h3>
-      <div id="lessonsList">${lessons.map(lessonEditHtml).join('') || '<p class="muted">Zatiaľ žiadne lekcie.</p>'}</div>
-      <button class="btn secondary" id="addLessonBtn">+ Pridať lekciu</button>
+      <h3 style="font-family:var(--serif);font-size:1.2rem;margin-bottom:.9rem">${t('lessonsTitle')}</h3>
+      <div id="lessonsList">${lessons.map(lessonEditHtml).join('') || `<p class="muted">${t('noLessons')}</p>`}</div>
+      <button class="btn secondary" id="addLessonBtn">${t('addLessonBtn')}</button>
     </div>
 
     <div class="card">
-      <h3 style="font-family:var(--serif);font-size:1.2rem;margin-bottom:.9rem">🏷️ Zľavové kódy</h3>
-      <div id="discountCodesRoot"><p class="muted">Načítavam…</p></div>
+      <h3 style="font-family:var(--serif);font-size:1.2rem;margin-bottom:.9rem">${t('discountTitle')}</h3>
+      <div id="discountCodesRoot"><p class="muted">${t('loading')}</p></div>
     </div>
 
     <div class="card">
-      <h3 style="font-family:var(--serif);font-size:1.2rem;margin-bottom:.9rem">💬 Otázky od študentov</h3>
-      <div id="commentsRoot"><p class="muted">Načítavam…</p></div>
+      <h3 style="font-family:var(--serif);font-size:1.2rem;margin-bottom:.9rem">${t('commentsTitle')}</h3>
+      <div id="commentsRoot"><p class="muted">${t('loading')}</p></div>
     </div>
 
     <div class="card">
-      <h3 style="font-family:var(--serif);font-size:1.2rem;margin-bottom:.9rem">📎 Nahraté materiály (AI vyhodnotenie)</h3>
-      <div id="submissionsRoot"><p class="muted">Načítavam…</p></div>
+      <h3 style="font-family:var(--serif);font-size:1.2rem;margin-bottom:.9rem">${t('submissionsTitle')}</h3>
+      <div id="submissionsRoot"><p class="muted">${t('loading')}</p></div>
     </div>`;
 
   document.getElementById('backBtn').onclick = () => { activeCourseId = null; renderCoursesTab(); };
@@ -479,9 +769,9 @@ async function renderCourseDetail(id) {
 function lessonEditHtml(l) {
   return `<div class="lesson-item">
     <h4>${escapeHtml(l.title)}</h4>
-    <p class="muted">${(l.quizQuestions || []).length} otázok v kvíze ${l.requires_upload ? '· vyžaduje nahratie materiálu' : ''}</p>
-    <button class="btn secondary" id="edit-lesson-${l.id}" style="margin-top:.5rem">Upraviť</button>
-    <button class="btn danger" id="del-lesson-${l.id}" style="margin-top:.5rem;margin-left:.5rem">Zmazať</button>
+    <p class="muted">${t('quizCount', { n: (l.quizQuestions || []).length })} ${l.requires_upload ? t('requiresUploadNote') : ''}</p>
+    <button class="btn secondary" id="edit-lesson-${l.id}" style="margin-top:.5rem">${t('editBtn')}</button>
+    <button class="btn danger" id="del-lesson-${l.id}" style="margin-top:.5rem;margin-left:.5rem">${t('deleteBtn')}</button>
   </div>`;
 }
 
@@ -499,7 +789,7 @@ async function saveCourse(id) {
         salesContent: document.getElementById('f-sales').value
       })
     });
-    feedback.textContent = 'Uložené.'; feedback.className = 'feedback ok';
+    feedback.textContent = t('saved'); feedback.className = 'feedback ok';
   } catch (e) { feedback.textContent = e.message; feedback.className = 'feedback err'; }
 }
 
@@ -511,7 +801,7 @@ async function submitForReview(id, value) {
 }
 
 async function deleteCourse(id) {
-  if (!confirm('Naozaj zmazať tento kurz aj s lekciami?')) return;
+  if (!confirm(t('confirmDeleteCourse'))) return;
   try {
     await api(`/api/instructor/courses/${id}`, { method: 'DELETE' });
     activeCourseId = null; renderCoursesTab();
@@ -522,20 +812,20 @@ function editLessonForm(courseId, lesson) {
   const isNew = !lesson;
   const qs = lesson?.quizQuestions || [];
   const formHtml = `<div class="card" id="lessonForm">
-    <h4 style="margin-bottom:.8rem">${isNew ? 'Nová lekcia' : 'Upraviť lekciu'}</h4>
-    <div class="field"><label>Názov</label><input id="lf-title" value="${escapeHtml(lesson?.title || '')}"></div>
+    <h4 style="margin-bottom:.8rem">${isNew ? t('lessonNewTitle') : t('lessonEditTitle')}</h4>
+    <div class="field"><label>${t('fieldTitle')}</label><input id="lf-title" value="${escapeHtml(lesson?.title || '')}"></div>
     <div class="row2">
-      ${fileUploadField('lf-video', 'Video lekcie', 'video', lesson?.video_url)}
-      ${fileUploadField('lf-doc', 'PDF materiály', 'doc', lesson?.doc_url)}
+      ${fileUploadField('lf-video', t('lessonFieldVideo'), 'video', lesson?.video_url)}
+      ${fileUploadField('lf-doc', t('lessonFieldDoc'), 'doc', lesson?.doc_url)}
     </div>
-    <div class="field"><label><input type="checkbox" id="lf-upload" style="width:auto" ${lesson?.requires_upload ? 'checked' : ''}> Vyžaduje nahratie materiálu od študenta</label></div>
-    <div class="field"><label>Pokyny pre nahratie (vidí ich študent)</label><textarea id="lf-upload-instr">${escapeHtml(lesson?.upload_instructions || '')}</textarea></div>
-    <div class="field"><label>AI kritériá hodnotenia (skryté, študent nevidí)</label><textarea id="lf-ai-criteria">${escapeHtml(lesson?.ai_grading_criteria || '')}</textarea></div>
-    <div class="field"><label>Kvíz — otázky (A/B/C/D, správna odpoveď)</label><div id="lf-quiz"></div>
-      <button class="btn secondary" id="lf-add-q" type="button" style="margin-top:.4rem">+ Pridať otázku</button>
+    <div class="field"><label><input type="checkbox" id="lf-upload" style="width:auto" ${lesson?.requires_upload ? 'checked' : ''}> ${t('lessonRequiresUpload')}</label></div>
+    <div class="field"><label>${t('lessonUploadInstr')}</label><textarea id="lf-upload-instr">${escapeHtml(lesson?.upload_instructions || '')}</textarea></div>
+    <div class="field"><label>${t('lessonAiCriteria')}</label><textarea id="lf-ai-criteria">${escapeHtml(lesson?.ai_grading_criteria || '')}</textarea></div>
+    <div class="field"><label>${t('lessonQuizLabel')}</label><div id="lf-quiz"></div>
+      <button class="btn secondary" id="lf-add-q" type="button" style="margin-top:.4rem">${t('addQuestionBtn')}</button>
     </div>
-    <button class="btn" id="lf-save">Uložiť lekciu</button>
-    <button class="btn secondary" id="lf-cancel" style="margin-left:.5rem">Zrušiť</button>
+    <button class="btn" id="lf-save">${t('saveLessonBtn')}</button>
+    <button class="btn secondary" id="lf-cancel" style="margin-left:.5rem">${t('cancelBtn')}</button>
     <div class="feedback" id="lf-feedback"></div>
   </div>`;
   const list = document.getElementById('lessonsList');
@@ -581,7 +871,7 @@ function editLessonForm(courseId, lesson) {
 
 function quizQEditHtml(q, i) {
   return `<div class="quiz-q">
-    <input id="lf-q-question-${i}" placeholder="Text otázky" value="${escapeHtml(q.question || '')}">
+    <input id="lf-q-question-${i}" placeholder="${t('questionPlaceholder')}" value="${escapeHtml(q.question || '')}">
     <div class="opts">
       <input id="lf-q-opta-${i}" placeholder="A" value="${escapeHtml(q.optionA || '')}">
       <input id="lf-q-optb-${i}" placeholder="B" value="${escapeHtml(q.optionB || '')}">
@@ -589,17 +879,17 @@ function quizQEditHtml(q, i) {
       <input id="lf-q-optd-${i}" placeholder="D" value="${escapeHtml(q.optionD || '')}">
     </div>
     <div style="margin-top:.5rem;display:flex;align-items:center;gap:.6rem">
-      <label style="margin:0">Správna:</label>
+      <label style="margin:0">${t('correctLabel')}</label>
       <select id="lf-q-correct-${i}" style="width:auto">
         ${['a', 'b', 'c', 'd'].map(o => `<option value="${o}" ${q.correct === o ? 'selected' : ''}>${o.toUpperCase()}</option>`).join('')}
       </select>
-      <button class="btn danger" id="lf-q-remove-${i}" type="button" style="margin-left:auto">Odstrániť</button>
+      <button class="btn danger" id="lf-q-remove-${i}" type="button" style="margin-left:auto">${t('removeBtn')}</button>
     </div>
   </div>`;
 }
 
 async function deleteLesson(courseId, lessonId) {
-  if (!confirm('Naozaj zmazať túto lekciu?')) return;
+  if (!confirm(t('confirmDeleteLesson'))) return;
   try {
     await api(`/api/instructor/courses/${courseId}/lessons/${lessonId}`, { method: 'DELETE' });
     renderCourseDetail(courseId);
@@ -621,27 +911,27 @@ function renderDiscountCodesList(mount, courseId, codes) {
       <div class="course-row">
         <div>
           <span style="font-family:var(--mono)">${escapeHtml(c.code)}</span> — ${c.percent_off}%
-          <span class="muted">${c.used_count}${c.max_uses ? ' / ' + c.max_uses : ''} použití${c.expires_at ? ', platí do ' + new Date(c.expires_at).toLocaleDateString('sk-SK') : ''}</span>
-          ${c.active ? '<span class="badge" style="margin-left:.4rem">aktívny</span>' : '<span class="badge locked" style="margin-left:.4rem">vypnutý</span>'}
+          <span class="muted">${c.used_count}${c.max_uses ? ' / ' + c.max_uses : ''} ${t('discountUses')}${c.expires_at ? t('discountValidUntil', { date: new Date(c.expires_at).toLocaleDateString(lang === 'cs' ? 'cs-CZ' : 'sk-SK') }) : ''}</span>
+          ${c.active ? `<span class="badge" style="margin-left:.4rem">${t('discountActive')}</span>` : `<span class="badge locked" style="margin-left:.4rem">${t('discountInactive')}</span>`}
         </div>
         <div style="display:flex;gap:.4rem">
-          <button class="btn secondary dc-toggle-btn" data-id="${c.id}" data-active="${c.active}">${c.active ? 'Vypnúť' : 'Zapnúť'}</button>
-          <button class="btn danger dc-delete-btn" data-id="${c.id}">Zmazať</button>
+          <button class="btn secondary dc-toggle-btn" data-id="${c.id}" data-active="${c.active}">${c.active ? t('discountTurnOff') : t('discountTurnOn')}</button>
+          <button class="btn danger dc-delete-btn" data-id="${c.id}">${t('deleteBtn')}</button>
         </div>
-      </div>`).join('') : '<p class="muted">Zatiaľ žiadne zľavové kódy.</p>'}</div>
-    <div class="field" style="margin-top:.9rem"><label>Nový kód</label>
+      </div>`).join('') : `<p class="muted">${t('discountNone')}</p>`}</div>
+    <div class="field" style="margin-top:.9rem"><label>${t('discountNewLabel')}</label>
       <div class="row2">
-        <input id="dc-code" placeholder="KÓD (napr. LETO2025)">
-        <input id="dc-percent" type="number" min="1" max="100" placeholder="% zľava">
+        <input id="dc-code" placeholder="${t('discountCodePlaceholder')}">
+        <input id="dc-percent" type="number" min="1" max="100" placeholder="${t('discountPercentPlaceholder')}">
       </div>
     </div>
     <div class="field">
       <div class="row2">
-        <input id="dc-maxuses" type="number" min="1" placeholder="Max. počet použití (voliteľné)">
+        <input id="dc-maxuses" type="number" min="1" placeholder="${t('discountMaxUsesPlaceholder')}">
         <input id="dc-expires" type="date">
       </div>
     </div>
-    <button class="btn secondary" id="dc-create-btn">Vytvoriť kód</button>
+    <button class="btn secondary" id="dc-create-btn">${t('discountCreateBtn')}</button>
     <div class="feedback" id="dcFeedback"></div>`;
 
   mount.querySelectorAll('.dc-toggle-btn').forEach(btn => btn.onclick = async () => {
@@ -651,7 +941,7 @@ function renderDiscountCodesList(mount, courseId, codes) {
     } catch (e) { alert(e.message); }
   });
   mount.querySelectorAll('.dc-delete-btn').forEach(btn => btn.onclick = async () => {
-    if (!confirm('Zmazať tento kód?')) return;
+    if (!confirm(t('discountConfirmDelete'))) return;
     try {
       await api(`/api/instructor/courses/${courseId}/discount-codes/${btn.dataset.id}`, { method: 'DELETE' });
       loadCourseDiscountCodes(courseId);
@@ -684,15 +974,15 @@ async function loadCourseComments(courseId, lessons) {
     comments.forEach(c => { if (c.parentId) (byParent[c.parentId] = byParent[c.parentId] || []).push(c); });
     function one(c) {
       return `<div class="comment${c.isInstructor ? ' instructor' : ''}">
-        <div class="comment-head"><span>${c.isInstructor ? 'Ty (lektor)' : escapeHtml(c.email)} · ${escapeHtml(c.lessonTitle)}</span><span>${new Date(c.createdAt).toLocaleDateString('sk-SK')}</span></div>
+        <div class="comment-head"><span>${c.isInstructor ? t('commentYou') : escapeHtml(c.email)} · ${escapeHtml(c.lessonTitle)}</span><span>${new Date(c.createdAt).toLocaleDateString(lang === 'cs' ? 'cs-CZ' : 'sk-SK')}</span></div>
         <div>${escapeHtml(c.body)}</div>
-        ${!c.isInstructor ? `<div style="margin-top:.5rem"><input placeholder="Odpovedať…" id="reply-${c.id}" style="margin-bottom:.4rem"><button class="btn secondary" id="reply-btn-${c.id}">Odpovedať</button></div>` : ''}
+        ${!c.isInstructor ? `<div style="margin-top:.5rem"><input placeholder="${t('replyPlaceholder')}" id="reply-${c.id}" style="margin-bottom:.4rem"><button class="btn secondary" id="reply-btn-${c.id}">${t('replyBtn')}</button></div>` : ''}
       </div>`;
     }
     const roots = comments.filter(c => !c.parentId);
     mount.innerHTML = roots.length
       ? roots.map(c => `<div class="comment-thread">${one(c)}${(byParent[c.id] || []).map(r => `<div style="margin-left:1.2rem">${one(r)}</div>`).join('')}</div>`).join('')
-      : '<p class="muted">Zatiaľ žiadne otázky.</p>';
+      : `<p class="muted">${t('commentsNone')}</p>`;
     roots.forEach(c => {
       const btn = document.getElementById('reply-btn-' + c.id);
       if (btn) btn.onclick = async () => {
@@ -715,46 +1005,46 @@ async function loadCourseSubmissions(courseId) {
     const subs = data.submissions || [];
     mount.innerHTML = subs.length ? subs.map(s => `
       <div class="comment">
-        <div class="comment-head"><span>${escapeHtml(s.email)} · ${escapeHtml(s.lessonTitle)}</span><span>${new Date(s.createdAt).toLocaleDateString('sk-SK')}</span></div>
-        <div>Verdikt AI: <strong style="color:${s.aiVerdict === 'pass' ? 'var(--green)' : 'var(--red)'}">${s.aiVerdict === 'pass' ? 'úspešné' : 'neúspešné'}</strong></div>
+        <div class="comment-head"><span>${escapeHtml(s.email)} · ${escapeHtml(s.lessonTitle)}</span><span>${new Date(s.createdAt).toLocaleDateString(lang === 'cs' ? 'cs-CZ' : 'sk-SK')}</span></div>
+        <div>${t('submissionVerdict')} <strong style="color:${s.aiVerdict === 'pass' ? 'var(--green)' : 'var(--red)'}">${s.aiVerdict === 'pass' ? t('submissionPass') : t('submissionFail')}</strong></div>
         <div class="muted" style="margin-top:.3rem">${escapeHtml(s.aiFeedback || '')}</div>
-        ${s.fileUrl ? `<a href="${s.fileUrl}" target="_blank" rel="noopener" style="display:inline-block;margin-top:.5rem">Otvoriť súbor →</a>` : ''}
-      </div>`).join('') : '<p class="muted">Zatiaľ žiadne nahraté materiály.</p>';
+        ${s.fileUrl ? `<a href="${s.fileUrl}" target="_blank" rel="noopener" style="display:inline-block;margin-top:.5rem">${t('submissionOpenFile')}</a>` : ''}
+      </div>`).join('') : `<p class="muted">${t('submissionsNone')}</p>`;
   } catch (e) { mount.innerHTML = `<p class="feedback err">${escapeHtml(e.message)}</p>`; }
 }
 
 // ---------- Zárobky ----------
 async function renderEarningsTab() {
   const tabRoot = document.getElementById('tabRoot');
-  tabRoot.innerHTML = `<p class="muted">Načítavam…</p>`;
+  tabRoot.innerHTML = `<p class="muted">${t('loading')}</p>`;
   let data;
   try { data = await api('/api/instructor/earnings'); }
   catch (e) { tabRoot.innerHTML = `<p class="feedback err">${escapeHtml(e.message)}</p>`; return; }
   tabRoot.innerHTML = `
     <div class="card">
       <div class="stat">${eur(data.unpaidCents)}</div>
-      <p class="muted">nevyplatené (${data.unpaidSaleCount} predajov)</p>
-      <div class="field" style="margin-top:1rem;max-width:320px"><label>IBAN pre výplatu</label><input id="payoutIban" value="${escapeHtml(me.iban || '')}"></div>
-      <button class="btn" id="requestPayoutBtn" ${data.unpaidCents ? '' : 'disabled'}>Požiadať o výplatu</button>
+      <p class="muted">${t('earningsUnpaidNote', { n: data.unpaidSaleCount })}</p>
+      <div class="field" style="margin-top:1rem;max-width:320px"><label>${t('ibanLabel')}</label><input id="payoutIban" value="${escapeHtml(me.iban || '')}"></div>
+      <button class="btn" id="requestPayoutBtn" ${data.unpaidCents ? '' : 'disabled'}>${t('requestPayoutBtn')}</button>
       <div class="feedback" id="payoutFeedback"></div>
     </div>
     <div class="card">
-      <h3 style="font-family:var(--serif);font-size:1.2rem;margin-bottom:.8rem">Posledné predaje</h3>
+      <h3 style="font-family:var(--serif);font-size:1.2rem;margin-bottom:.8rem">${t('recentSalesTitle')}</h3>
       ${data.recentSales.length ? data.recentSales.map(s => `
-        <div class="course-row"><div>${escapeHtml(s.courseTitle)} ${s.viaReferral ? '<span class="badge" style="margin-left:.4rem">referral</span>' : ''}</div><div>${eur(s.shareCents)}</div></div>
-      `).join('') : '<p class="muted">Zatiaľ žiadne predaje.</p>'}
+        <div class="course-row"><div>${escapeHtml(s.courseTitle)} ${s.viaReferral ? `<span class="badge" style="margin-left:.4rem">${t('referralBadge')}</span>` : ''}</div><div>${eur(s.shareCents)}</div></div>
+      `).join('') : `<p class="muted">${t('noSales')}</p>`}
     </div>
     <div class="card">
-      <h3 style="font-family:var(--serif);font-size:1.2rem;margin-bottom:.8rem">História výplat</h3>
+      <h3 style="font-family:var(--serif);font-size:1.2rem;margin-bottom:.8rem">${t('payoutHistoryTitle')}</h3>
       ${data.payouts.length ? data.payouts.map(p => `
-        <div class="course-row"><div>${new Date(p.requestedAt).toLocaleDateString('sk-SK')}</div><div>${eur(p.amountCents)} · ${p.status === 'completed' ? '<span class="badge">vyplatené</span>' : '<span class="badge pending">čaká</span>'}</div></div>
-      `).join('') : '<p class="muted">Zatiaľ žiadne výplaty.</p>'}
+        <div class="course-row"><div>${new Date(p.requestedAt).toLocaleDateString(lang === 'cs' ? 'cs-CZ' : 'sk-SK')}</div><div>${eur(p.amountCents)} · ${p.status === 'completed' ? `<span class="badge">${t('payoutPaid')}</span>` : `<span class="badge pending">${t('payoutPending')}</span>`}</div></div>
+      `).join('') : `<p class="muted">${t('noPayouts')}</p>`}
     </div>`;
   document.getElementById('requestPayoutBtn').onclick = async () => {
     const feedback = document.getElementById('payoutFeedback');
     try {
       await api('/api/instructor/payouts', { method: 'POST', body: JSON.stringify({ iban: document.getElementById('payoutIban').value }) });
-      feedback.textContent = 'Žiadosť odoslaná.'; feedback.className = 'feedback ok';
+      feedback.textContent = t('requestSent'); feedback.className = 'feedback ok';
       renderEarningsTab();
     } catch (e) { feedback.textContent = e.message; feedback.className = 'feedback err'; }
   };
@@ -765,24 +1055,24 @@ function renderProfileTab() {
   const tabRoot = document.getElementById('tabRoot');
   tabRoot.innerHTML = `
     <div class="card">
-      <div class="field"><label>Meno</label><input id="p-name" value="${escapeHtml(me.name || '')}"></div>
-      <div class="field"><label>Bio (zobrazí sa pri kurze)</label><textarea id="p-bio">${escapeHtml(me.bio || '')}</textarea></div>
-      ${fileUploadField('p-photo', 'Fotka', 'image', me.photoUrl)}
-      <div class="field"><label>IBAN pre výplaty</label><input id="p-iban" value="${escapeHtml(me.iban || '')}"></div>
-      <button class="btn" id="saveProfileBtn">Uložiť</button>
+      <div class="field"><label>${t('profileNameLabel')}</label><input id="p-name" value="${escapeHtml(me.name || '')}"></div>
+      <div class="field"><label>${t('profileBioLabel')}</label><textarea id="p-bio">${escapeHtml(me.bio || '')}</textarea></div>
+      ${fileUploadField('p-photo', t('profilePhotoLabel'), 'image', me.photoUrl)}
+      <div class="field"><label>${t('profileIbanLabel')}</label><input id="p-iban" value="${escapeHtml(me.iban || '')}"></div>
+      <button class="btn" id="saveProfileBtn">${t('saveBtn')}</button>
       <div class="feedback" id="profileFeedback"></div>
     </div>
     <div class="card">
-      <p class="muted">Referral odkaz nájdeš pri každom zverejnenom kurze na jeho stránke (Moje kurzy → otvor kurz). Keď niekto kúpi kurz cez tento odkaz, platforma si necháva len malý podiel — zvyšok je tvoj, lebo si zákazníka priviedol ty.</p>
+      <p class="muted">${t('referralNote')}</p>
     </div>
     <div class="card">
-      <h3 style="font-family:var(--serif);font-size:1.2rem;margin-bottom:.4rem">Reklamný banner</h3>
-      <p class="muted" style="margin-bottom:.8rem">Zobrazí sa pod tvojou kartou lektora na stránke každého zverejneného kurzu ako "Tento kurz ti prináša…" — ponúkni tu vlastné doučovacie alebo iné služby. Odporúčaná veľkosť <strong>1200 × 400 px</strong> (pomer strán 3:1) — iný pomer sa na stránke automaticky oreže na túto šírku, nech všetky kurzy vyzerajú rovnako.</p>
-      ${fileUploadField('p-banner', 'Obrázok banneru', 'image', me.bannerImageUrl)}
-      <div class="field"><label>Odkaz (kam sa má kliknutím prejsť)</label><input id="p-banner-link" placeholder="https://…" value="${escapeHtml(me.bannerLinkUrl || '')}"></div>
-      <button class="btn" id="saveBannerBtn">Uložiť banner</button>
+      <h3 style="font-family:var(--serif);font-size:1.2rem;margin-bottom:.4rem">${t('bannerTitle')}</h3>
+      <p class="muted" style="margin-bottom:.8rem">${t('bannerIntro')}</p>
+      ${fileUploadField('p-banner', t('bannerImageLabel'), 'image', me.bannerImageUrl)}
+      <div class="field"><label>${t('bannerLinkLabel')}</label><input id="p-banner-link" placeholder="https://…" value="${escapeHtml(me.bannerLinkUrl || '')}"></div>
+      <button class="btn" id="saveBannerBtn">${t('saveBannerBtn')}</button>
       <div class="feedback" id="bannerFeedback"></div>
-      <div id="bannerStatsRoot" style="margin-top:1rem"><p class="muted">Načítavam štatistiky…</p></div>
+      <div id="bannerStatsRoot" style="margin-top:1rem"><p class="muted">${t('bannerStatsLoading')}</p></div>
     </div>`;
   bindFileUpload('p-photo', 'image');
   bindFileUpload('p-banner', 'image');
@@ -799,7 +1089,7 @@ function renderProfileTab() {
         })
       });
       me = data.instructor;
-      feedback.textContent = 'Uložené.'; feedback.className = 'feedback ok';
+      feedback.textContent = t('saved'); feedback.className = 'feedback ok';
     } catch (e) { feedback.textContent = e.message; feedback.className = 'feedback err'; }
   };
   document.getElementById('saveBannerBtn').onclick = async () => {
@@ -813,7 +1103,7 @@ function renderProfileTab() {
         })
       });
       me = data.instructor;
-      feedback.textContent = 'Uložené.'; feedback.className = 'feedback ok';
+      feedback.textContent = t('saved'); feedback.className = 'feedback ok';
     } catch (e) { feedback.textContent = e.message; feedback.className = 'feedback err'; }
   };
   loadBannerStats();
@@ -825,7 +1115,7 @@ async function loadBannerStats() {
     const data = await api('/api/instructor/banner-stats');
     mount.innerHTML = `
       <div class="stat">${data.totalClicks}</div>
-      <p class="muted" style="margin-bottom:.6rem">preklikov na banner celkovo</p>
+      <p class="muted" style="margin-bottom:.6rem">${t('totalClicksNote')}</p>
       ${data.byCourse.length ? data.byCourse.map(c => `
         <div class="course-row"><div>${escapeHtml(c.courseTitle)}</div><div>${c.count}</div></div>
       `).join('') : ''}`;
