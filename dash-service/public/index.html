@@ -469,8 +469,8 @@ async function renderCourses() {
     <div id="courseFormRoot"></div>
     <div id="coursesList">${courses.map(c => `
       <div class="card-item" data-id="${c.id}">
-        <h4>${(c.title||'').replace(/</g,'&lt;')} ${c.published ? '<span class="pill resolved">publikovaný</span>' : '<span class="pill pending">draft</span>'}</h4>
-        <p class="muted">/kurzy/${c.slug} · ${eur(c.price_cents)} · ${c.lessonCount} lekcií · ${c.purchaseCount} nákupov</p>
+        <h4>${(c.title||'').replace(/</g,'&lt;')} ${c.published ? '<span class="pill resolved">publikovaný</span>' : '<span class="pill pending">draft</span>'} ${!c.published && c.submitted_for_review ? '<span class="pill pending">čaká na schválenie</span>' : ''}</h4>
+        <p class="muted">/kurzy/${c.slug} · ${eur(c.price_cents)} · ${c.lessonCount} lekcií · ${c.purchaseCount} nákupov${c.instructor ? ` · inštruktor: ${(c.instructor.name || c.instructor.email).replace(/</g,'&lt;')} (podiel platformy ${c.platform_cut_percent}%, cez referral ${c.referral_cut_percent}%)` : ''}</p>
         <p style="margin:.5rem 0">${(c.description||'').replace(/</g,'&lt;')}</p>
         <div style="display:flex;gap:.6rem;flex-wrap:wrap">
           <button class="btn secondary open-lessons-btn">Lekcie (${c.lessonCount})</button>
@@ -513,6 +513,13 @@ function courseFormHtml(c) {
       <input class="cf-instructor-photo" placeholder="URL fotky lektora" value="${(c?.instructor_photo_url||'').replace(/"/g,'&quot;')}" style="flex:1;min-width:220px">
     </div>
     <textarea class="cf-instructor-bio" placeholder="Krátky bio text lektora" style="min-height:60px">${c?.instructor_bio||''}</textarea>
+    ${c?.instructor_id ? `
+    <h4 style="margin-top:1.2rem">Podiel platformy (kurz od inštruktora ${(c.instructor?.name || c.instructor?.email || '').replace(/</g,'&lt;')})</h4>
+    <p class="muted" style="margin-top:-.4rem">% z ceny, ktoré si necháva platforma. Zvyšok dostane inštruktor. Pri kúpe cez jeho vlastný referral odkaz platí nižšia sadzba (referral), lebo zákazníka priviedol sám.</p>
+    <div class="formrow">
+      <div style="flex:1;min-width:220px"><label class="muted" style="display:block;margin-bottom:.3rem">Bežná kúpa — podiel platformy (%)</label><input class="cf-platform-cut" type="number" min="0" max="100" value="${c?.platform_cut_percent ?? 50}"></div>
+      <div style="flex:1;min-width:220px"><label class="muted" style="display:block;margin-bottom:.3rem">Cez referral inštruktora — podiel platformy (%)</label><input class="cf-referral-cut" type="number" min="0" max="100" value="${c?.referral_cut_percent ?? 10}"></div>
+    </div>` : ''}
     <div style="display:flex;gap:.6rem;margin-top:.6rem">
       <button class="btn cf-save">Uložiť</button>
       <button class="btn secondary cf-cancel">Zrušiť</button>
@@ -533,6 +540,10 @@ function bindCourseForm(course) {
       instructorName: $('.cf-instructor-name', root).value.trim(), instructorPhotoUrl: $('.cf-instructor-photo', root).value.trim(),
       instructorBio: $('.cf-instructor-bio', root).value.trim()
     };
+    const platformCutEl = $('.cf-platform-cut', root);
+    const referralCutEl = $('.cf-referral-cut', root);
+    if (platformCutEl) body.platformCutPercent = Number(platformCutEl.value);
+    if (referralCutEl) body.referralCutPercent = Number(referralCutEl.value);
     try {
       if (course) await api(`/api/dash/courses/${course.id}`, { method: 'PUT', body: JSON.stringify(body) });
       else await api('/api/dash/courses', { method: 'POST', body: JSON.stringify(body) });

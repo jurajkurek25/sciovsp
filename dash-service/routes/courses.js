@@ -42,10 +42,16 @@ async function replaceQuizQuestions(lessonId, quizQuestions) {
 router.get('/api/dash/courses', requireDashAuth, async (req, res) => {
   const { data: courses, error } = await mainDb.from('courses').select('*').order('created_at', { ascending: false });
   if (error) return res.status(500).json({ error: error.message });
+  const instructorIds = [...new Set((courses || []).map(c => c.instructor_id).filter(Boolean))];
+  let instructorById = {};
+  if (instructorIds.length) {
+    const { data: instructors } = await mainDb.from('instructors').select('id, name, email').in('id', instructorIds);
+    instructorById = Object.fromEntries((instructors || []).map(i => [i.id, i]));
+  }
   const withCounts = await Promise.all((courses || []).map(async c => {
     const { count: lessonCount } = await mainDb.from('course_lessons').select('*', { count: 'exact', head: true }).eq('course_id', c.id);
     const { count: purchaseCount } = await mainDb.from('course_purchases').select('*', { count: 'exact', head: true }).eq('course_id', c.id);
-    return { ...c, lessonCount: lessonCount || 0, purchaseCount: purchaseCount || 0 };
+    return { ...c, lessonCount: lessonCount || 0, purchaseCount: purchaseCount || 0, instructor: c.instructor_id ? (instructorById[c.instructor_id] || null) : null };
   }));
   res.json({ courses: withCounts });
 });
@@ -70,7 +76,10 @@ router.post('/api/dash/courses', requireDashAuth, async (req, res) => {
 });
 
 router.put('/api/dash/courses/:id', requireDashAuth, async (req, res) => {
-  const { title, description, priceCents, coverImageUrl, salesContent, introVideoUrl, published, instructorName, instructorBio, instructorPhotoUrl } = req.body || {};
+  const {
+    title, description, priceCents, coverImageUrl, salesContent, introVideoUrl, published,
+    instructorName, instructorBio, instructorPhotoUrl, platformCutPercent, referralCutPercent
+  } = req.body || {};
   const update = {};
   if (title !== undefined) update.title = title;
   if (description !== undefined) update.description = description;
@@ -82,6 +91,8 @@ router.put('/api/dash/courses/:id', requireDashAuth, async (req, res) => {
   if (instructorName !== undefined) update.instructor_name = instructorName;
   if (instructorBio !== undefined) update.instructor_bio = instructorBio;
   if (instructorPhotoUrl !== undefined) update.instructor_photo_url = instructorPhotoUrl;
+  if (platformCutPercent !== undefined) update.platform_cut_percent = Math.min(100, Math.max(0, Number(platformCutPercent) || 0));
+  if (referralCutPercent !== undefined) update.referral_cut_percent = Math.min(100, Math.max(0, Number(referralCutPercent) || 0));
   const { data, error } = await mainDb.from('courses').update(update).eq('id', req.params.id).select().single();
   if (error) return res.status(500).json({ error: error.message });
   res.json({ ok: true, course: data });
