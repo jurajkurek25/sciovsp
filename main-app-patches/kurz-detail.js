@@ -23,8 +23,10 @@
       } else if (currentUser) {
         const email = currentUser.email;
         const short = email.length > 22 ? email.substring(0, 20) + '...' : email;
+        const discountInputHtml = isFreeCourse() ? '' : '<input type="text" class="js-discount-input" placeholder="Zľavový kód" style="font-family:var(--mono);font-size:.78rem;background:var(--black2);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:.5rem .7rem;width:140px">';
         slot.innerHTML = '<div style="display:flex;align-items:center;gap:.8rem;flex-wrap:wrap">'
           + '<span style="font-family:var(--mono);font-size:.78rem;color:var(--text3)">' + short + '</span>'
+          + discountInputHtml
           + '<button class="course-buy-btn js-buy-btn">' + buyLabel + '</button>'
           + '</div>';
       } else {
@@ -63,15 +65,19 @@
     }
   }
 
-  async function buyCourse() {
+  async function buyCourse(e) {
     const buyBtns = document.querySelectorAll('.js-buy-btn');
     const free = isFreeCourse();
     buyBtns.forEach(b => { b.disabled = true; b.textContent = free ? 'Získavam prístup…' : 'Chvíľu strpenia…'; });
+    const clickedSlot = e && e.target ? e.target.closest('.courseAuthSlot') : null;
+    const discountInput = clickedSlot ? clickedSlot.querySelector('.js-discount-input') : document.querySelector('.js-discount-input');
+    const discountCode = discountInput && discountInput.value.trim() ? discountInput.value.trim() : undefined;
+    const ref = new URLSearchParams(location.search).get('ref') || undefined;
     try {
       const res = await fetch('/api/courses/' + slug + '/checkout', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ email: currentUser.email })
+        body: JSON.stringify({ email: currentUser.email, discountCode, ref })
       });
       const data = await res.json();
       if (data.url) {
