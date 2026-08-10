@@ -14,7 +14,8 @@ function clientIp(req) {
 }
 
 async function getLatestTermsVersion() {
-  const { data } = await mainDb.from('instructor_standard_terms').select('*').order('version', { ascending: false }).limit(1).maybeSingle();
+  const { data, error } = await mainDb.from('instructor_standard_terms').select('*').order('version', { ascending: false }).limit(1).maybeSingle();
+  if (error) throw error;
   return data;
 }
 
@@ -23,12 +24,15 @@ async function getLatestTermsVersion() {
 // zľavového kódu, žiadosť o výplatu...). Čítanie (GET) ostáva vždy
 // dostupné, inak by sa inštruktor ani nedozvedel, že má niečo potvrdiť.
 async function requireTermsAccepted(req, res, next) {
-  const latest = await getLatestTermsVersion();
+  let latest;
+  try { latest = await getLatestTermsVersion(); }
+  catch (e) { console.error('requireTermsAccepted:', e); return res.status(500).json({ error: 'Nepodarilo sa overiť zmluvné podmienky.' }); }
   if (latest && req.instructor.terms_accepted_version !== latest.version) {
     return res.status(403).json({ error: 'Najprv musíš potvrdiť aktuálne zmluvné podmienky.', code: 'TERMS_REQUIRED' });
   }
-  const { data: pendingAgreement } = await mainDb.from('instructor_custom_agreements')
+  const { data: pendingAgreement, error: agErr } = await mainDb.from('instructor_custom_agreements')
     .select('id').eq('instructor_id', req.instructor.id).is('superseded_at', null).is('accepted_at', null).maybeSingle();
+  if (agErr) { console.error('requireTermsAccepted (agreement check):', agErr); return res.status(500).json({ error: 'Nepodarilo sa overiť individuálnu dohodu.' }); }
   if (pendingAgreement) {
     return res.status(403).json({ error: 'Najprv musíš potvrdiť individuálnu dohodu.', code: 'AGREEMENT_REQUIRED' });
   }
@@ -36,7 +40,9 @@ async function requireTermsAccepted(req, res, next) {
 }
 
 router.get('/api/instructor/terms', requireInstructorAuth, async (req, res) => {
-  const latest = await getLatestTermsVersion();
+  let latest;
+  try { latest = await getLatestTermsVersion(); }
+  catch (e) { console.error('GET /api/instructor/terms:', e); return res.status(500).json({ error: 'Nepodarilo sa načítať zmluvné podmienky: ' + e.message }); }
   if (!latest) return res.json({ version: null, content: '', accepted: true });
   res.json({
     version: latest.version,
@@ -46,7 +52,9 @@ router.get('/api/instructor/terms', requireInstructorAuth, async (req, res) => {
 });
 
 router.post('/api/instructor/accept-terms', requireInstructorAuth, async (req, res) => {
-  const latest = await getLatestTermsVersion();
+  let latest;
+  try { latest = await getLatestTermsVersion(); }
+  catch (e) { console.error('POST /api/instructor/accept-terms:', e); return res.status(500).json({ error: 'Nepodarilo sa overiť zmluvné podmienky: ' + e.message }); }
   if (!latest) return res.status(400).json({ error: 'Žiadne podmienky na potvrdenie.' });
   const { data, error } = await mainDb.from('instructors').update({
     terms_accepted_at: new Date().toISOString(),
