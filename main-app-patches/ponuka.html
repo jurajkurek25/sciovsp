@@ -66,6 +66,10 @@ h1 .accent{color:var(--ignite);font-style:italic}
 .countdown .label{font-family:var(--mono);font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ignite2);margin-bottom:.5rem}
 .countdown .clock{font-family:var(--mono);font-size:1.9rem;font-weight:700;color:var(--text);letter-spacing:.04em}
 
+.offer-ended{max-width:520px;margin:2.4rem auto 0;text-align:center;background:var(--ink3);border:1px solid var(--border2);border-left:3px solid var(--signal);border-radius:6px;padding:1.3rem 1.5rem}
+.offer-ended-title{font-family:var(--serif);font-weight:800;font-size:clamp(1.2rem,2.6vw,1.6rem);margin-bottom:.5rem}
+.offer-ended-body{color:var(--text2);font-size:.9rem}
+
 /* ── diagonal section dividers ── */
 .lane{position:relative;padding:4rem 1.2rem;z-index:2}
 .lane.tilt-a{background:var(--ink2);clip-path:polygon(0 3%, 100% 0, 100% 97%, 0 100%)}
@@ -165,9 +169,13 @@ h1 .accent{color:var(--ignite);font-style:italic}
     </div>
   </div>
 
-  <div class="countdown">
+  <div class="countdown" id="countdownBox">
     <div class="label" id="tCountdownLabel">Ponuka končí o</div>
     <div class="clock" id="clock">--:--:--</div>
+  </div>
+  <div class="offer-ended" id="offerEndedBanner" style="display:none">
+    <div class="offer-ended-title" id="tOfferEndedTitle">Táto špeciálna ponuka po webinári už skončila.</div>
+    <div class="offer-ended-body" id="tOfferEndedBody">Členstvo je stále dostupné, teraz za bežnú cenu.</div>
   </div>
 </div>
 
@@ -244,7 +252,7 @@ h1 .accent{color:var(--ignite);font-style:italic}
   </div>
 </div>
 
-<div class="lane tilt-a">
+<div class="lane tilt-a" id="bonuses-section">
   <div class="lane-inner">
     <h2 class="section-title" id="tBonusTitle">Bonusy len teraz</h2>
     <div class="bonuses">
@@ -295,18 +303,39 @@ let currentUser = null;
 let duration = 3;
 
 const PRICES = { premium: { 3: 27, 6: 49, 12: 97 }, elite: { 3: 57, 6: 97, 12: 187 } };
+// Bežná (neakciová) cena po skončení ponuky — lineárny prepočet zo
+// základnej mesačnej sadzby (3-mesačná cena / 3), žiadny objemový
+// popust za dlhší záväzok. Zámerne menej výhodné než PRICES vyššie.
+const CLASSIC_PRICES = { premium: { 3: 27, 6: 54, 12: 108 }, elite: { 3: 57, 6: 114, 12: 228 } };
 const PERIOD_KEYS = { 3: 'period3', 6: 'period6', 12: 'period12' };
+let offerExpired = false;
 
 function setDuration(months) {
   duration = months;
   document.getElementById('btn3m').classList.toggle('active', months === 3);
   document.getElementById('btn6m').classList.toggle('active', months === 6);
   document.getElementById('btn12m').classList.toggle('active', months === 12);
-  document.getElementById('premiumPrice').textContent = PRICES.premium[months];
-  document.getElementById('elitePrice').textContent = PRICES.elite[months];
+  const priceTable = offerExpired ? CLASSIC_PRICES : PRICES;
+  document.getElementById('premiumPrice').textContent = priceTable.premium[months];
+  document.getElementById('elitePrice').textContent = priceTable.elite[months];
   const periodTxt = t(PERIOD_KEYS[months]);
   document.getElementById('premiumPeriod').textContent = periodTxt;
   document.getElementById('elitePeriod').textContent = periodTxt;
+}
+
+// Po vypršaní ponuky (cookie deadline): veľké oznámenie namiesto odpočtu,
+// bonusy preč, ceny prepočítané na bežnú (nezvýhodnenú) sadzbu — ale
+// 3/6/12 mesiacov ostávajú dostupné.
+function enterExpiredMode() {
+  if (offerExpired) return;
+  offerExpired = true;
+  const countdownBox = document.getElementById('countdownBox');
+  const banner = document.getElementById('offerEndedBanner');
+  const bonuses = document.getElementById('bonuses-section');
+  if (countdownBox) countdownBox.style.display = 'none';
+  if (banner) banner.style.display = 'block';
+  if (bonuses) bonuses.style.display = 'none';
+  setDuration(duration);
 }
 
 // Ponuka končí vždy o 23:59:59 dňa, kedy návštevník prišiel PRVÝKRÁT —
@@ -334,16 +363,13 @@ function getDeadline() {
 }
 function tickClock() {
   const remaining = getDeadline() - Date.now();
+  if (remaining <= 0) { enterExpiredMode(); return; }
   const clockEl = document.getElementById('clock');
-  if (remaining <= 0) { clockEl.textContent = '00:00:00'; return; }
   const h = Math.floor(remaining / 3600000);
   const m = Math.floor((remaining % 3600000) / 60000);
   const s = Math.floor((remaining % 60000) / 1000);
   clockEl.textContent = String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
 }
-setInterval(tickClock, 1000);
-tickClock();
-
 // Wildcard signal ticker — cyklické priklady personalizacie, priamo adresuju
 // namietku "zabera to aj mne?" primo v hero, este pred cenami.
 let tickerIdx = 0;
@@ -424,6 +450,8 @@ const T = {
       'Kika — spomalené tempo testu, zvýšená chybovosť pri strese'
     ],
     countdownLabel: 'Ponuka končí o',
+    offerEndedTitle: 'Táto špeciálna ponuka po webinári už skončila.',
+    offerEndedBody: 'Členstvo je stále dostupné, teraz za bežnú cenu.',
     plansTitle: 'Vyber si tempo', plansSub: 'Jednorazová platba, žiadne skryté opakované strhávanie.',
     eliteBadge: 'Odporúčame',
     pf1: 'Neobmedzený prístup k AI generátoru testov', pf2: '6 univerzálnych kurzov zahrnutých', pf3: 'Prístup do celej odborovej knižnice kurzov', pf4: 'Sledovanie pokroku a štatistiky',
@@ -465,6 +493,8 @@ const T = {
       'Kika — zpomalené tempo testu, zvýšená chybovost při stresu'
     ],
     countdownLabel: 'Nabídka končí za',
+    offerEndedTitle: 'Tato speciální nabídka po webináři už skončila.',
+    offerEndedBody: 'Členství je stále dostupné, teď za běžnou cenu.',
     plansTitle: 'Vyber si tempo', plansSub: 'Jednorázová platba, žádné skryté opakované strhávání.',
     eliteBadge: 'Doporučujeme',
     pf1: 'Neomezený přístup k AI generátoru testů', pf2: '6 univerzálních kurzů zahrnuto', pf3: 'Přístup do celé oborové knihovny kurzů', pf4: 'Sledování pokroku a statistiky',
@@ -513,6 +543,8 @@ function setLang(l) {
   document.getElementById('tHeroCta').textContent = t('heroCta');
   document.getElementById('tSignalLabel').textContent = t('signalLabel');
   document.getElementById('tCountdownLabel').textContent = t('countdownLabel');
+  document.getElementById('tOfferEndedTitle').textContent = t('offerEndedTitle');
+  document.getElementById('tOfferEndedBody').textContent = t('offerEndedBody');
   document.getElementById('tPlansTitle').textContent = t('plansTitle');
   document.getElementById('tPlansSub').textContent = t('plansSub');
   document.getElementById('tEliteBadge').textContent = t('eliteBadge');
@@ -561,6 +593,12 @@ function setLang(l) {
 }
 
 setLang(lang);
+
+// Spustené až po setLang (nie skôr) — ak návštevník príde na stránku
+// s už uplynutým deadlinom (napr. na druhý deň), enterExpiredMode()
+// volá t(), ktoré potrebuje T definované vyššie v skripte.
+setInterval(tickClock, 1000);
+tickClock();
 </script>
 </body>
 </html>
