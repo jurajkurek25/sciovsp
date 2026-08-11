@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vysielanie — SP Tréner</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Manrope:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#14100D; --ink2:#1c1610; --ink3:#241c14;
+  --text:#F6F1E7; --text2:rgba(246,241,231,.66); --text3:rgba(246,241,231,.4);
+  --ignite:#c8ff00; --ignite2:#d9ff66;
+  --signal:#7c5cff; --signal2:#b09bff;
+  --brand-volt:#c8ff00; --brand-mono:'DM Mono',monospace;
+  --border:rgba(246,241,231,.14); --border2:rgba(246,241,231,.24);
+  --serif:'Bricolage Grotesque',Georgia,serif; --mono:'Space Mono',monospace; --sans:'Manrope',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--ink);color:var(--text);font-family:var(--sans);line-height:1.6;min-height:100vh}
+a{color:var(--signal)}
+button{font-family:inherit}
+input{font-family:inherit}
+
+.top{max-width:900px;margin:0 auto;padding:1.5rem 1.2rem 0;display:flex;justify-content:space-between;align-items:center}
+.top a.back{font-family:var(--brand-mono);font-weight:500;font-size:.82rem;color:var(--brand-volt);text-decoration:none}
+.lang-switch{display:flex;gap:.35rem}
+.lang-switch button{font-family:var(--mono);font-size:.7rem;padding:.3rem .6rem;background:var(--ink2);border:1px solid var(--border2);border-radius:4px;color:var(--text2);cursor:pointer}
+.lang-switch button.active{color:var(--ignite);border-color:var(--ignite)}
+
+.wrap{max-width:900px;margin:0 auto;padding:1.6rem 1.2rem 5rem}
+
+.waiting{display:none;text-align:center;padding:3rem 0}
+.waiting.active{display:block}
+.waiting .clock{font-family:var(--mono);font-size:3rem;font-weight:700;color:var(--ignite);margin:1.5rem 0}
+.waiting p{color:var(--text2)}
+.waiting h2{font-family:var(--serif);font-weight:800;font-size:1.6rem;margin-bottom:.5rem}
+
+.no-session{display:none;text-align:center;padding:3rem 0}
+.no-session.active{display:block}
+.no-session a.cta{display:inline-block;margin-top:1.2rem;padding:.9rem 1.6rem;background:var(--ignite);color:var(--ink);border-radius:8px;text-decoration:none;font-family:var(--mono);font-weight:700}
+
+.broadcast{display:none}
+.broadcast.active{display:block}
+.stream-badge{display:inline-flex;align-items:center;gap:.5rem;font-family:var(--mono);font-size:.72rem;color:var(--ignite);margin-bottom:.8rem}
+.stream-badge .dot{width:7px;height:7px;border-radius:50%;background:var(--ignite);animation:pulse 1.2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.video-wrap{position:relative;background:#000;border-radius:10px;overflow:hidden;aspect-ratio:16/9;margin-bottom:1rem}
+.video-wrap video{width:100%;height:100%;display:block;object-fit:contain;background:#000}
+.video-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.7);flex-direction:column;gap:1rem;text-align:center;padding:2rem}
+.video-overlay button{padding:.9rem 1.6rem;background:var(--ignite);color:var(--ink);border:none;border-radius:8px;font-family:var(--mono);font-weight:700;cursor:pointer}
+.mute-toggle{position:absolute;bottom:.8rem;right:.8rem;background:rgba(0,0,0,.6);border:1px solid var(--border2);color:var(--text);border-radius:6px;padding:.4rem .6rem;font-size:.9rem;cursor:pointer}
+
+.chat-box{background:var(--ink3);border:1px solid var(--border2);border-radius:10px;display:flex;flex-direction:column;height:280px}
+.chat-log{flex:1;overflow-y:auto;padding:.9rem;display:flex;flex-direction:column;gap:.5rem}
+.chat-msg{font-size:.83rem;line-height:1.4}
+.chat-msg .name{font-family:var(--mono);font-weight:700;color:var(--signal2);margin-right:.4rem}
+.chat-msg.mine .name{color:var(--ignite)}
+.chat-input-row{display:flex;gap:.5rem;padding:.7rem;border-top:1px solid var(--border)}
+.chat-input-row input{flex:1;padding:.6rem .7rem;background:var(--ink2);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:.85rem}
+.chat-input-row button{padding:.6rem 1rem;background:var(--signal);color:#fff;border:none;border-radius:6px;font-family:var(--mono);font-size:.8rem;cursor:pointer}
+
+.end-screen{display:none;text-align:center;padding:2.5rem 1.5rem;background:var(--ink3);border:1px solid var(--border2);border-radius:12px;margin-top:1rem}
+.end-screen.active{display:block}
+.end-screen h2{font-family:var(--serif);font-weight:800;font-size:1.6rem;margin-bottom:.8rem}
+.end-screen p{color:var(--text2);margin-bottom:1.5rem}
+.end-screen a.cta{display:inline-block;padding:1rem 1.8rem;background:var(--ignite);color:var(--ink);border-radius:8px;font-family:var(--mono);font-weight:700;text-decoration:none}
+</style>
+</head>
+<body>
+<div class="top">
+  <a class="back" href="/" id="tBack">← SP Tréner</a>
+  <div class="lang-switch">
+    <button id="langSkBtn" onclick="setLang('sk')">SK</button>
+    <button id="langCsBtn" onclick="setLang('cs')">CZ</button>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div id="view-no-session" class="no-session">
+    <h2 id="tNoSessionTitle">Nemáš rezervované miesto</h2>
+    <p id="tNoSessionBody">Najprv sa zaregistruj na najbližšie vysielanie.</p>
+    <a class="cta" href="/webinar" id="tNoSessionCta">Zaregistrovať sa →</a>
+  </div>
+
+  <div id="view-waiting" class="waiting">
+    <h2 id="tWaitingLead">Tvoje miesto je rezervované. Vysielanie začína o</h2>
+    <div class="clock" id="waitClock">--:--:--</div>
+    <p id="tWaitingNote">Nechaj si túto stránku otvorenú — spustí sa automaticky.</p>
+  </div>
+
+  <div id="view-broadcast" class="broadcast">
+    <div class="stream-badge"><span class="dot"></span> <span id="tLiveBadge">NAŽIVO</span></div>
+    <div class="video-wrap">
+      <video id="webinarVideo" playsinline></video>
+      <div class="video-overlay" id="startOverlay">
+        <p id="tStartOverlayText">Klikni pre spustenie vysielania so zvukom</p>
+        <button id="startOverlayBtn">▶</button>
+      </div>
+      <button class="mute-toggle" id="muteToggle">🔊</button>
+    </div>
+    <div class="chat-box">
+      <div class="chat-log" id="chatLog"></div>
+      <div class="chat-input-row">
+        <input type="text" id="chatInput" placeholder="Napíš správu…">
+        <button id="chatSendBtn"><span id="tChatSend">Poslať</span></button>
+      </div>
+    </div>
+    <div class="end-screen" id="endScreen">
+      <h2 id="tEndTitle">Vysielanie sa skončilo</h2>
+      <p id="tEndBody">Ak si to stihol/a, čaká na teba špeciálna ponuka len pre účastníkov.</p>
+      <a class="cta" href="/ponuka" id="tEndCta">Zobraziť ponuku →</a>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ==================== KONFIGURÁCIA — uprav podľa skutočného videa ====================
+const VIDEO_URL = 'REPLACE_WITH_REAL_VIDEO_URL.mp4'; // TODO: nahraď skutočnou URL webinárového videa
+const VIDEO_DURATION_SECONDS = 45 * 60; // TODO: nastav na skutočnú dĺžku videa (rovnaká hodnota ako vo webinar.html)
+
+function fmtClock(seconds) {
+  const s = Math.max(0, Math.floor(seconds));
+  const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+  return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(sec).padStart(2, '0');
+}
+
+let session = null;
+try {
+  const saved = localStorage.getItem('sp_webinar_session');
+  if (saved) session = JSON.parse(saved);
+} catch (e) { session = null; }
+
+function currentElapsedSeconds() {
+  return (Date.now() - session.slotStartMs) / 1000;
+}
+
+function showView(name) {
+  ['no-session', 'waiting', 'broadcast'].forEach(v => {
+    document.getElementById('view-' + v).classList.toggle('active', v === name);
+  });
+}
+
+function routeToCurrentState() {
+  if (!session) { showView('no-session'); return; }
+  const elapsed = currentElapsedSeconds();
+  if (elapsed < 0) { showView('waiting'); startWaitingCountdown(); return; }
+  showView('broadcast');
+  startBroadcast();
+}
+
+let waitingTimer = null;
+function startWaitingCountdown() {
+  if (waitingTimer) clearInterval(waitingTimer);
+  function tick() {
+    const remaining = session.slotStartMs - Date.now();
+    if (remaining <= 0) { clearInterval(waitingTimer); showView('broadcast'); startBroadcast(); return; }
+    document.getElementById('waitClock').textContent = fmtClock(remaining / 1000);
+  }
+  tick();
+  waitingTimer = setInterval(tick, 1000);
+}
+
+// ==================== BROADCAST: video synchronizovane na realny cas ====================
+let broadcastStarted = false;
+let syncTimer = null;
+let endedShown = false;
+
+function startBroadcast() {
+  if (broadcastStarted) return;
+  broadcastStarted = true;
+  const video = document.getElementById('webinarVideo');
+  video.src = VIDEO_URL;
+
+  const elapsed = currentElapsedSeconds();
+  if (elapsed >= VIDEO_DURATION_SECONDS) { showEndScreen(); return; }
+
+  video.addEventListener('loadedmetadata', () => {
+    video.currentTime = Math.min(currentElapsedSeconds(), video.duration || VIDEO_DURATION_SECONDS);
+    attemptAutoplay();
+  });
+
+  // Nedá sa preskočiť dopredu — ak sa currentTime odchýli od skutočnej
+  // "živej" pozície (napr. cez klávesové skratky), vráti sa naspäť.
+  video.addEventListener('seeking', () => {
+    const expected = currentElapsedSeconds();
+    if (Math.abs(video.currentTime - expected) > 2) video.currentTime = expected;
+  });
+  video.addEventListener('pause', () => { if (!endedShown) video.play().catch(() => {}); });
+
+  document.getElementById('muteToggle').onclick = () => {
+    video.muted = !video.muted;
+    document.getElementById('muteToggle').textContent = video.muted ? '🔇' : '🔊';
+  };
+
+  seedPastChatMessages(elapsed);
+  syncTimer = setInterval(syncTick, 1000);
+}
+
+function attemptAutoplay() {
+  const video = document.getElementById('webinarVideo');
+  const overlay = document.getElementById('startOverlay');
+  video.play().then(() => { overlay.style.display = 'none'; }).catch(() => {
+    overlay.style.display = 'flex';
+    document.getElementById('startOverlayBtn').onclick = () => {
+      video.muted = false;
+      video.play().then(() => { overlay.style.display = 'none'; }).catch(() => {});
+    };
+  });
+}
+
+function syncTick() {
+  const video = document.getElementById('webinarVideo');
+  const elapsed = currentElapsedSeconds();
+  if (elapsed >= VIDEO_DURATION_SECONDS) { clearInterval(syncTimer); showEndScreen(); return; }
+  if (video.duration && Math.abs(video.currentTime - elapsed) > 3) video.currentTime = elapsed;
+  revealDueMessages(elapsed);
+}
+
+function showEndScreen() {
+  if (endedShown) return;
+  endedShown = true;
+  const video = document.getElementById('webinarVideo');
+  video.pause();
+  document.getElementById('endScreen').classList.add('active');
+}
+
+// ==================== SIMULOVANÝ ŽIVÝ CHAT ====================
+const CHAT_SCRIPT = [
+  { t: 15, name: 'Peťo', text: 'Ahoj všetci! 👋' },
+  { t: 40, name: 'Zuzka K.', text: 'Konečne som stihla, ideme na to!' },
+  { t: 90, name: 'Martin S.', text: 'Toto ma fakt zaujíma, syn ide budúci rok na prijímačky' },
+  { t: 180, name: 'Ivana', text: 'Super, presne som toto potrebovala' },
+  { t: 310, name: 'Tomáš', text: 'Počkať, appka to vie sama vygenerovať? 🤯' },
+  { t: 420, name: 'Katka B.', text: 'My sme skúšali klasické knihy a nulový posun' },
+  { t: 560, name: 'Robo', text: 'Toto dáva zmysel, konečne niekto vysvetľuje prečo' },
+  { t: 700, name: 'Simona', text: 'Koľko otázok tam reálne je?' },
+  { t: 850, name: 'Filip', text: 'Presne toto mi na iných prípravách chýbalo' },
+  { t: 1000, name: 'Lucia', text: 'Toto so spätnou väzbou znie skvele' },
+  { t: 1150, name: 'Dominik', text: 'A funguje to aj na právo?' },
+  { t: 1300, name: 'Nikola', text: 'Konečne AI, ktorá pomáha namiesto strašenia 😄' },
+  { t: 1450, name: 'Peter K.', text: 'Toto by som potreboval už minulý rok' },
+  { t: 1600, name: 'Zuzana M.', text: 'Kde sa dá appka vyskúšať?' },
+  { t: 1750, name: 'Adam', text: 'Toto vyzerá fakt profesionálne' },
+  { t: 1900, name: 'Miroslava', text: 'Idem sa pozrieť na tú ponuku po webinári 👀' },
+  { t: 2050, name: 'Jakub', text: 'Práve som si pozrel tú zľavu, oplatí sa!' },
+  { t: 2200, name: 'Veronika', text: 'Vďaka za skvelý webinár!' },
+  { t: 2350, name: 'Štefan', text: 'Kúpil som Premium, teším sa 🎉' },
+  { t: 2500, name: 'Alžbeta', text: 'Toto rozhodne odporúčam všetkým, čo idú na prijímačky' }
+];
+const FAKE_REPLY_NAMES = ['Peťo', 'Zuzka K.', 'Martin S.', 'Ivana', 'Tomáš', 'Robo', 'Filip', 'Adam'];
+const FAKE_REPLIES = ['👍', 'presne tak!', 'aj ja si to myslím', 'super otázka', 'to isté som chcel/a napísať 😄'];
+
+let chatShownUpTo = -1;
+
+function appendChatMessage(name, text, mine) {
+  const log = document.getElementById('chatLog');
+  const el = document.createElement('div');
+  el.className = 'chat-msg' + (mine ? ' mine' : '');
+  el.innerHTML = '<span class="name">' + escapeHtml(name) + ':</span>' + escapeHtml(text);
+  log.appendChild(el);
+  log.scrollTop = log.scrollHeight;
+}
+function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function seedPastChatMessages(elapsedNow) {
+  CHAT_SCRIPT.forEach((msg, i) => {
+    if (msg.t <= elapsedNow) { appendChatMessage(msg.name, msg.text, false); chatShownUpTo = i; }
+  });
+}
+function revealDueMessages(elapsedNow) {
+  for (let i = chatShownUpTo + 1; i < CHAT_SCRIPT.length; i++) {
+    if (CHAT_SCRIPT[i].t <= elapsedNow) { appendChatMessage(CHAT_SCRIPT[i].name, CHAT_SCRIPT[i].text, false); chatShownUpTo = i; }
+    else break;
+  }
+}
+
+document.getElementById('chatSendBtn').onclick = sendChatMessage;
+document.getElementById('chatInput').addEventListener('keydown', e => { if (e.key === 'Enter') sendChatMessage(); });
+function sendChatMessage() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+  appendChatMessage((session && session.name) ? session.name : t('you'), text, true);
+  input.value = '';
+  setTimeout(() => {
+    const name = FAKE_REPLY_NAMES[Math.floor(Math.random() * FAKE_REPLY_NAMES.length)];
+    const reply = FAKE_REPLIES[Math.floor(Math.random() * FAKE_REPLIES.length)];
+    appendChatMessage(name, reply, false);
+  }, 3000 + Math.random() * 4000);
+}
+
+// ==================== i18n ====================
+const T = {
+  sk: {
+    pageTitle: 'Vysielanie — SP Tréner',
+    noSessionTitle: 'Nemáš rezervované miesto', noSessionBody: 'Najprv sa zaregistruj na najbližšie vysielanie.', noSessionCta: 'Zaregistrovať sa →',
+    waitingLead: 'Tvoje miesto je rezervované. Vysielanie začína o', waitingNote: 'Nechaj si túto stránku otvorenú — spustí sa automaticky.',
+    liveBadge: 'NAŽIVO', startOverlayText: 'Klikni pre spustenie vysielania so zvukom', chatSend: 'Poslať', you: 'Ty',
+    endTitle: 'Vysielanie sa skončilo', endBody: 'Ak si to stihol/a, čaká na teba špeciálna ponuka len pre účastníkov.', endCta: 'Zobraziť ponuku →'
+  },
+  cs: {
+    pageTitle: 'Vysílání — SP Tréner',
+    noSessionTitle: 'Nemáš rezervované místo', noSessionBody: 'Nejprve se zaregistruj na nejbližší vysílání.', noSessionCta: 'Zaregistrovat se →',
+    waitingLead: 'Tvoje místo je rezervované. Vysílání začíná za', waitingNote: 'Nech si tuto stránku otevřenou — spustí se automaticky.',
+    liveBadge: 'ŽIVĚ', startOverlayText: 'Klikni pro spuštění vysílání se zvukem', chatSend: 'Poslat', you: 'Ty',
+    endTitle: 'Vysílání skončilo', endBody: 'Pokud jsi to stihl/a, čeká na tebe speciální nabídka jen pro účastníky.', endCta: 'Zobrazit nabídku →'
+  }
+};
+
+let lang = localStorage.getItem('sp_webinar_lang') || 'sk';
+function t(key) { return (T[lang] && T[lang][key] !== undefined) ? T[lang][key] : T.sk[key]; }
+
+function setLang(l) {
+  lang = l;
+  localStorage.setItem('sp_webinar_lang', l);
+  document.documentElement.lang = l === 'cs' ? 'cs' : 'sk';
+  document.title = t('pageTitle');
+  document.getElementById('langSkBtn').classList.toggle('active', l === 'sk');
+  document.getElementById('langCsBtn').classList.toggle('active', l === 'cs');
+
+  document.getElementById('tNoSessionTitle').textContent = t('noSessionTitle');
+  document.getElementById('tNoSessionBody').textContent = t('noSessionBody');
+  document.getElementById('tNoSessionCta').textContent = t('noSessionCta');
+  document.getElementById('tWaitingLead').textContent = t('waitingLead');
+  document.getElementById('tWaitingNote').textContent = t('waitingNote');
+  document.getElementById('tLiveBadge').textContent = t('liveBadge');
+  document.getElementById('tStartOverlayText').textContent = t('startOverlayText');
+  document.getElementById('tChatSend').textContent = t('chatSend');
+  document.getElementById('tEndTitle').textContent = t('endTitle');
+  document.getElementById('tEndBody').textContent = t('endBody');
+  document.getElementById('tEndCta').textContent = t('endCta');
+}
+
+setLang(lang);
+routeToCurrentState();
+</script>
+</body>
+</html>

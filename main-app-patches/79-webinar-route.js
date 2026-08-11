@@ -13,6 +13,7 @@ const markerCount = src.split(SPA_MARKER).length - 1;
 if (markerCount !== 1) { console.error('SPA fallback kotva nie je jednoznacna (najdenych: ' + markerCount + '). Nic som nezmenil.'); process.exit(1); }
 
 const NEW_ROUTES = `app.get('/webinar', (req, res) => { res.sendFile(path.join(__dirname, 'public', 'webinar.html')); });
+app.get('/webinar/live', (req, res) => { res.sendFile(path.join(__dirname, 'public', 'webinar-live.html')); });
 
 ` + SPA_MARKER;
 

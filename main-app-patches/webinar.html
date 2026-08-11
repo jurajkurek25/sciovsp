@@ -4,14 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Bezplatné vysielanie — SP Tréner</title>
-<meta name="description" content="Ako sa dostať na vysnívanú vysokú školu — aj keď ti ostáva len pár týždňov a nechceš sa učiť dňom i nocou. Bezplatné vysielanie s AI stratégiou na prijímačky.">
+<meta name="description" content="Ako sa dostať na vysnívanú vysokú školu — aj keď ti ostáva len pár týždňov a nechceš sa učiť dňom i nocou. Bezplatné vysielanie každý štvrtok o 20:00.">
 <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Manrope:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
 <style>
-/* Rovnaká vizuálna identita ako /ponuka ("Ignition Signal", farby zladené
-   s brandom appky) — webinár a ponuka po ňom sú dva kroky toho istého
-   lievika, majú pôsobiť ako jedna súvislá cesta, nie dve rôzne appky. */
+/* Rovnaká vizuálna identita ako /ponuka a /webinar/live ("Ignition
+   Signal") — celý lievik (webinár → live → ponuka) má pôsobiť ako
+   jedna súvislá cesta. */
 :root{
   --ink:#14100D; --ink2:#1c1610; --ink3:#241c14;
   --text:#F6F1E7; --text2:rgba(246,241,231,.66); --text3:rgba(246,241,231,.4);
@@ -27,73 +27,33 @@ a{color:var(--signal)}
 button{font-family:inherit}
 input{font-family:inherit}
 
-.top{max-width:1040px;margin:0 auto;padding:1.5rem 1.2rem 0;display:flex;justify-content:space-between;align-items:center}
+.top{max-width:900px;margin:0 auto;padding:1.5rem 1.2rem 0;display:flex;justify-content:space-between;align-items:center}
 .top a.back{font-family:var(--brand-mono);font-weight:500;font-size:.82rem;color:var(--brand-volt);text-decoration:none}
 .lang-switch{display:flex;gap:.35rem}
 .lang-switch button{font-family:var(--mono);font-size:.7rem;padding:.3rem .6rem;background:var(--ink2);border:1px solid var(--border2);border-radius:4px;color:var(--text2);cursor:pointer}
 .lang-switch button.active{color:var(--ignite);border-color:var(--ignite)}
 
-.wrap{max-width:900px;margin:0 auto;padding:1.6rem 1.2rem 5rem}
-
-/* ── REGISTER VIEW ── */
+.wrap{max-width:640px;margin:0 auto;padding:1.6rem 1.2rem 5rem}
 .hero{text-align:center;padding:2rem 0 1rem}
 .eyebrow{display:inline-flex;align-items:center;gap:.5rem;font-family:var(--mono);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ignite);border:1px solid rgba(200,255,0,.35);background:rgba(200,255,0,.08);padding:.4rem .8rem;border-radius:3px;margin-bottom:1.2rem}
 .eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--ignite);animation:pulse 1.6s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-h1{font-family:var(--serif);font-weight:800;font-size:clamp(2rem,5vw,3rem);line-height:1.1;margin-bottom:1rem}
-.sub{color:var(--text2);font-size:1.05rem;max-width:560px;margin:0 auto 2.2rem}
+h1{font-family:var(--serif);font-weight:800;font-size:clamp(2rem,5vw,2.8rem);line-height:1.1;margin-bottom:1rem}
+.sub{color:var(--text2);font-size:1.05rem;max-width:520px;margin:0 auto 2rem}
 
-.slot-block{margin-bottom:1.6rem}
-.slot-block h3{font-family:var(--mono);font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:.7rem;text-align:center}
-.slot-row{display:flex;gap:.7rem;flex-wrap:wrap;justify-content:center}
-.slot-btn{padding:.75rem 1.2rem;background:var(--ink2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:var(--mono);font-size:.88rem;cursor:pointer;transition:border-color .15s}
-.slot-btn:hover{border-color:var(--signal)}
-.slot-btn.live{border-color:var(--ignite);color:var(--ignite)}
-.slot-btn.live::before{content:'● ';color:var(--ignite)}
+.next-session{max-width:420px;margin:0 auto 2rem;background:var(--ink3);border:1px solid var(--border2);border-left:3px solid var(--signal);border-radius:10px;padding:1.2rem 1.4rem;text-align:center}
+.next-session .label{font-family:var(--mono);font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:.4rem}
+.next-session .date{font-family:var(--serif);font-weight:800;font-size:1.4rem}
 
-.instant-cta{display:block;margin:1.8rem auto 0;padding:1rem 1.8rem;background:var(--ignite);color:var(--ink);border:none;border-radius:8px;font-family:var(--mono);font-weight:700;font-size:.95rem;cursor:pointer}
-
-.reg-form{max-width:380px;margin:2.4rem auto 0;background:var(--ink3);border:1px solid var(--border2);border-radius:12px;padding:1.6rem;display:none}
-.reg-form.active{display:block}
+.reg-form{max-width:380px;margin:0 auto;background:var(--ink3);border:1px solid var(--border2);border-radius:12px;padding:1.6rem}
 .reg-form label{display:block;font-family:var(--mono);font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);margin-bottom:.35rem}
 .reg-form input{width:100%;padding:.7rem .8rem;background:var(--ink2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:.9rem;margin-bottom:1rem}
-.reg-form .selected-slot{font-size:.85rem;color:var(--text2);margin-bottom:1.2rem;padding:.6rem .8rem;background:var(--ink2);border-radius:6px;border-left:2px solid var(--signal)}
-.reg-form button{width:100%;padding:.9rem;background:var(--signal);color:#fff;border:none;border-radius:8px;font-family:var(--mono);font-weight:700;font-size:.9rem;cursor:pointer}
+.reg-form button{width:100%;padding:.9rem;background:var(--ignite);color:var(--ink);border:none;border-radius:8px;font-family:var(--mono);font-weight:700;font-size:.9rem;cursor:pointer}
 .reg-form .err{color:var(--ignite2);font-size:.8rem;margin-top:.5rem;min-height:1.1em}
 
-/* ── WAITING VIEW ── */
-.waiting{display:none;text-align:center;padding:3rem 0}
-.waiting.active{display:block}
-.waiting .clock{font-family:var(--mono);font-size:3rem;font-weight:700;color:var(--ignite);margin:1.5rem 0}
-.waiting p{color:var(--text2)}
-
-/* ── BROADCAST VIEW ── */
-.broadcast{display:none}
-.broadcast.active{display:block}
-.stream-badge{display:inline-flex;align-items:center;gap:.5rem;font-family:var(--mono);font-size:.72rem;color:var(--ignite);margin-bottom:.8rem}
-.stream-badge .dot{width:7px;height:7px;border-radius:50%;background:var(--ignite);animation:pulse 1.2s infinite}
-.video-wrap{position:relative;background:#000;border-radius:10px;overflow:hidden;aspect-ratio:16/9;margin-bottom:1rem}
-.video-wrap video{width:100%;height:100%;display:block;object-fit:contain;background:#000}
-.video-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.7);flex-direction:column;gap:1rem;text-align:center;padding:2rem}
-.video-overlay button{padding:.9rem 1.6rem;background:var(--ignite);color:var(--ink);border:none;border-radius:8px;font-family:var(--mono);font-weight:700;cursor:pointer}
-.mute-toggle{position:absolute;bottom:.8rem;right:.8rem;background:rgba(0,0,0,.6);border:1px solid var(--border2);color:var(--text);border-radius:6px;padding:.4rem .6rem;font-size:.9rem;cursor:pointer}
-
-.chat-box{background:var(--ink3);border:1px solid var(--border2);border-radius:10px;display:flex;flex-direction:column;height:280px}
-.chat-log{flex:1;overflow-y:auto;padding:.9rem;display:flex;flex-direction:column;gap:.5rem}
-.chat-msg{font-size:.83rem;line-height:1.4}
-.chat-msg .name{font-family:var(--mono);font-weight:700;color:var(--signal2);margin-right:.4rem}
-.chat-msg.mine .name{color:var(--ignite)}
-.chat-input-row{display:flex;gap:.5rem;padding:.7rem;border-top:1px solid var(--border)}
-.chat-input-row input{flex:1;padding:.6rem .7rem;background:var(--ink2);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:.85rem}
-.chat-input-row button{padding:.6rem 1rem;background:var(--signal);color:#fff;border:none;border-radius:6px;font-family:var(--mono);font-size:.8rem;cursor:pointer}
-
-.end-screen{display:none;text-align:center;padding:2.5rem 1.5rem;background:var(--ink3);border:1px solid var(--border2);border-radius:12px;margin-top:1rem}
-.end-screen.active{display:block}
-.end-screen h2{font-family:var(--serif);font-weight:800;font-size:1.6rem;margin-bottom:.8rem}
-.end-screen p{color:var(--text2);margin-bottom:1.5rem}
-.end-screen a.cta{display:inline-block;padding:1rem 1.8rem;background:var(--ignite);color:var(--ink);border-radius:8px;font-family:var(--mono);font-weight:700;text-decoration:none}
-
-@media(max-width:640px){.slot-row{flex-direction:column;align-items:stretch}}
+.already-box{max-width:420px;margin:0 auto;background:var(--ink3);border:1px solid var(--border2);border-radius:10px;padding:1.4rem;text-align:center;display:none}
+.already-box.active{display:block}
+.already-box a.cta{display:inline-block;margin-top:1rem;padding:.85rem 1.5rem;background:var(--signal);color:#fff;border-radius:8px;text-decoration:none;font-family:var(--mono);font-weight:700;font-size:.88rem}
 </style>
 </head>
 <body>
@@ -106,141 +66,66 @@ h1{font-family:var(--serif);font-weight:800;font-size:clamp(2rem,5vw,3rem);line-
 </div>
 
 <div class="wrap">
-
-  <!-- ═══════════ REGISTER VIEW ═══════════ -->
-  <div id="view-register">
-    <div class="hero">
-      <span class="eyebrow"><span class="dot"></span> <span id="tEyebrow">Bezplatné vysielanie</span></span>
-      <h1 id="tH1">Ako sa dostať na vysnívanú vysokú školu — aj keď ti ostáva len pár týždňov a nechceš sa učiť dňom i nocou</h1>
-      <p class="sub" id="tSub">30-minútové vysielanie zadarmo: presná AI stratégia na prijímačky, ktorú môžeš použiť ešte dnes.</p>
-    </div>
-
-    <button class="instant-cta" id="watchNowBtn">▶ <span id="tWatchNow">Pozrieť teraz</span></button>
-
-    <div class="slot-block">
-      <h3 id="tTodayLabel">Dnes</h3>
-      <div class="slot-row" id="todaySlots"></div>
-    </div>
-    <div class="slot-block">
-      <h3 id="tTomorrowLabel">Zajtra</h3>
-      <div class="slot-row" id="tomorrowSlots"></div>
-    </div>
-
-    <div class="reg-form" id="regForm">
-      <div class="selected-slot" id="selectedSlotLabel"></div>
-      <label id="tNameLabel">Meno</label>
-      <input type="text" id="regName" placeholder="Tvoje meno">
-      <label id="tEmailLabel">Email</label>
-      <input type="email" id="regEmail" placeholder="tvoj@email.sk">
-      <button id="regSubmitBtn"><span id="tRegSubmit">Rezervovať miesto</span></button>
-      <div class="err" id="regErr"></div>
-    </div>
+  <div class="hero">
+    <span class="eyebrow"><span class="dot"></span> <span id="tEyebrow">Bezplatné vysielanie</span></span>
+    <h1 id="tH1">Ako sa dostať na vysnívanú vysokú školu — aj keď ti ostáva len pár týždňov a nechceš sa učiť dňom i nocou</h1>
+    <p class="sub" id="tSub">30-minútové vysielanie zadarmo, naživo, každý štvrtok o 20:00: presná AI stratégia na prijímačky, ktorú môžeš použiť ešte dnes.</p>
   </div>
 
-  <!-- ═══════════ WAITING VIEW ═══════════ -->
-  <div id="view-waiting" class="waiting">
-    <p id="tWaitingLead">Tvoje miesto je rezervované. Vysielanie začína o</p>
-    <div class="clock" id="waitClock">--:--:--</div>
-    <p id="tWaitingNote">Nechaj si túto stránku otvorenú — spustí sa automaticky.</p>
+  <div class="next-session">
+    <div class="label" id="tNextLabel">Najbližší termín</div>
+    <div class="date" id="nextSessionDate">—</div>
   </div>
 
-  <!-- ═══════════ BROADCAST VIEW ═══════════ -->
-  <div id="view-broadcast" class="broadcast">
-    <div class="stream-badge"><span class="dot"></span> <span id="tLiveBadge">NAŽIVO</span></div>
-    <div class="video-wrap" id="videoWrap">
-      <video id="webinarVideo" playsinline></video>
-      <div class="video-overlay" id="startOverlay">
-        <p id="tStartOverlayText">Klikni pre spustenie vysielania so zvukom</p>
-        <button id="startOverlayBtn">▶</button>
-      </div>
-      <button class="mute-toggle" id="muteToggle">🔊</button>
-    </div>
-    <div class="chat-box">
-      <div class="chat-log" id="chatLog"></div>
-      <div class="chat-input-row">
-        <input type="text" id="chatInput" placeholder="Napíš správu…">
-        <button id="chatSendBtn"><span id="tChatSend">Poslať</span></button>
-      </div>
-    </div>
-    <div class="end-screen" id="endScreen">
-      <h2 id="tEndTitle">Vysielanie sa skončilo</h2>
-      <p id="tEndBody">Ak si to stihol/a, čaká na teba špeciálna ponuka len pre účastníkov.</p>
-      <a class="cta" href="/ponuka" id="tEndCta">Zobraziť ponuku →</a>
-    </div>
+  <div class="reg-form" id="regForm">
+    <label id="tNameLabel">Meno</label>
+    <input type="text" id="regName" placeholder="Tvoje meno">
+    <label id="tEmailLabel">Email</label>
+    <input type="email" id="regEmail" placeholder="tvoj@email.sk">
+    <button id="regSubmitBtn"><span id="tRegSubmit">Zaregistrovať sa zadarmo</span></button>
+    <div class="err" id="regErr"></div>
   </div>
 
+  <div class="already-box" id="alreadyBox">
+    <p id="tAlreadyText">Si už zaregistrovaný/á na najbližšie vysielanie.</p>
+    <a class="cta" href="/webinar/live" id="tAlreadyCta">Prejsť na vysielanie →</a>
+  </div>
 </div>
 
 <script>
-// ==================== KONFIGURÁCIA — uprav podľa skutočného videa ====================
-const VIDEO_URL = 'REPLACE_WITH_REAL_VIDEO_URL.mp4'; // TODO: nahraď skutočnou URL webinárového videa
-const VIDEO_DURATION_SECONDS = 45 * 60; // TODO: nastav na skutočnú dĺžku videa (teraz 45 min placeholder)
-const SLOT_HOURS = [10, 13, 16, 19, 21]; // hodiny (24h, lokálny čas prehliadača), kedy sa denne "spúšťa" vysielanie
-const JOIN_GRACE_SECONDS = VIDEO_DURATION_SECONDS; // ako dlho po štarte sa dá ešte pripojiť (= kým video nedobehne)
+// Vysiela sa iba raz týždenne — každý štvrtok o 20:00 (lokálny čas
+// prehliadača). Rovnaký princíp evergreen "join-in-progress" ako predtým,
+// len s jediným pevným termínom namiesto viacerých denných slotov.
+const SLOT_WEEKDAY = 4; // 0=Ne,1=Po,2=Ut,3=St,4=Št,5=Pi,6=So
+const SLOT_HOUR = 20;
+const VIDEO_DURATION_SECONDS = 45 * 60; // TODO: nastav na skutočnú dĺžku videa (zdieľané s webinar-live.html)
 
-function slotsForDay(daysFromNow) {
-  const base = new Date();
-  base.setDate(base.getDate() + daysFromNow);
-  return SLOT_HOURS.map(h => { const d = new Date(base); d.setHours(h, 0, 0, 0); return d; });
-}
-function slotStatus(slotDate) {
-  const elapsed = (Date.now() - slotDate.getTime()) / 1000;
-  if (elapsed < 0) return 'upcoming';
-  if (elapsed < JOIN_GRACE_SECONDS) return 'live';
-  return 'ended';
-}
-function fmtTime(d) {
-  return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
-}
-function fmtClock(seconds) {
-  const s = Math.max(0, Math.floor(seconds));
-  const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
-  return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(sec).padStart(2, '0');
-}
-
-let pendingSlot = null; // Date zvoleného slotu (alebo "teraz" pre instant)
-let session = null; // { slotStartMs, name, email } po registrácii
-
-function renderSlots() {
-  const todayEl = document.getElementById('todaySlots');
-  const tomorrowEl = document.getElementById('tomorrowSlots');
-  todayEl.innerHTML = '';
-  tomorrowEl.innerHTML = '';
-  slotsForDay(0).forEach(slot => {
-    const status = slotStatus(slot);
-    if (status === 'ended') return; // dnešné už prebehnuté sloty sa neponúkajú
-    const btn = document.createElement('button');
-    btn.className = 'slot-btn' + (status === 'live' ? ' live' : '');
-    btn.textContent = fmtTime(slot) + (status === 'live' ? ' · ' + t('joinLive') : '');
-    btn.onclick = () => selectSlot(slot);
-    todayEl.appendChild(btn);
-  });
-  if (!todayEl.children.length) {
-    const p = document.createElement('p');
-    p.style.color = 'var(--text3)'; p.style.fontSize = '.85rem';
-    p.textContent = t('noMoreToday');
-    todayEl.appendChild(p);
+function nextThursdayEight() {
+  const now = new Date();
+  const target = new Date(now);
+  const daysUntil = (SLOT_WEEKDAY - now.getDay() + 7) % 7;
+  target.setDate(now.getDate() + daysUntil);
+  target.setHours(SLOT_HOUR, 0, 0, 0);
+  if (target.getTime() <= now.getTime()) {
+    const elapsedIfToday = (now.getTime() - target.getTime()) / 1000;
+    if (daysUntil === 0 && elapsedIfToday < VIDEO_DURATION_SECONDS) return target; // dnes, ešte prebieha
+    target.setDate(target.getDate() + 7); // termín na tento týždeň už doznel — posuň o týždeň
   }
-  slotsForDay(1).forEach(slot => {
-    const btn = document.createElement('button');
-    btn.className = 'slot-btn';
-    btn.textContent = fmtTime(slot);
-    btn.onclick = () => selectSlot(slot);
-    tomorrowEl.appendChild(btn);
-  });
+  return target;
 }
 
-function selectSlot(slot) {
-  pendingSlot = slot;
-  const label = document.getElementById('selectedSlotLabel');
-  const status = slotStatus(slot);
-  const dayWord = slot.toDateString() === new Date().toDateString() ? t('today') : t('tomorrow');
-  label.textContent = (status === 'live' ? t('joiningNow') : t('reservingFor')) + ' ' + dayWord + ' ' + fmtTime(slot);
-  document.getElementById('regForm').classList.add('active');
-  document.getElementById('regForm').scrollIntoView({ behavior: 'smooth', block: 'center' });
+function fmtSessionDate(d, l) {
+  const dayNamesSk = ['nedeľu', 'pondelok', 'utorok', 'stredu', 'štvrtok', 'piatok', 'sobotu'];
+  const dayNamesCs = ['neděli', 'pondělí', 'úterý', 'středu', 'čtvrtek', 'pátek', 'sobotu'];
+  const names = l === 'cs' ? dayNamesCs : dayNamesSk;
+  const dayName = names[d.getDay()];
+  const dd = String(d.getDate()).padStart(2, '0');
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const hh = String(d.getHours()).padStart(2, '0');
+  return dayName.charAt(0).toUpperCase() + dayName.slice(1) + ' ' + dd + '.' + mm + ' o ' + hh + ':00';
 }
 
-document.getElementById('watchNowBtn').onclick = () => selectSlot(new Date());
+let nextSlot = nextThursdayEight();
 
 document.getElementById('regSubmitBtn').onclick = () => {
   const name = document.getElementById('regName').value.trim();
@@ -248,174 +133,23 @@ document.getElementById('regSubmitBtn').onclick = () => {
   const errEl = document.getElementById('regErr');
   if (!email || !email.includes('@')) { errEl.textContent = t('emailError'); return; }
   errEl.textContent = '';
-  session = { slotStartMs: pendingSlot.getTime(), name: name || null, email };
+  const session = { slotStartMs: nextSlot.getTime(), name: name || null, email };
   localStorage.setItem('sp_webinar_session', JSON.stringify(session));
-  routeToCurrentState();
+  location.href = '/webinar/live';
 };
 
-// Rovnaké smerovanie pri prvom vstupe aj po znovunačítaní stránky (ak už
-// niekto registrovaný má rozbehnutú reláciu uloženú v localStorage).
-function routeToCurrentState() {
-  if (!session) return;
-  const status = slotStatus(new Date(session.slotStartMs));
-  showView(status === 'upcoming' ? 'waiting' : 'broadcast');
-  if (status === 'upcoming') startWaitingCountdown();
-  else startBroadcast();
-}
-
-function showView(name) {
-  ['register', 'waiting', 'broadcast'].forEach(v => {
-    document.getElementById('view-' + v).classList.toggle('active', v === name);
-  });
-}
-
-let waitingTimer = null;
-function startWaitingCountdown() {
-  if (waitingTimer) clearInterval(waitingTimer);
-  function tick() {
-    const remaining = session.slotStartMs - Date.now();
-    if (remaining <= 0) { clearInterval(waitingTimer); showView('broadcast'); startBroadcast(); return; }
-    document.getElementById('waitClock').textContent = fmtClock(remaining / 1000);
-  }
-  tick();
-  waitingTimer = setInterval(tick, 1000);
-}
-
-// ==================== BROADCAST: video synchronizovane na realny cas ====================
-let broadcastStarted = false;
-let syncTimer = null;
-let endedShown = false;
-
-function currentElapsedSeconds() {
-  return (Date.now() - session.slotStartMs) / 1000;
-}
-
-function startBroadcast() {
-  if (broadcastStarted) return;
-  broadcastStarted = true;
-  const video = document.getElementById('webinarVideo');
-  video.src = VIDEO_URL;
-
-  const elapsed = currentElapsedSeconds();
-  if (elapsed >= VIDEO_DURATION_SECONDS) { showEndScreen(); return; }
-
-  video.addEventListener('loadedmetadata', () => {
-    video.currentTime = Math.min(currentElapsedSeconds(), video.duration || VIDEO_DURATION_SECONDS);
-    attemptAutoplay();
-  });
-
-  // Nedá sa preskočiť dopredu — ak sa currentTime odchýli od skutočnej
-  // "živej" pozície (napr. cez klávesové skratky), vráti sa naspäť.
-  video.addEventListener('seeking', () => {
-    const expected = currentElapsedSeconds();
-    if (Math.abs(video.currentTime - expected) > 2) video.currentTime = expected;
-  });
-  video.addEventListener('pause', () => { if (!endedShown) video.play().catch(() => {}); });
-
-  document.getElementById('muteToggle').onclick = () => {
-    video.muted = !video.muted;
-    document.getElementById('muteToggle').textContent = video.muted ? '🔇' : '🔊';
-  };
-
-  seedPastChatMessages(elapsed);
-  syncTimer = setInterval(syncTick, 1000);
-}
-
-function attemptAutoplay() {
-  const video = document.getElementById('webinarVideo');
-  const overlay = document.getElementById('startOverlay');
-  video.play().then(() => { overlay.style.display = 'none'; }).catch(() => {
-    overlay.style.display = 'flex';
-    document.getElementById('startOverlayBtn').onclick = () => {
-      video.muted = false;
-      video.play().then(() => { overlay.style.display = 'none'; }).catch(() => {});
-    };
-  });
-}
-
-function syncTick() {
-  const video = document.getElementById('webinarVideo');
-  const elapsed = currentElapsedSeconds();
-  if (elapsed >= VIDEO_DURATION_SECONDS) { clearInterval(syncTimer); showEndScreen(); return; }
-  // Jemná korekcia driftu (napr. keď je karta na pozadí a playback sa spomalí).
-  if (video.duration && Math.abs(video.currentTime - elapsed) > 3) video.currentTime = elapsed;
-  revealDueMessages(elapsed);
-}
-
-function showEndScreen() {
-  if (endedShown) return;
-  endedShown = true;
-  const video = document.getElementById('webinarVideo');
-  video.pause();
-  document.getElementById('endScreen').classList.add('active');
-}
-
-// ==================== SIMULOVANÝ ŽIVÝ CHAT ====================
-// Časy sú sekundy od začiatku videa — pri neskoršom pripojení sa všetky
-// správy s t <= elapsed zobrazia naraz (ako history), ostatné kvapkajú
-// v reálnom čase presne ako pri skutočnom naživo vysielaní.
-const CHAT_SCRIPT = [
-  { t: 15, name: 'Peťo', text: 'Ahoj všetci! 👋' },
-  { t: 40, name: 'Zuzka K.', text: 'Konečne som stihla, ideme na to!' },
-  { t: 90, name: 'Martin S.', text: 'Toto ma fakt zaujíma, syn ide budúci rok na prijímačky' },
-  { t: 180, name: 'Ivana', text: 'Super, presne som toto potrebovala' },
-  { t: 310, name: 'Tomáš', text: 'Počkať, appka to vie sama vygenerovať? 🤯' },
-  { t: 420, name: 'Katka B.', text: 'My sme skúšali klasické knihy a nulový posun' },
-  { t: 560, name: 'Robo', text: 'Toto dáva zmysel, konečne niekto vysvetľuje prečo' },
-  { t: 700, name: 'Simona', text: 'Koľko otázok tam reálne je?' },
-  { t: 850, name: 'Filip', text: 'Presne toto mi na iných prípravách chýbalo' },
-  { t: 1000, name: 'Lucia', text: 'Toto so spätnou väzbou znie skvele' },
-  { t: 1150, name: 'Dominik', text: 'A funguje to aj na právo?' },
-  { t: 1300, name: 'Nikola', text: 'Konečne AI, ktorá pomáha namiesto strašenia 😄' },
-  { t: 1450, name: 'Peter K.', text: 'Toto by som potreboval už minulý rok' },
-  { t: 1600, name: 'Zuzana M.', text: 'Kde sa dá appka vyskúšať?' },
-  { t: 1750, name: 'Adam', text: 'Toto vyzerá fakt profesionálne' },
-  { t: 1900, name: 'Miroslava', text: 'Idem sa pozrieť na tú ponuku po webinári 👀' },
-  { t: 2050, name: 'Jakub', text: 'Práve som si pozrel tú zľavu, oplatí sa!' },
-  { t: 2200, name: 'Veronika', text: 'Vďaka za skvelý webinár!' },
-  { t: 2350, name: 'Štefan', text: 'Kúpil som Premium, teším sa 🎉' },
-  { t: 2500, name: 'Alžbeta', text: 'Toto rozhodne odporúčam všetkým, čo idú na prijímačky' }
-];
-const FAKE_REPLY_NAMES = ['Peťo', 'Zuzka K.', 'Martin S.', 'Ivana', 'Tomáš', 'Robo', 'Filip', 'Adam'];
-const FAKE_REPLIES = ['👍', 'presne tak!', 'aj ja si to myslím', 'super otázka', 'to isté som chcel/a napísať 😄'];
-
-let chatShownUpTo = -1; // index v CHAT_SCRIPT po ktory uz bolo zobrazene
-
-function appendChatMessage(name, text, mine) {
-  const log = document.getElementById('chatLog');
-  const el = document.createElement('div');
-  el.className = 'chat-msg' + (mine ? ' mine' : '');
-  el.innerHTML = '<span class="name">' + escapeHtml(name) + ':</span>' + escapeHtml(text);
-  log.appendChild(el);
-  log.scrollTop = log.scrollHeight;
-}
-function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-
-function seedPastChatMessages(elapsedNow) {
-  CHAT_SCRIPT.forEach((msg, i) => {
-    if (msg.t <= elapsedNow) { appendChatMessage(msg.name, msg.text, false); chatShownUpTo = i; }
-  });
-}
-function revealDueMessages(elapsedNow) {
-  for (let i = chatShownUpTo + 1; i < CHAT_SCRIPT.length; i++) {
-    if (CHAT_SCRIPT[i].t <= elapsedNow) { appendChatMessage(CHAT_SCRIPT[i].name, CHAT_SCRIPT[i].text, false); chatShownUpTo = i; }
-    else break;
-  }
-}
-
-document.getElementById('chatSendBtn').onclick = sendChatMessage;
-document.getElementById('chatInput').addEventListener('keydown', e => { if (e.key === 'Enter') sendChatMessage(); });
-function sendChatMessage() {
-  const input = document.getElementById('chatInput');
-  const text = input.value.trim();
-  if (!text) return;
-  appendChatMessage((session && session.name) ? session.name : t('you'), text, true);
-  input.value = '';
-  setTimeout(() => {
-    const name = FAKE_REPLY_NAMES[Math.floor(Math.random() * FAKE_REPLY_NAMES.length)];
-    const reply = FAKE_REPLIES[Math.floor(Math.random() * FAKE_REPLIES.length)];
-    appendChatMessage(name, reply, false);
-  }, 3000 + Math.random() * 4000);
+function checkExistingRegistration() {
+  try {
+    const saved = localStorage.getItem('sp_webinar_session');
+    if (!saved) return;
+    const session = JSON.parse(saved);
+    // Existujúca registrácia je stále platná, ak smeruje na ten istý
+    // (alebo novší) termín, aký je práve aktuálny najbližší štvrtok.
+    if (session.slotStartMs >= nextSlot.getTime() - 6 * 24 * 60 * 60 * 1000) {
+      document.getElementById('regForm').style.display = 'none';
+      document.getElementById('alreadyBox').classList.add('active');
+    }
+  } catch (e) {}
 }
 
 // ==================== i18n ====================
@@ -424,29 +158,19 @@ const T = {
     pageTitle: 'Bezplatné vysielanie — SP Tréner',
     eyebrow: 'Bezplatné vysielanie',
     h1: 'Ako sa dostať na vysnívanú vysokú školu — aj keď ti ostáva len pár týždňov a nechceš sa učiť dňom i nocou',
-    sub: '30-minútové vysielanie zadarmo: presná AI stratégia na prijímačky, ktorú môžeš použiť ešte dnes.',
-    watchNow: 'Pozrieť teraz',
-    todayLabel: 'Dnes', tomorrowLabel: 'Zajtra',
-    joinLive: 'práve beží', noMoreToday: 'Dnešné vysielania už skončili — vyber si zajtrajší termín, alebo klikni "Pozrieť teraz".',
-    today: 'dnes', tomorrow: 'zajtra', joiningNow: 'Pripájaš sa práve teraz —', reservingFor: 'Rezervuješ si miesto na',
-    nameLabel: 'Meno', emailLabel: 'Email', regSubmit: 'Rezervovať miesto', emailError: 'Zadaj platný email.',
-    waitingLead: 'Tvoje miesto je rezervované. Vysielanie začína o', waitingNote: 'Nechaj si túto stránku otvorenú — spustí sa automaticky.',
-    liveBadge: 'NAŽIVO', startOverlayText: 'Klikni pre spustenie vysielania so zvukom', chatSend: 'Poslať', you: 'Ty',
-    endTitle: 'Vysielanie sa skončilo', endBody: 'Ak si to stihol/a, čaká na teba špeciálna ponuka len pre účastníkov.', endCta: 'Zobraziť ponuku →'
+    sub: '30-minútové vysielanie zadarmo, naživo, každý štvrtok o 20:00: presná AI stratégia na prijímačky, ktorú môžeš použiť ešte dnes.',
+    nextLabel: 'Najbližší termín',
+    nameLabel: 'Meno', emailLabel: 'Email', regSubmit: 'Zaregistrovať sa zadarmo', emailError: 'Zadaj platný email.',
+    alreadyText: 'Si už zaregistrovaný/á na najbližšie vysielanie.', alreadyCta: 'Prejsť na vysielanie →'
   },
   cs: {
     pageTitle: 'Bezplatné vysílání — SP Tréner',
     eyebrow: 'Bezplatné vysílání',
     h1: 'Jak se dostat na vysněnou vysokou školu — i když ti zbývá jen pár týdnů a nechceš se učit dnem i nocí',
-    sub: '30minutové vysílání zdarma: přesná AI strategie na přijímačky, kterou můžeš použít ještě dnes.',
-    watchNow: 'Podívat se teď',
-    todayLabel: 'Dnes', tomorrowLabel: 'Zítra',
-    joinLive: 'právě běží', noMoreToday: 'Dnešní vysílání už skončila — vyber si zítřejší termín, nebo klikni "Podívat se teď".',
-    today: 'dnes', tomorrow: 'zítra', joiningNow: 'Připojuješ se právě teď —', reservingFor: 'Rezervuješ si místo na',
-    nameLabel: 'Jméno', emailLabel: 'Email', regSubmit: 'Rezervovat místo', emailError: 'Zadej platný email.',
-    waitingLead: 'Tvoje místo je rezervované. Vysílání začíná za', waitingNote: 'Nech si tuto stránku otevřenou — spustí se automaticky.',
-    liveBadge: 'ŽIVĚ', startOverlayText: 'Klikni pro spuštění vysílání se zvukem', chatSend: 'Poslat', you: 'Ty',
-    endTitle: 'Vysílání skončilo', endBody: 'Pokud jsi to stihl/a, čeká na tebe speciální nabídka jen pro účastníky.', endCta: 'Zobrazit nabídku →'
+    sub: '30minutové vysílání zdarma, naživo, každý čtvrtek ve 20:00: přesná AI strategie na přijímačky, kterou můžeš použít ještě dnes.',
+    nextLabel: 'Nejbližší termín',
+    nameLabel: 'Jméno', emailLabel: 'Email', regSubmit: 'Zaregistrovat se zdarma', emailError: 'Zadej platný email.',
+    alreadyText: 'Už jsi zaregistrovaný/á na nejbližší vysílání.', alreadyCta: 'Přejít na vysílání →'
   }
 };
 
@@ -464,32 +188,17 @@ function setLang(l) {
   document.getElementById('tEyebrow').textContent = t('eyebrow');
   document.getElementById('tH1').textContent = t('h1');
   document.getElementById('tSub').textContent = t('sub');
-  document.getElementById('tWatchNow').textContent = t('watchNow');
-  document.getElementById('tTodayLabel').textContent = t('todayLabel');
-  document.getElementById('tTomorrowLabel').textContent = t('tomorrowLabel');
+  document.getElementById('tNextLabel').textContent = t('nextLabel');
   document.getElementById('tNameLabel').textContent = t('nameLabel');
   document.getElementById('tEmailLabel').textContent = t('emailLabel');
   document.getElementById('tRegSubmit').textContent = t('regSubmit');
-  document.getElementById('tWaitingLead').textContent = t('waitingLead');
-  document.getElementById('tWaitingNote').textContent = t('waitingNote');
-  document.getElementById('tLiveBadge').textContent = t('liveBadge');
-  document.getElementById('tStartOverlayText').textContent = t('startOverlayText');
-  document.getElementById('tChatSend').textContent = t('chatSend');
-  document.getElementById('tEndTitle').textContent = t('endTitle');
-  document.getElementById('tEndBody').textContent = t('endBody');
-  document.getElementById('tEndCta').textContent = t('endCta');
-
-  renderSlots();
+  document.getElementById('tAlreadyText').textContent = t('alreadyText');
+  document.getElementById('tAlreadyCta').textContent = t('alreadyCta');
+  document.getElementById('nextSessionDate').textContent = fmtSessionDate(nextSlot, l);
 }
 
-// ==================== INIT ====================
-try {
-  const saved = localStorage.getItem('sp_webinar_session');
-  if (saved) session = JSON.parse(saved);
-} catch (e) { session = null; }
-
 setLang(lang);
-if (session) routeToCurrentState();
+checkExistingRegistration();
 </script>
 </body>
 </html>
