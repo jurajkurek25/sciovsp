@@ -518,7 +518,7 @@ function courseFormHtml(c) {
     <textarea class="cf-instructor-bio" placeholder="Krátky bio text lektora" style="min-height:60px">${c?.instructor_bio||''}</textarea>
     ${c?.instructor_id ? `
     <h4 style="margin-top:1.2rem">Podiel platformy (kurz od inštruktora ${(c.instructor?.name || c.instructor?.email || '').replace(/</g,'&lt;')})</h4>
-    <p class="muted" style="margin-top:-.4rem">% z ceny, ktoré si necháva platforma. Zvyšok dostane inštruktor. Pri kúpe cez jeho vlastný referral odkaz platí nižšia sadzba (referral), lebo zákazníka priviedol sám.</p>
+    <p class="muted" style="margin-top:-.4rem">% z ceny, ktoré si necháva platforma — počíta sa až z ceny po odpočítaní poplatku Stripe (Ngroup, s. r. o. nie je platiteľom DPH, takže DPH sa tu nerieši). Zvyšok dostane inštruktor. Pri kúpe cez jeho vlastný referral odkaz platí nižšia sadzba (referral), lebo zákazníka priviedol sám.</p>
     <div class="formrow">
       <div style="flex:1;min-width:220px"><label class="muted" style="display:block;margin-bottom:.3rem">Bežná kúpa — podiel platformy (%)</label><input class="cf-platform-cut" type="number" min="0" max="100" value="${c?.platform_cut_percent ?? 50}"></div>
       <div style="flex:1;min-width:220px"><label class="muted" style="display:block;margin-bottom:.3rem">Cez referral inštruktora — podiel platformy (%)</label><input class="cf-referral-cut" type="number" min="0" max="100" value="${c?.referral_cut_percent ?? 10}"></div>

@@ -159,7 +159,7 @@ const T = {
     exampleTitle: 'Koľko si reálne zarobíš', exampleIntro: 'Konkrétny príklad na kurze za 50 €:',
     exampleNormalLabel: 'Bežný predaj', exampleNormalAmount: '25 €', exampleNormalBody: 'Platforma si necháva svoj podiel (bežne 50 %), zvyšok je tvoj.',
     exampleReferralLabel: 'Predaj cez tvoj odkaz', exampleReferralAmount: '45 €', exampleReferralBody: 'Priviedol si zákazníka sám — platforma si necháva len malý podiel (bežne 10 %).',
-    exampleNote: 'Presné percentá vidíš vopred pri každom kurze — môžu sa individuálne líšiť.',
+    exampleNote: 'Presné percentá vidíš vopred pri každom kurze — môžu sa individuálne líšiť. Podiel sa počíta z ceny po odpočítaní poplatku Stripe (DPH sa nerieši, keďže Ngroup, s. r. o. nie je platiteľom DPH).',
     howTitle: 'Ako to funguje',
     how1: 'Prihlásiš sa cez Google — účet sa založí okamžite.',
     how2: 'Potvrdíš zmluvné podmienky (raz, trvá to menej ako minútu).',
@@ -229,7 +229,7 @@ const T = {
 
     submissionVerdict: 'Verdikt AI:', submissionPass: 'úspešné', submissionFail: 'neúspešné', submissionOpenFile: 'Otvoriť súbor →', submissionsNone: 'Zatiaľ žiadne nahraté materiály.',
 
-    earningsUnpaidNote: 'nevyplatené ({n} predajov)', ibanLabel: 'IBAN pre výplatu', requestPayoutBtn: 'Požiadať o výplatu',
+    earningsUnpaidNote: 'nevyplatené ({n} predajov)', earningsFeeNote: 'Podiel je počítaný z ceny po odpočítaní poplatku Stripe.', ibanLabel: 'IBAN pre výplatu', requestPayoutBtn: 'Požiadať o výplatu',
     recentSalesTitle: 'Posledné predaje', noSales: 'Zatiaľ žiadne predaje.', referralBadge: 'referral',
     payoutHistoryTitle: 'História výplat', noPayouts: 'Zatiaľ žiadne výplaty.', payoutPaid: 'vyplatené', payoutPending: 'čaká', requestSent: 'Žiadosť odoslaná.',
 
@@ -276,7 +276,7 @@ const T = {
     exampleTitle: 'Kolik si reálně vyděláš', exampleIntro: 'Konkrétní příklad na kurzu za 50 €:',
     exampleNormalLabel: 'Běžný prodej', exampleNormalAmount: '25 €', exampleNormalBody: 'Platforma si nechává svůj podíl (běžně 50 %), zbytek je tvůj.',
     exampleReferralLabel: 'Prodej přes tvůj odkaz', exampleReferralAmount: '45 €', exampleReferralBody: 'Přivedl jsi zákazníka sám — platforma si nechává jen malý podíl (běžně 10 %).',
-    exampleNote: 'Přesná procenta vidíš předem u každého kurzu — mohou se individuálně lišit.',
+    exampleNote: 'Přesná procenta vidíš předem u každého kurzu — mohou se individuálně lišit. Podíl se počítá z ceny po odečtení poplatku Stripe (DPH se neřeší, jelikož Ngroup, s. r. o. není plátcem DPH).',
     howTitle: 'Jak to funguje',
     how1: 'Přihlásíš se přes Google — účet se založí okamžitě.',
     how2: 'Potvrdíš smluvní podmínky (jednou, trvá to méně než minutu).',
@@ -346,7 +346,7 @@ const T = {
 
     submissionVerdict: 'Verdikt AI:', submissionPass: 'úspěšné', submissionFail: 'neúspěšné', submissionOpenFile: 'Otevřít soubor →', submissionsNone: 'Zatím žádné nahrané materiály.',
 
-    earningsUnpaidNote: 'nevyplacené ({n} prodejů)', ibanLabel: 'IBAN pro výplatu', requestPayoutBtn: 'Požádat o výplatu',
+    earningsUnpaidNote: 'nevyplacené ({n} prodejů)', earningsFeeNote: 'Podíl je počítán z ceny po odečtení poplatku Stripe.', ibanLabel: 'IBAN pro výplatu', requestPayoutBtn: 'Požádat o výplatu',
     recentSalesTitle: 'Poslední prodeje', noSales: 'Zatím žádné prodeje.', referralBadge: 'referral',
     payoutHistoryTitle: 'Historie výplat', noPayouts: 'Zatím žádné výplaty.', payoutPaid: 'vyplaceno', payoutPending: 'čeká', requestSent: 'Žádost odeslána.',
 
@@ -1109,6 +1109,7 @@ async function renderEarningsTab() {
     <div class="card">
       <div class="stat">${eur(data.unpaidCents)}</div>
       <p class="muted">${t('earningsUnpaidNote', { n: data.unpaidSaleCount })}</p>
+      <p class="muted" style="font-size:.78rem">${t('earningsFeeNote')}</p>
       <div class="field" style="margin-top:1rem;max-width:320px"><label>${t('ibanLabel')}</label><input id="payoutIban" value="${escapeHtml(me.iban || '')}"></div>
       <button class="btn" id="requestPayoutBtn" ${data.unpaidCents ? '' : 'disabled'}>${t('requestPayoutBtn')}</button>
       <div class="feedback" id="payoutFeedback"></div>
