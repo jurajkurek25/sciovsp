@@ -108,9 +108,11 @@ h1 .accent{color:var(--ignite);font-style:italic}
 .course-groups{display:grid;grid-template-columns:1fr 1fr;gap:1.3rem}
 .course-card{background:var(--ink3);border:1px solid var(--border);border-radius:6px;padding:1.4rem}
 .course-card h3{font-family:var(--mono);font-size:.82rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:1rem;display:flex;align-items:center;gap:.55rem;color:var(--signal)}
-.course-card ul{list-style:none;display:flex;flex-direction:column;gap:.6rem}
+.course-card ul{list-style:none;display:flex;flex-direction:column;gap:.9rem}
 .course-card li{font-size:.9rem;color:var(--text2);display:flex;gap:.6rem;align-items:baseline}
-.course-card li .idx{font-family:var(--mono);font-size:.72rem;color:var(--ignite2);flex-shrink:0}
+.course-card li .idx{font-family:var(--mono);font-size:.72rem;color:var(--ignite2);flex-shrink:0;padding-top:.15rem}
+.course-item-title{color:var(--text);font-weight:600}
+.course-item-desc{color:var(--text3);font-size:.8rem;margin-top:.2rem;line-height:1.45}
 
 /* ── bonuses ── */
 .bonuses{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem}
@@ -229,23 +231,23 @@ h1 .accent{color:var(--ignite);font-style:italic}
       <div class="course-card">
         <h3>◆ <span id="tUniTitle">Univerzálne — pre každého</span></h3>
         <ul>
-          <li><span class="idx">01</span> <span id="tUni1">TSP na jeden pokus (stratégia)</span></li>
-          <li><span class="idx">02</span> <span id="tUni2">Time manažment</span></li>
-          <li><span class="idx">03</span> <span id="tUni3">Ako sa efektívne učiť</span></li>
-          <li><span class="idx">04</span> <span id="tUni4">Ústny pohovor nanečisto</span></li>
-          <li><span class="idx">05</span> <span id="tUni5">Motivačný list a esej</span></li>
-          <li><span class="idx">06</span> <span id="tUni6">Zvládni stres pred prijímačkami</span></li>
+          <li><span class="idx">01</span> <div><div class="course-item-title" id="tUni1">TSP na jeden pokus (stratégia)</div><div class="course-item-desc" id="tUni1Desc">Časovanie, eliminačné techniky a najčastejšie pasce v teste študijných predpokladov.</div></div></li>
+          <li><span class="idx">02</span> <div><div class="course-item-title" id="tUni2">Time manažment</div><div class="course-item-desc" id="tUni2Desc">Ako si rozvrhnúť prípravu na mesiace dopredu, aby si sa na poslednú chvíľu neučil všetko naraz.</div></div></li>
+          <li><span class="idx">03</span> <div><div class="course-item-title" id="tUni3">Ako sa efektívne učiť</div><div class="course-item-desc" id="tUni3Desc">Techniky učenia (aktívne opakovanie, spaced repetition), ktoré si zapamätáš, nielen prečítaš.</div></div></li>
+          <li><span class="idx">04</span> <div><div class="course-item-title" id="tUni4">Ústny pohovor nanečisto</div><div class="course-item-desc" id="tUni4Desc">Nácvik typických otázok komisie a sebaprezentácie — na kameru, s reálnou spätnou väzbou.</div></div></li>
+          <li><span class="idx">05</span> <div><div class="course-item-title" id="tUni5">Motivačný list a esej</div><div class="course-item-desc" id="tUni5Desc">Ako napísať motivačný list, ktorý ťa odlíši od stoviek rovnakých prihlášok.</div></div></li>
+          <li><span class="idx">06</span> <div><div class="course-item-title" id="tUni6">Zvládni stres pred prijímačkami</div><div class="course-item-desc" id="tUni6Desc">Dýchacie a kognitívne techniky na deň D, aby ťa nervy nepripravili o výsledok, na ktorý máš.</div></div></li>
         </ul>
       </div>
       <div class="course-card">
         <h3>◆ <span id="tSpecTitle">Odborová knižnica</span></h3>
         <ul>
-          <li><span class="idx">01</span> <span id="tSpec1">Ako sa dostať na psychológiu</span></li>
-          <li><span class="idx">02</span> <span id="tSpec2">Biológia a chémia pre medicínu</span></li>
-          <li><span class="idx">03</span> <span id="tSpec3">Právo — testy a logické úlohy</span></li>
-          <li><span class="idx">04</span> <span id="tSpec4">Pedagogika — prijímačky a pohovor</span></li>
-          <li><span class="idx">05</span> <span id="tSpec5">Matematika a logika pre IT a techniku</span></li>
-          <li><span class="idx">06</span> <span id="tSpecNote">+ sprievodca pre rodičov</span></li>
+          <li><span class="idx">01</span> <div><div class="course-item-title" id="tSpec1">Ako sa dostať na psychológiu</div><div class="course-item-desc" id="tSpec1Desc">Čo presne testujú prijímačky na psychológiu a ako sa pripraviť s lektorkou, ktorá si tým sama prešla.</div></div></li>
+          <li><span class="idx">02</span> <div><div class="course-item-title" id="tSpec2">Biológia a chémia pre medicínu</div><div class="course-item-desc" id="tSpec2Desc">Zrýchlený prehľad učiva, na ktoré sa najčastejšie pýtajú prijímačky na medicínu, farmáciu a veterinu.</div></div></li>
+          <li><span class="idx">03</span> <div><div class="course-item-title" id="tSpec3">Právo — testy a logické úlohy</div><div class="course-item-desc" id="tSpec3Desc">Ako riešiť testy študijných predpokladov a logické úlohy typické pre právnické fakulty.</div></div></li>
+          <li><span class="idx">04</span> <div><div class="course-item-title" id="tSpec4">Pedagogika — prijímačky a pohovor</div><div class="course-item-desc" id="tSpec4Desc">Pedagogicko-psychologický základ aj príprava na pohovor pre pedagogické odbory.</div></div></li>
+          <li><span class="idx">05</span> <div><div class="course-item-title" id="tSpec5">Matematika a logika pre IT a techniku</div><div class="course-item-desc" id="tSpec5Desc">Matematika a logické úlohy presne v tom formáte, ako ich dávajú technické a IT fakulty.</div></div></li>
+          <li><span class="idx">06</span> <div><div class="course-item-title" id="tSpecNote">+ sprievodca pre rodičov</div><div class="course-item-desc" id="tSpecNoteDesc">Ako podporiť dieťa počas prípravy bez zbytočného tlaku — pre rodičov a starých rodičov.</div></div></li>
         </ul>
       </div>
     </div>
@@ -462,8 +464,20 @@ const T = {
     coursesSub: '6 kurzov, ktoré potrebuje každý uchádzač bez ohľadu na odbor — a prístup do celej odborovej knižnice navyše.',
     uniTitle: 'Univerzálne — pre každého',
     uni1: 'TSP na jeden pokus (stratégia)', uni2: 'Time manažment', uni3: 'Ako sa efektívne učiť', uni4: 'Ústny pohovor nanečisto', uni5: 'Motivačný list a esej', uni6: 'Zvládni stres pred prijímačkami',
+    uni1Desc: 'Časovanie, eliminačné techniky a najčastejšie pasce v teste študijných predpokladov.',
+    uni2Desc: 'Ako si rozvrhnúť prípravu na mesiace dopredu, aby si sa na poslednú chvíľu neučil všetko naraz.',
+    uni3Desc: 'Techniky učenia (aktívne opakovanie, spaced repetition), ktoré si zapamätáš, nielen prečítaš.',
+    uni4Desc: 'Nácvik typických otázok komisie a sebaprezentácie — na kameru, s reálnou spätnou väzbou.',
+    uni5Desc: 'Ako napísať motivačný list, ktorý ťa odlíši od stoviek rovnakých prihlášok.',
+    uni6Desc: 'Dýchacie a kognitívne techniky na deň D, aby ťa nervy nepripravili o výsledok, na ktorý máš.',
     specTitle: 'Odborová knižnica',
     spec1: 'Ako sa dostať na psychológiu', spec2: 'Biológia a chémia pre medicínu', spec3: 'Právo — testy a logické úlohy', spec4: 'Pedagogika — prijímačky a pohovor', spec5: 'Matematika a logika pre IT a techniku', specNote: '+ sprievodca pre rodičov',
+    spec1Desc: 'Čo presne testujú prijímačky na psychológiu a ako sa pripraviť s lektorkou, ktorá si tým sama prešla.',
+    spec2Desc: 'Zrýchlený prehľad učiva, na ktoré sa najčastejšie pýtajú prijímačky na medicínu, farmáciu a veterinu.',
+    spec3Desc: 'Ako riešiť testy študijných predpokladov a logické úlohy typické pre právnické fakulty.',
+    spec4Desc: 'Pedagogicko-psychologický základ aj príprava na pohovor pre pedagogické odbory.',
+    spec5Desc: 'Matematika a logické úlohy presne v tom formáte, ako ich dávajú technické a IT fakulty.',
+    specNoteDesc: 'Ako podporiť dieťa počas prípravy bez zbytočného tlaku — pre rodičov a starých rodičov.',
     bonusTitle: 'Bonusy len teraz',
     b1Title: 'Bonusové dni', b1Desc: 'Navyše dni členstva, ak si ho aktivuješ počas platnosti tejto ponuky.',
     b2Title: 'Súkromná skupina', b2Desc: 'Prístup k ostatným účastníkom pred termínmi.',
@@ -505,8 +519,20 @@ const T = {
     coursesSub: '6 kurzů, které potřebuje každý uchazeč bez ohledu na obor — a přístup do celé oborové knihovny navíc.',
     uniTitle: 'Univerzální — pro každého',
     uni1: 'TSP na jeden pokus (strategie)', uni2: 'Time management', uni3: 'Jak se efektivně učit', uni4: 'Ústní pohovor nanečisto', uni5: 'Motivační dopis a esej', uni6: 'Zvládni stres před přijímačkami',
+    uni1Desc: 'Časování, eliminační techniky a nejčastější pasti v testu studijních předpokladů.',
+    uni2Desc: 'Jak si rozvrhnout přípravu na měsíce dopředu, abys se na poslední chvíli neučil všechno najednou.',
+    uni3Desc: 'Techniky učení (aktivní opakování, spaced repetition), které si zapamatuješ, ne jen přečteš.',
+    uni4Desc: 'Nácvik typických otázek komise a sebeprezentace — na kameru, s reálnou zpětnou vazbou.',
+    uni5Desc: 'Jak napsat motivační dopis, který tě odliší od stovek stejných přihlášek.',
+    uni6Desc: 'Dýchací a kognitivní techniky na den D, aby tě nervy nepřipravily o výsledek, na který máš.',
     specTitle: 'Oborová knihovna',
     spec1: 'Jak se dostat na psychologii', spec2: 'Biologie a chemie pro medicínu', spec3: 'Právo — testy a logické úlohy', spec4: 'Pedagogika — přijímačky a pohovor', spec5: 'Matematika a logika pro IT a techniku', specNote: '+ průvodce pro rodiče',
+    spec1Desc: 'Co přesně testují přijímačky na psychologii a jak se připravit s lektorkou, která si tím sama prošla.',
+    spec2Desc: 'Zrychlený přehled učiva, na které se nejčastěji ptají přijímačky na medicínu, farmacii a veterinu.',
+    spec3Desc: 'Jak řešit testy studijních předpokladů a logické úlohy typické pro právnické fakulty.',
+    spec4Desc: 'Pedagogicko-psychologický základ i příprava na pohovor pro pedagogické obory.',
+    spec5Desc: 'Matematika a logické úlohy přesně v tom formátu, jak je zadávají technické a IT fakulty.',
+    specNoteDesc: 'Jak podpořit dítě během přípravy bez zbytečného tlaku — pro rodiče a prarodiče.',
     bonusTitle: 'Bonusy jen teď',
     b1Title: 'Bonusové dny', b1Desc: 'Navíc dny členství, pokud si ho aktivuješ během platnosti této nabídky.',
     b2Title: 'Soukromá skupina', b2Desc: 'Přístup k ostatním účastníkům před termíny.',
@@ -563,18 +589,30 @@ function setLang(l) {
   document.getElementById('tCoursesSub').textContent = t('coursesSub');
   document.getElementById('tUniTitle').textContent = t('uniTitle');
   document.getElementById('tUni1').textContent = t('uni1');
+  document.getElementById('tUni1Desc').textContent = t('uni1Desc');
   document.getElementById('tUni2').textContent = t('uni2');
+  document.getElementById('tUni2Desc').textContent = t('uni2Desc');
   document.getElementById('tUni3').textContent = t('uni3');
+  document.getElementById('tUni3Desc').textContent = t('uni3Desc');
   document.getElementById('tUni4').textContent = t('uni4');
+  document.getElementById('tUni4Desc').textContent = t('uni4Desc');
   document.getElementById('tUni5').textContent = t('uni5');
+  document.getElementById('tUni5Desc').textContent = t('uni5Desc');
   document.getElementById('tUni6').textContent = t('uni6');
+  document.getElementById('tUni6Desc').textContent = t('uni6Desc');
   document.getElementById('tSpecTitle').textContent = t('specTitle');
   document.getElementById('tSpec1').textContent = t('spec1');
+  document.getElementById('tSpec1Desc').textContent = t('spec1Desc');
   document.getElementById('tSpec2').textContent = t('spec2');
+  document.getElementById('tSpec2Desc').textContent = t('spec2Desc');
   document.getElementById('tSpec3').textContent = t('spec3');
+  document.getElementById('tSpec3Desc').textContent = t('spec3Desc');
   document.getElementById('tSpec4').textContent = t('spec4');
+  document.getElementById('tSpec4Desc').textContent = t('spec4Desc');
   document.getElementById('tSpec5').textContent = t('spec5');
+  document.getElementById('tSpec5Desc').textContent = t('spec5Desc');
   document.getElementById('tSpecNote').textContent = t('specNote');
+  document.getElementById('tSpecNoteDesc').textContent = t('specNoteDesc');
   document.getElementById('tBonusTitle').textContent = t('bonusTitle');
   document.getElementById('tB1Title').textContent = t('b1Title'); document.getElementById('tB1Desc').textContent = t('b1Desc');
   document.getElementById('tB2Title').textContent = t('b2Title'); document.getElementById('tB2Desc').textContent = t('b2Desc');
