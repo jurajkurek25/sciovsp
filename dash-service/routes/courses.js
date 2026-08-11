@@ -56,9 +56,12 @@ router.get('/api/dash/courses', requireDashAuth, async (req, res) => {
   res.json({ courses: withCounts });
 });
 
+const ACCESS_MODES = ['paid', 'free', 'subscription'];
+
 router.post('/api/dash/courses', requireDashAuth, async (req, res) => {
-  const { title, description, priceCents, coverImageUrl, salesContent, introVideoUrl, instructorName, instructorBio, instructorPhotoUrl } = req.body || {};
+  const { title, description, priceCents, coverImageUrl, salesContent, introVideoUrl, instructorName, instructorBio, instructorPhotoUrl, accessMode, includedInPremium, includedInElite } = req.body || {};
   if (!title) return res.status(400).json({ error: 'Chýba title.' });
+  if (accessMode !== undefined && !ACCESS_MODES.includes(accessMode)) return res.status(400).json({ error: 'Neplatný accessMode.' });
   let slug = slugify(title);
   if (!slug) return res.status(400).json({ error: 'Z názvu sa nedá vytvoriť slug.' });
   const { data: existing } = await mainDb.from('courses').select('id').eq('slug', slug);
@@ -69,7 +72,8 @@ router.post('/api/dash/courses', requireDashAuth, async (req, res) => {
     slug, title, description: description || '', price_cents: priceCentsValue,
     cover_image_url: coverImageUrl || null, sales_content: salesContent || null,
     intro_video_url: introVideoUrl || null, published: false,
-    instructor_name: instructorName || null, instructor_bio: instructorBio || null, instructor_photo_url: instructorPhotoUrl || null
+    instructor_name: instructorName || null, instructor_bio: instructorBio || null, instructor_photo_url: instructorPhotoUrl || null,
+    access_mode: accessMode || 'paid', included_in_premium: !!includedInPremium, included_in_elite: !!includedInElite
   }).select().single();
   if (error) return res.status(500).json({ error: error.message });
   res.json({ ok: true, course: data });
@@ -78,8 +82,10 @@ router.post('/api/dash/courses', requireDashAuth, async (req, res) => {
 router.put('/api/dash/courses/:id', requireDashAuth, async (req, res) => {
   const {
     title, description, priceCents, coverImageUrl, salesContent, introVideoUrl, published,
-    instructorName, instructorBio, instructorPhotoUrl, platformCutPercent, referralCutPercent
+    instructorName, instructorBio, instructorPhotoUrl, platformCutPercent, referralCutPercent,
+    accessMode, includedInPremium, includedInElite
   } = req.body || {};
+  if (accessMode !== undefined && !ACCESS_MODES.includes(accessMode)) return res.status(400).json({ error: 'Neplatný accessMode.' });
   const update = {};
   if (title !== undefined) update.title = title;
   if (description !== undefined) update.description = description;
@@ -93,6 +99,9 @@ router.put('/api/dash/courses/:id', requireDashAuth, async (req, res) => {
   if (instructorPhotoUrl !== undefined) update.instructor_photo_url = instructorPhotoUrl;
   if (platformCutPercent !== undefined) update.platform_cut_percent = Math.min(100, Math.max(0, Number(platformCutPercent) || 0));
   if (referralCutPercent !== undefined) update.referral_cut_percent = Math.min(100, Math.max(0, Number(referralCutPercent) || 0));
+  if (accessMode !== undefined) update.access_mode = accessMode;
+  if (includedInPremium !== undefined) update.included_in_premium = !!includedInPremium;
+  if (includedInElite !== undefined) update.included_in_elite = !!includedInElite;
   const { data, error } = await mainDb.from('courses').update(update).eq('id', req.params.id).select().single();
   if (error) return res.status(500).json({ error: error.message });
   res.json({ ok: true, course: data });

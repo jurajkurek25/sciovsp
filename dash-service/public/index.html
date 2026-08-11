@@ -472,7 +472,7 @@ async function renderCourses() {
     <div id="courseFormRoot"></div>
     <div id="coursesList">${courses.map(c => `
       <div class="card-item" data-id="${c.id}">
-        <h4>${(c.title||'').replace(/</g,'&lt;')} ${c.published ? '<span class="pill resolved">publikovaný</span>' : '<span class="pill pending">draft</span>'} ${!c.published && c.submitted_for_review ? '<span class="pill pending">čaká na schválenie</span>' : ''}</h4>
+        <h4>${(c.title||'').replace(/</g,'&lt;')} ${c.published ? '<span class="pill resolved">publikovaný</span>' : '<span class="pill pending">draft</span>'} ${!c.published && c.submitted_for_review ? '<span class="pill pending">čaká na schválenie</span>' : ''} ${c.access_mode === 'free' ? '<span class="pill">zadarmo</span>' : ''} ${c.access_mode === 'subscription' ? `<span class="pill">predplatné${c.included_in_premium ? ' · Premium' : ''}${c.included_in_elite ? ' · Elite' : ''}</span>` : ''}</h4>
         <p class="muted">/kurzy/${c.slug} · ${eur(c.price_cents)} · ${c.lessonCount} lekcií · ${c.purchaseCount} nákupov${c.instructor ? ` · inštruktor: ${(c.instructor.name || c.instructor.email).replace(/</g,'&lt;')} (podiel platformy ${c.platform_cut_percent}%, cez referral ${c.referral_cut_percent}%)` : ''}</p>
         <p style="margin:.5rem 0">${(c.description||'').replace(/</g,'&lt;')}</p>
         <div style="display:flex;gap:.6rem;flex-wrap:wrap">
@@ -504,6 +504,17 @@ function courseFormHtml(c) {
       <input class="cf-price" type="number" min="0" placeholder="Cena v centoch" value="${c?.price_cents ?? 5700}" style="width:160px">
     </div>
     <p class="muted" style="margin-top:-.4rem">0 = kurz zadarmo (prístup len za prihlásenie cez Google, bez platby).</p>
+    <h4 style="margin-top:1.2rem">Dostupnosť kurzu</h4>
+    <p class="muted" style="margin-top:-.4rem">Pri "Súčasť predplatného" je kurz zadarmo len počas aktívneho predplatného vo vybraných tieroch — mimo predplatného sa dá kúpiť aj priamo za cenu vyššie.</p>
+    <select class="cf-access-mode">
+      <option value="paid" ${(!c || c.access_mode === 'paid' || !c.access_mode) ? 'selected' : ''}>Platený (bežný predaj)</option>
+      <option value="free" ${c?.access_mode === 'free' ? 'selected' : ''}>Zadarmo pre každého</option>
+      <option value="subscription" ${c?.access_mode === 'subscription' ? 'selected' : ''}>Súčasť predplatného appky</option>
+    </select>
+    <div class="cf-tier-row" style="display:${c?.access_mode === 'subscription' ? 'flex' : 'none'};gap:1.2rem;margin-top:.5rem">
+      <label><input type="checkbox" class="cf-tier-premium" ${c?.included_in_premium ? 'checked' : ''}> Premium</label>
+      <label><input type="checkbox" class="cf-tier-elite" ${c?.included_in_elite ? 'checked' : ''}> Elite</label>
+    </div>
     ${coverFieldHtml('cf-cover', c?.cover_image_url)}
     <input class="cf-intro-video" placeholder="URL úvodného videa (sales letter video, voliteľné)" value="${(c?.intro_video_url||'').replace(/"/g,'&quot;')}" style="margin-top:.6rem">
     <textarea class="cf-desc" placeholder="Krátky popis (karta v zozname + meta description, cca 1-2 vety)" style="min-height:60px">${c?.description||''}</textarea>
@@ -534,6 +545,9 @@ function bindCourseForm(course) {
   const root = $('#courseFormRoot');
   bindCoverField(root, 'cf-cover', 'courses');
   const salesQuill = initRichEditor(root, 'cf-sales-editor', course?.sales_content);
+  const accessModeEl = $('.cf-access-mode', root);
+  const tierRow = $('.cf-tier-row', root);
+  accessModeEl.onchange = () => { tierRow.style.display = accessModeEl.value === 'subscription' ? 'flex' : 'none'; };
   $('.cf-save', root).onclick = async () => {
     const body = {
       title: $('.cf-title', root).value, description: $('.cf-desc', root).value,
@@ -541,7 +555,9 @@ function bindCourseForm(course) {
       coverImageUrl: $('.cf-cover', root).value, introVideoUrl: $('.cf-intro-video', root).value.trim(),
       salesContent: salesQuill.getText().trim() ? salesQuill.root.innerHTML : '',
       instructorName: $('.cf-instructor-name', root).value.trim(), instructorPhotoUrl: $('.cf-instructor-photo', root).value.trim(),
-      instructorBio: $('.cf-instructor-bio', root).value.trim()
+      instructorBio: $('.cf-instructor-bio', root).value.trim(),
+      accessMode: accessModeEl.value,
+      includedInPremium: $('.cf-tier-premium', root).checked, includedInElite: $('.cf-tier-elite', root).checked
     };
     const platformCutEl = $('.cf-platform-cut', root);
     const referralCutEl = $('.cf-referral-cut', root);

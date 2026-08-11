@@ -59,9 +59,12 @@ router.get('/api/instructor/courses', requireInstructorAuth, async (req, res) =>
   res.json({ courses: withCounts });
 });
 
+const ACCESS_MODES = ['paid', 'free', 'subscription'];
+
 router.post('/api/instructor/courses', requireInstructorAuth, requireTermsAccepted, async (req, res) => {
-  const { title, description, priceCents, coverImageUrl, salesContent, introVideoUrl } = req.body || {};
+  const { title, description, priceCents, coverImageUrl, salesContent, introVideoUrl, accessMode, includedInPremium, includedInElite } = req.body || {};
   if (!title) return res.status(400).json({ error: 'Chýba title.' });
+  if (accessMode !== undefined && !ACCESS_MODES.includes(accessMode)) return res.status(400).json({ error: 'Neplatný accessMode.' });
   let slug = slugify(title);
   if (!slug) return res.status(400).json({ error: 'Z názvu sa nedá vytvoriť slug.' });
   const { data: existing } = await mainDb.from('courses').select('id').eq('slug', slug);
@@ -74,7 +77,8 @@ router.post('/api/instructor/courses', requireInstructorAuth, requireTermsAccept
     intro_video_url: introVideoUrl || null, published: false,
     instructor_id: req.instructor.id,
     instructor_name: req.instructor.name || null, instructor_bio: req.instructor.bio || null, instructor_photo_url: req.instructor.photo_url || null,
-    platform_cut_percent: req.instructor.default_cut_percent
+    platform_cut_percent: req.instructor.default_cut_percent,
+    access_mode: accessMode || 'paid', included_in_premium: !!includedInPremium, included_in_elite: !!includedInElite
   }).select().single();
   if (error) { console.error(error); return res.status(500).json({ error: error.message }); }
   res.json({ ok: true, course: data });
@@ -83,7 +87,8 @@ router.post('/api/instructor/courses', requireInstructorAuth, requireTermsAccept
 router.put('/api/instructor/courses/:id', requireInstructorAuth, async (req, res) => {
   const course = await ownCourseOr404(req, res);
   if (!course) return;
-  const { title, description, priceCents, coverImageUrl, salesContent, introVideoUrl, submittedForReview } = req.body || {};
+  const { title, description, priceCents, coverImageUrl, salesContent, introVideoUrl, submittedForReview, accessMode, includedInPremium, includedInElite } = req.body || {};
+  if (accessMode !== undefined && !ACCESS_MODES.includes(accessMode)) return res.status(400).json({ error: 'Neplatný accessMode.' });
   const update = {};
   if (title !== undefined) update.title = title;
   if (description !== undefined) update.description = description;
@@ -92,6 +97,9 @@ router.put('/api/instructor/courses/:id', requireInstructorAuth, async (req, res
   if (salesContent !== undefined) update.sales_content = salesContent;
   if (introVideoUrl !== undefined) update.intro_video_url = introVideoUrl;
   if (submittedForReview !== undefined) update.submitted_for_review = !!submittedForReview;
+  if (accessMode !== undefined) update.access_mode = accessMode;
+  if (includedInPremium !== undefined) update.included_in_premium = !!includedInPremium;
+  if (includedInElite !== undefined) update.included_in_elite = !!includedInElite;
   const { data, error } = await mainDb.from('courses').update(update).eq('id', course.id).select().single();
   if (error) { console.error(error); return res.status(500).json({ error: error.message }); }
   res.json({ ok: true, course: data });

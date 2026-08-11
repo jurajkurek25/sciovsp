@@ -202,6 +202,9 @@ const T = {
 
     back: '← Späť na zoznam',
     fieldTitle: 'Názov', fieldPrice: 'Cena (€)', fieldDesc: 'Popis', fieldCover: 'Obrázok kurzu', fieldIntroVideo: 'Úvodné video', fieldSales: 'Predajný text',
+    accessModeLabel: 'Dostupnosť kurzu', accessModePaid: 'Platený (bežný predaj)', accessModeFree: 'Zadarmo pre každého', accessModeSubscription: 'Súčasť predplatného appky',
+    accessModeNote: 'Pri "Súčasť predplatného" je kurz zadarmo len počas aktívneho predplatného vo vybraných tieroch — mimo predplatného sa dá kúpiť aj priamo za cenu vyššie.',
+    tierPremium: 'Premium', tierElite: 'Elite',
     saveBtn: 'Uložiť', submitReviewBtn: 'Odoslať na schválenie', submittedReviewBtn: 'Odoslané na schválenie ✓', deleteBtn: 'Zmazať',
     referralLabel: 'Tvoj referral odkaz na tento kurz (platforma si necháva len {percent}%, zvyšok je tvoj)',
     lessonsTitle: 'Lekcie', noLessons: 'Zatiaľ žiadne lekcie.', addLessonBtn: '+ Pridať lekciu',
@@ -319,6 +322,9 @@ const T = {
 
     back: '← Zpět na seznam',
     fieldTitle: 'Název', fieldPrice: 'Cena (€)', fieldDesc: 'Popis', fieldCover: 'Obrázek kurzu', fieldIntroVideo: 'Úvodní video', fieldSales: 'Prodejní text',
+    accessModeLabel: 'Dostupnost kurzu', accessModePaid: 'Placený (běžný prodej)', accessModeFree: 'Zdarma pro každého', accessModeSubscription: 'Součást předplatného appky',
+    accessModeNote: 'U "Součást předplatného" je kurz zdarma jen během aktivního předplatného ve vybraných tarifech — mimo předplatné se dá koupit i přímo za cenu výše.',
+    tierPremium: 'Premium', tierElite: 'Elite',
     saveBtn: 'Uložit', submitReviewBtn: 'Odeslat ke schválení', submittedReviewBtn: 'Odesláno ke schválení ✓', deleteBtn: 'Smazat',
     referralLabel: 'Tvůj referral odkaz na tento kurz (platforma si nechává jen {percent}%, zbytek je tvůj)',
     lessonsTitle: 'Lekce', noLessons: 'Zatím žádné lekce.', addLessonBtn: '+ Přidat lekci',
@@ -797,6 +803,19 @@ async function renderCourseDetail(id) {
         <div class="field"><label>${t('fieldPrice')}</label><input id="f-price" type="number" min="0" step="0.01" value="${(course.price_cents / 100).toFixed(2)}"></div>
       </div>
       <div class="field"><label>${t('fieldDesc')}</label><textarea id="f-desc">${escapeHtml(course.description || '')}</textarea></div>
+      <div class="field">
+        <label>${t('accessModeLabel')}</label>
+        <select id="f-access-mode">
+          <option value="paid" ${(!course.access_mode || course.access_mode === 'paid') ? 'selected' : ''}>${t('accessModePaid')}</option>
+          <option value="free" ${course.access_mode === 'free' ? 'selected' : ''}>${t('accessModeFree')}</option>
+          <option value="subscription" ${course.access_mode === 'subscription' ? 'selected' : ''}>${t('accessModeSubscription')}</option>
+        </select>
+        <p class="muted" style="margin-top:.3rem">${t('accessModeNote')}</p>
+        <div id="f-tier-row" style="display:${course.access_mode === 'subscription' ? 'flex' : 'none'};gap:1.2rem;margin-top:.4rem">
+          <label><input type="checkbox" id="f-tier-premium" ${course.included_in_premium ? 'checked' : ''}> ${t('tierPremium')}</label>
+          <label><input type="checkbox" id="f-tier-elite" ${course.included_in_elite ? 'checked' : ''}> ${t('tierElite')}</label>
+        </div>
+      </div>
       <div class="row2">
         ${fileUploadField('f-cover', t('fieldCover'), 'image', course.cover_image_url)}
         ${fileUploadField('f-intro', t('fieldIntroVideo'), 'video', course.intro_video_url)}
@@ -832,6 +851,9 @@ async function renderCourseDetail(id) {
 
   document.getElementById('backBtn').onclick = () => { activeCourseId = null; renderCoursesTab(); };
   document.getElementById('saveCourseBtn').onclick = () => saveCourse(course.id);
+  document.getElementById('f-access-mode').onchange = (e) => {
+    document.getElementById('f-tier-row').style.display = e.target.value === 'subscription' ? 'flex' : 'none';
+  };
   bindFileUpload('f-cover', 'image');
   bindFileUpload('f-intro', 'video');
   const submitBtn = document.getElementById('submitReviewBtn');
@@ -871,7 +893,10 @@ async function saveCourse(id) {
         description: document.getElementById('f-desc').value,
         coverImageUrl: document.getElementById('f-cover').value,
         introVideoUrl: document.getElementById('f-intro').value,
-        salesContent: document.getElementById('f-sales').value
+        salesContent: document.getElementById('f-sales').value,
+        accessMode: document.getElementById('f-access-mode').value,
+        includedInPremium: document.getElementById('f-tier-premium').checked,
+        includedInElite: document.getElementById('f-tier-elite').checked
       })
     });
     feedback.textContent = t('saved'); feedback.className = 'feedback ok';
