@@ -7,76 +7,124 @@
 <meta name="description" content="Špeciálna ponuka členstva len pre účastníkov webinára — Premium a Elite na 3 alebo 6 mesiacov, s kurzami zahrnutými.">
 <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@300;400;500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Manrope:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-:root{--black:#08080d;--black2:#0f0f18;--black3:#15151f;--border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.13);--text:#eeeef5;--text2:#a1a1bc;--text3:#5c5c7a;--volt:#c8ff00;--purple:#7c5cff;--purple2:#b09bff;--red:#ff3f5e;--green:#36e896;--serif:'Instrument Serif',Georgia,serif;--mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif}
+/* ── Vibe: "Ignition Signal" ─────────────────────────────────────────────
+   Kolízia: fyzická energia štartovacej čiary (ignite oranžová, sklony,
+   asymetria) × presnosť AI dátového signálu (signal cyan, mono readouty).
+   Zámerne mimo palety appky (žiadna fialová/volt) — samostatná kampaň. */
+:root{
+  --ink:#14100D; --ink2:#1c1610; --ink3:#241c14;
+  --paper:#F6F1E7; --text:#F6F1E7; --text2:rgba(246,241,231,.66); --text3:rgba(246,241,231,.4);
+  --ignite:#FF4D1C; --ignite2:#FF8A50;
+  --signal:#00D4FF; --signal2:#8FEFFF;
+  --border:rgba(246,241,231,.14); --border2:rgba(246,241,231,.24);
+  --serif:'Bricolage Grotesque',Georgia,serif; --mono:'Space Mono',monospace; --sans:'Manrope',sans-serif;
+}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--black);color:var(--text);font-family:var(--sans);line-height:1.6;min-height:100vh;background-image:radial-gradient(circle at 15% 0%, rgba(124,92,255,.14), transparent 45%),radial-gradient(circle at 85% 10%, rgba(200,255,0,.08), transparent 40%)}
-a{color:var(--purple2)}
+body{background:var(--ink);color:var(--text);font-family:var(--sans);line-height:1.6;min-height:100vh;overflow-x:hidden}
+a{color:var(--signal)}
 button{font-family:inherit}
-.top{max-width:980px;margin:0 auto;padding:1.6rem 1.2rem 0;display:flex;justify-content:space-between;align-items:center}
-.top a.back{font-family:var(--mono);font-size:.8rem;color:var(--text2);text-decoration:none}
+.noise{position:fixed;inset:0;pointer-events:none;opacity:.05;z-index:1;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+.top{max-width:1040px;margin:0 auto;padding:1.5rem 1.2rem 0;display:flex;justify-content:space-between;align-items:center;position:relative;z-index:2}
+.top a.back{font-family:var(--mono);font-size:.78rem;color:var(--text2);text-decoration:none}
 .lang-switch{display:flex;gap:.35rem}
-.lang-switch button{font-family:var(--mono);font-size:.72rem;padding:.3rem .6rem;background:var(--black2);border:1px solid var(--border2);border-radius:6px;color:var(--text2);cursor:pointer}
-.lang-switch button.active{color:var(--volt);border-color:var(--volt)}
-.wrap{max-width:980px;margin:0 auto;padding:1.6rem 1.2rem 6rem}
-.hero{padding:1.6rem 0 1rem;text-align:center}
-.eyebrow{display:inline-block;font-family:var(--mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--volt);background:rgba(200,255,0,.08);border:1px solid rgba(200,255,0,.25);padding:.3rem .8rem;border-radius:99px;margin-bottom:1rem}
-h1{font-family:var(--serif);font-size:clamp(2rem,4.6vw,2.9rem);line-height:1.12;margin-bottom:.9rem}
-.sub{color:var(--text2);max-width:600px;margin:0 auto;font-size:1.02rem}
+.lang-switch button{font-family:var(--mono);font-size:.7rem;padding:.3rem .6rem;background:var(--ink2);border:1px solid var(--border2);border-radius:4px;color:var(--text2);cursor:pointer}
+.lang-switch button.active{color:var(--ignite);border-color:var(--ignite)}
 
-.countdown{max-width:420px;margin:1.6rem auto 0;background:var(--black2);border:1px solid rgba(255,63,94,.35);border-radius:14px;padding:1rem 1.2rem;text-align:center}
-.countdown .label{font-family:var(--mono);font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--red);margin-bottom:.5rem}
-.countdown .clock{font-family:var(--mono);font-size:1.5rem;font-weight:500;color:var(--text)}
+/* ── HERO ── */
+.hero{position:relative;max-width:1040px;margin:0 auto;padding:3rem 1.2rem 4rem;z-index:2}
+.hero-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:2.5rem;align-items:center}
+.eyebrow{display:inline-flex;align-items:center;gap:.5rem;font-family:var(--mono);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ignite);border:1px solid rgba(255,77,28,.4);background:rgba(255,77,28,.08);padding:.4rem .8rem;border-radius:3px;margin-bottom:1.3rem}
+h1{font-family:var(--serif);font-weight:800;font-size:clamp(2.1rem,4.6vw,3.4rem);line-height:1.05;letter-spacing:-.01em;margin-bottom:1.1rem}
+h1 .accent{color:var(--ignite);font-style:italic}
+.sub{color:var(--text2);font-size:1.05rem;max-width:480px;margin-bottom:1.8rem}
+.hero-cta{display:inline-flex;align-items:center;gap:.7rem;background:var(--ignite);color:var(--ink);font-family:var(--mono);font-weight:700;font-size:.9rem;padding:1rem 1.6rem;border:none;border-radius:3px;cursor:pointer;transform:skewX(-4deg);transition:transform .15s}
+.hero-cta:hover{transform:skewX(-4deg) translateY(-2px)}
+.hero-cta span{display:inline-block;transform:skewX(4deg)}
 
-.toggle-row{display:flex;justify-content:center;margin:2.4rem 0 1.6rem}
-.toggle{display:inline-flex;background:var(--black2);border:1px solid var(--border2);border-radius:99px;padding:.25rem}
-.toggle button{padding:.55rem 1.2rem;border:none;background:transparent;color:var(--text2);border-radius:99px;font-family:var(--mono);font-size:.82rem;cursor:pointer}
-.toggle button.active{background:var(--volt);color:var(--black);font-weight:700}
+/* signal ticker — wildcard prvok: zivy "personalizovany" readout */
+.signal-box{margin-top:2.2rem;background:var(--ink2);border:1px solid var(--border2);border-left:3px solid var(--signal);border-radius:4px;padding:.9rem 1.1rem;max-width:480px}
+.signal-box .sb-label{font-family:var(--mono);font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--signal);margin-bottom:.4rem;display:flex;align-items:center;gap:.4rem}
+.signal-box .sb-dot{width:6px;height:6px;border-radius:50%;background:var(--signal);animation:pulse 1.6s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.signal-box .sb-text{font-family:var(--mono);font-size:.82rem;color:var(--text);min-height:2.6em}
 
-.plans{display:grid;grid-template-columns:1fr 1fr;gap:1.1rem;max-width:760px;margin:0 auto}
-.plan{background:var(--black2);border:1px solid var(--border2);border-radius:16px;padding:1.6rem;display:flex;flex-direction:column;gap:.7rem;position:relative}
-.plan.featured{border-color:var(--purple);box-shadow:0 0 0 1px var(--purple)}
-.plan .badge{position:absolute;top:-.7rem;right:1.2rem;background:var(--purple);color:#fff;font-family:var(--mono);font-size:.68rem;padding:.25rem .6rem;border-radius:99px;font-weight:700}
-.plan .name{font-family:var(--serif);font-size:1.5rem}
-.plan .price{font-family:var(--mono);font-size:2.1rem;color:var(--text)}
-.plan .price small{font-size:.9rem;color:var(--text3);font-weight:400}
-.plan ul{list-style:none;display:flex;flex-direction:column;gap:.5rem;margin:.4rem 0}
-.plan li{font-size:.85rem;color:var(--text2);display:flex;gap:.5rem;align-items:flex-start}
-.plan li .ok{color:var(--green);flex-shrink:0}
-.plan-btn{margin-top:auto;padding:.9rem 1.2rem;border:none;border-radius:10px;font-family:var(--mono);font-size:.85rem;font-weight:700;cursor:pointer;text-align:center}
-.plan-btn.primary{background:var(--volt);color:var(--black)}
+.hero-visual{position:relative;aspect-ratio:1/1;max-width:340px;justify-self:center}
+.track-rings{position:absolute;inset:0;border-radius:50%;border:1px dashed var(--border2)}
+.track-rings::before{content:'';position:absolute;inset:14%;border-radius:50%;border:1px solid var(--border)}
+.track-rings::after{content:'';position:absolute;inset:30%;border-radius:50%;background:radial-gradient(circle,rgba(255,77,28,.25),transparent 70%)}
+.hero-icon{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+
+.countdown{max-width:420px;margin:2.4rem auto 0;text-align:center}
+.countdown .label{font-family:var(--mono);font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ignite2);margin-bottom:.5rem}
+.countdown .clock{font-family:var(--mono);font-size:1.9rem;font-weight:700;color:var(--text);letter-spacing:.04em}
+
+/* ── diagonal section dividers ── */
+.lane{position:relative;padding:4rem 1.2rem;z-index:2}
+.lane.tilt-a{background:var(--ink2);clip-path:polygon(0 3%, 100% 0, 100% 97%, 0 100%)}
+.lane.tilt-b{background:var(--ink);clip-path:polygon(0 0, 100% 3%, 100% 100%, 0 97%)}
+.lane-inner{max-width:1040px;margin:0 auto}
+
+.section-title{font-family:var(--serif);font-weight:800;font-size:clamp(1.5rem,3vw,2rem);margin-bottom:.5rem}
+.section-sub{color:var(--text2);max-width:560px;font-size:.92rem;margin-bottom:2rem}
+
+/* ── pricing ── */
+.toggle-row{display:flex;justify-content:center;margin-bottom:2.2rem}
+.toggle{display:inline-flex;background:var(--ink3);border:1px solid var(--border2);border-radius:99px;padding:.25rem}
+.toggle button{padding:.55rem 1.3rem;border:none;background:transparent;color:var(--text2);border-radius:99px;font-family:var(--mono);font-size:.8rem;cursor:pointer}
+.toggle button.active{background:var(--signal);color:var(--ink);font-weight:700}
+
+.plans{display:grid;grid-template-columns:1fr 1fr;gap:1.3rem;max-width:760px;margin:0 auto}
+.plan{background:var(--ink3);border:1px solid var(--border2);border-radius:6px;padding:1.7rem;display:flex;flex-direction:column;gap:.8rem;position:relative;transition:transform .2s}
+.plan.featured{border-color:var(--ignite);transform:rotate(-1deg)}
+.plan.featured:hover{transform:rotate(0deg) translateY(-3px)}
+.plan:not(.featured){transform:rotate(1deg)}
+.plan:not(.featured):hover{transform:rotate(0deg) translateY(-3px)}
+.plan .badge{position:absolute;top:-.7rem;right:1.1rem;background:var(--ignite);color:var(--ink);font-family:var(--mono);font-size:.65rem;padding:.25rem .6rem;border-radius:3px;font-weight:700;transform:rotate(-2deg)}
+.plan .name{font-family:var(--serif);font-weight:800;font-size:1.5rem}
+.plan .price{font-family:var(--mono);font-size:2.2rem;color:var(--text);font-weight:700}
+.plan .price small{font-size:.85rem;color:var(--text3);font-weight:400;font-family:var(--sans)}
+.plan ul{list-style:none;display:flex;flex-direction:column;gap:.55rem;margin:.3rem 0}
+.plan li{font-size:.85rem;color:var(--text2);display:flex;gap:.55rem;align-items:flex-start}
+.plan li svg{flex-shrink:0;margin-top:.15rem}
+.plan-btn{margin-top:auto;padding:.9rem 1.2rem;border:none;border-radius:3px;font-family:var(--mono);font-size:.85rem;font-weight:700;cursor:pointer;text-align:center}
+.plan-btn.primary{background:var(--ignite);color:var(--ink)}
 .plan-btn.secondary{background:transparent;border:1px solid var(--border2);color:var(--text)}
 .plan-btn:disabled{opacity:.6;cursor:not-allowed}
+#planFeedback{text-align:center;margin-top:1rem;font-size:.85rem;color:var(--ignite)}
 
-.section-title{font-family:var(--serif);font-size:1.7rem;text-align:center;margin:3.2rem 0 .5rem}
-.section-sub{color:var(--text2);text-align:center;max-width:560px;margin:0 auto 1.8rem;font-size:.92rem}
+/* ── courses ── */
+.course-groups{display:grid;grid-template-columns:1fr 1fr;gap:1.3rem}
+.course-card{background:var(--ink3);border:1px solid var(--border);border-radius:6px;padding:1.4rem}
+.course-card h3{font-family:var(--mono);font-size:.82rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:1rem;display:flex;align-items:center;gap:.55rem;color:var(--signal)}
+.course-card ul{list-style:none;display:flex;flex-direction:column;gap:.6rem}
+.course-card li{font-size:.9rem;color:var(--text2);display:flex;gap:.6rem;align-items:baseline}
+.course-card li .idx{font-family:var(--mono);font-size:.72rem;color:var(--ignite2);flex-shrink:0}
 
-.course-groups{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem}
-.course-card{background:var(--black3);border:1px solid var(--border);border-radius:14px;padding:1.3rem}
-.course-card h3{font-size:.95rem;margin-bottom:.8rem;display:flex;align-items:center;gap:.5rem}
-.course-card ul{list-style:none;display:flex;flex-direction:column;gap:.55rem}
-.course-card li{font-size:.85rem;color:var(--text2);display:flex;gap:.5rem}
-.course-card li .dot{color:var(--volt);flex-shrink:0}
-
-.bonuses{display:grid;grid-template-columns:repeat(4,1fr);gap:.9rem}
-.bonus{background:var(--black2);border:1px solid var(--border);border-radius:12px;padding:1.1rem;text-align:center}
-.bonus .icon{font-size:1.5rem;display:block;margin-bottom:.5rem}
-.bonus h4{font-size:.85rem;margin-bottom:.35rem}
+/* ── bonuses ── */
+.bonuses{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem}
+.bonus{background:var(--ink2);border:1px solid var(--border);border-radius:6px;padding:1.2rem}
+.bonus .bi{margin-bottom:.7rem}
+.bonus h4{font-size:.88rem;margin-bottom:.4rem}
 .bonus p{font-size:.78rem;color:var(--text3)}
 
-.faq-item{border-bottom:1px solid var(--border);padding:1.1rem 0}
-.faq-item h4{font-size:.95rem;margin-bottom:.4rem}
+/* ── faq ── */
+.faq-item{border-bottom:1px solid var(--border);padding:1.15rem 0}
+.faq-item h4{font-size:.95rem;margin-bottom:.4rem;font-family:var(--sans);font-weight:700}
 .faq-item p{font-size:.85rem;color:var(--text2)}
 
-.final{text-align:center;margin-top:3.5rem;padding-top:2.5rem;border-top:1px solid var(--border)}
-.final h2{font-family:var(--serif);font-size:2rem;margin-bottom:.8rem}
-.final p{color:var(--text2);margin-bottom:1.6rem}
+/* ── final ── */
+.final{text-align:center;padding:4.5rem 1.2rem 5rem;position:relative;z-index:2}
+.final h2{font-family:var(--serif);font-weight:800;font-size:clamp(1.8rem,4vw,2.6rem);margin-bottom:.8rem}
+.final p{color:var(--text2);margin-bottom:1.8rem}
 
-@media(max-width:680px){.plans,.course-groups{grid-template-columns:1fr}.bonuses{grid-template-columns:1fr 1fr}}
+@media(max-width:760px){.hero-grid{grid-template-columns:1fr}.hero-visual{display:none}.plans,.course-groups{grid-template-columns:1fr}.bonuses{grid-template-columns:1fr 1fr}.plan.featured,.plan:not(.featured){transform:none}}
 </style>
 </head>
 <body>
+<div class="noise"></div>
 <div class="top">
   <a class="back" href="/" id="tBack">← SP Tréner</a>
   <div class="lang-switch">
@@ -84,112 +132,149 @@ h1{font-family:var(--serif);font-size:clamp(2rem,4.6vw,2.9rem);line-height:1.12;
     <button id="langCsBtn" onclick="setLang('cs')">CZ</button>
   </div>
 </div>
-<div class="wrap">
-  <div class="hero">
-    <span class="eyebrow" id="tEyebrow">Ponuka len pre účastníkov webinára</span>
-    <h1 id="tH1">Poď na to poriadne —<br>nie sám a bez plánu</h1>
-    <p class="sub" id="tSub">Táto cena platí len obmedzený čas po webinári. Potom sa členstvo vracia na plnú cenu.</p>
+
+<div class="hero">
+  <div class="hero-grid">
+    <div>
+      <span class="eyebrow" id="tEyebrow">🚩 Špeciálna ponuka po webinári</span>
+      <h1 id="tH1">Nie ďalší balík testov pre všetkých.<br><span class="accent" id="tH1Accent">AI príprava, ktorá sa prispôsobí presne tebe.</span></h1>
+      <p class="sub" id="tSub">Táto cena platí len obmedzený čas po webinári. Potom sa členstvo vracia na plnú cenu.</p>
+      <button class="hero-cta" onclick="document.getElementById('plans-anchor').scrollIntoView({behavior:'smooth'})"><span id="tHeroCta">Na štart, priprav sa →</span></button>
+
+      <div class="signal-box">
+        <div class="sb-label"><span class="sb-dot"></span> <span id="tSignalLabel">Živý príklad personalizácie</span></div>
+        <div class="sb-text" id="signalTicker"></div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="track-rings"></div>
+      <div class="hero-icon">
+        <svg width="76" height="76" viewBox="0 0 76 76" fill="none">
+          <path d="M14 62V14l40 16-40 16" stroke="#FF4D1C" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+          <circle cx="58" cy="20" r="4" fill="#00D4FF"/>
+        </svg>
+      </div>
+    </div>
   </div>
 
   <div class="countdown">
     <div class="label" id="tCountdownLabel">Ponuka končí o</div>
     <div class="clock" id="clock">--:--:--</div>
   </div>
+</div>
 
-  <div class="toggle-row">
-    <div class="toggle">
-      <button id="btn3m" class="active" onclick="setDuration(3)">3 mesiace</button>
-      <button id="btn6m" onclick="setDuration(6)">6 mesiacov</button>
+<div class="lane tilt-a" id="plans-anchor">
+  <div class="lane-inner">
+    <h2 class="section-title" style="text-align:center" id="tPlansTitle">Vyber si tempo</h2>
+    <p class="section-sub" style="text-align:center;margin-left:auto;margin-right:auto" id="tPlansSub">Jednorazová platba, žiadne skryté opakované strhávanie.</p>
+
+    <div class="toggle-row">
+      <div class="toggle">
+        <button id="btn3m" class="active" onclick="setDuration(3)">3 mesiace</button>
+        <button id="btn6m" onclick="setDuration(6)">6 mesiacov</button>
+      </div>
+    </div>
+
+    <div class="plans">
+      <div class="plan">
+        <div class="name">Premium</div>
+        <div class="price"><span id="premiumPrice">27</span> € <small id="premiumPeriod">/ 3 mesiace</small></div>
+        <ul>
+          <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3.5" stroke="#00D4FF" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> <span id="tPF1">Neobmedzený prístup k AI generátoru testov</span></li>
+          <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3.5" stroke="#00D4FF" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> <span id="tPF2">6 univerzálnych kurzov zahrnutých</span></li>
+          <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3.5" stroke="#00D4FF" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> <span id="tPF3">Prístup do celej odborovej knižnice kurzov</span></li>
+          <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3.5" stroke="#00D4FF" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> <span id="tPF4">Sledovanie pokroku a štatistiky</span></li>
+        </ul>
+        <button class="plan-btn secondary js-plan-btn" data-tier="premium" id="premiumBtn">Získať Premium →</button>
+      </div>
+      <div class="plan featured">
+        <span class="badge" id="tEliteBadge">Odporúčame</span>
+        <div class="name">Elite</div>
+        <div class="price"><span id="elitePrice">57</span> € <small id="elitePeriod">/ 3 mesiace</small></div>
+        <ul>
+          <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3.5" stroke="#FF4D1C" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> <span id="tEF1">Všetko z Premium</span></li>
+          <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3.5" stroke="#FF4D1C" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> <span id="tEF2">Osobný AI mentor</span></li>
+          <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3.5" stroke="#FF4D1C" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> <span id="tEF3">Pokročilé AI nástroje na mieru tvojim slabinám</span></li>
+          <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3.5" stroke="#FF4D1C" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> <span id="tEF4">Prioritná podpora</span></li>
+        </ul>
+        <button class="plan-btn primary js-plan-btn" data-tier="elite" id="eliteBtn">Získať Elite →</button>
+      </div>
+    </div>
+    <div id="planFeedback"></div>
+  </div>
+</div>
+
+<div class="lane tilt-b">
+  <div class="lane-inner">
+    <h2 class="section-title" id="tCoursesTitle">Kurzy zahrnuté v členstve</h2>
+    <p class="section-sub" id="tCoursesSub">6 kurzov, ktoré potrebuje každý uchádzač bez ohľadu na odbor — a prístup do celej odborovej knižnice navyše.</p>
+    <div class="course-groups">
+      <div class="course-card">
+        <h3>◆ <span id="tUniTitle">Univerzálne — pre každého</span></h3>
+        <ul>
+          <li><span class="idx">01</span> <span id="tUni1">TSP na jeden pokus (stratégia)</span></li>
+          <li><span class="idx">02</span> <span id="tUni2">Time manažment</span></li>
+          <li><span class="idx">03</span> <span id="tUni3">Ako sa efektívne učiť</span></li>
+          <li><span class="idx">04</span> <span id="tUni4">Ústny pohovor nanečisto</span></li>
+          <li><span class="idx">05</span> <span id="tUni5">Motivačný list a esej</span></li>
+          <li><span class="idx">06</span> <span id="tUni6">Zvládni stres pred prijímačkami</span></li>
+        </ul>
+      </div>
+      <div class="course-card">
+        <h3>◆ <span id="tSpecTitle">Odborová knižnica</span></h3>
+        <ul>
+          <li><span class="idx">01</span> <span id="tSpec1">Ako sa dostať na psychológiu</span></li>
+          <li><span class="idx">02</span> <span id="tSpec2">Biológia a chémia pre medicínu</span></li>
+          <li><span class="idx">03</span> <span id="tSpec3">Právo — testy a logické úlohy</span></li>
+          <li><span class="idx">04</span> <span id="tSpec4">Pedagogika — prijímačky a pohovor</span></li>
+          <li><span class="idx">05</span> <span id="tSpec5">Matematika a logika pre IT a techniku</span></li>
+          <li><span class="idx">06</span> <span id="tSpecNote">+ sprievodca pre rodičov</span></li>
+        </ul>
+      </div>
     </div>
   </div>
+</div>
 
-  <div class="plans">
-    <div class="plan">
-      <div class="name">Premium</div>
-      <div class="price"><span id="premiumPrice">27</span> € <small id="premiumPeriod">/ 3 mesiace</small></div>
-      <ul>
-        <li><span class="ok">✓</span> <span id="tPF1">Neobmedzený prístup k AI generátoru testov</span></li>
-        <li><span class="ok">✓</span> <span id="tPF2">6 univerzálnych kurzov zahrnutých</span></li>
-        <li><span class="ok">✓</span> <span id="tPF3">Prístup do celej odborovej knižnice kurzov</span></li>
-        <li><span class="ok">✓</span> <span id="tPF4">Sledovanie pokroku a štatistiky</span></li>
-      </ul>
-      <button class="plan-btn secondary js-plan-btn" data-tier="premium" id="premiumBtn">Získať Premium →</button>
-    </div>
-    <div class="plan featured">
-      <span class="badge" id="tEliteBadge">Odporúčame</span>
-      <div class="name">Elite</div>
-      <div class="price"><span id="elitePrice">57</span> € <small id="elitePeriod">/ 3 mesiace</small></div>
-      <ul>
-        <li><span class="ok">✓</span> <span id="tEF1">Všetko z Premium</span></li>
-        <li><span class="ok">✓</span> <span id="tEF2">Osobný AI mentor</span></li>
-        <li><span class="ok">✓</span> <span id="tEF3">Pokročilé AI nástroje na mieru tvojim slabinám</span></li>
-        <li><span class="ok">✓</span> <span id="tEF4">Prioritná podpora</span></li>
-      </ul>
-      <button class="plan-btn primary js-plan-btn" data-tier="elite" id="eliteBtn">Získať Elite →</button>
+<div class="lane tilt-a">
+  <div class="lane-inner">
+    <h2 class="section-title" id="tBonusTitle">Bonusy len teraz</h2>
+    <div class="bonuses">
+      <div class="bonus"><div class="bi"><svg width="22" height="22" viewBox="0 0 22 22"><rect x="3" y="9" width="16" height="10" rx="1" stroke="#00D4FF" stroke-width="1.6"/><path d="M3 12h16M11 9v10M7 9c0-2 1.5-4 4-4s4 2 4 4" stroke="#00D4FF" stroke-width="1.6"/></svg></div><h4 id="tB1Title">Bonusové dni</h4><p id="tB1Desc">Navyše dni členstva, ak si ho aktivuješ počas platnosti tejto ponuky.</p></div>
+      <div class="bonus"><div class="bi"><svg width="22" height="22" viewBox="0 0 22 22"><circle cx="8" cy="8" r="3.5" stroke="#FF4D1C" stroke-width="1.6"/><circle cx="16" cy="10" r="2.5" stroke="#FF4D1C" stroke-width="1.6"/><path d="M2 19c0-3.5 2.7-6 6-6s6 2.5 6 6M14 19c0-2.3 1-4.3 2.6-5.4" stroke="#FF4D1C" stroke-width="1.6" stroke-linecap="round"/></svg></div><h4 id="tB2Title">Súkromná skupina</h4><p id="tB2Desc">Prístup k ostatným účastníkom pred termínmi.</p></div>
+      <div class="bonus"><div class="bi"><svg width="22" height="22" viewBox="0 0 22 22"><path d="M11 2v4M11 16v4M2 11h4M16 11h4M4.5 4.5l2.8 2.8M14.7 14.7l2.8 2.8M4.5 17.5l2.8-2.8M14.7 7.3l2.8-2.8" stroke="#00D4FF" stroke-width="1.6" stroke-linecap="round"/><circle cx="11" cy="11" r="3" stroke="#00D4FF" stroke-width="1.6"/></svg></div><h4 id="tB3Title">Extra AI testy</h4><p id="tB3Desc">Navýšený limit generovaných testov počas prvého mesiaca.</p></div>
+      <div class="bonus"><div class="bi"><svg width="22" height="22" viewBox="0 0 22 22"><path d="M3 5h16v10H8l-5 4V5z" stroke="#FF4D1C" stroke-width="1.6" stroke-linejoin="round"/></svg></div><h4 id="tB4Title">Osobná podpora</h4><p id="tB4Desc">Priama pomoc, ak si počas prípravy niečím neistý.</p></div>
     </div>
   </div>
-  <div class="feedback" id="planFeedback" style="text-align:center;margin-top:1rem;font-size:.85rem;color:var(--red)"></div>
+</div>
 
-  <h2 class="section-title" id="tCoursesTitle">Kurzy zahrnuté v členstve</h2>
-  <p class="section-sub" id="tCoursesSub">6 kurzov, ktoré potrebuje každý uchádzač bez ohľadu na odbor — a prístup do celej odborovej knižnice navyše.</p>
-  <div class="course-groups">
-    <div class="course-card">
-      <h3>🎯 <span id="tUniTitle">Univerzálne — pre každého</span></h3>
-      <ul>
-        <li><span class="dot">●</span> <span id="tUni1">TSP na jeden pokus (stratégia)</span></li>
-        <li><span class="dot">●</span> <span id="tUni2">Time manažment</span></li>
-        <li><span class="dot">●</span> <span id="tUni3">Ako sa efektívne učiť</span></li>
-        <li><span class="dot">●</span> <span id="tUni4">Ústny pohovor nanečisto</span></li>
-        <li><span class="dot">●</span> <span id="tUni5">Motivačný list a esej</span></li>
-        <li><span class="dot">●</span> <span id="tUni6">Zvládni stres pred prijímačkami</span></li>
-      </ul>
-    </div>
-    <div class="course-card">
-      <h3>📚 <span id="tSpecTitle">Odborová knižnica</span></h3>
-      <ul>
-        <li><span class="dot">●</span> <span id="tSpec1">Ako sa dostať na psychológiu</span></li>
-        <li><span class="dot">●</span> <span id="tSpec2">Biológia a chémia pre medicínu</span></li>
-        <li><span class="dot">●</span> <span id="tSpec3">Právo — testy a logické úlohy</span></li>
-        <li><span class="dot">●</span> <span id="tSpec4">Pedagogika — prijímačky a pohovor</span></li>
-        <li><span class="dot">●</span> <span id="tSpec5">Matematika a logika pre IT a techniku</span></li>
-        <li><span class="dot">●</span> <span id="tSpecNote">+ sprievodca pre rodičov</span></li>
-      </ul>
+<div class="lane tilt-b">
+  <div class="lane-inner">
+    <h2 class="section-title" id="tFaqTitle">Časté otázky</h2>
+    <div class="faq">
+      <div class="faq-item">
+        <h4 id="tFaq1Q">Aký je rozdiel medzi Premium a Elite?</h4>
+        <p id="tFaq1A">Premium ti dáva neobmedzený prístup k appke aj ku všetkým kurzom. Elite navyše pridáva pokročilé AI nástroje vrátane osobného AI mentora a prioritnú podporu.</p>
+      </div>
+      <div class="faq-item">
+        <h4 id="tFaq2Q">Čo sa stane po uplynutí 3 alebo 6 mesiacov?</h4>
+        <p id="tFaq2A">Členstvo je jednorazová platba na presne dohodnutú dĺžku — nič sa samo neobnovuje ani nestrháva ďalšia platba. Ak budeš chcieť pokračovať, jednoducho si dokúpiš ďalšie obdobie.</p>
+      </div>
+      <div class="faq-item">
+        <h4 id="tFaq3Q">Môžem si vybrať kurzy z knižnice kedykoľvek?</h4>
+        <p id="tFaq3A">Áno, počas trvania členstva máš prístup ku všetkým kurzom v knižnici, nielen k jednému.</p>
+      </div>
+      <div class="faq-item">
+        <h4 id="tFaq4Q">Ako presne appka vie, že mi to pomôže — čo ak som iný prípad?</h4>
+        <p id="tFaq4A">AI generátor sleduje presne to, v čom robíš chyby, a testy prispôsobuje tomu — nie univerzálnej sade pre všetkých. Čím viac testov spravíš, tým presnejšie appka vie, kde máš medzery.</p>
+      </div>
     </div>
   </div>
+</div>
 
-  <h2 class="section-title" id="tBonusTitle">Bonusy len teraz</h2>
-  <div class="bonuses">
-    <div class="bonus"><span class="icon">🎁</span><h4 id="tB1Title">Bonusové dni</h4><p id="tB1Desc">Navyše dni členstva, ak si ho aktivuješ počas platnosti tejto ponuky.</p></div>
-    <div class="bonus"><span class="icon">👥</span><h4 id="tB2Title">Súkromná skupina</h4><p id="tB2Desc">Prístup k ostatným účastníkom pred termínmi.</p></div>
-    <div class="bonus"><span class="icon">🧪</span><h4 id="tB3Title">Extra AI testy</h4><p id="tB3Desc">Navýšený limit generovaných testov počas prvého mesiaca.</p></div>
-    <div class="bonus"><span class="icon">📩</span><h4 id="tB4Title">Osobná podpora</h4><p id="tB4Desc">Priama pomoc, ak si počas prípravy niečím neistý.</p></div>
-  </div>
-
-  <h2 class="section-title" id="tFaqTitle">Časté otázky</h2>
-  <div class="faq">
-    <div class="faq-item">
-      <h4 id="tFaq1Q">Aký je rozdiel medzi Premium a Elite?</h4>
-      <p id="tFaq1A">Premium ti dáva neobmedzený prístup k appke aj ku všetkým kurzom. Elite navyše pridáva pokročilé AI nástroje vrátane osobného AI mentora a prioritnú podporu.</p>
-    </div>
-    <div class="faq-item">
-      <h4 id="tFaq2Q">Čo sa stane po uplynutí 3 alebo 6 mesiacov?</h4>
-      <p id="tFaq2A">Členstvo je jednorazová platba na presne dohodnutú dĺžku — nič sa samo neobnovuje ani nestrháva ďalšia platba. Ak budeš chcieť pokračovať, jednoducho si dokúpiš ďalšie obdobie.</p>
-    </div>
-    <div class="faq-item">
-      <h4 id="tFaq3Q">Môžem si vybrať kurzy z knižnice kedykoľvek?</h4>
-      <p id="tFaq3A">Áno, počas trvania členstva máš prístup ku všetkým kurzom v knižnici, nielen k jednému.</p>
-    </div>
-    <div class="faq-item">
-      <h4 id="tFaq4Q">Čo ak zmeškám túto ponuku?</h4>
-      <p id="tFaq4A">Členstvo si budeš vedieť dokúpiť aj neskôr za bežnú cenu — táto zľava platí len obmedzený čas po webinári.</p>
-    </div>
-  </div>
-
-  <div class="final">
-    <h2 id="tFinalTitle">Poď na to s plánom, nie s chaosom</h2>
-    <p id="tFinalSub">Vyber si Premium alebo Elite a začni ešte dnes.</p>
-    <button class="plan-btn primary js-plan-btn" data-tier="elite" style="max-width:280px;margin:0 auto;display:block" id="finalCtaBtn">Získať Elite →</button>
-  </div>
+<div class="final">
+  <h2 id="tFinalTitle">Poď na to s plánom, nie s chaosom</h2>
+  <p id="tFinalSub">Vyber si Premium alebo Elite a začni ešte dnes.</p>
+  <button class="plan-btn primary js-plan-btn" data-tier="elite" style="max-width:280px;margin:0 auto;display:block" id="finalCtaBtn">Získať Elite →</button>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -213,8 +298,7 @@ function setDuration(months) {
   document.getElementById('elitePeriod').textContent = periodTxt;
 }
 
-// 48-hodinové odpočítavanie od prvej návštevy tejto stránky (per prehliadač) —
-// vytvára urgenciu bez nutnosti pevného dátumu nastavovaného na serveri.
+// 48-hodinové odpočítavanie od prvej návštevy tejto stránky (per prehliadač).
 function getDeadline() {
   let deadline = localStorage.getItem('sp_offer_deadline');
   if (!deadline) {
@@ -234,6 +318,24 @@ function tickClock() {
 }
 setInterval(tickClock, 1000);
 tickClock();
+
+// Wildcard signal ticker — cyklické priklady personalizacie, priamo adresuju
+// namietku "zabera to aj mne?" primo v hero, este pred cenami.
+let tickerIdx = 0;
+let tickerTimer = null;
+function tickSignal() {
+  const el = document.getElementById('signalTicker');
+  if (!el) return;
+  const examples = t('signalExamples');
+  el.textContent = examples[tickerIdx % examples.length];
+  tickerIdx++;
+}
+function startSignalTicker() {
+  if (tickerTimer) clearInterval(tickerTimer);
+  tickerIdx = 0;
+  tickSignal();
+  tickerTimer = setInterval(tickSignal, 3200);
+}
 
 async function startPlanCheckout(tier) {
   const feedback = document.getElementById('planFeedback');
@@ -283,10 +385,20 @@ _supabase.auth.onAuthStateChange((event, session) => {
 // ==================== i18n ====================
 const T = {
   sk: {
-    eyebrow: 'Ponuka len pre účastníkov webinára',
-    h1: 'Poď na to poriadne —<br>nie sám a bez plánu',
+    eyebrow: '🚩 Špeciálna ponuka po webinári',
+    h1: 'Nie ďalší balík testov pre všetkých.',
+    h1Accent: 'AI príprava, ktorá sa prispôsobí presne tebe.',
     sub: 'Táto cena platí len obmedzený čas po webinári. Potom sa členstvo vracia na plnú cenu.',
+    heroCta: 'Na štart, priprav sa →',
+    signalLabel: 'Živý príklad personalizácie',
+    signalExamples: [
+      'Peter — o 40 % viac úloh z chémie po 3 chybách za sebou',
+      'Zuzka — prepnuté na ťažšiu logiku, posledných 5 správne',
+      'Martin — pridaný opakovací test z minulého týždňa',
+      'Kika — spomalené tempo testu, zvýšená chybovosť pri strese'
+    ],
     countdownLabel: 'Ponuka končí o',
+    plansTitle: 'Vyber si tempo', plansSub: 'Jednorazová platba, žiadne skryté opakované strhávanie.',
     eliteBadge: 'Odporúčame',
     pf1: 'Neobmedzený prístup k AI generátoru testov', pf2: '6 univerzálnych kurzov zahrnutých', pf3: 'Prístup do celej odborovej knižnice kurzov', pf4: 'Sledovanie pokroku a štatistiky',
     ef1: 'Všetko z Premium', ef2: 'Osobný AI mentor', ef3: 'Pokročilé AI nástroje na mieru tvojim slabinám', ef4: 'Prioritná podpora',
@@ -307,16 +419,26 @@ const T = {
     faq1Q: 'Aký je rozdiel medzi Premium a Elite?', faq1A: 'Premium ti dáva neobmedzený prístup k appke aj ku všetkým kurzom. Elite navyše pridáva pokročilé AI nástroje vrátane osobného AI mentora a prioritnú podporu.',
     faq2Q: 'Čo sa stane po uplynutí 3 alebo 6 mesiacov?', faq2A: 'Členstvo je jednorazová platba na presne dohodnutú dĺžku — nič sa samo neobnovuje ani nestrháva ďalšia platba. Ak budeš chcieť pokračovať, jednoducho si dokúpiš ďalšie obdobie.',
     faq3Q: 'Môžem si vybrať kurzy z knižnice kedykoľvek?', faq3A: 'Áno, počas trvania členstva máš prístup ku všetkým kurzom v knižnici, nielen k jednému.',
-    faq4Q: 'Čo ak zmeškám túto ponuku?', faq4A: 'Členstvo si budeš vedieť dokúpiť aj neskôr za bežnú cenu — táto zľava platí len obmedzený čas po webinári.',
+    faq4Q: 'Ako presne appka vie, že mi to pomôže — čo ak som iný prípad?', faq4A: 'AI generátor sleduje presne to, v čom robíš chyby, a testy prispôsobuje tomu — nie univerzálnej sade pre všetkých. Čím viac testov spravíš, tým presnejšie appka vie, kde máš medzery.',
     finalTitle: 'Poď na to s plánom, nie s chaosom', finalSub: 'Vyber si Premium alebo Elite a začni ešte dnes.',
     redirecting: 'Presmerovávam…', checkoutError: 'Chyba pri vytváraní platby.', networkError: 'Chyba servera.',
     pageTitle: 'Ponuka pre účastníkov webinára — SP Tréner'
   },
   cs: {
-    eyebrow: 'Nabídka jen pro účastníky webináře',
-    h1: 'Pojď do toho pořádně —<br>ne sám a bez plánu',
+    eyebrow: '🚩 Speciální nabídka po webináři',
+    h1: 'Ne další balík testů pro všechny.',
+    h1Accent: 'AI příprava, která se přizpůsobí přesně tobě.',
     sub: 'Tato cena platí jen omezenou dobu po webináři. Poté se členství vrací na plnou cenu.',
+    heroCta: 'Na start, připrav se →',
+    signalLabel: 'Živý příklad personalizace',
+    signalExamples: [
+      'Petr — o 40 % víc úloh z chemie po 3 chybách za sebou',
+      'Zuzka — přepnuto na těžší logiku, posledních 5 správně',
+      'Martin — přidán opakovací test z minulého týdne',
+      'Kika — zpomalené tempo testu, zvýšená chybovost při stresu'
+    ],
     countdownLabel: 'Nabídka končí za',
+    plansTitle: 'Vyber si tempo', plansSub: 'Jednorázová platba, žádné skryté opakované strhávání.',
     eliteBadge: 'Doporučujeme',
     pf1: 'Neomezený přístup k AI generátoru testů', pf2: '6 univerzálních kurzů zahrnuto', pf3: 'Přístup do celé oborové knihovny kurzů', pf4: 'Sledování pokroku a statistiky',
     ef1: 'Vše z Premium', ef2: 'Osobní AI mentor', ef3: 'Pokročilé AI nástroje na míru tvým slabinám', ef4: 'Prioritní podpora',
@@ -337,7 +459,7 @@ const T = {
     faq1Q: 'Jaký je rozdíl mezi Premium a Elite?', faq1A: 'Premium ti dává neomezený přístup k appce i ke všem kurzům. Elite navíc přidává pokročilé AI nástroje včetně osobního AI mentora a prioritní podporu.',
     faq2Q: 'Co se stane po uplynutí 3 nebo 6 měsíců?', faq2A: 'Členství je jednorázová platba na přesně dohodnutou dobu — nic se samo neobnovuje ani nestrhává další platba. Pokud budeš chtít pokračovat, jednoduše si dokoupíš další období.',
     faq3Q: 'Můžu si vybrat kurzy z knihovny kdykoliv?', faq3A: 'Ano, po dobu trvání členství máš přístup ke všem kurzům v knihovně, nejen k jednomu.',
-    faq4Q: 'Co když zmeškám tuto nabídku?', faq4A: 'Členství si budeš moct dokoupit i později za běžnou cenu — tato sleva platí jen omezenou dobu po webináři.',
+    faq4Q: 'Jak přesně appka ví, že mi to pomůže — co když jsem jiný případ?', faq4A: 'AI generátor sleduje přesně to, v čem děláš chyby, a testy tomu přizpůsobuje — ne univerzální sadě pro všechny. Čím víc testů uděláš, tím přesněji appka ví, kde máš mezery.',
     finalTitle: 'Pojď do toho s plánem, ne s chaosem', finalSub: 'Vyber si Premium nebo Elite a začni ještě dnes.',
     redirecting: 'Přesměrovávám…', checkoutError: 'Chyba při vytváření platby.', networkError: 'Chyba serveru.',
     pageTitle: 'Nabídka pro účastníky webináře — SP Tréner'
@@ -346,7 +468,7 @@ const T = {
 
 let lang = localStorage.getItem('sp_offer_lang') || 'sk';
 
-function t(key) { return (T[lang] && T[lang][key]) || T.sk[key] || key; }
+function t(key) { return (T[lang] && T[lang][key] !== undefined) ? T[lang][key] : T.sk[key]; }
 
 function setLang(l) {
   lang = l;
@@ -357,9 +479,14 @@ function setLang(l) {
   document.getElementById('langCsBtn').classList.toggle('active', l === 'cs');
 
   document.getElementById('tEyebrow').textContent = t('eyebrow');
-  document.getElementById('tH1').innerHTML = t('h1');
+  document.getElementById('tH1').firstChild.textContent = t('h1');
+  document.getElementById('tH1Accent').textContent = t('h1Accent');
   document.getElementById('tSub').textContent = t('sub');
+  document.getElementById('tHeroCta').textContent = t('heroCta');
+  document.getElementById('tSignalLabel').textContent = t('signalLabel');
   document.getElementById('tCountdownLabel').textContent = t('countdownLabel');
+  document.getElementById('tPlansTitle').textContent = t('plansTitle');
+  document.getElementById('tPlansSub').textContent = t('plansSub');
   document.getElementById('tEliteBadge').textContent = t('eliteBadge');
   document.getElementById('tPF1').textContent = t('pf1');
   document.getElementById('tPF2').textContent = t('pf2');
@@ -402,6 +529,7 @@ function setLang(l) {
   document.getElementById('tFinalSub').textContent = t('finalSub');
 
   setDuration(duration);
+  startSignalTicker();
 }
 
 setLang(lang);
