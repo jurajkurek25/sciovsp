@@ -39,17 +39,35 @@
       } else if (currentUser) {
         const email = currentUser.email;
         const short = email.length > 22 ? email.substring(0, 20) + '...' : email;
-        const discountInputHtml = isFreeCourse() ? '' : '<input type="text" class="js-discount-input" placeholder="Zľavový kód" style="font-family:var(--mono);font-size:.78rem;background:var(--black2);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:.5rem .7rem;width:140px">';
-        const membershipBtnHtml = showMembershipOption
-          ? '<button class="course-buy-btn js-membership-btn" style="background:var(--black2);border:1px solid var(--border2);color:var(--text)">' + membershipLabel + '</button>'
-          : '';
-        slot.innerHTML = '<div style="display:flex;align-items:center;gap:.8rem;flex-wrap:wrap">'
-          + '<span style="font-family:var(--mono);font-size:.78rem;color:var(--text3)">' + short + '</span>'
-          + discountInputHtml
-          + membershipBtnHtml
-          + '<button class="course-buy-btn js-buy-btn">' + buyLabel + '</button>'
-          + '</div>'
-          + (showMembershipOption ? '<p style="font-size:.76rem;color:var(--text3);margin-top:.5rem">Ako člen máš tento kurz zahrnutý zadarmo. Bez členstva si ho môžeš aj tak rovno kúpiť.</p>' : '');
+        const discountInputStyle = 'font-family:var(--mono);font-size:.78rem;background:var(--black2);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:.55rem .7rem;';
+        const discountInputHtml = isFreeCourse() ? '' : '<input type="text" class="js-discount-input" placeholder="Zľavový kód" style="' + discountInputStyle + 'width:100%;box-sizing:border-box">';
+        const discountInputHtmlInline = isFreeCourse() ? '' : '<input type="text" class="js-discount-input" placeholder="Zľavový kód" style="' + discountInputStyle + 'width:140px">';
+        if (showMembershipOption) {
+          const tierWord = tier === 'elite' ? 'Elite' : 'Premium';
+          slot.innerHTML = '<div style="width:100%;text-align:left">'
+            + '<div style="font-family:var(--mono);font-size:.76rem;color:var(--text3);margin-bottom:.8rem">' + short + '</div>'
+            + '<div style="display:flex;gap:1rem;flex-wrap:wrap;align-items:stretch;justify-content:center">'
+            + '  <div style="flex:1;min-width:220px;max-width:280px;border:1px solid var(--border2);border-radius:12px;padding:1.1rem;display:flex;flex-direction:column;gap:.6rem">'
+            + '    <div style="font-weight:600">Predplatné</div>'
+            + '    <p style="font-size:.8rem;color:var(--text3);margin:0;flex:1">Ako ' + tierWord + ' člen máš tento kurz zahrnutý zadarmo, spolu s ďalšími výhodami appky.</p>'
+            + '    <button class="course-buy-btn js-membership-btn" style="width:100%;background:var(--black2);border:1px solid var(--border2);color:var(--text)">' + membershipLabel + '</button>'
+            + '  </div>'
+            + '  <div style="display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:.78rem;color:var(--text3);padding:.3rem 0">alebo</div>'
+            + '  <div style="flex:1;min-width:220px;max-width:280px;border:1px solid var(--border2);border-radius:12px;padding:1.1rem;display:flex;flex-direction:column;gap:.6rem">'
+            + '    <div style="font-weight:600">Jednorazová kúpa</div>'
+            + '    <p style="font-size:.8rem;color:var(--text3);margin:0;flex:1">Bez členstva, len tento kurz.</p>'
+            + discountInputHtml
+            + '    <button class="course-buy-btn js-buy-btn" style="width:100%">' + buyLabel + '</button>'
+            + '  </div>'
+            + '</div>'
+            + '</div>';
+        } else {
+          slot.innerHTML = '<div style="display:flex;align-items:center;gap:.8rem;flex-wrap:wrap">'
+            + '<span style="font-family:var(--mono);font-size:.78rem;color:var(--text3)">' + short + '</span>'
+            + discountInputHtmlInline
+            + '<button class="course-buy-btn js-buy-btn">' + buyLabel + '</button>'
+            + '</div>';
+        }
       } else {
         slot.innerHTML = '<button class="course-buy-btn js-google-btn" style="display:inline-flex;align-items:center;gap:.5rem;background:var(--black2);border:1px solid var(--border2);color:var(--text)">'
           + gSvg + ' Prihlásiť sa cez Google</button>';
