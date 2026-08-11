@@ -37,9 +37,6 @@ input{font-family:inherit}
 .waiting p{color:var(--text2)}
 .waiting h2{font-family:var(--serif);font-weight:800;font-size:1.6rem;margin-bottom:.5rem}
 
-.no-session{display:none;text-align:center;padding:3rem 0}
-.no-session.active{display:block}
-.no-session a.cta{display:inline-block;margin-top:1.2rem;padding:.9rem 1.6rem;background:var(--ignite);color:var(--ink);border-radius:8px;text-decoration:none;font-family:var(--mono);font-weight:700}
 
 .broadcast{display:none}
 .broadcast.active{display:block}
@@ -78,12 +75,6 @@ input{font-family:inherit}
 </div>
 
 <div class="wrap">
-
-  <div id="view-no-session" class="no-session">
-    <h2 id="tNoSessionTitle">Nemáš rezervované miesto</h2>
-    <p id="tNoSessionBody">Najprv sa zaregistruj na najbližšie vysielanie.</p>
-    <a class="cta" href="/webinar" id="tNoSessionCta">Zaregistrovať sa →</a>
-  </div>
 
   <div id="view-waiting" class="waiting">
     <h2 id="tWaitingLead">Tvoje miesto je rezervované. Vysielanie začína o</h2>
@@ -139,13 +130,13 @@ function currentElapsedSeconds() {
 }
 
 function showView(name) {
-  ['no-session', 'waiting', 'broadcast'].forEach(v => {
+  ['waiting', 'broadcast'].forEach(v => {
     document.getElementById('view-' + v).classList.toggle('active', v === name);
   });
 }
 
 function routeToCurrentState() {
-  if (!session) { showView('no-session'); return; }
+  if (!session) { location.href = '/webinar'; return; }
   const elapsed = currentElapsedSeconds();
   if (elapsed < 0) { showView('waiting'); startWaitingCountdown(); return; }
   showView('broadcast');
@@ -297,14 +288,12 @@ function sendChatMessage() {
 const T = {
   sk: {
     pageTitle: 'Vysielanie — SP Tréner',
-    noSessionTitle: 'Nemáš rezervované miesto', noSessionBody: 'Najprv sa zaregistruj na najbližšie vysielanie.', noSessionCta: 'Zaregistrovať sa →',
     waitingLead: 'Tvoje miesto je rezervované. Vysielanie začína o', waitingNote: 'Nechaj si túto stránku otvorenú — spustí sa automaticky.',
     liveBadge: 'NAŽIVO', startOverlayText: 'Klikni pre spustenie vysielania so zvukom', chatSend: 'Poslať', you: 'Ty',
     endTitle: 'Vysielanie sa skončilo', endBody: 'Ak si to stihol/a, čaká na teba špeciálna ponuka len pre účastníkov.', endCta: 'Zobraziť ponuku →'
   },
   cs: {
     pageTitle: 'Vysílání — SP Tréner',
-    noSessionTitle: 'Nemáš rezervované místo', noSessionBody: 'Nejprve se zaregistruj na nejbližší vysílání.', noSessionCta: 'Zaregistrovat se →',
     waitingLead: 'Tvoje místo je rezervované. Vysílání začíná za', waitingNote: 'Nech si tuto stránku otevřenou — spustí se automaticky.',
     liveBadge: 'ŽIVĚ', startOverlayText: 'Klikni pro spuštění vysílání se zvukem', chatSend: 'Poslat', you: 'Ty',
     endTitle: 'Vysílání skončilo', endBody: 'Pokud jsi to stihl/a, čeká na tebe speciální nabídka jen pro účastníky.', endCta: 'Zobrazit nabídku →'
@@ -322,9 +311,6 @@ function setLang(l) {
   document.getElementById('langSkBtn').classList.toggle('active', l === 'sk');
   document.getElementById('langCsBtn').classList.toggle('active', l === 'cs');
 
-  document.getElementById('tNoSessionTitle').textContent = t('noSessionTitle');
-  document.getElementById('tNoSessionBody').textContent = t('noSessionBody');
-  document.getElementById('tNoSessionCta').textContent = t('noSessionCta');
   document.getElementById('tWaitingLead').textContent = t('waitingLead');
   document.getElementById('tWaitingNote').textContent = t('waitingNote');
   document.getElementById('tLiveBadge').textContent = t('liveBadge');
