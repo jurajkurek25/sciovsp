@@ -13,10 +13,26 @@
     return !!slot && slot.dataset.free === '1';
   }
 
+  function accessMode() {
+    const slot = document.querySelector('.courseAuthSlot');
+    return slot ? (slot.dataset.accessMode || 'paid') : 'paid';
+  }
+
+  // Ak je kurz zaradeny do oboch tierov, ponukneme clenstvo v tom
+  // lacnejsom (Premium) — netreba upsellovat Elite, ked Premium uz staci.
+  function membershipTier() {
+    const slot = document.querySelector('.courseAuthSlot');
+    if (!slot) return 'premium';
+    return slot.dataset.includedPremium === '1' ? 'premium' : 'elite';
+  }
+
   function render() {
     const slots = document.querySelectorAll('.courseAuthSlot');
     if (!slots.length) return;
     const buyLabel = isFreeCourse() ? 'Získať zadarmo' : 'Kúpiť kurz';
+    const showMembershipOption = accessMode() === 'subscription';
+    const tier = membershipTier();
+    const membershipLabel = tier === 'elite' ? 'Staň sa Elite členom' : 'Staň sa Premium členom';
     slots.forEach(slot => {
       if (currentUser && purchased) {
         slot.innerHTML = '<a class="course-buy-btn" style="display:inline-block;text-decoration:none;text-align:center" href="/kurzy/' + slug + '/watch">Pokračovať →</a>';
@@ -24,17 +40,23 @@
         const email = currentUser.email;
         const short = email.length > 22 ? email.substring(0, 20) + '...' : email;
         const discountInputHtml = isFreeCourse() ? '' : '<input type="text" class="js-discount-input" placeholder="Zľavový kód" style="font-family:var(--mono);font-size:.78rem;background:var(--black2);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:.5rem .7rem;width:140px">';
+        const membershipBtnHtml = showMembershipOption
+          ? '<button class="course-buy-btn js-membership-btn" style="background:var(--black2);border:1px solid var(--border2);color:var(--text)">' + membershipLabel + '</button>'
+          : '';
         slot.innerHTML = '<div style="display:flex;align-items:center;gap:.8rem;flex-wrap:wrap">'
           + '<span style="font-family:var(--mono);font-size:.78rem;color:var(--text3)">' + short + '</span>'
           + discountInputHtml
+          + membershipBtnHtml
           + '<button class="course-buy-btn js-buy-btn">' + buyLabel + '</button>'
-          + '</div>';
+          + '</div>'
+          + (showMembershipOption ? '<p style="font-size:.76rem;color:var(--text3);margin-top:.5rem">Ako člen máš tento kurz zahrnutý zadarmo. Bez členstva si ho môžeš aj tak rovno kúpiť.</p>' : '');
       } else {
         slot.innerHTML = '<button class="course-buy-btn js-google-btn" style="display:inline-flex;align-items:center;gap:.5rem;background:var(--black2);border:1px solid var(--border2);color:var(--text)">'
           + gSvg + ' Prihlásiť sa cez Google</button>';
       }
     });
     document.querySelectorAll('.js-buy-btn').forEach(btn => btn.onclick = buyCourse);
+    document.querySelectorAll('.js-membership-btn').forEach(btn => btn.onclick = startMembership);
     document.querySelectorAll('.js-google-btn').forEach(btn => btn.onclick = () => {
       _supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.origin + location.pathname } });
     });
@@ -89,6 +111,29 @@
     } catch (e) {
       alert('Chyba servera.');
       buyBtns.forEach(b => { b.disabled = false; b.textContent = free ? 'Získať zadarmo' : 'Kúpiť kurz'; });
+    }
+  }
+
+  async function startMembership() {
+    const btns = document.querySelectorAll('.js-membership-btn');
+    const tier = membershipTier();
+    btns.forEach(b => { b.disabled = true; b.textContent = 'Presmerovávam…'; });
+    try {
+      const res = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ email: currentUser.email, plan: tier === 'elite' ? 'elite' : undefined, refCode: null })
+      });
+      const data = await res.json();
+      if (data.url) {
+        location.href = data.url;
+      } else {
+        alert(data.error || 'Chyba pri vytváraní platby.');
+        btns.forEach(b => { b.disabled = false; b.textContent = tier === 'elite' ? 'Staň sa Elite členom' : 'Staň sa Premium členom'; });
+      }
+    } catch (e) {
+      alert('Chyba servera.');
+      btns.forEach(b => { b.disabled = false; b.textContent = tier === 'elite' ? 'Staň sa Elite členom' : 'Staň sa Premium členom'; });
     }
   }
 
