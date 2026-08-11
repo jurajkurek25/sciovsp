@@ -10,18 +10,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Manrope:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
 <style>
 /* ── Vibe: "Ignition Signal" ─────────────────────────────────────────────
-   Kolízia: fyzická energia štartovacej čiary (ignite oranžová, sklony,
-   asymetria) × presnosť AI dátového signálu (signal cyan, mono readouty).
-   Zámerne mimo palety appky (žiadna fialová/volt) — samostatná kampaň,
-   AŽ na jednu vedomú výnimku: wordmark "SP Tréner" hore vľavo používa
-   font aj farbu appky (DM Mono + volt), aby platobná stránka po
-   webinári jasne kotvila k dôvere v hlavnú značku, aj keď zvyšok
-   stránky má vlastnú identitu. */
+   Kolízia: fyzická energia štartovacej čiary (sklony, asymetria, sklonené
+   pricing karty) × presnosť AI dátového signálu (mono readouty, ticker).
+   Farby zámerne zladené s appkou (--ignite = brand volt zelená, --signal
+   = brand fialová) — layout/fonty/wildcard prvky ostávajú vlastné tejto
+   kampani, ale paleta si teraz vedome požičiava identitu appky, aby
+   platobná stránka po webinári jasne kotvila k dôvere v hlavnú značku. */
 :root{
   --ink:#14100D; --ink2:#1c1610; --ink3:#241c14;
   --paper:#F6F1E7; --text:#F6F1E7; --text2:rgba(246,241,231,.66); --text3:rgba(246,241,231,.4);
-  --ignite:#FF4D1C; --ignite2:#FF8A50;
-  --signal:#00D4FF; --signal2:#8FEFFF;
+  --ignite:#c8ff00; --ignite2:#d9ff66;
+  --signal:#7c5cff; --signal2:#b09bff;
   --brand-volt:#c8ff00; --brand-mono:'DM Mono',monospace;
   --border:rgba(246,241,231,.14); --border2:rgba(246,241,231,.24);
   --serif:'Bricolage Grotesque',Georgia,serif; --mono:'Space Mono',monospace; --sans:'Manrope',sans-serif;
@@ -159,8 +158,8 @@ h1 .accent{color:var(--ignite);font-style:italic}
       <div class="track-rings"></div>
       <div class="hero-icon">
         <svg width="76" height="76" viewBox="0 0 76 76" fill="none">
-          <path d="M14 62V14l40 16-40 16" stroke="#FF4D1C" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
-          <circle cx="58" cy="20" r="4" fill="#00D4FF"/>
+          <path d="M14 62V14l40 16-40 16" stroke="#c8ff00" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+          <circle cx="58" cy="20" r="4" fill="#7c5cff"/>
         </svg>
       </div>
     </div>
@@ -190,10 +189,10 @@ h1 .accent{color:var(--ignite);font-style:italic}
         <div class="name">Premium</div>
         <div class="price"><span id="premiumPrice">27</span> € <small id="premiumPeriod">/ 3 mesiace</small></div>
         <ul>
-          <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3.5" stroke="#00D4FF" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> <span id="tPF1">Neobmedzený prístup k AI generátoru testov</span></li>
-          <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3.5" stroke="#00D4FF" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> <span id="tPF2">6 univerzálnych kurzov zahrnutých</span></li>
-          <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3.5" stroke="#00D4FF" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> <span id="tPF3">Prístup do celej odborovej knižnice kurzov</span></li>
-          <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3.5" stroke="#00D4FF" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> <span id="tPF4">Sledovanie pokroku a štatistiky</span></li>
+          <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3.5" stroke="#7c5cff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> <span id="tPF1">Neobmedzený prístup k AI generátoru testov</span></li>
+          <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3.5" stroke="#7c5cff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> <span id="tPF2">6 univerzálnych kurzov zahrnutých</span></li>
+          <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3.5" stroke="#7c5cff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> <span id="tPF3">Prístup do celej odborovej knižnice kurzov</span></li>
+          <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3.5" stroke="#7c5cff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> <span id="tPF4">Sledovanie pokroku a štatistiky</span></li>
         </ul>
         <button class="plan-btn secondary js-plan-btn" data-tier="premium" id="premiumBtn">Získať Premium →</button>
       </div>
@@ -202,10 +201,10 @@ h1 .accent{color:var(--ignite);font-style:italic}
         <div class="name">Elite</div>
         <div class="price"><span id="elitePrice">57</span> € <small id="elitePeriod">/ 3 mesiace</small></div>
         <ul>
-          <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3.5" stroke="#FF4D1C" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> <span id="tEF1">Všetko z Premium</span></li>
-          <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3.5" stroke="#FF4D1C" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> <span id="tEF2">Osobný AI mentor</span></li>
-          <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3.5" stroke="#FF4D1C" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> <span id="tEF3">Pokročilé AI nástroje na mieru tvojim slabinám</span></li>
-          <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3.5" stroke="#FF4D1C" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> <span id="tEF4">Prioritná podpora</span></li>
+          <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3.5" stroke="#c8ff00" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> <span id="tEF1">Všetko z Premium</span></li>
+          <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3.5" stroke="#c8ff00" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> <span id="tEF2">Osobný AI mentor</span></li>
+          <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3.5" stroke="#c8ff00" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> <span id="tEF3">Pokročilé AI nástroje na mieru tvojim slabinám</span></li>
+          <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3.5" stroke="#c8ff00" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> <span id="tEF4">Prioritná podpora</span></li>
         </ul>
         <button class="plan-btn primary js-plan-btn" data-tier="elite" id="eliteBtn">Získať Elite →</button>
       </div>
@@ -249,10 +248,10 @@ h1 .accent{color:var(--ignite);font-style:italic}
   <div class="lane-inner">
     <h2 class="section-title" id="tBonusTitle">Bonusy len teraz</h2>
     <div class="bonuses">
-      <div class="bonus"><div class="bi"><svg width="22" height="22" viewBox="0 0 22 22"><rect x="3" y="9" width="16" height="10" rx="1" stroke="#00D4FF" stroke-width="1.6"/><path d="M3 12h16M11 9v10M7 9c0-2 1.5-4 4-4s4 2 4 4" stroke="#00D4FF" stroke-width="1.6"/></svg></div><h4 id="tB1Title">Bonusové dni</h4><p id="tB1Desc">Navyše dni členstva, ak si ho aktivuješ počas platnosti tejto ponuky.</p></div>
-      <div class="bonus"><div class="bi"><svg width="22" height="22" viewBox="0 0 22 22"><circle cx="8" cy="8" r="3.5" stroke="#FF4D1C" stroke-width="1.6"/><circle cx="16" cy="10" r="2.5" stroke="#FF4D1C" stroke-width="1.6"/><path d="M2 19c0-3.5 2.7-6 6-6s6 2.5 6 6M14 19c0-2.3 1-4.3 2.6-5.4" stroke="#FF4D1C" stroke-width="1.6" stroke-linecap="round"/></svg></div><h4 id="tB2Title">Súkromná skupina</h4><p id="tB2Desc">Prístup k ostatným účastníkom pred termínmi.</p></div>
-      <div class="bonus"><div class="bi"><svg width="22" height="22" viewBox="0 0 22 22"><path d="M11 2v4M11 16v4M2 11h4M16 11h4M4.5 4.5l2.8 2.8M14.7 14.7l2.8 2.8M4.5 17.5l2.8-2.8M14.7 7.3l2.8-2.8" stroke="#00D4FF" stroke-width="1.6" stroke-linecap="round"/><circle cx="11" cy="11" r="3" stroke="#00D4FF" stroke-width="1.6"/></svg></div><h4 id="tB3Title">Extra AI testy</h4><p id="tB3Desc">Navýšený limit generovaných testov počas prvého mesiaca.</p></div>
-      <div class="bonus"><div class="bi"><svg width="22" height="22" viewBox="0 0 22 22"><path d="M3 5h16v10H8l-5 4V5z" stroke="#FF4D1C" stroke-width="1.6" stroke-linejoin="round"/></svg></div><h4 id="tB4Title">Osobná podpora</h4><p id="tB4Desc">Priama pomoc, ak si počas prípravy niečím neistý.</p></div>
+      <div class="bonus"><div class="bi"><svg width="22" height="22" viewBox="0 0 22 22"><rect x="3" y="9" width="16" height="10" rx="1" stroke="#7c5cff" stroke-width="1.6"/><path d="M3 12h16M11 9v10M7 9c0-2 1.5-4 4-4s4 2 4 4" stroke="#7c5cff" stroke-width="1.6"/></svg></div><h4 id="tB1Title">Bonusové dni</h4><p id="tB1Desc">Navyše dni členstva, ak si ho aktivuješ počas platnosti tejto ponuky.</p></div>
+      <div class="bonus"><div class="bi"><svg width="22" height="22" viewBox="0 0 22 22"><circle cx="8" cy="8" r="3.5" stroke="#c8ff00" stroke-width="1.6"/><circle cx="16" cy="10" r="2.5" stroke="#c8ff00" stroke-width="1.6"/><path d="M2 19c0-3.5 2.7-6 6-6s6 2.5 6 6M14 19c0-2.3 1-4.3 2.6-5.4" stroke="#c8ff00" stroke-width="1.6" stroke-linecap="round"/></svg></div><h4 id="tB2Title">Súkromná skupina</h4><p id="tB2Desc">Prístup k ostatným účastníkom pred termínmi.</p></div>
+      <div class="bonus"><div class="bi"><svg width="22" height="22" viewBox="0 0 22 22"><path d="M11 2v4M11 16v4M2 11h4M16 11h4M4.5 4.5l2.8 2.8M14.7 14.7l2.8 2.8M4.5 17.5l2.8-2.8M14.7 7.3l2.8-2.8" stroke="#7c5cff" stroke-width="1.6" stroke-linecap="round"/><circle cx="11" cy="11" r="3" stroke="#7c5cff" stroke-width="1.6"/></svg></div><h4 id="tB3Title">Extra AI testy</h4><p id="tB3Desc">Navýšený limit generovaných testov počas prvého mesiaca.</p></div>
+      <div class="bonus"><div class="bi"><svg width="22" height="22" viewBox="0 0 22 22"><path d="M3 5h16v10H8l-5 4V5z" stroke="#c8ff00" stroke-width="1.6" stroke-linejoin="round"/></svg></div><h4 id="tB4Title">Osobná podpora</h4><p id="tB4Desc">Priama pomoc, ak si počas prípravy niečím neistý.</p></div>
     </div>
   </div>
 </div>
