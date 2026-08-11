@@ -505,18 +505,18 @@ function courseFormHtml(c) {
     </div>
     <p class="muted" style="margin-top:-.4rem">0 = kurz zadarmo (prístup len za prihlásenie cez Google, bez platby).</p>
     <h4 style="margin-top:1.2rem">Dostupnosť kurzu</h4>
-    <p class="muted" style="margin-top:-.4rem">Pri "Súčasť predplatného" je kurz zadarmo len počas aktívneho predplatného vo vybraných tieroch — mimo predplatného sa dá kúpiť aj priamo za cenu vyššie.</p>
-    <select class="cf-access-mode">
+    <p class="muted" style="margin-top:-.4rem;margin-bottom:.5rem">Pri "Súčasť predplatného" je kurz zadarmo len počas aktívneho predplatného vo vybraných tieroch — mimo predplatného sa dá kúpiť aj priamo za cenu vyššie.</p>
+    <select class="cf-access-mode" style="width:100%;max-width:360px;padding:.6rem .8rem;background:var(--black3);border:1px solid var(--border2);border-radius:8px;font-size:.83rem;appearance:none;-webkit-appearance:none;background-image:url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 20 20%22 fill=%22%238a8aa3%22><path d=%22M5.5 7.5l4.5 5 4.5-5z%22/></svg>');background-repeat:no-repeat;background-position:right .7rem center;background-size:1.1rem">
       <option value="paid" ${(!c || c.access_mode === 'paid' || !c.access_mode) ? 'selected' : ''}>Platený (bežný predaj)</option>
       <option value="free" ${c?.access_mode === 'free' ? 'selected' : ''}>Zadarmo pre každého</option>
       <option value="subscription" ${c?.access_mode === 'subscription' ? 'selected' : ''}>Súčasť predplatného appky</option>
     </select>
-    <div class="cf-tier-row" style="display:${c?.access_mode === 'subscription' ? 'flex' : 'none'};gap:1.2rem;margin-top:.5rem">
-      <label><input type="checkbox" class="cf-tier-premium" ${c?.included_in_premium ? 'checked' : ''}> Premium</label>
-      <label><input type="checkbox" class="cf-tier-elite" ${c?.included_in_elite ? 'checked' : ''}> Elite</label>
+    <div class="cf-tier-row" style="display:${c?.access_mode === 'subscription' ? 'flex' : 'none'};gap:1.4rem;margin-top:.7rem;margin-bottom:.6rem;align-items:center">
+      <label style="display:flex;align-items:center;gap:.4rem;cursor:pointer"><input type="checkbox" class="cf-tier-premium" ${c?.included_in_premium ? 'checked' : ''} style="width:16px;height:16px;accent-color:var(--purple)"> Premium</label>
+      <label style="display:flex;align-items:center;gap:.4rem;cursor:pointer"><input type="checkbox" class="cf-tier-elite" ${c?.included_in_elite ? 'checked' : ''} style="width:16px;height:16px;accent-color:var(--purple)"> Elite</label>
     </div>
     ${coverFieldHtml('cf-cover', c?.cover_image_url)}
-    <input class="cf-intro-video" placeholder="URL úvodného videa (sales letter video, voliteľné)" value="${(c?.intro_video_url||'').replace(/"/g,'&quot;')}" style="margin-top:.6rem">
+    <input class="cf-intro-video" placeholder="URL úvodného videa (sales letter video, voliteľné)" value="${(c?.intro_video_url||'').replace(/"/g,'&quot;')}" style="width:100%;padding:.6rem .8rem;background:var(--black3);border:1px solid var(--border2);border-radius:8px;font-size:.83rem;margin-top:.6rem;box-sizing:border-box">
     <textarea class="cf-desc" placeholder="Krátky popis (karta v zozname + meta description, cca 1-2 vety)" style="min-height:60px">${c?.description||''}</textarea>
     <p class="muted" style="margin-top:.6rem">Sales letter — zobrazí sa medzi horným a dolným tlačidlom "Kúpiť kurz".</p>
     ${richEditorHtml('cf-sales-editor', 'Napíš predajný text kurzu — nadpisy, tučné písmo, zoznamy...')}
