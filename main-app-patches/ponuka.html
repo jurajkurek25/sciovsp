@@ -309,12 +309,26 @@ function setDuration(months) {
   document.getElementById('elitePeriod').textContent = periodTxt;
 }
 
-// 48-hodinové odpočítavanie od prvej návštevy tejto stránky (per prehliadač).
+// Ponuka končí vždy o 23:59:59 dňa, kedy návštevník prišiel PRVÝKRÁT —
+// zapamätané cez cookie (nie localStorage), nech to prežije aj vymazanie
+// site dát, ktoré niekedy nechá cookies bokom.
+function getCookie(name) {
+  const match = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
+  return match ? decodeURIComponent(match[1]) : null;
+}
+function setCookie(name, value, expiresDate) {
+  document.cookie = name + '=' + encodeURIComponent(value) + '; expires=' + expiresDate.toUTCString() + '; path=/; SameSite=Lax';
+}
 function getDeadline() {
-  let deadline = localStorage.getItem('sp_offer_deadline');
+  let deadline = getCookie('sp_offer_deadline');
   if (!deadline) {
-    deadline = String(Date.now() + 48 * 60 * 60 * 1000);
-    localStorage.setItem('sp_offer_deadline', deadline);
+    const now = new Date();
+    const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+    deadline = String(endOfDay.getTime());
+    // cookie samotná nech vydrží pár dní navyše — hodnota v nej (koniec
+    // dňa prvej návštevy) je to, čo skutočne určuje odpočet, nie expirácia cookie.
+    const cookieExpiry = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+    setCookie('sp_offer_deadline', deadline, cookieExpiry);
   }
   return Number(deadline);
 }
