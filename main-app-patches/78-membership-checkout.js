@@ -96,7 +96,7 @@ patched = replaceOnce(patched,
 // ── 2) Checkout endpoint + expiračný interval, pred app.listen ──
 patched = replaceOnce(patched,
   `app.listen(PORT, () => {`,
-  `const MEMBERSHIP_PRICES = { premium: { 3: 2700, 6: 5700, 12: 9700 }, elite: { 3: 5700, 6: 9700, 12: 19700 } };
+  `const MEMBERSHIP_PRICES = { premium: { 3: 2700, 6: 4900, 12: 9700 }, elite: { 3: 5700, 6: 9700, 12: 18700 } };
 
 app.post('/api/membership/checkout', rateLimit, async (req, res) => {
   const { email, tier, months } = req.body || {};
