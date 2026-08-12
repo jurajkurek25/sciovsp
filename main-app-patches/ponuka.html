@@ -350,16 +350,34 @@ function getCookie(name) {
 function setCookie(name, value, expiresDate) {
   document.cookie = name + '=' + encodeURIComponent(value) + '; expires=' + expiresDate.toUTCString() + '; path=/; SameSite=Lax';
 }
+// Webinár je týždenný (každý štvrtok) — bez tohto by si niekto, kto sa
+// zaregistruje znova o týždeň neskôr, priniesol starú (už dávno prepadnutú)
+// cookie a akciu by už nikdy nedostal. Preto sa deadline cookie viaže na
+// konkrétny termín (slotStartMs) z aktuálnej registrácie: nová registrácia
+// na iný termín = nový odpočet; opakovaná návšteva v rámci toho istého
+// termínu = ten istý (už bežiaci/prepadnutý) odpočet ostáva.
+function currentWebinarSlotKey() {
+  try {
+    const raw = localStorage.getItem('sp_webinar_session');
+    if (!raw) return null;
+    const session = JSON.parse(raw);
+    return session && session.slotStartMs ? String(session.slotStartMs) : null;
+  } catch (e) { return null; }
+}
 function getDeadline() {
-  let deadline = getCookie('sp_offer_deadline');
-  if (!deadline) {
+  const slotKey = currentWebinarSlotKey();
+  const stored = getCookie('sp_offer_deadline');
+  const parts = stored ? stored.split('|') : [];
+  const storedSlotKey = parts.length > 1 ? parts[0] : null;
+  let deadline = parts.length > 1 ? parts[1] : null;
+  if (!deadline || storedSlotKey !== slotKey) {
     const now = new Date();
     const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
     deadline = String(endOfDay.getTime());
     // cookie samotná nech vydrží pár dní navyše — hodnota v nej (koniec
-    // dňa prvej návštevy) je to, čo skutočne určuje odpočet, nie expirácia cookie.
+    // dňa prvej návštevy k danému termínu) je to, čo skutočne určuje odpočet, nie expirácia cookie.
     const cookieExpiry = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-    setCookie('sp_offer_deadline', deadline, cookieExpiry);
+    setCookie('sp_offer_deadline', slotKey + '|' + deadline, cookieExpiry);
   }
   return Number(deadline);
 }
