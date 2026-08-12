@@ -217,8 +217,8 @@ let nextSlot = nextThursdayEight();
 // pred termínom) — skutočný HTML form POST do skrytého iframe (viď <form
 // id="ecomailForm"> vyššie), presne ako by to spravil ich vlastný embed
 // kód. "Fire and forget": chyba/výpadok Ecomailu nesmie zablokovať samotnú
-// registráciu na vysielanie, preto sa presmerovanie na /webinar/live iba
-// mierne oneskorí (nie zruší), aby mal formulár čas request reálne odoslať.
+// registráciu na vysielanie, preto sa presmerovanie na /webinar/dakujeme
+// iba mierne oneskorí (nie zruší), aby mal formulár čas request reálne odoslať.
 function subscribeToEcomail(name, email) {
   try {
     document.getElementById('ecomailName').value = name || '';
@@ -236,7 +236,9 @@ document.getElementById('regSubmitBtn').onclick = () => {
   const session = { slotStartMs: nextSlot.getTime(), name: name || null, email };
   localStorage.setItem('sp_webinar_session', JSON.stringify(session));
   subscribeToEcomail(name, email);
-  setTimeout(() => { location.href = '/webinar/live'; }, 250);
+  // Nepresmerovávame rovno na vysielanie — najprv poďakovanie + potvrdenie
+  // opt-inu, nech je jasné, že treba potvrdiť email pred pripomienkami.
+  setTimeout(() => { location.href = '/webinar/dakujeme'; }, 250);
 };
 
 function checkExistingRegistration() {
