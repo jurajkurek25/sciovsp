@@ -45,6 +45,12 @@ h1{font-family:var(--serif);font-weight:800;font-size:clamp(2rem,5vw,2.8rem);lin
 .next-session .label{font-family:var(--mono);font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:.4rem}
 .next-session .date{font-family:var(--serif);font-weight:800;font-size:1.4rem}
 
+.benefits{max-width:480px;margin:0 auto 2rem;background:var(--ink3);border:1px solid var(--border2);border-radius:12px;padding:1.4rem 1.6rem}
+.benefits .label{font-family:var(--mono);font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ignite2);margin-bottom:.9rem}
+.benefits ul{list-style:none;display:flex;flex-direction:column;gap:.75rem}
+.benefits li{font-size:.92rem;color:var(--text2);display:flex;gap:.6rem;align-items:flex-start;text-align:left}
+.benefits li svg{flex-shrink:0;margin-top:.2rem}
+
 .reg-form{max-width:380px;margin:0 auto;background:var(--ink3);border:1px solid var(--border2);border-radius:12px;padding:1.6rem}
 .reg-form label{display:block;font-family:var(--mono);font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);margin-bottom:.35rem}
 .reg-form input{width:100%;padding:.7rem .8rem;background:var(--ink2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:.9rem;margin-bottom:1rem}
@@ -81,6 +87,16 @@ h1{font-family:var(--serif);font-weight:800;font-size:clamp(2rem,5vw,2.8rem);lin
   <div class="next-session">
     <div class="label" id="tNextLabel">Najbližší termín</div>
     <div class="date" id="nextSessionDate">—</div>
+  </div>
+
+  <div class="benefits">
+    <div class="label" id="tBenefitsLabel">Čo na vysielaní získaš</div>
+    <ul>
+      <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3.5" stroke="#7c5cff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> <span id="tBenefit1">Kompletný postup, ako sa dostať na vysnívanú vysokú školu</span></li>
+      <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3.5" stroke="#7c5cff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> <span id="tBenefit2">Ako si rozvrhnúť prípravu, aj keď nemáš veľa času</span></li>
+      <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3.5" stroke="#7c5cff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> <span id="tBenefit3">Ako získať viac energie na učenie</span></li>
+      <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3.5" stroke="#7c5cff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> <span id="tBenefit4">Pracovný zošit na stiahnutie zadarmo</span></li>
+    </ul>
   </div>
 
   <div class="reg-form" id="regForm">
@@ -200,6 +216,11 @@ const T = {
     eyebrow: 'Bezplatné vysielanie',
     h1: 'Ako sa dostať na vysnívanú vysokú školu — aj keď ti ostáva len pár týždňov a nechceš sa učiť dňom i nocou',
     nextLabel: 'Najbližší termín',
+    benefitsLabel: 'Čo na vysielaní získaš',
+    benefit1: 'Kompletný postup, ako sa dostať na vysnívanú vysokú školu',
+    benefit2: 'Ako si rozvrhnúť prípravu, aj keď nemáš veľa času',
+    benefit3: 'Ako získať viac energie na učenie',
+    benefit4: 'Pracovný zošit na stiahnutie zadarmo',
     nameLabel: 'Meno', emailLabel: 'Email', regSubmit: 'Zaregistrovať sa zadarmo', emailError: 'Zadaj platný email.',
     alreadyText: 'Si už zaregistrovaný/á na najbližšie vysielanie.', alreadyCta: 'Prejsť na vysielanie →',
     footerTerms: 'Obchodné podmienky', footerPrivacy: 'Ochrana osobných údajov',
@@ -210,6 +231,11 @@ const T = {
     eyebrow: 'Bezplatné vysílání',
     h1: 'Jak se dostat na vysněnou vysokou školu — i když ti zbývá jen pár týdnů a nechceš se učit dnem i nocí',
     nextLabel: 'Nejbližší termín',
+    benefitsLabel: 'Co na vysílání získáš',
+    benefit1: 'Kompletní postup, jak se dostat na vysněnou vysokou školu',
+    benefit2: 'Jak si rozvrhnout přípravu, i když nemáš moc času',
+    benefit3: 'Jak získat víc energie na učení',
+    benefit4: 'Pracovní sešit ke stažení zdarma',
     nameLabel: 'Jméno', emailLabel: 'Email', regSubmit: 'Zaregistrovat se zdarma', emailError: 'Zadej platný email.',
     alreadyText: 'Už jsi zaregistrovaný/á na nejbližší vysílání.', alreadyCta: 'Přejít na vysílání →',
     footerTerms: 'Obchodní podmínky', footerPrivacy: 'Ochrana osobních údajů',
@@ -231,6 +257,11 @@ function setLang(l) {
   document.getElementById('tEyebrow').textContent = t('eyebrow');
   document.getElementById('tH1').textContent = t('h1');
   document.getElementById('tNextLabel').textContent = t('nextLabel');
+  document.getElementById('tBenefitsLabel').textContent = t('benefitsLabel');
+  document.getElementById('tBenefit1').textContent = t('benefit1');
+  document.getElementById('tBenefit2').textContent = t('benefit2');
+  document.getElementById('tBenefit3').textContent = t('benefit3');
+  document.getElementById('tBenefit4').textContent = t('benefit4');
   document.getElementById('tNameLabel').textContent = t('nameLabel');
   document.getElementById('tEmailLabel').textContent = t('emailLabel');
   document.getElementById('tRegSubmit').textContent = t('regSubmit');
