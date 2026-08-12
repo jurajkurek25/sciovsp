@@ -19,7 +19,7 @@ async function sendMail({ to, subject, html }) {
     return;
   }
   try {
-    await transporter.sendMail({ from: process.env.SMTP_USER, to, subject, html });
+    await transporter.sendMail({ from: process.env.SMTP_FROM || process.env.SMTP_USER, to, subject, html });
   } catch (e) {
     console.error('sendMail zlyhal:', e.message);
   }

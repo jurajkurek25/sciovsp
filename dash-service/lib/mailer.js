@@ -19,7 +19,7 @@ async function sendMail({ to, subject, html }) {
     console.warn('⚠️  SMTP nie je nastavené — email sa neposlal.', { to, subject });
     return { sent: false };
   }
-  await transporter.sendMail({ from: process.env.SMTP_USER, to, subject, html });
+  await transporter.sendMail({ from: process.env.SMTP_FROM || process.env.SMTP_USER, to, subject, html });
   return { sent: true };
 }
 
