@@ -169,7 +169,33 @@ function startBroadcast() {
   const elapsed = currentElapsedSeconds();
   if (elapsed >= VIDEO_DURATION_SECONDS) { showEndScreen(); return; }
 
+  // Tlačidlo "▶" musí byť klikateľné HNEĎ, nezávisle od toho, či/kedy
+  // nastane loadedmetadata — predtým sa onclick priraďoval až vnútri
+  // callbacku po loadedmetadata → automatickom pokuse o prehratie, takže
+  // ak loadedmetadata vôbec nenastalo (typicky veľký .mp4 bez "faststart",
+  // teda moov atom na konci súboru namiesto na začiatku — prehliadač
+  // vtedy nevie prečítať dĺžku/metadáta bez stiahnutia takmer celého
+  // súboru), tlačidlo ostalo navždy mŕtve bez akejkoľvek chyby.
+  document.getElementById('startOverlayBtn').onclick = () => {
+    video.muted = false;
+    if (video.readyState >= 1) video.currentTime = currentElapsedSeconds();
+    video.play().then(() => { document.getElementById('startOverlay').style.display = 'none'; }).catch(reportPlaybackError);
+  };
+
+  video.addEventListener('error', () => reportPlaybackError(video.error));
+
+  // Ak loadedmetadata nenastane do pár sekúnd, ide takmer isto o vyššie
+  // opísaný faststart problém — nahlás to viditeľne namiesto ticho visiaceho UI.
+  const metadataStallTimer = setTimeout(() => {
+    if (video.readyState < 1) {
+      console.warn('SP webinár — video ani po 8s nenačítalo metadáta (readyState=' + video.readyState + '). Súbor pravdepodobne nie je "faststart" (moov atom na konci) — treba ho remuxovať: ffmpeg -i in.mp4 -c copy -movflags +faststart out.mp4');
+      const textEl = document.getElementById('tStartOverlayText');
+      if (textEl) textEl.textContent = 'Video sa dlho nenačítava — skontroluj konzolu prehliadača (F12) pre diagnostiku.';
+    }
+  }, 8000);
+
   video.addEventListener('loadedmetadata', () => {
+    clearTimeout(metadataStallTimer);
     video.currentTime = Math.min(currentElapsedSeconds(), video.duration || VIDEO_DURATION_SECONDS);
     attemptAutoplay();
   });
@@ -203,13 +229,8 @@ function reportPlaybackError(err) {
 function attemptAutoplay() {
   const video = document.getElementById('webinarVideo');
   const overlay = document.getElementById('startOverlay');
-  video.addEventListener('error', () => reportPlaybackError(video.error));
-  video.play().then(() => { overlay.style.display = 'none'; }).catch((err) => {
+  video.play().then(() => { overlay.style.display = 'none'; }).catch(() => {
     overlay.style.display = 'flex';
-    document.getElementById('startOverlayBtn').onclick = () => {
-      video.muted = false;
-      video.play().then(() => { overlay.style.display = 'none'; }).catch(reportPlaybackError);
-    };
   });
 }
 
