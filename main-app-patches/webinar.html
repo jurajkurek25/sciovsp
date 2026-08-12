@@ -92,6 +92,17 @@ h1{font-family:var(--serif);font-weight:800;font-size:clamp(2rem,5vw,2.8rem);lin
   </div>
 </div>
 
+<!-- Skutočný HTML form POST do Ecomailu (rovnaký princíp ako ich vlastný
+     embed kód) — mieri do skrytého iframe, aby stránka po odoslaní
+     neopustila /webinar. Zámerne NIE fetch(): cudzí formulár POST nepodlieha
+     CORS, zatiaľ čo fetch na cudziu doménu narazí na CSRF/Accept-header
+     kontroly, ktoré tento endpoint pri AJAX volaní odmieta. -->
+<iframe name="ecomailSubscribeFrame" style="display:none" tabindex="-1" aria-hidden="true"></iframe>
+<form id="ecomailForm" action="https://jurajaugustinkurek.ecomailapp.cz/public/subscribe/15/864b4f4872272bdd94aadbc81dfd8b18" method="POST" target="ecomailSubscribeFrame" style="display:none">
+  <input type="hidden" name="name" id="ecomailName">
+  <input type="hidden" name="email" id="ecomailEmail">
+</form>
+
 <script>
 // Vysiela sa iba raz týždenne — každý štvrtok o 20:00 (lokálny čas
 // prehliadača). Rovnaký princíp evergreen "join-in-progress" ako predtým,
@@ -128,22 +139,16 @@ function fmtSessionDate(d, l) {
 let nextSlot = nextThursdayEight();
 
 // Registráciu zároveň posunieme do Ecomail zoznamu (pripomienkové emaily
-// pred termínom). Verejný subscribe endpoint nevracia čitateľnú CORS
-// odpoveď, takže ide o "fire and forget" — chyba/výpadok Ecomailu nesmie
-// zablokovať samotnú registráciu na vysielanie. keepalive:true, aby sa
-// požiadavka dokončila, aj keď stránka hneď potom presmeruje preč.
+// pred termínom) — skutočný HTML form POST do skrytého iframe (viď <form
+// id="ecomailForm"> vyššie), presne ako by to spravil ich vlastný embed
+// kód. "Fire and forget": chyba/výpadok Ecomailu nesmie zablokovať samotnú
+// registráciu na vysielanie, preto sa presmerovanie na /webinar/live iba
+// mierne oneskorí (nie zruší), aby mal formulár čas request reálne odoslať.
 function subscribeToEcomail(name, email) {
   try {
-    const body = new URLSearchParams();
-    if (name) body.set('name', name);
-    body.set('email', email);
-    fetch('https://jurajaugustinkurek.ecomailapp.cz/public/subscribe/15/864b4f4872272bdd94aadbc81dfd8b18', {
-      method: 'POST',
-      mode: 'no-cors',
-      keepalive: true,
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: body.toString()
-    }).catch(() => {});
+    document.getElementById('ecomailName').value = name || '';
+    document.getElementById('ecomailEmail').value = email;
+    document.getElementById('ecomailForm').submit();
   } catch (e) {}
 }
 
@@ -156,7 +161,7 @@ document.getElementById('regSubmitBtn').onclick = () => {
   const session = { slotStartMs: nextSlot.getTime(), name: name || null, email };
   localStorage.setItem('sp_webinar_session', JSON.stringify(session));
   subscribeToEcomail(name, email);
-  location.href = '/webinar/live';
+  setTimeout(() => { location.href = '/webinar/live'; }, 250);
 };
 
 function checkExistingRegistration() {
