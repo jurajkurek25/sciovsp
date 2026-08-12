@@ -4,6 +4,9 @@ const { pool } = require('../db/pool');
 const { requireAuth, requirePro } = require('../middleware/auth');
 
 const ANTHROPIC_API = 'https://api.anthropic.com/v1/messages';
+// Skúša ďalší model len keď chyba vyzerá na problém s modelom (404 alebo
+// zmienka "model" v chybe) — pozri poznámku pri jeho použití nižšie.
+const MODEL_FALLBACK_CHAIN = ['claude-sonnet-5', 'claude-sonnet-4-6'];
 
 // Systémový prompt — znalosť štruktúry SCIO VSP testov
 const SYSTEM_PROMPT = `Si odborník na tvorbu úloh pre slovenské SCIO Všeobecné študijné predpoklady (VSP/VŠP) testy.
@@ -67,25 +70,36 @@ router.post('/generate', requireAuth, requirePro, async (req, res) => {
 Vrát validný JSON podľa schémy.`;
 
   try {
-    const response = await fetch(ANTHROPIC_API, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': process.env.ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-5',
-        max_tokens: 4000,
-        system: SYSTEM_PROMPT,
-        messages: [{ role: 'user', content: userPrompt }]
-      })
-    });
-
-    if (!response.ok) {
+    // Tichý fallback na iný model, ak Anthropic odmietne primárny (napr.
+    // bol medzičasom deprecated) — inak by generátor prestal fungovať
+    // okamžite a ticho pre všetkých Pro používateľov naraz.
+    let response;
+    for (let i = 0; i < MODEL_FALLBACK_CHAIN.length; i++) {
+      const model = MODEL_FALLBACK_CHAIN[i];
+      response = await fetch(ANTHROPIC_API, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': process.env.ANTHROPIC_API_KEY,
+          'anthropic-version': '2023-06-01'
+        },
+        body: JSON.stringify({
+          model,
+          max_tokens: 4000,
+          system: SYSTEM_PROMPT,
+          messages: [{ role: 'user', content: userPrompt }]
+        })
+      });
+      if (response.ok) {
+        if (i > 0) console.error(`⚠️ Claude model fallback: '${MODEL_FALLBACK_CHAIN[0]}' zlyhal, použitý '${model}'.`);
+        break;
+      }
       const err = await response.text();
-      console.error('Claude API error:', err);
-      return res.status(502).json({ error: 'Chyba pri komunikácii s AI.' });
+      const looksLikeModelIssue = response.status === 404 || /model/i.test(err);
+      if (!looksLikeModelIssue || i === MODEL_FALLBACK_CHAIN.length - 1) {
+        console.error('Claude API error:', err);
+        return res.status(502).json({ error: 'Chyba pri komunikácii s AI.' });
+      }
     }
 
     const data = await response.json();

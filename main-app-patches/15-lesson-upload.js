@@ -164,14 +164,20 @@ app.post('/api/courses/:slug/lessons/:lessonId/submit', requireCourseBuyer, (req
   });
 });
 
-function callAnthropicGrade(instructions, fileBuffer, mimeType) {
+// Tichý fallback na iný model, ak Anthropic odmietne primárny (napr. bol
+// medzičasom deprecated) — inak by hodnotenie nahratých materiálov prestalo
+// fungovať okamžite a ticho pre všetkých žiakov naraz.
+const GRADE_MODEL_FALLBACK_CHAIN = ['claude-sonnet-5', 'claude-sonnet-4-6'];
+
+function callAnthropicGrade(instructions, fileBuffer, mimeType, modelIdx) {
+  modelIdx = modelIdx || 0;
   return new Promise((resolve, reject) => {
     const base64 = fileBuffer.toString('base64');
     const fileBlock = mimeType === 'application/pdf'
       ? { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64 } }
       : { type: 'image', source: { type: 'base64', media_type: mimeType, data: base64 } };
     const payload = JSON.stringify({
-      model: 'claude-sonnet-5',
+      model: GRADE_MODEL_FALLBACK_CHAIN[modelIdx],
       max_tokens: 1024,
       system: 'Si prísny, ale spravodlivý hodnotiaci asistent kurzu SP Tréner. Dostaneš pokyny/kritériá od lektora a nahraný materiál od žiaka (obrázok alebo PDF). Over, či materiál spĺňa zadané pokyny/kritériá. Odpovedaj VÝLUČNE v JSON bez backticks: {"verdict":"pass" alebo "fail","feedback":"krátka spätná väzba po slovensky, 1-3 vety, čo je dobre / čo treba opraviť"}.',
       messages: [{
@@ -192,7 +198,14 @@ function callAnthropicGrade(instructions, fileBuffer, mimeType) {
       apiRes.on('end', () => {
         try {
           const parsed = JSON.parse(data);
-          if (parsed.error) return reject(new Error(parsed.error.message));
+          if (parsed.error) {
+            const looksLikeModelIssue = apiRes.statusCode === 404 || /model/i.test(parsed.error.message || '');
+            if (looksLikeModelIssue && modelIdx < GRADE_MODEL_FALLBACK_CHAIN.length - 1) {
+              console.error(\`⚠️ Claude model fallback: '\${GRADE_MODEL_FALLBACK_CHAIN[modelIdx]}' zlyhal, skúšam '\${GRADE_MODEL_FALLBACK_CHAIN[modelIdx + 1]}'.\`);
+              return resolve(callAnthropicGrade(instructions, fileBuffer, mimeType, modelIdx + 1));
+            }
+            return reject(new Error(parsed.error.message));
+          }
           const text = parsed.content?.find(b => b.type === 'text')?.text || '';
           const clean = text.replace(/\`\`\`json\\s*/gi, '').replace(/\`\`\`\\s*/gi, '').trim();
           const result = JSON.parse(clean.replace(/,\\s*([}\\]])/g, '$1'));

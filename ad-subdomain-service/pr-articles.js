@@ -18,7 +18,11 @@ const { moderateArticleText } = require('./moderation');
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
-const WRITER_MODEL = 'claude-sonnet-5';
+// Tichý fallback na iný model, ak Anthropic odmietne primárny (napr. bol
+// medzičasom deprecated) — bez tohto by generovanie PR článkov prestalo
+// fungovať okamžite a ticho. Skúša ďalší model len keď chyba vyzerá na
+// problém s modelom (404 alebo zmienka "model" v chybe).
+const MODEL_FALLBACK_CHAIN = ['claude-sonnet-5', 'claude-sonnet-4-6'];
 const PR_ARTICLE_PRICE_CENTS = 24900; // 249€
 const APP_URL = process.env.APP_URL || 'https://ad.sptrener.online';
 const MAIN_APP_URL = process.env.MAIN_APP_URL || 'https://sptrener.online';
@@ -95,33 +99,44 @@ async function publishArticle(pr, article) {
 
 async function callClaude({ system, userPrompt, maxTokens }) {
   if (!ANTHROPIC_API_KEY) throw new Error('ANTHROPIC_API_KEY nie je nastavený.');
-  const controller = new AbortController();
-  const t = setTimeout(() => controller.abort(), 60000);
-  let res;
-  try {
-    res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'x-api-key': ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01',
-        'content-type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: WRITER_MODEL,
-        max_tokens: maxTokens,
-        system,
-        messages: [{ role: 'user', content: userPrompt }]
-      }),
-      signal: controller.signal
-    });
-  } finally {
-    clearTimeout(t);
-  }
-  if (!res.ok) {
+  let lastErrText = '';
+  let data;
+  for (let i = 0; i < MODEL_FALLBACK_CHAIN.length; i++) {
+    const model = MODEL_FALLBACK_CHAIN[i];
+    const controller = new AbortController();
+    const t = setTimeout(() => controller.abort(), 60000);
+    let res;
+    try {
+      res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'x-api-key': ANTHROPIC_API_KEY,
+          'anthropic-version': '2023-06-01',
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          model,
+          max_tokens: maxTokens,
+          system,
+          messages: [{ role: 'user', content: userPrompt }]
+        }),
+        signal: controller.signal
+      });
+    } finally {
+      clearTimeout(t);
+    }
+    if (res.ok) {
+      if (i > 0) console.error(`⚠️ Claude model fallback: '${MODEL_FALLBACK_CHAIN[0]}' zlyhal, použitý '${model}'.`);
+      data = await res.json();
+      break;
+    }
     const errText = await res.text().catch(() => '');
-    throw new Error(`Claude API vrátila chybu ${res.status}: ${errText.slice(0, 300)}`);
+    lastErrText = errText;
+    const looksLikeModelIssue = res.status === 404 || /model/i.test(errText);
+    if (!looksLikeModelIssue || i === MODEL_FALLBACK_CHAIN.length - 1) {
+      throw new Error(`Claude API vrátila chybu ${res.status}: ${errText.slice(0, 300)}`);
+    }
   }
-  const data = await res.json();
   const text = (data.content || []).map(b => b.text || '').join('').trim();
   const match = text.match(/\{[\s\S]*\}/);
   if (!match) throw new Error('Claude nevrátila validný JSON.');

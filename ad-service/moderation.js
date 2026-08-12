@@ -14,7 +14,13 @@ const { promisify } = require('util');
 const execFileAsync = promisify(execFile);
 
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
-const MODERATION_MODEL = 'claude-haiku-4-5-20251001';
+// Tichý fallback na iný model, ak Anthropic odmietne primárny (napr. bol
+// medzičasom deprecated) — inak by fail-closed politika nižšie začala
+// zamietať KAŽDÚ kreatívu len kvôli neplatnému model ID, nie kvôli
+// skutočnému problému s obsahom. Skúša ďalší model len keď chyba vyzerá
+// na problém s modelom (404 alebo zmienka "model" v chybe) — inou chybou
+// (napr. skutočný content policy problém) sa naďalej riadi fail-closed.
+const MODEL_FALLBACK_CHAIN = ['claude-haiku-4-5-20251001', 'claude-sonnet-4-6'];
 const MAX_FRAMES = 4;
 
 async function getDurationSeconds(filePath) {
@@ -235,36 +241,43 @@ async function moderateContent({ buffer, mimeType, linkUrl }) {
 
   let res;
   try {
-    const controller = new AbortController();
-    const t = setTimeout(() => controller.abort(), 20000);
-    res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'x-api-key': ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01',
-        'content-type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: MODERATION_MODEL,
-        max_tokens: 300,
-        messages: [{
-          role: 'user',
-          content: [
-            ...imageBuffers.map(buf => ({ type: 'image', source: { type: 'base64', media_type: imageMediaType, data: buf.toString('base64') } })),
-            { type: 'text', text: buildPrompt(linkUrl, linkContext, imageBuffers.length) }
-          ]
-        }]
-      }),
-      signal: controller.signal
-    });
-    clearTimeout(t);
+    for (let i = 0; i < MODEL_FALLBACK_CHAIN.length; i++) {
+      const model = MODEL_FALLBACK_CHAIN[i];
+      const controller = new AbortController();
+      const t = setTimeout(() => controller.abort(), 20000);
+      res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'x-api-key': ANTHROPIC_API_KEY,
+          'anthropic-version': '2023-06-01',
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          model,
+          max_tokens: 300,
+          messages: [{
+            role: 'user',
+            content: [
+              ...imageBuffers.map(buf => ({ type: 'image', source: { type: 'base64', media_type: imageMediaType, data: buf.toString('base64') } })),
+              { type: 'text', text: buildPrompt(linkUrl, linkContext, imageBuffers.length) }
+            ]
+          }]
+        }),
+        signal: controller.signal
+      });
+      clearTimeout(t);
+      if (res.ok) {
+        if (i > 0) console.error(`⚠️ Claude model fallback: '${MODEL_FALLBACK_CHAIN[0]}' zlyhal, použitý '${model}'.`);
+        break;
+      }
+      const errText = await res.text().catch(() => '');
+      const looksLikeModelIssue = res.status === 404 || /model/i.test(errText);
+      if (!looksLikeModelIssue || i === MODEL_FALLBACK_CHAIN.length - 1) {
+        return { allowed: false, category: 'api_error', reason: `AI kontrola vrátila chybu ${res.status} — zamietnuté pre istotu.`, raw: errText.slice(0, 500) };
+      }
+    }
   } catch (e) {
     return { allowed: false, category: 'api_error', reason: `Volanie AI kontroly zlyhalo (${e.message}) — zamietnuté pre istotu.` };
-  }
-
-  if (!res.ok) {
-    const errText = await res.text().catch(() => '');
-    return { allowed: false, category: 'api_error', reason: `AI kontrola vrátila chybu ${res.status} — zamietnuté pre istotu.`, raw: errText.slice(0, 500) };
   }
 
   const data = await res.json();
