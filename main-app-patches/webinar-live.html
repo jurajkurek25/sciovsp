@@ -109,9 +109,8 @@ input{font-family:inherit}
 </div>
 
 <script>
-// ==================== KONFIGURÁCIA — uprav podľa skutočného videa ====================
-const VIDEO_URL = 'https://videos.jurajkurek.com/webinar.mp4';
-const VIDEO_DURATION_SECONDS = 45 * 60; // TODO: nastav na skutočnú dĺžku videa (rovnaká hodnota ako vo webinar.html)
+let VIDEO_URL = '';
+const VIDEO_DURATION_SECONDS = 45 * 60;
 
 function fmtClock(seconds) {
   const s = Math.max(0, Math.floor(seconds));
@@ -169,13 +168,6 @@ function startBroadcast() {
   const elapsed = currentElapsedSeconds();
   if (elapsed >= VIDEO_DURATION_SECONDS) { showEndScreen(); return; }
 
-  // Tlačidlo "▶" musí byť klikateľné HNEĎ, nezávisle od toho, či/kedy
-  // nastane loadedmetadata — predtým sa onclick priraďoval až vnútri
-  // callbacku po loadedmetadata → automatickom pokuse o prehratie, takže
-  // ak loadedmetadata vôbec nenastalo (typicky veľký .mp4 bez "faststart",
-  // teda moov atom na konci súboru namiesto na začiatku — prehliadač
-  // vtedy nevie prečítať dĺžku/metadáta bez stiahnutia takmer celého
-  // súboru), tlačidlo ostalo navždy mŕtve bez akejkoľvek chyby.
   document.getElementById('startOverlayBtn').onclick = () => {
     video.muted = false;
     if (video.readyState >= 1) video.currentTime = currentElapsedSeconds();
@@ -184,11 +176,8 @@ function startBroadcast() {
 
   video.addEventListener('error', () => reportPlaybackError(video.error));
 
-  // Ak loadedmetadata nenastane do pár sekúnd, ide takmer isto o vyššie
-  // opísaný faststart problém — nahlás to viditeľne namiesto ticho visiaceho UI.
   const metadataStallTimer = setTimeout(() => {
     if (video.readyState < 1) {
-      console.warn('SP webinár — video ani po 8s nenačítalo metadáta (readyState=' + video.readyState + '). Súbor pravdepodobne nie je "faststart" (moov atom na konci) — treba ho remuxovať: ffmpeg -i in.mp4 -c copy -movflags +faststart out.mp4');
       const textEl = document.getElementById('tStartOverlayText');
       if (textEl) textEl.textContent = 'Video sa dlho nenačítava — skontroluj konzolu prehliadača (F12) pre diagnostiku.';
     }
@@ -200,8 +189,6 @@ function startBroadcast() {
     attemptAutoplay();
   });
 
-  // Nedá sa preskočiť dopredu — ak sa currentTime odchýli od skutočnej
-  // "živej" pozície (napr. cez klávesové skratky), vráti sa naspäť.
   video.addEventListener('seeking', () => {
     const expected = currentElapsedSeconds();
     if (Math.abs(video.currentTime - expected) > 2) video.currentTime = expected;
@@ -250,31 +237,9 @@ function showEndScreen() {
   document.getElementById('endScreen').classList.add('active');
 }
 
-// ==================== SIMULOVANÝ ŽIVÝ CHAT ====================
-const CHAT_SCRIPT = [
-  { t: 15, name: 'Peťo', text: 'Ahoj všetci! 👋' },
-  { t: 40, name: 'Zuzka K.', text: 'Konečne som stihla, ideme na to!' },
-  { t: 90, name: 'Martin S.', text: 'Toto ma fakt zaujíma, syn ide budúci rok na prijímačky' },
-  { t: 180, name: 'Ivana', text: 'Super, presne som toto potrebovala' },
-  { t: 310, name: 'Tomáš', text: 'Počkať, appka to vie sama vygenerovať? 🤯' },
-  { t: 420, name: 'Katka B.', text: 'My sme skúšali klasické knihy a nulový posun' },
-  { t: 560, name: 'Robo', text: 'Toto dáva zmysel, konečne niekto vysvetľuje prečo' },
-  { t: 700, name: 'Simona', text: 'Koľko otázok tam reálne je?' },
-  { t: 850, name: 'Filip', text: 'Presne toto mi na iných prípravách chýbalo' },
-  { t: 1000, name: 'Lucia', text: 'Toto so spätnou väzbou znie skvele' },
-  { t: 1150, name: 'Dominik', text: 'A funguje to aj na právo?' },
-  { t: 1300, name: 'Nikola', text: 'Konečne AI, ktorá pomáha namiesto strašenia 😄' },
-  { t: 1450, name: 'Peter K.', text: 'Toto by som potreboval už minulý rok' },
-  { t: 1600, name: 'Zuzana M.', text: 'Kde sa dá appka vyskúšať?' },
-  { t: 1750, name: 'Adam', text: 'Toto vyzerá fakt profesionálne' },
-  { t: 1900, name: 'Miroslava', text: 'Idem sa pozrieť na tú ponuku po webinári 👀' },
-  { t: 2050, name: 'Jakub', text: 'Práve som si pozrel tú zľavu, oplatí sa!' },
-  { t: 2200, name: 'Veronika', text: 'Vďaka za skvelý webinár!' },
-  { t: 2350, name: 'Štefan', text: 'Kúpil som Premium, teším sa 🎉' },
-  { t: 2500, name: 'Alžbeta', text: 'Toto rozhodne odporúčam všetkým, čo idú na prijímačky' }
-];
-const FAKE_REPLY_NAMES = ['Peťo', 'Zuzka K.', 'Martin S.', 'Ivana', 'Tomáš', 'Robo', 'Filip', 'Adam'];
-const FAKE_REPLIES = ['👍', 'presne tak!', 'aj ja si to myslím', 'super otázka', 'to isté som chcel/a napísať 😄'];
+let CHAT_SCRIPT = [];
+let REPLY_NAMES = [];
+let REPLY_TEXTS = [];
 
 let chatShownUpTo = -1;
 
@@ -308,9 +273,10 @@ function sendChatMessage() {
   if (!text) return;
   appendChatMessage((session && session.name) ? session.name : t('you'), text, true);
   input.value = '';
+  if (!REPLY_NAMES.length || !REPLY_TEXTS.length) return;
   setTimeout(() => {
-    const name = FAKE_REPLY_NAMES[Math.floor(Math.random() * FAKE_REPLY_NAMES.length)];
-    const reply = FAKE_REPLIES[Math.floor(Math.random() * FAKE_REPLIES.length)];
+    const name = REPLY_NAMES[Math.floor(Math.random() * REPLY_NAMES.length)];
+    const reply = REPLY_TEXTS[Math.floor(Math.random() * REPLY_TEXTS.length)];
     appendChatMessage(name, reply, false);
   }, 3000 + Math.random() * 4000);
 }
@@ -355,7 +321,13 @@ function setLang(l) {
 }
 
 setLang(lang);
-routeToCurrentState();
+fetch('/api/webinar/live-data').then(r => r.json()).then(data => {
+  VIDEO_URL = data.videoUrl || '';
+  CHAT_SCRIPT = data.chatScript || [];
+  REPLY_NAMES = data.replyNames || [];
+  REPLY_TEXTS = data.replyTexts || [];
+  routeToCurrentState();
+}).catch(() => { routeToCurrentState(); });
 </script>
 </body>
 </html>
