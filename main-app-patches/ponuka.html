@@ -450,7 +450,7 @@ async function startPlanCheckout(tier) {
     const res = await fetch('/api/membership/checkout', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ email: currentUser.email, tier, months: duration, pricingMode: offerExpired ? 'classic' : 'promo' })
+      body: JSON.stringify({ email: currentUser.email, tier, months: duration, pricingMode: offerExpired ? 'classic' : 'promo', refCode: sessionStorage.getItem('partner_ref') || null })
     });
     const data = await res.json();
     if (data.url) {
