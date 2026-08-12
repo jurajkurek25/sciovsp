@@ -223,7 +223,7 @@ h1 .accent{color:var(--ignite);font-style:italic}
   </div>
 </div>
 
-<div class="lane tilt-b">
+<div class="lane tilt-b" id="courses-section">
   <div class="lane-inner">
     <h2 class="section-title" id="tCoursesTitle">Kurzy zahrnuté v členstve</h2>
     <p class="section-sub" id="tCoursesSub">6 kurzov, ktoré potrebuje každý uchádzač bez ohľadu na odbor — a prístup do celej odborovej knižnice navyše.</p>
@@ -305,38 +305,47 @@ let currentUser = null;
 let duration = 3;
 
 const PRICES = { premium: { 3: 27, 6: 49, 12: 97 }, elite: { 3: 57, 6: 97, 12: 187 } };
-// Bežná (neakciová) cena po skončení ponuky — lineárny prepočet zo
-// základnej mesačnej sadzby (3-mesačná cena / 3), žiadny objemový
-// popust za dlhší záväzok. Zámerne menej výhodné než PRICES vyššie.
-const CLASSIC_PRICES = { premium: { 3: 27, 6: 54, 12: 108 }, elite: { 3: 57, 6: 114, 12: 228 } };
+// Bežná (neakciová) cena po skončení ponuky — lineárny prepočet z reálnej
+// mesačnej sadzby appky (Premium 9,90 €/mes., Elite 19,90 €/mes., viď
+// public/app.html), žiadny objemový popust za dlhší záväzok.
+const CLASSIC_PRICES = { premium: { 3: 29.70, 6: 59.40, 12: 118.80 }, elite: { 3: 59.70, 6: 119.40, 12: 238.80 } };
 const PERIOD_KEYS = { 3: 'period3', 6: 'period6', 12: 'period12' };
 let offerExpired = false;
 
+// Akciové ceny sú vždy celé eurá, klasické (po vypršaní) majú desatiny
+// (odvodené z reálnej mesačnej sadzby 9,90 € / 19,90 €) — zobraz desatinné
+// miesta len keď skutočne existujú, so slovenskou desatinnou čiarkou.
+function formatPrice(n) {
+  return Number.isInteger(n) ? String(n) : n.toFixed(2).replace('.', ',');
+}
 function setDuration(months) {
   duration = months;
   document.getElementById('btn3m').classList.toggle('active', months === 3);
   document.getElementById('btn6m').classList.toggle('active', months === 6);
   document.getElementById('btn12m').classList.toggle('active', months === 12);
   const priceTable = offerExpired ? CLASSIC_PRICES : PRICES;
-  document.getElementById('premiumPrice').textContent = priceTable.premium[months];
-  document.getElementById('elitePrice').textContent = priceTable.elite[months];
+  document.getElementById('premiumPrice').textContent = formatPrice(priceTable.premium[months]);
+  document.getElementById('elitePrice').textContent = formatPrice(priceTable.elite[months]);
   const periodTxt = t(PERIOD_KEYS[months]);
   document.getElementById('premiumPeriod').textContent = periodTxt;
   document.getElementById('elitePeriod').textContent = periodTxt;
 }
 
 // Po vypršaní ponuky (cookie deadline): veľké oznámenie namiesto odpočtu,
-// bonusy preč, ceny prepočítané na bežnú (nezvýhodnenú) sadzbu — ale
-// 3/6/12 mesiacov ostávajú dostupné.
+// bonusy aj bonusový kurzový balík preč (ten patrí len k akcii), ceny
+// prepočítané na bežnú (nezvýhodnenú) sadzbu — ale 3/6/12 mesiacov
+// ostávajú dostupné.
 function enterExpiredMode() {
   if (offerExpired) return;
   offerExpired = true;
   const countdownBox = document.getElementById('countdownBox');
   const banner = document.getElementById('offerEndedBanner');
   const bonuses = document.getElementById('bonuses-section');
+  const courses = document.getElementById('courses-section');
   if (countdownBox) countdownBox.style.display = 'none';
   if (banner) banner.style.display = 'block';
   if (bonuses) bonuses.style.display = 'none';
+  if (courses) courses.style.display = 'none';
   setDuration(duration);
 }
 
@@ -424,7 +433,7 @@ async function startPlanCheckout(tier) {
     const res = await fetch('/api/membership/checkout', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ email: currentUser.email, tier, months: duration })
+      body: JSON.stringify({ email: currentUser.email, tier, months: duration, pricingMode: offerExpired ? 'classic' : 'promo' })
     });
     const data = await res.json();
     if (data.url) {
