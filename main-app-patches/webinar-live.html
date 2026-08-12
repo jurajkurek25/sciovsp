@@ -56,7 +56,7 @@ input{font-family:inherit}
 .chat-msg.mine .name{color:var(--ignite)}
 .chat-input-row{display:flex;gap:.5rem;padding:.7rem;border-top:1px solid var(--border)}
 .chat-input-row input{flex:1;padding:.6rem .7rem;background:var(--ink2);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:.85rem}
-.chat-input-row button{padding:.6rem 1rem;background:var(--signal);color:#fff;border:none;border-radius:6px;font-family:var(--mono);font-size:.8rem;cursor:pointer}
+.chat-input-row button{width:2.6rem;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--signal);color:#fff;border:none;border-radius:6px;cursor:pointer}
 
 .end-screen{display:none;text-align:center;padding:2.5rem 1.5rem;background:var(--ink3);border:1px solid var(--border2);border-radius:12px;margin-top:1rem}
 .end-screen.active{display:block}
@@ -96,7 +96,7 @@ input{font-family:inherit}
       <div class="chat-log" id="chatLog"></div>
       <div class="chat-input-row">
         <input type="text" id="chatInput" placeholder="Napíš správu…">
-        <button id="chatSendBtn"><span id="tChatSend">Poslať</span></button>
+        <button id="chatSendBtn" aria-label="Poslať" title="Poslať"><svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><path d="M2 21L23 12L2 3V10L17 12L2 14V21Z"/></svg></button>
       </div>
     </div>
     <div class="end-screen" id="endScreen">
@@ -346,7 +346,9 @@ function setLang(l) {
   document.getElementById('tWaitingNote').textContent = t('waitingNote');
   document.getElementById('tLiveBadge').textContent = t('liveBadge');
   document.getElementById('tStartOverlayText').textContent = t('startOverlayText');
-  document.getElementById('tChatSend').textContent = t('chatSend');
+  const chatSendBtn = document.getElementById('chatSendBtn');
+  chatSendBtn.setAttribute('aria-label', t('chatSend'));
+  chatSendBtn.setAttribute('title', t('chatSend'));
   document.getElementById('tEndTitle').textContent = t('endTitle');
   document.getElementById('tEndBody').textContent = t('endBody');
   document.getElementById('tEndCta').textContent = t('endCta');
