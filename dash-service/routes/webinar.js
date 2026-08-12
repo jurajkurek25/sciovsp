@@ -57,7 +57,7 @@ router.post('/api/dash/webinar/send', requireDashAuth, async (req, res) => {
     if (reg.unsubscribed_at) continue;
     const personalized = html
       .split('[MENO]').join(reg.name || '')
-      .split('[UNSUBSCRIBE]').join((process.env.MAIN_APP_URL || 'https://sptrener.online') + '/api/webinar/unsubscribe?token=' + reg.confirm_token);
+      .split('[UNSUBSCRIBE]').join((process.env.MAIN_APP_URL || 'https://sptrener.online').replace(/\/+$/, '') + '/api/webinar/unsubscribe?token=' + reg.confirm_token);
     try {
       await sendMail({ to: reg.email, subject, html: personalized });
       sent++;
