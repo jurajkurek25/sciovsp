@@ -100,9 +100,9 @@ input{font-family:inherit}
       </div>
     </div>
     <div class="end-screen" id="endScreen">
-      <h2 id="tEndTitle">Vysielanie sa skončilo</h2>
-      <p id="tEndBody">Ak si to stihol/a, čaká na teba špeciálna ponuka len pre účastníkov.</p>
-      <a class="cta" href="/ponuka" id="tEndCta">Zobraziť ponuku →</a>
+      <h2 id="tEndTitle"></h2>
+      <p id="tEndBody"></p>
+      <a class="cta" id="tEndCta"></a>
     </div>
   </div>
 
@@ -240,6 +240,7 @@ function showEndScreen() {
 let CHAT_SCRIPT = [];
 let REPLY_NAMES = [];
 let REPLY_TEXTS = [];
+let ENDSCREEN_ALL = {};
 
 let chatShownUpTo = -1;
 
@@ -286,14 +287,12 @@ const T = {
   sk: {
     pageTitle: 'Vysielanie — SP Tréner',
     waitingLead: 'Tvoje miesto je rezervované. Vysielanie začína o', waitingNote: 'Nechaj si túto stránku otvorenú — spustí sa automaticky.',
-    liveBadge: 'NAŽIVO', startOverlayText: 'Klikni pre spustenie vysielania so zvukom', chatSend: 'Poslať', you: 'Ty',
-    endTitle: 'Vysielanie sa skončilo', endBody: 'Ak si to stihol/a, čaká na teba špeciálna ponuka len pre účastníkov.', endCta: 'Zobraziť ponuku →'
+    liveBadge: 'NAŽIVO', startOverlayText: 'Klikni pre spustenie vysielania so zvukom', chatSend: 'Poslať', you: 'Ty'
   },
   cs: {
     pageTitle: 'Vysílání — SP Tréner',
     waitingLead: 'Tvoje místo je rezervované. Vysílání začíná za', waitingNote: 'Nech si tuto stránku otevřenou — spustí se automaticky.',
-    liveBadge: 'ŽIVĚ', startOverlayText: 'Klikni pro spuštění vysílání se zvukem', chatSend: 'Poslat', you: 'Ty',
-    endTitle: 'Vysílání skončilo', endBody: 'Pokud jsi to stihl/a, čeká na tebe speciální nabídka jen pro účastníky.', endCta: 'Zobrazit nabídku →'
+    liveBadge: 'ŽIVĚ', startOverlayText: 'Klikni pro spuštění vysílání se zvukem', chatSend: 'Poslat', you: 'Ty'
   }
 };
 
@@ -315,9 +314,12 @@ function setLang(l) {
   const chatSendBtn = document.getElementById('chatSendBtn');
   chatSendBtn.setAttribute('aria-label', t('chatSend'));
   chatSendBtn.setAttribute('title', t('chatSend'));
-  document.getElementById('tEndTitle').textContent = t('endTitle');
-  document.getElementById('tEndBody').textContent = t('endBody');
-  document.getElementById('tEndCta').textContent = t('endCta');
+  const es = ENDSCREEN_ALL[l] || ENDSCREEN_ALL.sk || {};
+  document.getElementById('tEndTitle').textContent = es.title || '';
+  document.getElementById('tEndBody').textContent = es.body || '';
+  const endCta = document.getElementById('tEndCta');
+  endCta.textContent = es.ctaText || '';
+  endCta.href = es.ctaHref || '/ponuka';
 }
 
 setLang(lang);
@@ -326,6 +328,8 @@ fetch('/api/webinar/live-data').then(r => r.json()).then(data => {
   CHAT_SCRIPT = data.chatScript || [];
   REPLY_NAMES = data.replyNames || [];
   REPLY_TEXTS = data.replyTexts || [];
+  ENDSCREEN_ALL = data.endScreen || {};
+  setLang(lang);
   routeToCurrentState();
 }).catch(() => { routeToCurrentState(); });
 </script>

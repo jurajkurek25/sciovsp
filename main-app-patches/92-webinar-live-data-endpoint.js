@@ -44,7 +44,11 @@ const NEW_ROUTE = `app.get('/api/webinar/live-data', (req, res) => {
       { t: 2500, name: 'Alžbeta', text: 'Toto rozhodne odporúčam všetkým, čo idú na prijímačky' }
     ],
     replyNames: ['Peťo', 'Zuzka K.', 'Martin S.', 'Ivana', 'Tomáš', 'Robo', 'Filip', 'Adam'],
-    replyTexts: ['👍', 'presne tak!', 'aj ja si to myslím', 'super otázka', 'to isté som chcel/a napísať 😄']
+    replyTexts: ['👍', 'presne tak!', 'aj ja si to myslím', 'super otázka', 'to isté som chcel/a napísať 😄'],
+    endScreen: {
+      sk: { title: 'Vysielanie sa skončilo', body: 'Ak si to stihol/a, čaká na teba špeciálna ponuka len pre účastníkov.', ctaText: 'Zobraziť ponuku →', ctaHref: '/ponuka' },
+      cs: { title: 'Vysílání skončilo', body: 'Pokud jsi to stihl/a, čeká na tebe speciální nabídka jen pro účastníky.', ctaText: 'Zobrazit nabídku →', ctaHref: '/ponuka' }
+    }
   });
 });
 ` + SPA_MARKER;
