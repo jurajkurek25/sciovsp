@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SP Tréner — SCIO + AI</title>
+<title>SP Tréner — AI príprava na prijímačky</title>
 <link rel="manifest" href="/manifest.json">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -210,7 +210,7 @@ h1.title span{font-style:italic;color:var(--purple2)}
 .option-group{margin-bottom:1.25rem}
 .option-group label{display:block;font-size:.75rem;color:var(--text3);font-family:var(--mono);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.6rem}
 .chip-row{display:flex;gap:.5rem;flex-wrap:wrap}
-.chip{padding:.35rem .9rem;border-radius:8px;border:1px solid var(--border2);background:var(--black3);color:var(--text2);cursor:pointer;font-size:.82rem;transition:all .15s}
+.chip{padding:.35rem .9rem;border-radius:8px;border:1px solid var(--border2);background:var(--black3);color:var(--text2);cursor:pointer;font-size:.82rem;transition:all .15s;text-decoration:none;display:inline-block}
 .chip:hover{border-color:var(--volt);color:var(--text)}
 .chip.active{border-color:var(--volt);background:rgba(200,255,0,.07);color:var(--volt)}
 .count-row{display:flex;align-items:center;gap:.75rem}
@@ -661,19 +661,20 @@ h1.title span{font-style:italic;color:var(--purple2)}
         <div class="chip" data-cat="technika" onclick="filterModes('technika',this)" data-i18n="catTechnika">🔧 Technika</div>
         <div class="chip" data-cat="pedagogika" onclick="filterModes('pedagogika',this)" data-i18n="catPedagogika">🍎 Pedagogika</div>
         <div class="chip" data-cat="progress" onclick="filterModes('progress',this)" data-i18n="catProgress">📊 Pokrok</div>
+        <a class="chip" href="/kurzy" data-i18n="catCourses">🎓 Kurzy</a>
       </nav>
     </aside>
     <main class="app-main">
   <div class="mode-grid">
-    <div class="mode-section-title" data-cat="vsp" data-i18n="secVsp">Všeobecné študijné predpoklady (SCIO)</div>
-    <div class="mode-card" data-cat="vsp" onclick="startMode('full')"><span class="card-badge" data-i18n="badgeRecommended">Odporúčané</span><span class="card-icon">⏱</span><div class="card-title" data-i18n="modeFullTitle">Celý test (na čas)</div><div class="card-desc" data-i18n="modeFullDesc">Verbálna (35 min) + Analytická (45 min). Presná simulácia SCIO.</div></div>
+    <div class="mode-section-title" data-cat="vsp" data-i18n="secVsp">Všeobecné študijné predpoklady</div>
+    <div class="mode-card" data-cat="vsp" onclick="startMode('full')"><span class="card-badge" data-i18n="badgeRecommended">Odporúčané</span><span class="card-icon">⏱</span><div class="card-title" data-i18n="modeFullTitle">Celý test (na čas)</div><div class="card-desc" data-i18n="modeFullDesc">Verbálna (35 min) + Analytická (45 min). Presná simulácia ostrého testu.</div></div>
     <div class="mode-card" data-cat="vsp" onclick="startMode('verbal')"><span class="card-icon">📖</span><div class="card-title" data-i18n="modeVerbalTitle">Len verbálna časť</div><div class="card-desc" data-i18n="modeVerbalDesc">33 úloh, 35 min. Doplňovanie, vzťahy, koherencia, pasáže.</div></div>
     <div class="mode-card" data-cat="vsp" onclick="startMode('analytical')"><span class="card-icon">🧮</span><div class="card-title" data-i18n="modeAnalyticalTitle">Len analytická časť</div><div class="card-desc" data-i18n="modeAnalyticalDesc">33 úloh, 45 min. Grafy, porovnávanie, slovné úlohy, zebry.</div></div>
     <div class="mode-card" data-cat="vsp" onclick="startMode('topic')"><span class="card-icon">🎯</span><div class="card-title" data-i18n="modeTopicTitle">Podľa okruhu</div><div class="card-desc" data-i18n="modeTopicDesc">Vyber konkrétny okruh — napr. zebry, koherencia, porovnávanie.</div></div>
     <div class="mode-card" data-cat="vsp" onclick="startMode('review')"><span class="card-icon">🔁</span><div class="card-title" data-i18n="modeReviewTitle">Precvičiť slabé úlohy</div><div class="card-desc" data-i18n="modeReviewDesc">Len úlohy kde si chyboval alebo vynechal. Bez časomiery.</div></div>
 
     <div class="mode-section-title" data-cat="ai" data-i18n="secAi">AI nástroje</div>
-    <div class="mode-card ai-card" data-cat="ai" onclick="showScreen('ai-gen')"><span class="card-badge ai-badge">✨ AI NOVÉ</span><span class="card-icon">🤖</span><div class="card-title" data-i18n="modeAIGenTitle">AI Generátor úloh</div><div class="card-desc" data-i18n="modeAIGenDesc">Claude AI vygeneruje nové SCIO-štýlové úlohy presne pre tvoje slabé miesta.</div></div>
+    <div class="mode-card ai-card" data-cat="ai" onclick="showScreen('ai-gen')"><span class="card-badge ai-badge">✨ AI NOVÉ</span><span class="card-icon">🤖</span><div class="card-title" data-i18n="modeAIGenTitle">AI Generátor úloh</div><div class="card-desc" data-i18n="modeAIGenDesc">Claude AI vygeneruje nové úlohy presne pre tvoje slabé miesta.</div></div>
     <div class="mode-card ai-card" data-cat="ai" onclick="startAIFullTest()"><span class="card-badge ai-badge">✨ AI + ČASOMIERA</span><span class="card-icon">🤖⏱</span><div class="card-title" data-i18n="modeAIFullTitle">AI Celý test (na čas)</div><div class="card-desc" data-i18n="modeAIFullDesc">Claude vygeneruje 66 nových úloh — verbálna + analytická s reálnou časomieru.</div></div>
     <div class="mode-card" data-cat="ai" onclick="showAIBank()"><span class="card-icon">📚</span><div class="card-title" data-i18n="modeAIBankTitle">AI banka úloh</div><div class="card-desc" data-i18n="modeAIBankDesc">Prehľad všetkých vygenerovaných úloh. Spusti precvičovanie kedykoľvek.</div></div>
 
@@ -783,7 +784,7 @@ h1.title span{font-style:italic;color:var(--purple2)}
         <div class="elite-plan-period">/ mesiac</div>
         <div class="elite-plan-micro">Pre tých, ktorí vedia trénovať samostatne.</div>
         <div class="elite-plan-feats">
-          <span>→ Neobmedzené SCIO simulácie</span>
+          <span>→ Neobmedzené simulácie na čas</span>
           <span>→ AI generátor nových úloh</span>
           <span>→ Postup riešenia po teste</span>
           <span>→ Percentilový tracker</span>
@@ -840,8 +841,8 @@ h1.title span{font-style:italic;color:var(--purple2)}
 <div id="ai-gen" class="screen" style="position:relative;">
   <button class="btn back-btn" onclick="showScreen('home')" data-i18n="btnBack">← Späť</button>
   <div class="ai-gen-box">
-    <div class="ai-gen-title"><div class="ai-pulse"></div><span data-i18n="aiGenTitle">AI Generátor SCIO úloh</span></div>
-    <div class="ai-gen-subtitle" data-i18n="aiGenSubtitle">Claude AI vytvorí nové úlohy v štýle oficiálnych SCIO testov</div>
+    <div class="ai-gen-title"><div class="ai-pulse"></div><span data-i18n="aiGenTitle">AI Generátor úloh</span></div>
+    <div class="ai-gen-subtitle" data-i18n="aiGenSubtitle">Claude AI vytvorí nové úlohy v štýle oficiálnych prijímacích testov</div>
     <div id="gen-form">
       <div class="option-group"><label data-i18n="labelSubject">Predmet</label><div class="chip-row" id="genSubjectChips">
         <div class="chip active" data-val="vsp" onclick="selectGenSubject(this)" data-i18n="chipSubjVsp">📘 VŠP</div>
@@ -864,7 +865,7 @@ h1.title span{font-style:italic;color:var(--purple2)}
     <div class="ai-loading" id="genLoading">
       <div class="loading-spinner"></div>
       <div class="loading-steps">
-        <div class="loading-step active" id="step1"><div class="step-dot"></div><span data-i18n="step1">Zostavujem SCIO prompt...</span></div>
+        <div class="loading-step active" id="step1"><div class="step-dot"></div><span data-i18n="step1">Zostavujem prompt...</span></div>
         <div class="loading-step" id="step2"><div class="step-dot"></div><span data-i18n="step2">AI generuje úlohy...</span></div>
         <div class="loading-step" id="step3"><div class="step-dot"></div><span data-i18n="step3">Validujem formát...</span></div>
         <div class="loading-step" id="step4"><div class="step-dot"></div><span data-i18n="step4">Pridávam do banky...</span></div>
@@ -1062,12 +1063,12 @@ const TRANSLATIONS={
   sk:{
     logoTag:'SP TRÉNER',homeTitle:'Dostaň sa<br>na <span>percentil 85</span>',
     homeSubtitle:'Cvič reálne testy · Meria čas · AI generuje nové úlohy',
-    catAll:'🏠 Domov',catVsp:'📘 VŠP',catAi:'🤖 AI nástroje',catPsych:'🧠 Psychológia UCM',catLaw:'⚖️ Právo',catMedicina:'🩺 Medicína',catTechnika:'🔧 Technika',catPedagogika:'🍎 Pedagogika',catProgress:'📊 Pokrok',
-    secVsp:'Všeobecné študijné predpoklady (SCIO)',secAi:'AI nástroje',secPsych:'Psychológia — UCM Trnava',secLaw:'Právo — vedomostné okruhy',secMedicina:'Medicína',secTechnika:'Technika',secPedagogika:'Pedagogika',secProgress:'Pokrok a komunita',
-    badgeRecommended:'Odporúčané',modeFullTitle:'Celý test (na čas)',modeFullDesc:'Verbálna (35 min) + Analytická (45 min). Presná simulácia SCIO.',
+    catAll:'🏠 Domov',catVsp:'📘 VŠP',catAi:'🤖 AI nástroje',catPsych:'🧠 Psychológia UCM',catLaw:'⚖️ Právo',catMedicina:'🩺 Medicína',catTechnika:'🔧 Technika',catPedagogika:'🍎 Pedagogika',catProgress:'📊 Pokrok',catCourses:'🎓 Kurzy',
+    secVsp:'Všeobecné študijné predpoklady',secAi:'AI nástroje',secPsych:'Psychológia — UCM Trnava',secLaw:'Právo — vedomostné okruhy',secMedicina:'Medicína',secTechnika:'Technika',secPedagogika:'Pedagogika',secProgress:'Pokrok a komunita',
+    badgeRecommended:'Odporúčané',modeFullTitle:'Celý test (na čas)',modeFullDesc:'Verbálna (35 min) + Analytická (45 min). Presná simulácia ostrého testu.',
     modeVerbalTitle:'Len verbálna časť',modeVerbalDesc:'33 úloh, 35 min.',
     modeAnalyticalTitle:'Len analytická časť',modeAnalyticalDesc:'33 úloh, 45 min.',
-    modeAIGenTitle:'AI Generátor úloh',modeAIGenDesc:'Claude AI vygeneruje nové SCIO-štýlové úlohy.',
+    modeAIGenTitle:'AI Generátor úloh',modeAIGenDesc:'Claude AI vygeneruje nové úlohy v rovnakom štýle.',
     modeAIFullTitle:'AI Celý test (na čas)',modeAIFullDesc:'Claude vygeneruje 66 nových úloh s reálnou časomierou.',
     modeReviewTitle:'Precvičiť slabé úlohy',modeReviewDesc:'Len úlohy kde si chyboval. Bez časomiery.',
     modeAIBankTitle:'AI banka úloh',modeAIBankDesc:'Prehľad všetkých vygenerovaných úloh.',
@@ -1097,14 +1098,14 @@ const TRANSLATIONS={
     attnFind:'Hľadaj písmeno:',attnStartBtn:'▶ Spustiť (60 s)',attnRetryBtn:'↻ Skúsiť znova',
     attnFound:'Nájdené',attnAccuracy:'Presnosť',attnMissed:'Vynechané',attnFalse:'Falošné zásahy',
     statTests:'Testov',statQuestions:'Úloh',statAccuracy:'Úspešnosť',statAIQuestions:'AI úloh',
-    aiGenTitle:'AI Generátor SCIO úloh',aiGenSubtitle:'Claude AI vytvorí nové úlohy v štýle oficiálnych SCIO testov',
+    aiGenTitle:'AI Generátor úloh',aiGenSubtitle:'Claude AI vytvorí nové úlohy v štýle oficiálnych prijímacích testov',
     labelTestPart:'Časť testu',chipVerbal:'📖 Verbálna',chipAnalytical:'🧮 Analytická',
     labelSubject:'Predmet',chipSubjVsp:'📘 VŠP',chipSubjBio:'🧬 Biológia',chipSubjChem:'🧪 Chémia',chipSubjFyz:'⚛️ Fyzika',chipSubjMat:'📐 Matematika',chipSubjLog:'🧩 Logika a informatika',chipSubjPed:'🍎 Pedagogika',chipSubjPsy:'🧠 Psychológia',chipSubjLaw:'⚖️ Právo',
     chipVerbalShort:'Verbálna',chipAnalyticalShort:'Analytická',labelTopicGroup:'Okruh úloh',
     labelCount:'Počet úloh',countHint:'úloh (max 10)',labelDifficulty:'Obtiažnosť',
     diffEasy:'🟢 Ľahké',diffMedium:'🟡 Stredné',diffHard:'🔴 Ťažké (P85+)',
     btnGenerate:'✨ Generovať úlohy s AI',
-    step1:'Zostavujem SCIO prompt...',step2:'AI generuje úlohy...',step3:'Validujem formát...',step4:'Pridávam do banky...',
+    step1:'Zostavujem prompt...',step2:'AI generuje úlohy...',step3:'Validujem formát...',step4:'Pridávam do banky...',
     genDoneSubtitle:'Pridané do tvojej banky úloh',btnPracticeNow:'▶ Precvičiť teraz',
     btnGenerateMore:'↻ Generovať ďalšie',btnQBank:'📚 Banka úloh',
     btnHome:'← Domov',btnBack:'← Späť',bankTitle:'AI Banka úloh',
@@ -1133,12 +1134,12 @@ const TRANSLATIONS={
     goalAchieved:'🎯 Cieľ dosiahnutý!',goalMissed:'Cieľ: 85. percentil',
     percentileLabel:'~{p}. percentil',testsRemaining:'⚡ {r} z {l} testov zostáva',
     progressLabel:'Progres k cieľu P85',testsLabel:'Testov',percentileStat:'Percentil',accuracyStat:'Úspešnosť',
-    scioDatePrompt:'Zadaj dátum tvojho SCIO testu (formát: RRRR-MM-DD):',
+    scioDatePrompt:'Zadaj dátum tvojho testu (formát: RRRR-MM-DD):',
     scioDateInvalid:'⚠️ Nesprávny formát. Použi RRRR-MM-DD',
     scioDateSavedCloud:'📅 Dátum uložený naprieč všetkými zariadeniami!',
-    scioDateSavedLocal:'📅 Dátum uložený lokálne.',scioDateSet:'📅 Dátum SCIO testu nastavený.',
+    scioDateSavedLocal:'📅 Dátum uložený lokálne.',scioDateSet:'📅 Dátum testu nastavený.',
     setDateBtn:'⚙ Nastaviť dátum',daysLeft:'{d} dní',today:'Dnes!',
-    toSCIO:'do tvojho SCIO testu',setDateCTA:'Nastav dátum SCIO testu',
+    toSCIO:'do tvojho testu',setDateCTA:'Nastav dátum testu',
     coachLabel:'AI Coach',coachAnalyzing:'Analyzujem tvoje výsledky...',
     coachGenerating:'Generujem odporúčania',coachPersonalized:'Personalizovaná analýza',coachDefault:'Skvelý výkon! Pokračuj v tréningu.',
     promoPrompt:'Zadaj promo kód:',promoSuccess:'✅ Promo kód aktivovaný!',promoInvalid:'⚠️ Neplatný promo kód.',
@@ -1217,12 +1218,12 @@ const TRANSLATIONS={
   cz:{
     logoTag:'SP TRENÉR',homeTitle:'Dostaň se<br>na <span>percentil 85</span>',
     homeSubtitle:'Cvič reálné testy · Měří čas · AI generuje nové úkoly',
-    catAll:'🏠 Domů',catVsp:'📘 VŠP',catAi:'🤖 AI nástroje',catPsych:'🧠 Psychologie UCM',catLaw:'⚖️ Právo',catMedicina:'🩺 Medicína',catTechnika:'🔧 Technika',catPedagogika:'🍎 Pedagogika',catProgress:'📊 Pokrok',
-    secVsp:'Všeobecné studijní předpoklady (SCIO)',secAi:'AI nástroje',secPsych:'Psychologie — UCM Trnava',secLaw:'Právo — znalostní okruhy',secMedicina:'Medicína',secTechnika:'Technika',secPedagogika:'Pedagogika',secProgress:'Pokrok a komunita',
-    badgeRecommended:'Doporučeno',modeFullTitle:'Celý test (na čas)',modeFullDesc:'Verbální (35 min) + Analytická (45 min). Přesná simulace SCIO.',
+    catAll:'🏠 Domů',catVsp:'📘 VŠP',catAi:'🤖 AI nástroje',catPsych:'🧠 Psychologie UCM',catLaw:'⚖️ Právo',catMedicina:'🩺 Medicína',catTechnika:'🔧 Technika',catPedagogika:'🍎 Pedagogika',catProgress:'📊 Pokrok',catCourses:'🎓 Kurzy',
+    secVsp:'Všeobecné studijní předpoklady',secAi:'AI nástroje',secPsych:'Psychologie — UCM Trnava',secLaw:'Právo — znalostní okruhy',secMedicina:'Medicína',secTechnika:'Technika',secPedagogika:'Pedagogika',secProgress:'Pokrok a komunita',
+    badgeRecommended:'Doporučeno',modeFullTitle:'Celý test (na čas)',modeFullDesc:'Verbální (35 min) + Analytická (45 min). Přesná simulace ostrého testu.',
     modeVerbalTitle:'Jen verbální část',modeVerbalDesc:'33 úkolů, 35 min.',
     modeAnalyticalTitle:'Jen analytická část',modeAnalyticalDesc:'33 úkolů, 45 min.',
-    modeAIGenTitle:'AI Generátor úkolů',modeAIGenDesc:'Claude AI vygeneruje nové SCIO úkoly.',
+    modeAIGenTitle:'AI Generátor úkolů',modeAIGenDesc:'Claude AI vygeneruje nové úkoly ve stejném stylu.',
     modeAIFullTitle:'AI Celý test (na čas)',modeAIFullDesc:'Claude vygeneruje 66 nových úkolů s reálnou časomírou.',
     modeReviewTitle:'Procvičit slabé úkoly',modeReviewDesc:'Jen úkoly kde jsi chyboval. Bez časomíry.',
     modeAIBankTitle:'AI banka úkolů',modeAIBankDesc:'Přehled všech vygenerovaných úkolů.',
@@ -1252,14 +1253,14 @@ const TRANSLATIONS={
     attnFind:'Hledej písmeno:',attnStartBtn:'▶ Spustit (60 s)',attnRetryBtn:'↻ Zkusit znovu',
     attnFound:'Nalezeno',attnAccuracy:'Přesnost',attnMissed:'Vynecháno',attnFalse:'Falešné zásahy',
     statTests:'Testů',statQuestions:'Úkolů',statAccuracy:'Úspěšnost',statAIQuestions:'AI úkolů',
-    aiGenTitle:'AI Generátor SCIO úkolů',aiGenSubtitle:'Claude AI vytvoří nové úkoly ve stylu oficiálních SCIO testů',
+    aiGenTitle:'AI Generátor úkolů',aiGenSubtitle:'Claude AI vytvoří nové úkoly ve stylu oficiálních přijímacích testů',
     labelTestPart:'Část testu',chipVerbal:'📖 Verbální',chipAnalytical:'🧮 Analytická',
     labelSubject:'Předmět',chipSubjVsp:'📘 VŠP',chipSubjBio:'🧬 Biologie',chipSubjChem:'🧪 Chemie',chipSubjFyz:'⚛️ Fyzika',chipSubjMat:'📐 Matematika',chipSubjLog:'🧩 Logika a informatika',chipSubjPed:'🍎 Pedagogika',chipSubjPsy:'🧠 Psychologie',chipSubjLaw:'⚖️ Právo',
     chipVerbalShort:'Verbální',chipAnalyticalShort:'Analytická',labelTopicGroup:'Okruh úkolů',
     labelCount:'Počet úkolů',countHint:'úkolů (max 10)',labelDifficulty:'Obtížnost',
     diffEasy:'🟢 Lehké',diffMedium:'🟡 Střední',diffHard:'🔴 Těžké (P85+)',
     btnGenerate:'✨ Generovat úkoly s AI',
-    step1:'Sestavuji SCIO prompt...',step2:'AI generuje úkoly...',step3:'Validuji formát...',step4:'Přidávám do banky úkolů...',
+    step1:'Sestavuji prompt...',step2:'AI generuje úkoly...',step3:'Validuji formát...',step4:'Přidávám do banky úkolů...',
     genDoneSubtitle:'Přidáno do tvé banky úkolů',btnPracticeNow:'▶ Procvičit hned',
     btnGenerateMore:'↻ Generovat další',btnQBank:'📚 Banka úkolů',
     btnHome:'← Domů',btnBack:'← Zpět',bankTitle:'AI Banka úkolů',
@@ -1288,12 +1289,12 @@ const TRANSLATIONS={
     goalAchieved:'🎯 Cíl dosažen!',goalMissed:'Cíl: 85. percentil',
     percentileLabel:'~{p}. percentil',testsRemaining:'⚡ {r} z {l} testů zbývá',
     progressLabel:'Postup k cíli P85',testsLabel:'Testů',percentileStat:'Percentil',accuracyStat:'Úspěšnost',
-    scioDatePrompt:'Zadej datum tvého SCIO testu (formát: RRRR-MM-DD):',
+    scioDatePrompt:'Zadej datum tvého testu (formát: RRRR-MM-DD):',
     scioDateInvalid:'⚠️ Nesprávný formát. Použij RRRR-MM-DD',
     scioDateSavedCloud:'📅 Datum uloženo na všech zařízeních!',
-    scioDateSavedLocal:'📅 Datum uloženo lokálně.',scioDateSet:'📅 Datum SCIO testu nastaveno.',
+    scioDateSavedLocal:'📅 Datum uloženo lokálně.',scioDateSet:'📅 Datum testu nastaveno.',
     setDateBtn:'⚙ Nastavit datum',daysLeft:'{d} dní',today:'Dnes!',
-    toSCIO:'do tvého SCIO testu',setDateCTA:'Nastav datum SCIO testu',
+    toSCIO:'do tvého testu',setDateCTA:'Nastav datum testu',
     coachLabel:'AI Coach',coachAnalyzing:'Analyzuji tvoje výsledky...',
     coachGenerating:'Generuji doporučení',coachPersonalized:'Personalizovaná analýza',coachDefault:'Skvělý výkon! Pokračuj v tréninku.',
     promoPrompt:'Zadej promo kód:',promoSuccess:'✅ Promo kód aktivován!',promoInvalid:'⚠️ Neplatný promo kód.',
@@ -3207,7 +3208,7 @@ async function generateQuestions(){
         id:'ai_'+Date.now()+'_'+i,topic:parsed.topic||activeTopic,part:parsed.part||part,
         text:q.text,context:ctx,options:q.options,answer:parseInt(q.answer),
         antonym_answer:q.antonym_answer!=null?parseInt(q.antonym_answer):null,
-        explanation:q.explanation||'Správna odpoveď podľa SCIO kritérií.',
+        explanation:q.explanation||'Správna odpoveď podľa kritérií testu.',
         isAI:true,generatedAt:new Date().toLocaleDateString('sk-SK')
       };
     });
@@ -4314,7 +4315,7 @@ function showSCIOAnalysis(entry, qs) {
   overlay.innerHTML = `
     <div class="analysis-modal" id="analysis-modal">
       <div class="am-header">
-        <div class="am-logo">SCIO · Individuálna analýza</div>
+        <div class="am-logo">Individuálna analýza</div>
         <div class="am-title">Výsledky testu</div>
         <div class="am-sub">${entry.date} · ${state.mode === 'ai-full' ? 'AI Celý test' : 'Celý test'}</div>
       </div>
@@ -4503,7 +4504,7 @@ async function loadRefCard() {
 
 function copyRefCode() {
   if (!_refCode) return;
-  const shareText = 'Cvič SCIO testy s AI! Použi môj kód ' + _refCode + ' a dostaneš +14 dní Premium zadarmo. sptrener.online';
+  const shareText = 'Cvič prijímacie testy s AI! Použi môj kód ' + _refCode + ' a dostaneš +14 dní Premium zadarmo. sptrener.online';
   navigator.clipboard.writeText(shareText).then(() => {
     showToast('📋 Kód ' + _refCode + ' skopírovaný!');
   }).catch(() => {
@@ -4632,7 +4633,7 @@ function generateEliteMission(history,stats){
   if(testsCount===0){
     return{
       title:'Prvý krok: zisti kde si',
-      desc:'Spusti celý SCIO test s časomieru. Nezaoberaj sa výsledkom — dnes len mapujeme tvoj štartový bod.',
+      desc:'Spusti celý test s časomieru. Nezaoberaj sa výsledkom — dnes len mapujeme tvoj štartový bod.',
       targets:[
         {icon:'⏱',label:'Dnešný cieľ',val:'1 celý test'},
         {icon:'📊',label:'Typ',val:'Celý test (66 úloh)'},
