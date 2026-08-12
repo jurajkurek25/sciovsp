@@ -54,6 +54,13 @@ h1{font-family:var(--serif);font-weight:800;font-size:clamp(2rem,5vw,2.8rem);lin
 .already-box{max-width:420px;margin:0 auto;background:var(--ink3);border:1px solid var(--border2);border-radius:10px;padding:1.4rem;text-align:center;display:none}
 .already-box.active{display:block}
 .already-box a.cta{display:inline-block;margin-top:1rem;padding:.85rem 1.5rem;background:var(--signal);color:#fff;border-radius:8px;text-decoration:none;font-family:var(--mono);font-weight:700;font-size:.88rem}
+
+.site-footer{max-width:640px;margin:0 auto;padding:2rem 1.2rem 2.5rem;text-align:center;border-top:1px solid var(--border)}
+.footer-links{display:flex;justify-content:center;gap:.6rem;font-family:var(--mono);font-size:.78rem;margin-bottom:.8rem}
+.footer-links a{color:var(--text2);text-decoration:none}
+.footer-links a:hover{color:var(--text)}
+.footer-dot{color:var(--text3)}
+.footer-disclaimer{font-size:.72rem;color:var(--text3);line-height:1.5;max-width:480px;margin:0 auto}
 </style>
 </head>
 <body>
@@ -69,7 +76,6 @@ h1{font-family:var(--serif);font-weight:800;font-size:clamp(2rem,5vw,2.8rem);lin
   <div class="hero">
     <span class="eyebrow"><span class="dot"></span> <span id="tEyebrow">Bezplatné vysielanie</span></span>
     <h1 id="tH1">Ako sa dostať na vysnívanú vysokú školu — aj keď ti ostáva len pár týždňov a nechceš sa učiť dňom i nocou</h1>
-    <p class="sub" id="tSub">30-minútové vysielanie zadarmo, naživo, každý štvrtok o 20:00: presná AI stratégia na prijímačky, ktorú môžeš použiť ešte dnes.</p>
   </div>
 
   <div class="next-session">
@@ -91,6 +97,15 @@ h1{font-family:var(--serif);font-weight:800;font-size:clamp(2rem,5vw,2.8rem);lin
     <a class="cta" href="/webinar/live" id="tAlreadyCta">Prejsť na vysielanie →</a>
   </div>
 </div>
+
+<footer class="site-footer">
+  <div class="footer-links">
+    <a href="/legal.html#vop" id="tFooterTerms">Obchodné podmienky</a>
+    <span class="footer-dot">·</span>
+    <a href="/legal.html#privacy" id="tFooterPrivacy">Ochrana osobných údajov</a>
+  </div>
+  <p class="footer-disclaimer" id="tFooterDisclaimer">Táto stránka nie je súčasťou webu Facebook ani spoločnosti Meta, Inc. a nie je nimi žiadnym spôsobom podporovaná ani sponzorovaná. FACEBOOK a INSTAGRAM sú ochranné známky spoločnosti Meta, Inc.</p>
+</footer>
 
 <!-- Skutočný HTML form POST do Ecomailu (rovnaký princíp ako ich vlastný
      embed kód) — mieri do skrytého iframe, aby stránka po odoslaní
@@ -184,19 +199,21 @@ const T = {
     pageTitle: 'Bezplatné vysielanie — SP Tréner',
     eyebrow: 'Bezplatné vysielanie',
     h1: 'Ako sa dostať na vysnívanú vysokú školu — aj keď ti ostáva len pár týždňov a nechceš sa učiť dňom i nocou',
-    sub: '30-minútové vysielanie zadarmo, naživo, každý štvrtok o 20:00: presná AI stratégia na prijímačky, ktorú môžeš použiť ešte dnes.',
     nextLabel: 'Najbližší termín',
     nameLabel: 'Meno', emailLabel: 'Email', regSubmit: 'Zaregistrovať sa zadarmo', emailError: 'Zadaj platný email.',
-    alreadyText: 'Si už zaregistrovaný/á na najbližšie vysielanie.', alreadyCta: 'Prejsť na vysielanie →'
+    alreadyText: 'Si už zaregistrovaný/á na najbližšie vysielanie.', alreadyCta: 'Prejsť na vysielanie →',
+    footerTerms: 'Obchodné podmienky', footerPrivacy: 'Ochrana osobných údajov',
+    footerDisclaimer: 'Táto stránka nie je súčasťou webu Facebook ani spoločnosti Meta, Inc. a nie je nimi žiadnym spôsobom podporovaná ani sponzorovaná. FACEBOOK a INSTAGRAM sú ochranné známky spoločnosti Meta, Inc.'
   },
   cs: {
     pageTitle: 'Bezplatné vysílání — SP Tréner',
     eyebrow: 'Bezplatné vysílání',
     h1: 'Jak se dostat na vysněnou vysokou školu — i když ti zbývá jen pár týdnů a nechceš se učit dnem i nocí',
-    sub: '30minutové vysílání zdarma, naživo, každý čtvrtek ve 20:00: přesná AI strategie na přijímačky, kterou můžeš použít ještě dnes.',
     nextLabel: 'Nejbližší termín',
     nameLabel: 'Jméno', emailLabel: 'Email', regSubmit: 'Zaregistrovat se zdarma', emailError: 'Zadej platný email.',
-    alreadyText: 'Už jsi zaregistrovaný/á na nejbližší vysílání.', alreadyCta: 'Přejít na vysílání →'
+    alreadyText: 'Už jsi zaregistrovaný/á na nejbližší vysílání.', alreadyCta: 'Přejít na vysílání →',
+    footerTerms: 'Obchodní podmínky', footerPrivacy: 'Ochrana osobních údajů',
+    footerDisclaimer: 'Tato stránka není součástí webu Facebook ani společnosti Meta, Inc. a není jimi žádným způsobem podporována ani sponzorována. FACEBOOK a INSTAGRAM jsou ochranné známky společnosti Meta, Inc.'
   }
 };
 
@@ -213,7 +230,6 @@ function setLang(l) {
 
   document.getElementById('tEyebrow').textContent = t('eyebrow');
   document.getElementById('tH1').textContent = t('h1');
-  document.getElementById('tSub').textContent = t('sub');
   document.getElementById('tNextLabel').textContent = t('nextLabel');
   document.getElementById('tNameLabel').textContent = t('nameLabel');
   document.getElementById('tEmailLabel').textContent = t('emailLabel');
@@ -221,6 +237,9 @@ function setLang(l) {
   document.getElementById('tAlreadyText').textContent = t('alreadyText');
   document.getElementById('tAlreadyCta').textContent = t('alreadyCta');
   document.getElementById('nextSessionDate').textContent = fmtSessionDate(nextSlot, l);
+  document.getElementById('tFooterTerms').textContent = t('footerTerms');
+  document.getElementById('tFooterPrivacy').textContent = t('footerPrivacy');
+  document.getElementById('tFooterDisclaimer').textContent = t('footerDisclaimer');
 }
 
 setLang(lang);

@@ -131,6 +131,13 @@ h1 .accent{color:var(--ignite);font-style:italic}
 .final h2{font-family:var(--serif);font-weight:800;font-size:clamp(1.8rem,4vw,2.6rem);margin-bottom:.8rem}
 .final p{color:var(--text2);margin-bottom:1.8rem}
 
+.site-footer{max-width:640px;margin:0 auto;padding:0 1.2rem 3rem;text-align:center;position:relative;z-index:2}
+.footer-links{display:flex;justify-content:center;gap:.6rem;font-family:var(--mono);font-size:.78rem;margin-bottom:.8rem}
+.footer-links a{color:var(--text2);text-decoration:none}
+.footer-links a:hover{color:var(--text)}
+.footer-dot{color:var(--text3)}
+.footer-disclaimer{font-size:.72rem;color:var(--text3);line-height:1.5;max-width:480px;margin:0 auto}
+
 @media(max-width:760px){.hero-grid{grid-template-columns:1fr}.hero-visual{display:none}.plans,.course-groups{grid-template-columns:1fr}.bonuses{grid-template-columns:1fr 1fr}.plan.featured,.plan:not(.featured){transform:none}}
 </style>
 </head>
@@ -178,6 +185,7 @@ h1 .accent{color:var(--ignite);font-style:italic}
   <div class="offer-ended" id="offerEndedBanner" style="display:none">
     <div class="offer-ended-title" id="tOfferEndedTitle">Táto špeciálna ponuka po webinári už skončila.</div>
     <div class="offer-ended-body" id="tOfferEndedBody">Členstvo je stále dostupné, teraz za bežnú cenu.</div>
+    <div class="offer-ended-body" id="tOfferEndedCoursesNote" style="margin-top:.5rem;color:var(--ignite2)">Bonusový balík kurzov už nie je súčasťou ponuky.</div>
   </div>
 </div>
 
@@ -295,6 +303,15 @@ h1 .accent{color:var(--ignite);font-style:italic}
   <p id="tFinalSub">Vyber si Premium alebo Elite a začni ešte dnes.</p>
   <button class="plan-btn primary js-plan-btn" data-tier="elite" style="max-width:280px;margin:0 auto;display:block" id="finalCtaBtn">Získať Elite →</button>
 </div>
+
+<footer class="site-footer">
+  <div class="footer-links">
+    <a href="/legal.html#vop" id="tFooterTerms">Obchodné podmienky</a>
+    <span class="footer-dot">·</span>
+    <a href="/legal.html#privacy" id="tFooterPrivacy">Ochrana osobných údajov</a>
+  </div>
+  <p class="footer-disclaimer" id="tFooterDisclaimer">Táto stránka nie je súčasťou webu Facebook ani spoločnosti Meta, Inc. a nie je nimi žiadnym spôsobom podporovaná ani sponzorovaná. FACEBOOK a INSTAGRAM sú ochranné známky spoločnosti Meta, Inc.</p>
+</footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -481,6 +498,7 @@ const T = {
     countdownLabel: 'Ponuka končí o',
     offerEndedTitle: 'Táto špeciálna ponuka po webinári už skončila.',
     offerEndedBody: 'Členstvo je stále dostupné, teraz za bežnú cenu.',
+    offerEndedCoursesNote: 'Bonusový balík kurzov už nie je súčasťou ponuky.',
     plansTitle: 'Vyber si tempo', plansSub: 'Jednorazová platba, žiadne skryté opakované strhávanie.',
     eliteBadge: 'Odporúčame',
     pf1: 'Neobmedzený prístup k AI generátoru testov', pf2: '6 univerzálnych kurzov zahrnutých', pf3: 'Prístup do celej odborovej knižnice kurzov', pf4: 'Sledovanie pokroku a štatistiky',
@@ -517,6 +535,8 @@ const T = {
     faq4Q: 'Ako presne appka vie, že mi to pomôže — čo ak som iný prípad?', faq4A: 'AI generátor sleduje presne to, v čom robíš chyby, a testy prispôsobuje tomu — nie univerzálnej sade pre všetkých. Čím viac testov spravíš, tým presnejšie appka vie, kde máš medzery.',
     finalTitle: 'Poď na to s plánom, nie s chaosom', finalSub: 'Vyber si Premium alebo Elite a začni ešte dnes.',
     redirecting: 'Presmerovávam…', checkoutError: 'Chyba pri vytváraní platby.', networkError: 'Chyba servera.',
+    footerTerms: 'Obchodné podmienky', footerPrivacy: 'Ochrana osobných údajov',
+    footerDisclaimer: 'Táto stránka nie je súčasťou webu Facebook ani spoločnosti Meta, Inc. a nie je nimi žiadnym spôsobom podporovaná ani sponzorovaná. FACEBOOK a INSTAGRAM sú ochranné známky spoločnosti Meta, Inc.',
     pageTitle: 'Ponuka pre účastníkov webinára — SP Tréner'
   },
   cs: {
@@ -536,6 +556,7 @@ const T = {
     countdownLabel: 'Nabídka končí za',
     offerEndedTitle: 'Tato speciální nabídka po webináři už skončila.',
     offerEndedBody: 'Členství je stále dostupné, teď za běžnou cenu.',
+    offerEndedCoursesNote: 'Bonusový balíček kurzů už není součástí nabídky.',
     plansTitle: 'Vyber si tempo', plansSub: 'Jednorázová platba, žádné skryté opakované strhávání.',
     eliteBadge: 'Doporučujeme',
     pf1: 'Neomezený přístup k AI generátoru testů', pf2: '6 univerzálních kurzů zahrnuto', pf3: 'Přístup do celé oborové knihovny kurzů', pf4: 'Sledování pokroku a statistiky',
@@ -572,6 +593,8 @@ const T = {
     faq4Q: 'Jak přesně appka ví, že mi to pomůže — co když jsem jiný případ?', faq4A: 'AI generátor sleduje přesně to, v čem děláš chyby, a testy tomu přizpůsobuje — ne univerzální sadě pro všechny. Čím víc testů uděláš, tím přesněji appka ví, kde máš mezery.',
     finalTitle: 'Pojď do toho s plánem, ne s chaosem', finalSub: 'Vyber si Premium nebo Elite a začni ještě dnes.',
     redirecting: 'Přesměrovávám…', checkoutError: 'Chyba při vytváření platby.', networkError: 'Chyba serveru.',
+    footerTerms: 'Obchodní podmínky', footerPrivacy: 'Ochrana osobních údajů',
+    footerDisclaimer: 'Tato stránka není součástí webu Facebook ani společnosti Meta, Inc. a není jimi žádným způsobem podporována ani sponzorována. FACEBOOK a INSTAGRAM jsou ochranné známky společnosti Meta, Inc.',
     pageTitle: 'Nabídka pro účastníky webináře — SP Tréner'
   }
 };
@@ -598,6 +621,7 @@ function setLang(l) {
   document.getElementById('tCountdownLabel').textContent = t('countdownLabel');
   document.getElementById('tOfferEndedTitle').textContent = t('offerEndedTitle');
   document.getElementById('tOfferEndedBody').textContent = t('offerEndedBody');
+  document.getElementById('tOfferEndedCoursesNote').textContent = t('offerEndedCoursesNote');
   document.getElementById('tPlansTitle').textContent = t('plansTitle');
   document.getElementById('tPlansSub').textContent = t('plansSub');
   document.getElementById('tEliteBadge').textContent = t('eliteBadge');
@@ -652,6 +676,9 @@ function setLang(l) {
   document.getElementById('tFaq4Q').textContent = t('faq4Q'); document.getElementById('tFaq4A').textContent = t('faq4A');
   document.getElementById('tFinalTitle').textContent = t('finalTitle');
   document.getElementById('tFinalSub').textContent = t('finalSub');
+  document.getElementById('tFooterTerms').textContent = t('footerTerms');
+  document.getElementById('tFooterPrivacy').textContent = t('footerPrivacy');
+  document.getElementById('tFooterDisclaimer').textContent = t('footerDisclaimer');
 
   setDuration(duration);
   startSignalTicker();
