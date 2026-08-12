@@ -127,6 +127,26 @@ function fmtSessionDate(d, l) {
 
 let nextSlot = nextThursdayEight();
 
+// Registráciu zároveň posunieme do Ecomail zoznamu (pripomienkové emaily
+// pred termínom). Verejný subscribe endpoint nevracia čitateľnú CORS
+// odpoveď, takže ide o "fire and forget" — chyba/výpadok Ecomailu nesmie
+// zablokovať samotnú registráciu na vysielanie. keepalive:true, aby sa
+// požiadavka dokončila, aj keď stránka hneď potom presmeruje preč.
+function subscribeToEcomail(name, email) {
+  try {
+    const body = new URLSearchParams();
+    if (name) body.set('name', name);
+    body.set('email', email);
+    fetch('https://jurajaugustinkurek.ecomailapp.cz/public/subscribe/15/864b4f4872272bdd94aadbc81dfd8b18', {
+      method: 'POST',
+      mode: 'no-cors',
+      keepalive: true,
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: body.toString()
+    }).catch(() => {});
+  } catch (e) {}
+}
+
 document.getElementById('regSubmitBtn').onclick = () => {
   const name = document.getElementById('regName').value.trim();
   const email = document.getElementById('regEmail').value.trim();
@@ -135,6 +155,7 @@ document.getElementById('regSubmitBtn').onclick = () => {
   errEl.textContent = '';
   const session = { slotStartMs: nextSlot.getTime(), name: name || null, email };
   localStorage.setItem('sp_webinar_session', JSON.stringify(session));
+  subscribeToEcomail(name, email);
   location.href = '/webinar/live';
 };
 
