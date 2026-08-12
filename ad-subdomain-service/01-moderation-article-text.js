@@ -78,30 +78,46 @@ async function moderateArticleText({ companyName, title, content, linkUrl }) {
 
   let res;
   try {
-    const controller = new AbortController();
-    const t = setTimeout(() => controller.abort(), 25000);
-    res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'x-api-key': ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01',
-        'content-type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: MODERATION_MODEL,
-        max_tokens: 300,
-        messages: [{ role: 'user', content: buildArticlePrompt({ companyName, title, content, linkUrl, linkContext }) }]
-      }),
-      signal: controller.signal
-    });
-    clearTimeout(t);
+    let triedModels = [];
+    let model = pickStartingModel();
+    for (let attempt = 0; attempt < 4; attempt++) {
+      triedModels.push(model);
+      const controller = new AbortController();
+      const t = setTimeout(() => controller.abort(), 25000);
+      res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'x-api-key': ANTHROPIC_API_KEY,
+          'anthropic-version': '2023-06-01',
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          model,
+          max_tokens: 300,
+          messages: [{ role: 'user', content: buildArticlePrompt({ companyName, title, content, linkUrl, linkContext }) }]
+        }),
+        signal: controller.signal
+      });
+      clearTimeout(t);
+      if (res.ok) {
+        markModelGood(model);
+        if (attempt > 0) console.error(\`⚠️ Claude model fallback: úspešne použitý novší model '\${model}'.\`);
+        break;
+      }
+      const errTextInner = await res.text().catch(() => '');
+      const looksLikeModelIssue = res.status === 404 || /model/i.test(errTextInner);
+      if (!looksLikeModelIssue) {
+        return { allowed: false, category: 'api_error', reason: \`AI kontrola vrátila chybu \${res.status} — zamietnuté pre istotu.\`, raw: errTextInner.slice(0, 500) };
+      }
+      const next = await getNewestUntriedModel(triedModels);
+      if (!next) {
+        return { allowed: false, category: 'api_error', reason: \`AI kontrola vrátila chybu \${res.status} — zamietnuté pre istotu.\`, raw: errTextInner.slice(0, 500) };
+      }
+      console.error(\`⚠️ Claude model '\${model}' zlyhal, skúšam novší dostupný '\${next}'.\`);
+      model = next;
+    }
   } catch (e) {
     return { allowed: false, category: 'api_error', reason: \`Volanie AI kontroly zlyhalo (\${e.message}) — zamietnuté pre istotu.\` };
-  }
-
-  if (!res.ok) {
-    const errText = await res.text().catch(() => '');
-    return { allowed: false, category: 'api_error', reason: \`AI kontrola vrátila chybu \${res.status} — zamietnuté pre istotu.\`, raw: errText.slice(0, 500) };
   }
 
   const data = await res.json();

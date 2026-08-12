@@ -2,9 +2,9 @@ const express = require('express');
 const router = express.Router();
 
 const ANTHROPIC_API = 'https://api.anthropic.com/v1/messages';
-// Skúša ďalší model len keď chyba vyzerá na problém s modelom (404 alebo
-// zmienka "model" v chybe) — pozri poznámku pri jeho použití nižšie.
-const MODEL_FALLBACK_CHAIN = ['claude-sonnet-5', 'claude-sonnet-4-6'];
+// Dynamický fallback na NAJNOVŠÍ dostupný model (nikdy na starší pevne
+// zadaný) — pozri poznámku pri jeho použití nižšie a lib/resolveModel.js.
+const { pickStartingModel, markModelGood, getNewestUntriedModel } = require('./lib/resolveModel');
 
 // Spoločná JSON schéma, ktorú očakáva public/app.html (generateQuestions()) —
 // pole "text" (nie "question"!), voliteľný "context", "options" (4, alebo 8 pri
@@ -129,12 +129,14 @@ Píš výhradne v ${langLabel}.
 Vráť validný JSON presne podľa schémy zo systémového promptu, žiadny iný text.`;
 
   try {
-    // Tichý fallback na iný model, ak Anthropic odmietne primárny (napr.
-    // bol medzičasom deprecated) — inak by generátor prestal fungovať
-    // okamžite a ticho pre všetkých používateľov naraz.
+    // Dynamický fallback na najnovší dostupný model, ak Anthropic odmietne
+    // primárny (napr. bol medzičasom deprecated) — inak by generátor
+    // prestal fungovať okamžite a ticho pre všetkých používateľov naraz.
     let response, data;
-    for (let i = 0; i < MODEL_FALLBACK_CHAIN.length; i++) {
-      const model = MODEL_FALLBACK_CHAIN[i];
+    let triedModels = [];
+    let model = pickStartingModel();
+    for (let attempt = 0; attempt < 4; attempt++) {
+      triedModels.push(model);
       response = await fetch(ANTHROPIC_API, {
         method: 'POST',
         headers: {
@@ -151,15 +153,23 @@ Vráť validný JSON presne podľa schémy zo systémového promptu, žiadny in�
       });
       data = await response.json();
       if (response.ok) {
-        if (i > 0) console.error(`⚠️ Claude model fallback: '${MODEL_FALLBACK_CHAIN[0]}' zlyhal, použitý '${model}'.`);
+        markModelGood(model);
+        if (attempt > 0) console.error(`⚠️ Claude model fallback: úspešne použitý novší model '${model}'.`);
         break;
       }
       const errText = JSON.stringify(data);
       const looksLikeModelIssue = response.status === 404 || /model/i.test(errText);
-      if (!looksLikeModelIssue || i === MODEL_FALLBACK_CHAIN.length - 1) {
+      if (!looksLikeModelIssue) {
         console.error('Anthropic API error:', errText);
         return res.status(response.status).json(data);
       }
+      const next = await getNewestUntriedModel(triedModels);
+      if (!next) {
+        console.error('Anthropic API error:', errText);
+        return res.status(response.status).json(data);
+      }
+      console.error(`⚠️ Claude model '${model}' zlyhal, skúšam novší dostupný '${next}'.`);
+      model = next;
     }
     res.json(data);
   } catch (e) {

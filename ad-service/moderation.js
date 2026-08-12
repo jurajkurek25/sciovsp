@@ -14,13 +14,55 @@ const { promisify } = require('util');
 const execFileAsync = promisify(execFile);
 
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
-// Tichý fallback na iný model, ak Anthropic odmietne primárny (napr. bol
-// medzičasom deprecated) — inak by fail-closed politika nižšie začala
-// zamietať KAŽDÚ kreatívu len kvôli neplatnému model ID, nie kvôli
-// skutočnému problému s obsahom. Skúša ďalší model len keď chyba vyzerá
-// na problém s modelom (404 alebo zmienka "model" v chybe) — inou chybou
-// (napr. skutočný content policy problém) sa naďalej riadi fail-closed.
-const MODEL_FALLBACK_CHAIN = ['claude-haiku-4-5-20251001', 'claude-sonnet-4-6'];
+// Dynamický fallback na NAJNOVŠÍ dostupný model (nikdy na starší pevne
+// zadaný) — keď Anthropic odmietne primárny (napr. bol medzičasom
+// deprecated), inak by fail-closed politika nižšie začala zamietať KAŽDÚ
+// kreatívu len kvôli neplatnému model ID, nie kvôli skutočnému problému s
+// obsahom. Appka si sama vypýta aktuálny zoznam modelov cez GET /v1/models
+// a skúsi najnovší, ktorý ešte neskúsila. Skúša ďalší model len keď chyba
+// vyzerá na problém s modelom (404 alebo zmienka "model" v chybe) — inou
+// chybou (napr. skutočný content policy problém) sa naďalej riadi
+// fail-closed. Primárne sa skúša lacnejší Haiku (bežná vision klasifikácia
+// si nevyžaduje Opus/Sonnet-úroveň) — fallback pri probléme s modelom už
+// ide na čokoľvek najnovšie dostupné, cena tu ustupuje funkčnosti.
+const MODEL_FALLBACK_BASELINE = 'claude-haiku-4-5-20251001';
+const MODEL_LIST_CACHE_TTL_MS = 60 * 60 * 1000;
+let _modelListCache = null;
+let _lastGoodClaudeModel = null;
+
+function pickStartingModel() { return _lastGoodClaudeModel || MODEL_FALLBACK_BASELINE; }
+function markModelGood(model) { _lastGoodClaudeModel = model; }
+
+async function fetchAnthropicModelList() {
+  let all = [];
+  let afterId = null;
+  for (let page = 0; page < 10; page++) {
+    const url = 'https://api.anthropic.com/v1/models?limit=100' + (afterId ? '&after_id=' + encodeURIComponent(afterId) : '');
+    const res = await fetch(url, { headers: { 'x-api-key': ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' } });
+    if (!res.ok) break;
+    const data = await res.json();
+    const list = Array.isArray(data.data) ? data.data : [];
+    all = all.concat(list);
+    if (!data.has_more || !data.last_id || !list.length) break;
+    afterId = data.last_id;
+  }
+  return all;
+}
+
+async function getNewestUntriedModel(triedIds) {
+  try {
+    if (!_modelListCache || Date.now() - _modelListCache.fetchedAt > MODEL_LIST_CACHE_TTL_MS) {
+      const models = await fetchAnthropicModelList();
+      models.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      _modelListCache = { models, fetchedAt: Date.now() };
+    }
+    const found = _modelListCache.models.find(m => m && m.id && !triedIds.includes(m.id));
+    return found ? found.id : null;
+  } catch (e) {
+    console.error('⚠️ Nepodarilo sa zistiť aktuálny zoznam Claude modelov:', e.message);
+    return null;
+  }
+}
 const MAX_FRAMES = 4;
 
 async function getDurationSeconds(filePath) {
@@ -241,8 +283,10 @@ async function moderateContent({ buffer, mimeType, linkUrl }) {
 
   let res;
   try {
-    for (let i = 0; i < MODEL_FALLBACK_CHAIN.length; i++) {
-      const model = MODEL_FALLBACK_CHAIN[i];
+    let triedModels = [];
+    let model = pickStartingModel();
+    for (let attempt = 0; attempt < 4; attempt++) {
+      triedModels.push(model);
       const controller = new AbortController();
       const t = setTimeout(() => controller.abort(), 20000);
       res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -267,14 +311,21 @@ async function moderateContent({ buffer, mimeType, linkUrl }) {
       });
       clearTimeout(t);
       if (res.ok) {
-        if (i > 0) console.error(`⚠️ Claude model fallback: '${MODEL_FALLBACK_CHAIN[0]}' zlyhal, použitý '${model}'.`);
+        markModelGood(model);
+        if (attempt > 0) console.error(`⚠️ Claude model fallback: úspešne použitý novší model '${model}'.`);
         break;
       }
       const errText = await res.text().catch(() => '');
       const looksLikeModelIssue = res.status === 404 || /model/i.test(errText);
-      if (!looksLikeModelIssue || i === MODEL_FALLBACK_CHAIN.length - 1) {
+      if (!looksLikeModelIssue) {
         return { allowed: false, category: 'api_error', reason: `AI kontrola vrátila chybu ${res.status} — zamietnuté pre istotu.`, raw: errText.slice(0, 500) };
       }
+      const next = await getNewestUntriedModel(triedModels);
+      if (!next) {
+        return { allowed: false, category: 'api_error', reason: `AI kontrola vrátila chybu ${res.status} — zamietnuté pre istotu.`, raw: errText.slice(0, 500) };
+      }
+      console.error(`⚠️ Claude model '${model}' zlyhal, skúšam novší dostupný '${next}'.`);
+      model = next;
     }
   } catch (e) {
     return { allowed: false, category: 'api_error', reason: `Volanie AI kontroly zlyhalo (${e.message}) — zamietnuté pre istotu.` };

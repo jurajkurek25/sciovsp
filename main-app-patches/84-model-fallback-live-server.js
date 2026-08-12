@@ -1,3 +1,11 @@
+// ⚠️ SUPERSEDNUTÉ — NENASADZUJ TENTO PATCH.
+// Nahradený patchom 85-model-fallback-dynamic-newest.js, ktorý namiesto
+// pádu na STARŠÍ pevne zadaný model ('claude-sonnet-4-6') dynamicky
+// vyhľadáva NAJNOVŠÍ dostupný model cez živé Anthropic API. Tento súbor
+// ostáva v repozitári len ako história (a ako zdroj presných OLD kotiev,
+// z ktorých patch 85 vychádza) — nasaď namiesto neho rovno patch 85 na
+// pôvodný (ešte nepatchnutý) živý server.js.
+//
 // Tichý fallback na iný Claude model pri deprecated model ID — pre VŠETKY
 // AI generátor endpointy v hlavnej appke (8 miest, konsolidovaných z 10
 // pôvodných výskytov 'model: claude-sonnet-5'). Bez tohto by ktorýkoľvek
