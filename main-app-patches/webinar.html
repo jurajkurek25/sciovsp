@@ -135,17 +135,6 @@ h1{font-family:var(--serif);font-weight:800;font-size:clamp(2rem,5vw,2.8rem);lin
   <p class="footer-disclaimer" id="tFooterDisclaimer">Táto stránka nie je súčasťou webu Facebook ani spoločnosti Meta, Inc. a nie je nimi žiadnym spôsobom podporovaná ani sponzorovaná. FACEBOOK a INSTAGRAM sú ochranné známky spoločnosti Meta, Inc.</p>
 </footer>
 
-<!-- Skutočný HTML form POST do Ecomailu (rovnaký princíp ako ich vlastný
-     embed kód) — mieri do skrytého iframe, aby stránka po odoslaní
-     neopustila /webinar. Zámerne NIE fetch(): cudzí formulár POST nepodlieha
-     CORS, zatiaľ čo fetch na cudziu doménu narazí na CSRF/Accept-header
-     kontroly, ktoré tento endpoint pri AJAX volaní odmieta. -->
-<iframe name="ecomailSubscribeFrame" style="display:none" tabindex="-1" aria-hidden="true"></iframe>
-<form id="ecomailForm" action="https://jurajaugustinkurek.ecomailapp.cz/public/subscribe/15/864b4f4872272bdd94aadbc81dfd8b18" method="POST" target="ecomailSubscribeFrame" style="display:none">
-  <input type="hidden" name="name" id="ecomailName">
-  <input type="hidden" name="email" id="ecomailEmail">
-</form>
-
 <script>
 // Zachytenie partnerského ?ref= presne ako na hlavnej index.html — bez
 // tohto by affiliate linky mierené priamo na /webinar (nie na hlavnú
@@ -213,18 +202,16 @@ function fmtSessionDate(d, l) {
 
 let nextSlot = nextThursdayEight();
 
-// Registráciu zároveň posunieme do Ecomail zoznamu (pripomienkové emaily
-// pred termínom) — skutočný HTML form POST do skrytého iframe (viď <form
-// id="ecomailForm"> vyššie), presne ako by to spravil ich vlastný embed
-// kód. "Fire and forget": chyba/výpadok Ecomailu nesmie zablokovať samotnú
-// registráciu na vysielanie, preto sa presmerovanie na /webinar/dakujeme
-// iba mierne oneskorí (nie zruší), aby mal formulár čas request reálne odoslať.
-function subscribeToEcomail(name, email) {
-  try {
-    document.getElementById('ecomailName').value = name || '';
-    document.getElementById('ecomailEmail').value = email;
-    document.getElementById('ecomailForm').submit();
-  } catch (e) {}
+// Registrácia ide na vlastný endpoint (vlastný email systém, nie Ecomail) —
+// "fire and forget": chyba/výpadok odosielania emailu nesmie zablokovať
+// samotnú registráciu na vysielanie, preto presmerovanie na /webinar/dakujeme
+// prebehne aj keby fetch zlyhal.
+function submitRegistration(name, email) {
+  return fetch('/api/webinar/register', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name: name || null, email, slotStartMs: nextSlot.getTime() })
+  }).catch(() => {});
 }
 
 document.getElementById('regSubmitBtn').onclick = () => {
@@ -235,10 +222,9 @@ document.getElementById('regSubmitBtn').onclick = () => {
   errEl.textContent = '';
   const session = { slotStartMs: nextSlot.getTime(), name: name || null, email };
   localStorage.setItem('sp_webinar_session', JSON.stringify(session));
-  subscribeToEcomail(name, email);
   // Nepresmerovávame rovno na vysielanie — najprv poďakovanie + potvrdenie
   // opt-inu, nech je jasné, že treba potvrdiť email pred pripomienkami.
-  setTimeout(() => { location.href = '/webinar/dakujeme'; }, 250);
+  submitRegistration(name, email).finally(() => { location.href = '/webinar/dakujeme'; });
 };
 
 function checkExistingRegistration() {

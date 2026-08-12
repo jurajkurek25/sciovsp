@@ -152,6 +152,7 @@ textarea{width:100%;min-height:110px;padding:.7rem;background:var(--black3);bord
     <a class="navlink" data-page="houseads">Vlastné reklamy</a>
     <a class="navlink" data-page="giftcards">Darčekové karty (partner shop)</a>
     <a class="navlink" data-page="giftcardsales">Darčekové karty (predaj)</a>
+    <a class="navlink" data-page="webinar">Webinár — kontakty</a>
     <a class="navlink" data-page="payouts">Výplaty (PAY by square)</a>
     <a class="navlink" data-page="instructorpayouts">Výplaty inštruktorov</a>
     <a class="navlink" data-page="discountcodes">Zľavové kódy</a>
@@ -241,7 +242,7 @@ function showApp() {
 }
 
 // ─────────────────────────── ROUTER ───────────────────────────
-const PAGES = { overview: renderOverview, trends: renderTrends, academy: renderAcademy, courses: renderCourses, blog: renderBlog, houseads: renderHouseAds, giftcards: renderGiftcards, giftcardsales: renderGiftCardSales, payouts: renderPayouts, instructorpayouts: renderInstructorPayouts, discountcodes: renderDiscountCodes, instructors: renderInstructors, bugs: renderBugs, advisor: renderAdvisor, aiops: renderAiops };
+const PAGES = { overview: renderOverview, trends: renderTrends, academy: renderAcademy, courses: renderCourses, blog: renderBlog, houseads: renderHouseAds, giftcards: renderGiftcards, giftcardsales: renderGiftCardSales, payouts: renderPayouts, instructorpayouts: renderInstructorPayouts, discountcodes: renderDiscountCodes, instructors: renderInstructors, bugs: renderBugs, advisor: renderAdvisor, aiops: renderAiops, webinar: renderWebinar };
 
 $$('.navlink[data-page]').forEach(a => a.addEventListener('click', () => { navigate(a.dataset.page); closeMobileNav(); }));
 
@@ -1135,6 +1136,114 @@ async function renderGiftCardSales() {
     if (!confirm('Zmazať túto možnosť?')) return;
     const item = btn.closest('.card-item');
     try { await api(`/api/dash/gift-card-options/${item.dataset.id}`, { method: 'DELETE' }); navigate('giftcardsales'); }
+    catch (err) { alert(err.message); }
+  });
+}
+
+// ─────────────────────────── WEBINÁR — KONTAKTY ───────────────────────────
+let _webinarContacts = [];
+let _webinarFilter = 'all';
+
+function webinarFilterContacts() {
+  return _webinarContacts.filter(c => {
+    if (_webinarFilter === 'confirmed') return c.confirmedAt && !c.unsubscribedAt;
+    if (_webinarFilter === 'unconfirmed') return !c.confirmedAt && !c.unsubscribedAt;
+    if (_webinarFilter === 'paid') return c.isPremium && !c.unsubscribedAt;
+    if (_webinarFilter === 'unpaid') return !c.isPremium && !c.unsubscribedAt;
+    if (_webinarFilter === 'unsubscribed') return !!c.unsubscribedAt;
+    return !c.unsubscribedAt;
+  });
+}
+
+async function renderWebinar() {
+  const { contacts } = await api('/api/dash/webinar/contacts');
+  _webinarContacts = contacts;
+  renderWebinarTable();
+}
+
+function renderWebinarTable() {
+  const visible = webinarFilterContacts();
+  $('#main').innerHTML = `
+    <div class="pagehead">
+      <h2>Webinár — kontakty</h2>
+      <span class="muted">${_webinarContacts.length} kontaktov spolu · vlastný email systém (bez Ecomailu)</span>
+      <a class="btn secondary" href="/api/dash/webinar/export.xml" style="margin-left:auto">Exportovať XML</a>
+    </div>
+
+    <div class="card" style="margin-bottom:1.4rem">
+      <h3>Napísať vybraným</h3>
+      <p class="muted" style="margin:.3rem 0 .8rem">V texte môžeš použiť <code>[MENO]</code> a <code>[UNSUBSCRIBE]</code> (odhlasovací odkaz sa doplní automaticky).</p>
+      <div class="formrow">
+        <input id="wSubject" placeholder="Predmet emailu" style="flex:1;min-width:220px">
+      </div>
+      <textarea id="wBody" rows="6" placeholder="Obsah emailu (HTML alebo obyčajný text)" style="width:100%;margin-top:.6rem;padding:.6rem .8rem;background:var(--black3);border:1px solid var(--border2);border-radius:8px;color:inherit;font-family:inherit"></textarea>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:.8rem">
+        <span class="muted" id="wSelectedCount">0 vybraných</span>
+        <button class="btn" id="wSendBtn">Odoslať vybraným</button>
+      </div>
+    </div>
+
+    <div class="formrow" style="margin-bottom:1rem">
+      <select id="wFilter" style="padding:.6rem .8rem;background:var(--black3);border:1px solid var(--border2);border-radius:8px">
+        <option value="all" ${_webinarFilter === 'all' ? 'selected' : ''}>Všetci (bez odhlásených)</option>
+        <option value="confirmed" ${_webinarFilter === 'confirmed' ? 'selected' : ''}>Potvrdení</option>
+        <option value="unconfirmed" ${_webinarFilter === 'unconfirmed' ? 'selected' : ''}>Nepotvrdení</option>
+        <option value="paid" ${_webinarFilter === 'paid' ? 'selected' : ''}>Platení zákazníci</option>
+        <option value="unpaid" ${_webinarFilter === 'unpaid' ? 'selected' : ''}>Neplatení</option>
+        <option value="unsubscribed" ${_webinarFilter === 'unsubscribed' ? 'selected' : ''}>Odhlásení</option>
+      </select>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th><input type="checkbox" id="wSelectAll"></th><th>Meno</th><th>Email</th><th>Termín</th><th>Stav</th><th>Platený</th><th></th></tr></thead>
+        <tbody>${visible.map(c => `<tr data-id="${c.id}">
+          <td><input type="checkbox" class="w-row-check" data-id="${c.id}"></td>
+          <td>${(c.name || '—').replace(/</g, '&lt;')}</td>
+          <td class="muted">${c.email}</td>
+          <td class="muted">${new Date(c.slotStartMs).toLocaleString('sk-SK')}</td>
+          <td>${c.unsubscribedAt ? '<span class="pill pending">odhlásený</span>' : (c.confirmedAt ? '<span class="pill resolved">potvrdený</span>' : '<span class="pill pending">nepotvrdený</span>')}</td>
+          <td>${c.isPremium ? `<span class="pill resolved">${c.plan || 'áno'}</span>` : '<span class="muted">nie</span>'}</td>
+          <td style="white-space:nowrap">
+            ${!c.unsubscribedAt ? `<button class="btn secondary w-unsub-btn" data-id="${c.id}">Odhlásiť</button>` : ''}
+            <button class="btn danger w-delete-btn" data-id="${c.id}">Zmazať</button>
+          </td>
+        </tr>`).join('') || '<tr><td class="muted" colspan="7">Žiadne kontakty v tomto filtri.</td></tr>'}</tbody>
+      </table>
+    </div>`;
+
+  $('#wFilter').onchange = () => { _webinarFilter = $('#wFilter').value; renderWebinarTable(); };
+
+  const updateSelectedCount = () => {
+    const n = $$('.w-row-check:checked').length;
+    $('#wSelectedCount').textContent = n + ' vybraných';
+  };
+  $('#wSelectAll').onchange = () => {
+    $$('.w-row-check').forEach(cb => cb.checked = $('#wSelectAll').checked);
+    updateSelectedCount();
+  };
+  $$('.w-row-check').forEach(cb => cb.onchange = updateSelectedCount);
+
+  $('#wSendBtn').onclick = async () => {
+    const targetIds = $$('.w-row-check:checked').map(cb => cb.dataset.id);
+    const subject = $('#wSubject').value.trim();
+    const html = $('#wBody').value.trim();
+    if (!targetIds.length) return alert('Vyber aspoň jeden kontakt.');
+    if (!subject || !html) return alert('Vyplň predmet aj obsah emailu.');
+    if (!confirm(`Odoslať email ${targetIds.length} kontaktom?`)) return;
+    try {
+      const result = await api('/api/dash/webinar/send', { method: 'POST', body: JSON.stringify({ targetIds, subject, html }) });
+      alert(`Odoslané: ${result.sent}, zlyhalo: ${result.failed}`);
+    } catch (err) { alert(err.message); }
+  };
+
+  $$('.w-unsub-btn').forEach(btn => btn.onclick = async () => {
+    try { await api(`/api/dash/webinar/contacts/${btn.dataset.id}/unsubscribe`, { method: 'POST', body: JSON.stringify({}) }); navigate('webinar'); }
+    catch (err) { alert(err.message); }
+  });
+  $$('.w-delete-btn').forEach(btn => btn.onclick = async () => {
+    if (!confirm('Natrvalo zmazať tento kontakt?')) return;
+    try { await api(`/api/dash/webinar/contacts/${btn.dataset.id}`, { method: 'DELETE' }); navigate('webinar'); }
     catch (err) { alert(err.message); }
   });
 }
