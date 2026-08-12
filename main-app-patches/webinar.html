@@ -27,6 +27,13 @@ a{color:var(--signal)}
 button{font-family:inherit}
 input{font-family:inherit}
 
+#partnerBanner{display:none;align-items:center;justify-content:center;gap:.6rem;flex-wrap:wrap;position:sticky;top:0;left:0;right:0;z-index:50;background:var(--ink3);border-bottom:1px solid var(--border2);padding:.6rem 1rem;text-align:center;font-size:.82rem}
+#partnerBanner .banner-text{color:var(--text2)}
+#partnerBanner .banner-text strong{color:var(--ignite)}
+#partnerBanner .banner-code{background:rgba(200,255,0,.12);border:1px solid rgba(200,255,0,.3);border-radius:6px;padding:.2rem .65rem;color:var(--ignite);letter-spacing:.1em;font-weight:700;cursor:pointer}
+#partnerBanner .banner-close{background:none;border:none;color:var(--text3);cursor:pointer;font-size:1rem;line-height:1;padding:.25rem}
+#partnerBanner .banner-close:hover{color:var(--text)}
+
 .top{max-width:900px;margin:0 auto;padding:1.5rem 1.2rem 0;display:flex;justify-content:space-between;align-items:center}
 .top a.back{font-family:var(--brand-mono);font-weight:500;font-size:.82rem;color:var(--brand-volt);text-decoration:none}
 .lang-switch{display:flex;gap:.35rem}
@@ -70,6 +77,11 @@ h1{font-family:var(--serif);font-weight:800;font-size:clamp(2rem,5vw,2.8rem);lin
 </style>
 </head>
 <body>
+<div id="partnerBanner">
+  <span class="banner-text" id="bannerText">Pozval ťa <strong id="bannerName"></strong> na SP Tréner. Tvoj kód:</span>
+  <span class="banner-code" id="bannerCode" onclick="copyRefCode()" title="Klikni pre kopírovanie"></span>
+  <button class="banner-close" onclick="closeBanner()" title="Zavrieť">✕</button>
+</div>
 <div class="top">
   <a class="back" href="/" id="tBack">← SP Tréner</a>
   <div class="lang-switch">
@@ -135,6 +147,38 @@ h1{font-family:var(--serif);font-weight:800;font-size:clamp(2rem,5vw,2.8rem);lin
 </form>
 
 <script>
+// Zachytenie partnerského ?ref= presne ako na hlavnej index.html — bez
+// tohto by affiliate linky mierené priamo na /webinar (nie na hlavnú
+// stránku) stratili referral atribúciu úplne, keďže sessionStorage sa
+// predtým nastavoval len na index.html.
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  const ref = params.get('ref');
+  if (!ref) return;
+  sessionStorage.setItem('partner_ref', ref.toUpperCase());
+  fetch('/api/partner/ref/' + encodeURIComponent(ref))
+    .then(r => r.json())
+    .then(data => {
+      if (!data.name) return;
+      document.getElementById('bannerName').textContent = data.name;
+      document.getElementById('bannerCode').textContent = data.refCode;
+      document.getElementById('partnerBanner').style.display = 'flex';
+    })
+    .catch(() => {});
+})();
+function copyRefCode() {
+  const code = document.getElementById('bannerCode').textContent;
+  navigator.clipboard.writeText(code).then(() => {
+    const el = document.getElementById('bannerCode');
+    const orig = el.textContent;
+    el.textContent = '✓ Skopírované';
+    setTimeout(() => el.textContent = orig, 1500);
+  });
+}
+function closeBanner() {
+  document.getElementById('partnerBanner').style.display = 'none';
+}
+
 // Vysiela sa iba raz týždenne — každý štvrtok o 20:00 (lokálny čas
 // prehliadača). Rovnaký princíp evergreen "join-in-progress" ako predtým,
 // len s jediným pevným termínom namiesto viacerých denných slotov.
