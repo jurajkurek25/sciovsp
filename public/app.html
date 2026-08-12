@@ -660,8 +660,8 @@ h1.title span{font-style:italic;color:var(--purple2)}
         <div class="chip" data-cat="medicina" onclick="filterModes('medicina',this)" data-i18n="catMedicina">🩺 Medicína</div>
         <div class="chip" data-cat="technika" onclick="filterModes('technika',this)" data-i18n="catTechnika">🔧 Technika</div>
         <div class="chip" data-cat="pedagogika" onclick="filterModes('pedagogika',this)" data-i18n="catPedagogika">🍎 Pedagogika</div>
+        <div class="chip" data-cat="courses" onclick="filterModes('courses',this)" data-i18n="catCourses">🎓 Kurzy</div>
         <div class="chip" data-cat="progress" onclick="filterModes('progress',this)" data-i18n="catProgress">📊 Pokrok</div>
-        <a class="chip" href="/kurzy" data-i18n="catCourses">🎓 Kurzy</a>
       </nav>
     </aside>
     <main class="app-main">
@@ -703,6 +703,9 @@ h1.title span{font-style:italic;color:var(--purple2)}
     <div class="mode-section-title" data-cat="pedagogika" data-i18n="secPedagogika">Pedagogika</div>
     <div class="mode-card" data-cat="pedagogika" onclick="startMode('ped_tsp')"><span class="card-badge" style="background:linear-gradient(135deg,var(--green),var(--purple));color:#04150d;">PEDAGOGIKA</span><span class="card-icon">🍎</span><div class="card-title" data-i18n="modePedTspTitle">Test predpokladov pre pedagogiku</div><div class="card-desc" data-i18n="modePedTspDesc">40 otázok v banke (prehľad, verbálne a logické uvažovanie) — každý pokus 30 nových.</div></div>
     <div class="mode-card" data-cat="pedagogika" onclick="startMode('ped_pp')"><span class="card-badge" style="background:linear-gradient(135deg,var(--green),var(--purple));color:#04150d;">PEDAGOGIKA</span><span class="card-icon">🍎</span><div class="card-title" data-i18n="modePedPpTitle">Pedagogicko-psychologický základ</div><div class="card-desc" data-i18n="modePedPpDesc">40 otázok v banke (vývinová psychológia, didaktika...) — každý pokus 30 nových.</div></div>
+
+    <div class="mode-section-title" data-cat="courses" data-i18n="secCourses">Kurzy</div>
+    <template id="coursesAnchor"></template>
 
     <div class="mode-section-title" data-cat="progress" data-i18n="secProgress">Pokrok a komunita</div>
     <div class="mode-card" data-cat="progress" onclick="showHistory()"><span class="card-icon">📊</span><div class="card-title" data-i18n="modeHistoryTitle">Výsledky a história</div><div class="card-desc" data-i18n="modeHistoryDesc">Pokroky, analýza podľa okruhov, percentilový odhad.</div></div>
@@ -1064,7 +1067,8 @@ const TRANSLATIONS={
     logoTag:'SP TRÉNER',homeTitle:'Dostaň sa<br>na <span>percentil 85</span>',
     homeSubtitle:'Cvič reálne testy · Meria čas · AI generuje nové úlohy',
     catAll:'🏠 Domov',catVsp:'📘 VŠP',catAi:'🤖 AI nástroje',catPsych:'🧠 Psychológia UCM',catLaw:'⚖️ Právo',catMedicina:'🩺 Medicína',catTechnika:'🔧 Technika',catPedagogika:'🍎 Pedagogika',catProgress:'📊 Pokrok',catCourses:'🎓 Kurzy',
-    secVsp:'Všeobecné študijné predpoklady',secAi:'AI nástroje',secPsych:'Psychológia — UCM Trnava',secLaw:'Právo — vedomostné okruhy',secMedicina:'Medicína',secTechnika:'Technika',secPedagogika:'Pedagogika',secProgress:'Pokrok a komunita',
+    secVsp:'Všeobecné študijné predpoklady',secAi:'AI nástroje',secPsych:'Psychológia — UCM Trnava',secLaw:'Právo — vedomostné okruhy',secMedicina:'Medicína',secTechnika:'Technika',secPedagogika:'Pedagogika',secCourses:'Kurzy',secProgress:'Pokrok a komunita',
+    noCoursesTitle:'Zatiaľ nemáš žiadne kurzy.',addCourseBtn:'+ Pridať',browseCoursesBtn:'Pozrieť kurzy',lessonsLabel:'lekcií',
     badgeRecommended:'Odporúčané',modeFullTitle:'Celý test (na čas)',modeFullDesc:'Verbálna (35 min) + Analytická (45 min). Presná simulácia ostrého testu.',
     modeVerbalTitle:'Len verbálna časť',modeVerbalDesc:'33 úloh, 35 min.',
     modeAnalyticalTitle:'Len analytická časť',modeAnalyticalDesc:'33 úloh, 45 min.',
@@ -1219,7 +1223,8 @@ const TRANSLATIONS={
     logoTag:'SP TRENÉR',homeTitle:'Dostaň se<br>na <span>percentil 85</span>',
     homeSubtitle:'Cvič reálné testy · Měří čas · AI generuje nové úkoly',
     catAll:'🏠 Domů',catVsp:'📘 VŠP',catAi:'🤖 AI nástroje',catPsych:'🧠 Psychologie UCM',catLaw:'⚖️ Právo',catMedicina:'🩺 Medicína',catTechnika:'🔧 Technika',catPedagogika:'🍎 Pedagogika',catProgress:'📊 Pokrok',catCourses:'🎓 Kurzy',
-    secVsp:'Všeobecné studijní předpoklady',secAi:'AI nástroje',secPsych:'Psychologie — UCM Trnava',secLaw:'Právo — znalostní okruhy',secMedicina:'Medicína',secTechnika:'Technika',secPedagogika:'Pedagogika',secProgress:'Pokrok a komunita',
+    secVsp:'Všeobecné studijní předpoklady',secAi:'AI nástroje',secPsych:'Psychologie — UCM Trnava',secLaw:'Právo — znalostní okruhy',secMedicina:'Medicína',secTechnika:'Technika',secPedagogika:'Pedagogika',secCourses:'Kurzy',secProgress:'Pokrok a komunita',
+    noCoursesTitle:'Zatím nemáš žádné kurzy.',addCourseBtn:'+ Přidat',browseCoursesBtn:'Prohlédnout kurzy',lessonsLabel:'lekcí',
     badgeRecommended:'Doporučeno',modeFullTitle:'Celý test (na čas)',modeFullDesc:'Verbální (35 min) + Analytická (45 min). Přesná simulace ostrého testu.',
     modeVerbalTitle:'Jen verbální část',modeVerbalDesc:'33 úkolů, 35 min.',
     modeAnalyticalTitle:'Jen analytická část',modeAnalyticalDesc:'33 úkolů, 45 min.',
@@ -3081,6 +3086,39 @@ function filterModes(cat,chipEl){
   document.querySelectorAll('.mode-card,.mode-section-title').forEach(el=>{
     el.classList.toggle('hidden-by-filter',!(cat==='all'||el.dataset.cat===cat));
   });
+}
+
+// ============================================================
+// HOME — sekcia Kurzy (vlastnené kurzy alebo výzva na pridanie/nákup)
+// ============================================================
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function coursesEmptyStateHtml(){
+  return `<div class="mode-card" data-cat="courses" data-courses-generated="1" style="cursor:default;">
+    <span class="card-icon">🎓</span>
+    <div class="card-title">${t('noCoursesTitle')}</div>
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.85rem;">
+      <a href="/uplatnit-darcek" class="btn" style="text-decoration:none;font-size:.78rem;">${t('addCourseBtn')}</a>
+      <a href="/kurzy" class="btn primary" style="text-decoration:none;font-size:.78rem;">${t('browseCoursesBtn')}</a>
+    </div>
+  </div>`;
+}
+async function renderCoursesSection(){
+  const anchor=document.getElementById('coursesAnchor');
+  if(!anchor)return;
+  document.querySelectorAll('.mode-card[data-courses-generated]').forEach(el=>el.remove());
+  if(!currentUser){anchor.insertAdjacentHTML('afterend',coursesEmptyStateHtml());return;}
+  try{
+    const headers=await getAuthHeader();
+    const res=await fetch('/api/user/my-courses',{headers});
+    if(!res.ok)throw new Error('status '+res.status);
+    const data=await res.json();
+    const courses=data.courses||[];
+    if(!courses.length){anchor.insertAdjacentHTML('afterend',coursesEmptyStateHtml());return;}
+    const html=courses.map(c=>`<div class="mode-card" data-cat="courses" data-courses-generated="1" onclick="location.href='/kurzy/${encodeURIComponent(c.slug)}/watch'"><span class="card-icon">🎓</span><div class="card-title">${escapeHtml(c.title)}</div><div class="card-desc">${c.completedLessons}/${c.totalLessons} ${t('lessonsLabel')}</div></div>`).join('');
+    anchor.insertAdjacentHTML('afterend',html);
+  }catch(e){
+    anchor.insertAdjacentHTML('afterend',coursesEmptyStateHtml());
+  }
 }
 
 // ============================================================
@@ -5299,7 +5337,7 @@ function initEliteFeatures() {
   renderMirrorMode();
 }
 
-applyTranslations();updateHomeStats();updateGenTopicChips('verbal');renderAuthButton();
+applyTranslations();updateHomeStats();updateGenTopicChips('verbal');renderAuthButton();renderCoursesSection();
 </script>
 
 <!-- Supabase Auth -->
@@ -5329,7 +5367,7 @@ async function onUserLoggedIn(user,token){
     if(data.premiumExpiresAt)localStorage.setItem('vsp_premium_expires',data.premiumExpiresAt);
     if(typeof data.usedTests==='number')localStorage.setItem('vsp_trial_count',String(data.usedTests));
   }catch(e){}
-  renderAuthButton();updateHomeStats();loadRefCard();renderEliteHomeCards();initEliteFeatures();
+  renderAuthButton();updateHomeStats();loadRefCard();renderEliteHomeCards();initEliteFeatures();renderCoursesSection();
   if(isPremium()){const ol=document.getElementById('paywall-overlay');if(ol)ol.remove();}
   loadScioDateFromCloud();
   attachPendingPartnerRef();
@@ -5345,7 +5383,7 @@ async function attachPendingPartnerRef(){
 }
 function onUserLoggedOut(){
   currentUser=null;localStorage.removeItem('vsp_user_email');localStorage.removeItem('vsp_premium');
-  renderAuthButton();updateHomeStats();
+  renderAuthButton();updateHomeStats();renderCoursesSection();
 }
 async function loginWithGoogle(){
   await _supabase.auth.signInWithOAuth({provider:'google',options:{redirectTo:'https://vsp.jurajkurek.com/app'}});
