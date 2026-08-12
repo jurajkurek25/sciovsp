@@ -53,7 +53,10 @@ footer{border-top:1px solid var(--border);padding:2.5rem;display:flex;align-item
 h1.title{font-family:var(--serif);font-size:clamp(2.5rem,6vw,5rem);font-weight:400;letter-spacing:-.02em;line-height:1.05;margin-bottom:.75rem}
 h1.title span{font-style:italic;color:var(--purple2)}
 .subtitle{color:var(--text2);font-size:1rem;font-weight:300;margin-top:.5rem}
+.cat-filter-row{max-width:880px;width:100%;margin-bottom:1rem;justify-content:center}
 .mode-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1px;max-width:880px;width:100%;position:relative;z-index:1;background:var(--border);border:1px solid var(--border);border-radius:20px;overflow:hidden}
+.mode-section-title{grid-column:1/-1;background:var(--black1,#0c0a08);padding:.7rem 1.75rem;font-family:var(--mono);font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);}
+.mode-card.hidden-by-filter,.mode-section-title.hidden-by-filter{display:none}
 .mode-card{background:var(--black2);padding:1.75rem;cursor:pointer;transition:background .2s;position:relative;overflow:hidden}
 .mode-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--volt);transform:scaleX(0);transform-origin:left;transition:transform .3s}
 .mode-card:hover{background:var(--black3)}
@@ -633,33 +636,53 @@ h1.title span{font-style:italic;color:var(--purple2)}
     <p class="subtitle" data-i18n="homeSubtitle">Cvič reálne testy · Meria čas · AI generuje nové úlohy</p>
     <div id="home-auth-btn" style="margin-top:1.25rem;display:flex;justify-content:center;"></div>
   </div>
+  <div class="chip-row cat-filter-row" id="modeCatFilter">
+    <div class="chip active" data-cat="all" onclick="filterModes('all',this)" data-i18n="catAll">Všetko</div>
+    <div class="chip" data-cat="vsp" onclick="filterModes('vsp',this)" data-i18n="catVsp">📘 VŠP</div>
+    <div class="chip" data-cat="ai" onclick="filterModes('ai',this)" data-i18n="catAi">🤖 AI nástroje</div>
+    <div class="chip" data-cat="psych" onclick="filterModes('psych',this)" data-i18n="catPsych">🧠 Psychológia UCM</div>
+    <div class="chip" data-cat="law" onclick="filterModes('law',this)" data-i18n="catLaw">⚖️ Právo</div>
+    <div class="chip" data-cat="stem" onclick="filterModes('stem',this)" data-i18n="catStem">🎓 Medicína, technika, pedagogika</div>
+    <div class="chip" data-cat="progress" onclick="filterModes('progress',this)" data-i18n="catProgress">📊 Pokrok</div>
+  </div>
   <div class="mode-grid">
-    <div class="mode-card" onclick="startMode('full')"><span class="card-badge" data-i18n="badgeRecommended">Odporúčané</span><span class="card-icon">⏱</span><div class="card-title" data-i18n="modeFullTitle">Celý test (na čas)</div><div class="card-desc" data-i18n="modeFullDesc">Verbálna (35 min) + Analytická (45 min). Presná simulácia SCIO.</div></div>
-    <div class="mode-card" onclick="startMode('verbal')"><span class="card-icon">📖</span><div class="card-title" data-i18n="modeVerbalTitle">Len verbálna časť</div><div class="card-desc" data-i18n="modeVerbalDesc">33 úloh, 35 min. Doplňovanie, vzťahy, koherencia, pasáže.</div></div>
-    <div class="mode-card" onclick="startMode('analytical')"><span class="card-icon">🧮</span><div class="card-title" data-i18n="modeAnalyticalTitle">Len analytická časť</div><div class="card-desc" data-i18n="modeAnalyticalDesc">33 úloh, 45 min. Grafy, porovnávanie, slovné úlohy, zebry.</div></div>
-    <div class="mode-card ai-card" onclick="showScreen('ai-gen')"><span class="card-badge ai-badge">✨ AI NOVÉ</span><span class="card-icon">🤖</span><div class="card-title" data-i18n="modeAIGenTitle">AI Generátor úloh</div><div class="card-desc" data-i18n="modeAIGenDesc">Claude AI vygeneruje nové SCIO-štýlové úlohy presne pre tvoje slabé miesta.</div></div>
-    <div class="mode-card ai-card" onclick="startAIFullTest()"><span class="card-badge ai-badge">✨ AI + ČASOMIERA</span><span class="card-icon">🤖⏱</span><div class="card-title" data-i18n="modeAIFullTitle">AI Celý test (na čas)</div><div class="card-desc" data-i18n="modeAIFullDesc">Claude vygeneruje 66 nových úloh — verbálna + analytická s reálnou časomieru.</div></div>
-    <div class="mode-card" onclick="startMode('review')"><span class="card-icon">🔁</span><div class="card-title" data-i18n="modeReviewTitle">Precvičiť slabé úlohy</div><div class="card-desc" data-i18n="modeReviewDesc">Len úlohy kde si chyboval alebo vynechal. Bez časomiery.</div></div>
-    <div class="mode-card" onclick="showAIBank()"><span class="card-icon">📚</span><div class="card-title" data-i18n="modeAIBankTitle">AI banka úloh</div><div class="card-desc" data-i18n="modeAIBankDesc">Prehľad všetkých vygenerovaných úloh. Spusti precvičovanie kedykoľvek.</div></div>
-    <div class="mode-card" onclick="showHistory()"><span class="card-icon">📊</span><div class="card-title" data-i18n="modeHistoryTitle">Výsledky a história</div><div class="card-desc" data-i18n="modeHistoryDesc">Pokroky, analýza podľa okruhov, percentilový odhad.</div></div>
-    <div class="mode-card" onclick="showClans()"><span class="card-badge" style="background:linear-gradient(135deg,var(--purple),var(--red));color:#fff;">NOVÉ</span><span class="card-icon">⚔️</span><div class="card-title" data-i18n="clansCardTitle">SP Klany</div><div class="card-desc" data-i18n="clansCardDesc">Súkromné skupiny · Leaderboard s kamarátmi</div></div>
-    <div class="mode-card" onclick="startMode('topic')"><span class="card-icon">🎯</span><div class="card-title" data-i18n="modeTopicTitle">Podľa okruhu</div><div class="card-desc" data-i18n="modeTopicDesc">Vyber konkrétny okruh — napr. zebry, koherencia, porovnávanie.</div></div>
-    <div class="mode-card" onclick="startMode('psychologia')"><span class="card-badge" style="background:linear-gradient(135deg,var(--purple),var(--red));color:#fff;">NOVÉ</span><span class="card-icon">🧠</span><div class="card-title" data-i18n="modePsychTitle">Psychológia UCM Trnava</div><div class="card-desc" data-i18n="modePsychDesc">76 úloh — Biológia človeka, Filozofia, Psychológia. Vedomostná časť prijímačiek FF UCM.</div></div>
-    <div class="mode-card" onclick="showScreen('psych-info')"><span class="card-badge" style="background:linear-gradient(135deg,var(--purple),var(--red));color:#fff;">NOVÉ</span><span class="card-icon">🧭</span><div class="card-title" data-i18n="modePsychInfoTitle">Test študijných predpokladov (UCM)</div><div class="card-desc" data-i18n="modePsychInfoDesc">Druhá časť prijímačiek na psychológiu — verbálne/analytické uvažovanie + koncentrácia pozornosti.</div></div>
-    <div class="mode-card" onclick="startMode('law_full')"><span class="card-badge" style="background:linear-gradient(135deg,var(--yellow),var(--red));color:#1a1200;">PRÁVO</span><span class="card-icon">⚖️</span><div class="card-title" data-i18n="modeLawFullTitle">Právo — rýchly test</div><div class="card-desc" data-i18n="modeLawFullDesc">40 náhodných otázok zo všetkých okruhov práva (spolu ~900 v banke) — každý pokus iná zostava.</div></div>
-    <div class="mode-card" onclick="startMode('law_spol')"><span class="card-badge" style="background:linear-gradient(135deg,var(--yellow),var(--red));color:#1a1200;">PRÁVO</span><span class="card-icon">🌍</span><div class="card-title" data-i18n="modeLawSpolTitle">Spoločensko-politický prehľad</div><div class="card-desc" data-i18n="modeLawSpolDesc">178 otázok v banke (politológia, sociológia, ekonómia, medzinárodné vzťahy, kultúra) — každý pokus 35 nových.</div></div>
-    <div class="mode-card" onclick="startMode('law_fil')"><span class="card-badge" style="background:linear-gradient(135deg,var(--yellow),var(--red));color:#1a1200;">PRÁVO</span><span class="card-icon">💭</span><div class="card-title" data-i18n="modeLawFilTitle">Základy filozofie</div><div class="card-desc" data-i18n="modeLawFilDesc">151 otázok v banke (od antiky po súčasnú filozofiu) — každý pokus 35 nových.</div></div>
-    <div class="mode-card" onclick="startMode('law_zp')"><span class="card-badge" style="background:linear-gradient(135deg,var(--yellow),var(--red));color:#1a1200;">PRÁVO</span><span class="card-icon">⚖️</span><div class="card-title" data-i18n="modeLawZpTitle">Základy práva</div><div class="card-desc" data-i18n="modeLawZpDesc">134 otázok v banke (Ústava SR, ľudské práva, štátne orgány) — každý pokus 35 nových.</div></div>
-    <div class="mode-card" onclick="startMode('law_sd')"><span class="card-badge" style="background:linear-gradient(135deg,var(--yellow),var(--red));color:#1a1200;">PRÁVO</span><span class="card-icon">🌐</span><div class="card-title" data-i18n="modeLawSdTitle">Svetové dejiny</div><div class="card-desc" data-i18n="modeLawSdDesc">235 otázok v banke (od praveku po koniec studenej vojny) — každý pokus 35 nových.</div></div>
-    <div class="mode-card" onclick="startMode('law_skd')"><span class="card-badge" style="background:linear-gradient(135deg,var(--yellow),var(--red));color:#1a1200;">PRÁVO</span><span class="card-icon">🏰</span><div class="card-title" data-i18n="modeLawSkdTitle">Slovenské dejiny</div><div class="card-desc" data-i18n="modeLawSkdDesc">206 otázok v banke (od Veľkej Moravy po vznik SR) — každý pokus 35 nových.</div></div>
-    <div class="mode-card" onclick="startMode('sci_full')"><span class="card-badge" style="background:linear-gradient(135deg,var(--green),var(--purple));color:#04150d;">VŠ</span><span class="card-icon">🎓</span><div class="card-title" data-i18n="modeSciFullTitle">Príprava na VŠ — rýchly test</div><div class="card-desc" data-i18n="modeSciFullDesc">40 náhodných otázok z medicíny, techniky aj pedagogiky naraz.</div></div>
-    <div class="mode-card" onclick="startMode('sci_bio')"><span class="card-badge" style="background:linear-gradient(135deg,var(--green),var(--purple));color:#04150d;">MEDICÍNA</span><span class="card-icon">🧬</span><div class="card-title" data-i18n="modeSciBioTitle">Biológia</div><div class="card-desc" data-i18n="modeSciBioDesc">45 otázok v banke (bunky, genetika, sústavy človeka) — každý pokus 30 nových.</div></div>
-    <div class="mode-card" onclick="startMode('sci_chem')"><span class="card-badge" style="background:linear-gradient(135deg,var(--green),var(--purple));color:#04150d;">MEDICÍNA</span><span class="card-icon">🧪</span><div class="card-title" data-i18n="modeSciChemTitle">Chémia</div><div class="card-desc" data-i18n="modeSciChemDesc">45 otázok v banke (anorganická, organická, biochémia) — každý pokus 30 nových.</div></div>
-    <div class="mode-card" onclick="startMode('sci_fyz')"><span class="card-badge" style="background:linear-gradient(135deg,var(--green),var(--purple));color:#04150d;">MEDICÍNA+TECH</span><span class="card-icon">⚛️</span><div class="card-title" data-i18n="modeSciFyzTitle">Fyzika</div><div class="card-desc" data-i18n="modeSciFyzDesc">50 otázok v banke (mechanika, optika, elektrina...) — každý pokus 30 nových.</div></div>
-    <div class="mode-card" onclick="startMode('tech_mat')"><span class="card-badge" style="background:linear-gradient(135deg,var(--green),var(--purple));color:#04150d;">TECHNIKA</span><span class="card-icon">📐</span><div class="card-title" data-i18n="modeTechMatTitle">Matematika</div><div class="card-desc" data-i18n="modeTechMatDesc">45 otázok v banke (algebra, funkcie, geometria...) — každý pokus 30 nových.</div></div>
-    <div class="mode-card" onclick="startMode('tech_log')"><span class="card-badge" style="background:linear-gradient(135deg,var(--green),var(--purple));color:#04150d;">TECHNIKA</span><span class="card-icon">🧩</span><div class="card-title" data-i18n="modeTechLogTitle">Logika a informatika</div><div class="card-desc" data-i18n="modeTechLogDesc">40 otázok v banke (výroková logika, číselné sústavy...) — každý pokus 30 nových.</div></div>
-    <div class="mode-card" onclick="startMode('ped_tsp')"><span class="card-badge" style="background:linear-gradient(135deg,var(--green),var(--purple));color:#04150d;">PEDAGOGIKA</span><span class="card-icon">🍎</span><div class="card-title" data-i18n="modePedTspTitle">Test predpokladov pre pedagogiku</div><div class="card-desc" data-i18n="modePedTspDesc">40 otázok v banke (prehľad, verbálne a logické uvažovanie) — každý pokus 30 nových.</div></div>
-    <div class="mode-card" onclick="startMode('ped_pp')"><span class="card-badge" style="background:linear-gradient(135deg,var(--green),var(--purple));color:#04150d;">PEDAGOGIKA</span><span class="card-icon">🍎</span><div class="card-title" data-i18n="modePedPpTitle">Pedagogicko-psychologický základ</div><div class="card-desc" data-i18n="modePedPpDesc">40 otázok v banke (vývinová psychológia, didaktika...) — každý pokus 30 nových.</div></div>
+    <div class="mode-section-title" data-cat="vsp" data-i18n="secVsp">Všeobecné študijné predpoklady (SCIO)</div>
+    <div class="mode-card" data-cat="vsp" onclick="startMode('full')"><span class="card-badge" data-i18n="badgeRecommended">Odporúčané</span><span class="card-icon">⏱</span><div class="card-title" data-i18n="modeFullTitle">Celý test (na čas)</div><div class="card-desc" data-i18n="modeFullDesc">Verbálna (35 min) + Analytická (45 min). Presná simulácia SCIO.</div></div>
+    <div class="mode-card" data-cat="vsp" onclick="startMode('verbal')"><span class="card-icon">📖</span><div class="card-title" data-i18n="modeVerbalTitle">Len verbálna časť</div><div class="card-desc" data-i18n="modeVerbalDesc">33 úloh, 35 min. Doplňovanie, vzťahy, koherencia, pasáže.</div></div>
+    <div class="mode-card" data-cat="vsp" onclick="startMode('analytical')"><span class="card-icon">🧮</span><div class="card-title" data-i18n="modeAnalyticalTitle">Len analytická časť</div><div class="card-desc" data-i18n="modeAnalyticalDesc">33 úloh, 45 min. Grafy, porovnávanie, slovné úlohy, zebry.</div></div>
+    <div class="mode-card" data-cat="vsp" onclick="startMode('topic')"><span class="card-icon">🎯</span><div class="card-title" data-i18n="modeTopicTitle">Podľa okruhu</div><div class="card-desc" data-i18n="modeTopicDesc">Vyber konkrétny okruh — napr. zebry, koherencia, porovnávanie.</div></div>
+    <div class="mode-card" data-cat="vsp" onclick="startMode('review')"><span class="card-icon">🔁</span><div class="card-title" data-i18n="modeReviewTitle">Precvičiť slabé úlohy</div><div class="card-desc" data-i18n="modeReviewDesc">Len úlohy kde si chyboval alebo vynechal. Bez časomiery.</div></div>
+
+    <div class="mode-section-title" data-cat="ai" data-i18n="secAi">AI nástroje</div>
+    <div class="mode-card ai-card" data-cat="ai" onclick="showScreen('ai-gen')"><span class="card-badge ai-badge">✨ AI NOVÉ</span><span class="card-icon">🤖</span><div class="card-title" data-i18n="modeAIGenTitle">AI Generátor úloh</div><div class="card-desc" data-i18n="modeAIGenDesc">Claude AI vygeneruje nové SCIO-štýlové úlohy presne pre tvoje slabé miesta.</div></div>
+    <div class="mode-card ai-card" data-cat="ai" onclick="startAIFullTest()"><span class="card-badge ai-badge">✨ AI + ČASOMIERA</span><span class="card-icon">🤖⏱</span><div class="card-title" data-i18n="modeAIFullTitle">AI Celý test (na čas)</div><div class="card-desc" data-i18n="modeAIFullDesc">Claude vygeneruje 66 nových úloh — verbálna + analytická s reálnou časomieru.</div></div>
+    <div class="mode-card" data-cat="ai" onclick="showAIBank()"><span class="card-icon">📚</span><div class="card-title" data-i18n="modeAIBankTitle">AI banka úloh</div><div class="card-desc" data-i18n="modeAIBankDesc">Prehľad všetkých vygenerovaných úloh. Spusti precvičovanie kedykoľvek.</div></div>
+
+    <div class="mode-section-title" data-cat="psych" data-i18n="secPsych">Psychológia — UCM Trnava</div>
+    <div class="mode-card" data-cat="psych" onclick="startMode('psychologia')"><span class="card-badge" style="background:linear-gradient(135deg,var(--purple),var(--red));color:#fff;">NOVÉ</span><span class="card-icon">🧠</span><div class="card-title" data-i18n="modePsychTitle">Psychológia UCM Trnava</div><div class="card-desc" data-i18n="modePsychDesc">76 úloh — Biológia človeka, Filozofia, Psychológia. Vedomostná časť prijímačiek FF UCM.</div></div>
+    <div class="mode-card" data-cat="psych" onclick="showScreen('psych-info')"><span class="card-badge" style="background:linear-gradient(135deg,var(--purple),var(--red));color:#fff;">NOVÉ</span><span class="card-icon">🧭</span><div class="card-title" data-i18n="modePsychInfoTitle">Test študijných predpokladov (UCM)</div><div class="card-desc" data-i18n="modePsychInfoDesc">Druhá časť prijímačiek na psychológiu — verbálne/analytické uvažovanie + koncentrácia pozornosti.</div></div>
+
+    <div class="mode-section-title" data-cat="law" data-i18n="secLaw">Právo — vedomostné okruhy</div>
+    <div class="mode-card" data-cat="law" onclick="startMode('law_full')"><span class="card-badge" style="background:linear-gradient(135deg,var(--yellow),var(--red));color:#1a1200;">PRÁVO</span><span class="card-icon">⚖️</span><div class="card-title" data-i18n="modeLawFullTitle">Právo — rýchly test</div><div class="card-desc" data-i18n="modeLawFullDesc">40 náhodných otázok zo všetkých okruhov práva (spolu ~900 v banke) — každý pokus iná zostava.</div></div>
+    <div class="mode-card" data-cat="law" onclick="startMode('law_spol')"><span class="card-badge" style="background:linear-gradient(135deg,var(--yellow),var(--red));color:#1a1200;">PRÁVO</span><span class="card-icon">🌍</span><div class="card-title" data-i18n="modeLawSpolTitle">Spoločensko-politický prehľad</div><div class="card-desc" data-i18n="modeLawSpolDesc">178 otázok v banke (politológia, sociológia, ekonómia, medzinárodné vzťahy, kultúra) — každý pokus 35 nových.</div></div>
+    <div class="mode-card" data-cat="law" onclick="startMode('law_fil')"><span class="card-badge" style="background:linear-gradient(135deg,var(--yellow),var(--red));color:#1a1200;">PRÁVO</span><span class="card-icon">💭</span><div class="card-title" data-i18n="modeLawFilTitle">Základy filozofie</div><div class="card-desc" data-i18n="modeLawFilDesc">151 otázok v banke (od antiky po súčasnú filozofiu) — každý pokus 35 nových.</div></div>
+    <div class="mode-card" data-cat="law" onclick="startMode('law_zp')"><span class="card-badge" style="background:linear-gradient(135deg,var(--yellow),var(--red));color:#1a1200;">PRÁVO</span><span class="card-icon">⚖️</span><div class="card-title" data-i18n="modeLawZpTitle">Základy práva</div><div class="card-desc" data-i18n="modeLawZpDesc">134 otázok v banke (Ústava SR, ľudské práva, štátne orgány) — každý pokus 35 nových.</div></div>
+    <div class="mode-card" data-cat="law" onclick="startMode('law_sd')"><span class="card-badge" style="background:linear-gradient(135deg,var(--yellow),var(--red));color:#1a1200;">PRÁVO</span><span class="card-icon">🌐</span><div class="card-title" data-i18n="modeLawSdTitle">Svetové dejiny</div><div class="card-desc" data-i18n="modeLawSdDesc">235 otázok v banke (od praveku po koniec studenej vojny) — každý pokus 35 nových.</div></div>
+    <div class="mode-card" data-cat="law" onclick="startMode('law_skd')"><span class="card-badge" style="background:linear-gradient(135deg,var(--yellow),var(--red));color:#1a1200;">PRÁVO</span><span class="card-icon">🏰</span><div class="card-title" data-i18n="modeLawSkdTitle">Slovenské dejiny</div><div class="card-desc" data-i18n="modeLawSkdDesc">206 otázok v banke (od Veľkej Moravy po vznik SR) — každý pokus 35 nových.</div></div>
+
+    <div class="mode-section-title" data-cat="stem" data-i18n="secStem">Medicína, technika a pedagogika</div>
+    <div class="mode-card" data-cat="stem" onclick="startMode('sci_full')"><span class="card-badge" style="background:linear-gradient(135deg,var(--green),var(--purple));color:#04150d;">VŠ</span><span class="card-icon">🎓</span><div class="card-title" data-i18n="modeSciFullTitle">Príprava na VŠ — rýchly test</div><div class="card-desc" data-i18n="modeSciFullDesc">40 náhodných otázok z medicíny, techniky aj pedagogiky naraz.</div></div>
+    <div class="mode-card" data-cat="stem" onclick="startMode('sci_bio')"><span class="card-badge" style="background:linear-gradient(135deg,var(--green),var(--purple));color:#04150d;">MEDICÍNA</span><span class="card-icon">🧬</span><div class="card-title" data-i18n="modeSciBioTitle">Biológia</div><div class="card-desc" data-i18n="modeSciBioDesc">45 otázok v banke (bunky, genetika, sústavy človeka) — každý pokus 30 nových.</div></div>
+    <div class="mode-card" data-cat="stem" onclick="startMode('sci_chem')"><span class="card-badge" style="background:linear-gradient(135deg,var(--green),var(--purple));color:#04150d;">MEDICÍNA</span><span class="card-icon">🧪</span><div class="card-title" data-i18n="modeSciChemTitle">Chémia</div><div class="card-desc" data-i18n="modeSciChemDesc">45 otázok v banke (anorganická, organická, biochémia) — každý pokus 30 nových.</div></div>
+    <div class="mode-card" data-cat="stem" onclick="startMode('sci_fyz')"><span class="card-badge" style="background:linear-gradient(135deg,var(--green),var(--purple));color:#04150d;">MEDICÍNA+TECH</span><span class="card-icon">⚛️</span><div class="card-title" data-i18n="modeSciFyzTitle">Fyzika</div><div class="card-desc" data-i18n="modeSciFyzDesc">50 otázok v banke (mechanika, optika, elektrina...) — každý pokus 30 nových.</div></div>
+    <div class="mode-card" data-cat="stem" onclick="startMode('tech_mat')"><span class="card-badge" style="background:linear-gradient(135deg,var(--green),var(--purple));color:#04150d;">TECHNIKA</span><span class="card-icon">📐</span><div class="card-title" data-i18n="modeTechMatTitle">Matematika</div><div class="card-desc" data-i18n="modeTechMatDesc">45 otázok v banke (algebra, funkcie, geometria...) — každý pokus 30 nových.</div></div>
+    <div class="mode-card" data-cat="stem" onclick="startMode('tech_log')"><span class="card-badge" style="background:linear-gradient(135deg,var(--green),var(--purple));color:#04150d;">TECHNIKA</span><span class="card-icon">🧩</span><div class="card-title" data-i18n="modeTechLogTitle">Logika a informatika</div><div class="card-desc" data-i18n="modeTechLogDesc">40 otázok v banke (výroková logika, číselné sústavy...) — každý pokus 30 nových.</div></div>
+    <div class="mode-card" data-cat="stem" onclick="startMode('ped_tsp')"><span class="card-badge" style="background:linear-gradient(135deg,var(--green),var(--purple));color:#04150d;">PEDAGOGIKA</span><span class="card-icon">🍎</span><div class="card-title" data-i18n="modePedTspTitle">Test predpokladov pre pedagogiku</div><div class="card-desc" data-i18n="modePedTspDesc">40 otázok v banke (prehľad, verbálne a logické uvažovanie) — každý pokus 30 nových.</div></div>
+    <div class="mode-card" data-cat="stem" onclick="startMode('ped_pp')"><span class="card-badge" style="background:linear-gradient(135deg,var(--green),var(--purple));color:#04150d;">PEDAGOGIKA</span><span class="card-icon">🍎</span><div class="card-title" data-i18n="modePedPpTitle">Pedagogicko-psychologický základ</div><div class="card-desc" data-i18n="modePedPpDesc">40 otázok v banke (vývinová psychológia, didaktika...) — každý pokus 30 nových.</div></div>
+
+    <div class="mode-section-title" data-cat="progress" data-i18n="secProgress">Pokrok a komunita</div>
+    <div class="mode-card" data-cat="progress" onclick="showHistory()"><span class="card-icon">📊</span><div class="card-title" data-i18n="modeHistoryTitle">Výsledky a história</div><div class="card-desc" data-i18n="modeHistoryDesc">Pokroky, analýza podľa okruhov, percentilový odhad.</div></div>
+    <div class="mode-card" data-cat="progress" onclick="showClans()"><span class="card-badge" style="background:linear-gradient(135deg,var(--purple),var(--red));color:#fff;">NOVÉ</span><span class="card-icon">⚔️</span><div class="card-title" data-i18n="clansCardTitle">SP Klany</div><div class="card-desc" data-i18n="clansCardDesc">Súkromné skupiny · Leaderboard s kamarátmi</div></div>
   </div>
   <!-- REFERRAL CARD — zobrazí sa Premium userom aj pri platbe -->
 <div class="ref-card hidden" id="refCard">
@@ -934,6 +957,7 @@ h1.title span{font-style:italic;color:var(--purple2)}
     <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1rem;">
       <button class="btn primary" onclick="startMode('full')" data-i18n="btnNewTest">Nový test →</button>
       <button class="btn" onclick="reviewWrong()" data-i18n="btnReviewErrors">Precvičiť chyby</button>
+      <button class="btn" id="btnGenMoreAI" style="display:none;border-color:var(--purple);color:var(--purple2);" onclick="goGenerateMoreFor()" data-i18n="btnGenMore">✨ Vygenerovať ďalšie s AI</button>
       <button class="btn" onclick="showHistory()" data-i18n="btnHistory">História</button>
       <button class="btn" onclick="showScreen('home')" style="margin-left:auto;" data-i18n="btnHome2">Domov</button>
     </div>
@@ -1014,6 +1038,8 @@ const TRANSLATIONS={
   sk:{
     logoTag:'SP TRÉNER · SCIO + AI',homeTitle:'Dostaň sa<br>na <span>percentil 85</span>',
     homeSubtitle:'Cvič reálne testy · Meria čas · AI generuje nové úlohy',
+    catAll:'Všetko',catVsp:'📘 VŠP',catAi:'🤖 AI nástroje',catPsych:'🧠 Psychológia UCM',catLaw:'⚖️ Právo',catStem:'🎓 Medicína, technika, pedagogika',catProgress:'📊 Pokrok',
+    secVsp:'Všeobecné študijné predpoklady (SCIO)',secAi:'AI nástroje',secPsych:'Psychológia — UCM Trnava',secLaw:'Právo — vedomostné okruhy',secStem:'Medicína, technika a pedagogika',secProgress:'Pokrok a komunita',
     badgeRecommended:'Odporúčané',modeFullTitle:'Celý test (na čas)',modeFullDesc:'Verbálna (35 min) + Analytická (45 min). Presná simulácia SCIO.',
     modeVerbalTitle:'Len verbálna časť',modeVerbalDesc:'33 úloh, 35 min.',
     modeAnalyticalTitle:'Len analytická časť',modeAnalyticalDesc:'33 úloh, 45 min.',
@@ -1065,7 +1091,7 @@ const TRANSLATIONS={
     btnEnd:'Ukončiť',verbalDone:'Verbálna časť hotová!',
     btnContinueAnalytical:'Pokračovať → Analytická časť',labelScore:'Skóre',
     analysisTitle:'📈 Analýza podľa okruhov',reviewTitle:'❌ Chyby a vynechané úlohy',
-    btnNewTest:'Nový test →',btnReviewErrors:'Precvičiť chyby',
+    btnNewTest:'Nový test →',btnReviewErrors:'Precvičiť chyby',btnGenMore:'✨ Vygenerovať ďalšie s AI',
     btnHistory:'História',btnHome2:'Domov',
     historyTitle:'História testov',historySubtitle:'Tvoje výsledky a progres k percentilu 85',
     estimatedPercentile:'Odhadnutý percentil',verbal:'Verbálny',analytical:'Analytický',goalP85:'Cieľ: percentil 85',
@@ -1167,6 +1193,8 @@ const TRANSLATIONS={
   cz:{
     logoTag:'SP TRENÉR · SCIO + AI',homeTitle:'Dostaň se<br>na <span>percentil 85</span>',
     homeSubtitle:'Cvič reálné testy · Měří čas · AI generuje nové úkoly',
+    catAll:'Vše',catVsp:'📘 VŠP',catAi:'🤖 AI nástroje',catPsych:'🧠 Psychologie UCM',catLaw:'⚖️ Právo',catStem:'🎓 Medicína, technika, pedagogika',catProgress:'📊 Pokrok',
+    secVsp:'Všeobecné studijní předpoklady (SCIO)',secAi:'AI nástroje',secPsych:'Psychologie — UCM Trnava',secLaw:'Právo — znalostní okruhy',secStem:'Medicína, technika a pedagogika',secProgress:'Pokrok a komunita',
     badgeRecommended:'Doporučeno',modeFullTitle:'Celý test (na čas)',modeFullDesc:'Verbální (35 min) + Analytická (45 min). Přesná simulace SCIO.',
     modeVerbalTitle:'Jen verbální část',modeVerbalDesc:'33 úkolů, 35 min.',
     modeAnalyticalTitle:'Jen analytická část',modeAnalyticalDesc:'33 úkolů, 45 min.',
@@ -1218,7 +1246,7 @@ const TRANSLATIONS={
     btnEnd:'Ukončit',verbalDone:'Verbální část hotová!',
     btnContinueAnalytical:'Pokračovat → Analytická část',labelScore:'Skóre',
     analysisTitle:'📈 Analýza podle okruhů',reviewTitle:'❌ Chyby a vynechané úkoly',
-    btnNewTest:'Nový test →',btnReviewErrors:'Procvičit chyby',
+    btnNewTest:'Nový test →',btnReviewErrors:'Procvičit chyby',btnGenMore:'✨ Vygenerovat další s AI',
     btnHistory:'Historie',btnHome2:'Domů',
     historyTitle:'Historie testů',historySubtitle:'Tvoje výsledky a postup k percentilu 85',
     estimatedPercentile:'Odhadnutý percentil',verbal:'Verbální',analytical:'Analytický',goalP85:'Cíl: percentil 85',
@@ -3021,6 +3049,16 @@ function applyCursorTo(el){
 }
 
 // ============================================================
+// HOME — kategórie / filter dlaždíc
+// ============================================================
+function filterModes(cat,chipEl){
+  document.querySelectorAll('#modeCatFilter .chip').forEach(c=>c.classList.toggle('active',c===chipEl));
+  document.querySelectorAll('.mode-card,.mode-section-title').forEach(el=>{
+    el.classList.toggle('hidden-by-filter',!(cat==='all'||el.dataset.cat===cat));
+  });
+}
+
+// ============================================================
 // GENERATOR — volá /api/generate-topic (server má prompty)
 // ============================================================
 let genCount=5;
@@ -3031,20 +3069,41 @@ const AI_SUBJECT_SOURCE={
   logika:['tech_log'],pedagogika:['ped_tsp','ped_pp'],psychologia:['psychologia'],
   pravo:['law_spol','law_fil','law_zp','law_sd','law_skd']
 };
+// Reverzná mapa: mode z testu → predmet (a časť pri VŠP) v AI generátore. Používa
+// ju len tlačidlo "Vygenerovať ďalšie s AI" na výsledkovej obrazovke — prednastaví
+// generátor, samotné volanie AI vždy spustí až explicitný klik používateľa.
+const REVERSE_GEN_MAP={
+  full:{subject:'vsp',part:'verbal'},verbal:{subject:'vsp',part:'verbal'},analytical:{subject:'vsp',part:'analytical'},
+  law_full:{subject:'pravo'},law_spol:{subject:'pravo'},law_fil:{subject:'pravo'},law_zp:{subject:'pravo'},law_sd:{subject:'pravo'},law_skd:{subject:'pravo'},
+  sci_bio:{subject:'biologia'},sci_chem:{subject:'chemia'},sci_fyz:{subject:'fyzika'},
+  tech_mat:{subject:'matematika'},tech_log:{subject:'logika'},
+  ped_tsp:{subject:'pedagogika'},ped_pp:{subject:'pedagogika'},
+  psychologia:{subject:'psychologia'}
+};
 function adjustCount(delta){genCount=Math.max(1,Math.min(10,genCount+delta));document.getElementById('genCount').textContent=genCount;}
 function selectGenChip(el,group){
   el.closest('.chip-row').querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
   el.classList.add('active');
   if(group==='part')updateGenTopicChips(el.dataset.val);
 }
-function selectGenSubject(el){
+function selectGenSubject(el){activateGenSubject(el.dataset.val);}
+function activateGenSubject(subjectKey,part){
+  const el=document.querySelector(`#genSubjectChips .chip[data-val="${subjectKey}"]`);
+  if(!el)return;
   document.querySelectorAll('#genSubjectChips .chip').forEach(c=>c.classList.remove('active'));
   el.classList.add('active');
-  currentGenSubject=el.dataset.val;
-  const isVSP=currentGenSubject==='vsp';
+  currentGenSubject=subjectKey;
+  const isVSP=subjectKey==='vsp';
   document.getElementById('genPartGroup').style.display=isVSP?'':'none';
-  const part=isVSP?(document.querySelector('#genPartChips .chip.active')?.dataset.val||'verbal'):currentGenSubject;
-  updateGenTopicChips(part);
+  if(isVSP&&part)document.querySelectorAll('#genPartChips .chip').forEach(c=>c.classList.toggle('active',c.dataset.val===part));
+  const effectivePart=isVSP?(part||document.querySelector('#genPartChips .chip.active')?.dataset.val||'verbal'):subjectKey;
+  updateGenTopicChips(effectivePart);
+}
+function goGenerateMoreFor(){
+  const map=REVERSE_GEN_MAP[state.mode];
+  if(!map)return;
+  showScreen('ai-gen');
+  activateGenSubject(map.subject,map.part);
 }
 function updateGenTopicChips(part){
   let topics;
@@ -3715,6 +3774,8 @@ function renderResults(entry,qs){
   let cc=document.getElementById('coach-card');
   if(!cc){cc=document.createElement('div');cc.id='coach-card';cc.className='coach-card';const rg=document.getElementById('resultsGrid');if(rg)rc.insertBefore(cc,rg);}
   loadAICoach(entry,topicStats);
+  const genBtn=document.getElementById('btnGenMoreAI');
+  if(genBtn)genBtn.style.display=REVERSE_GEN_MAP[entry.mode]?'':'none';
 }
 function reviewWrong(){_origStartMode('review');}
 
