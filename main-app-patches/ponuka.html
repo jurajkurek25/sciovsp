@@ -630,13 +630,25 @@ function setLang(l) {
   startSignalTicker();
 }
 
+// Akciová cena patrí len tým, čo prešli cez /webinar registráciu (rovnaké
+// localStorage, rovnaká doména) — kto príde na /ponuka priamo bez toho,
+// vidí rovno stav "po vypršaní" (bežná cena, žiadne bonusy).
+function hasWebinarRegistration() {
+  try { return !!localStorage.getItem('sp_webinar_session'); }
+  catch (e) { return false; }
+}
+
 setLang(lang);
 
 // Spustené až po setLang (nie skôr) — ak návštevník príde na stránku
 // s už uplynutým deadlinom (napr. na druhý deň), enterExpiredMode()
 // volá t(), ktoré potrebuje T definované vyššie v skripte.
-setInterval(tickClock, 1000);
-tickClock();
+if (hasWebinarRegistration()) {
+  setInterval(tickClock, 1000);
+  tickClock();
+} else {
+  enterExpiredMode();
+}
 </script>
 </body>
 </html>
