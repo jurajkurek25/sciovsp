@@ -191,14 +191,24 @@ function startBroadcast() {
   syncTimer = setInterval(syncTick, 1000);
 }
 
+// video.play() chyby sa predtým ticho prehltli (.catch(() => {})), takže pri
+// zlyhaní nebolo vôbec vidieť PREČO — ani v konzole, ani na obrazovke.
+// Teraz sa loguje aj zobrazuje, nech je to diagnostikovateľné.
+function reportPlaybackError(err) {
+  console.error('SP webinár — prehratie videa zlyhalo:', err, 'video.error =', document.getElementById('webinarVideo').error);
+  const textEl = document.getElementById('tStartOverlayText');
+  if (textEl) textEl.textContent = 'Video sa nepodarilo prehrať (skontroluj konzolu prehliadača — F12). Skús kliknúť znova.';
+}
+
 function attemptAutoplay() {
   const video = document.getElementById('webinarVideo');
   const overlay = document.getElementById('startOverlay');
-  video.play().then(() => { overlay.style.display = 'none'; }).catch(() => {
+  video.addEventListener('error', () => reportPlaybackError(video.error));
+  video.play().then(() => { overlay.style.display = 'none'; }).catch((err) => {
     overlay.style.display = 'flex';
     document.getElementById('startOverlayBtn').onclick = () => {
       video.muted = false;
-      video.play().then(() => { overlay.style.display = 'none'; }).catch(() => {});
+      video.play().then(() => { overlay.style.display = 'none'; }).catch(reportPlaybackError);
     };
   });
 }
