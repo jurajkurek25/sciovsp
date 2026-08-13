@@ -137,6 +137,13 @@ h1 em{color:var(--gold);font-style:italic}
 </div>
 
 <script>
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  const ref = params.get('ref');
+  if (!ref) return;
+  sessionStorage.setItem('partner_ref', ref.toUpperCase());
+})();
+
 const T = {
   sk: {
     eyebrow: '🎄 Vianočný darček, ktorý má zmysel', h1: 'Nie ďalšia vec<br>pod stromček. <em>Jeho budúcnosť.</em>',
