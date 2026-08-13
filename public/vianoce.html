@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Vianočný darček pre budúceho vysokoškoláka — SP Tréner</title>
-<meta name="description" content="Namiesto ďalšej veci pod stromček mu daruj skutočnú prípravu na prijímačky. Darčeková karta SP Tréner — Premium, Elite alebo online kurz podľa jeho výberu.">
+<meta name="description" content="Namiesto ďalšej veci pod stromček mu daruj niečo, na čom mu naozaj záleží — prípravu na prijímačky. Darčeková karta SP Tréner, hneď na stiahnutie a vytlačenie.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@300;400;500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
@@ -21,18 +21,26 @@ a{color:var(--purple2)}
 .wrap{max-width:900px;margin:0 auto;padding:2.4rem 1.2rem 6rem}
 .hero{padding:2.4rem 0 1.6rem;text-align:center}
 .eyebrow{display:inline-block;font-family:var(--mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);background:rgba(255,200,94,.09);border:1px solid rgba(255,200,94,.28);padding:.3rem .8rem;border-radius:99px;margin-bottom:1rem}
-h1{font-family:var(--serif);font-size:clamp(2.2rem,5vw,3.3rem);line-height:1.1;margin-bottom:.9rem}
+h1{font-family:var(--serif);font-size:clamp(2.2rem,5vw,3.4rem);line-height:1.12;margin-bottom:1.1rem}
 h1 em{color:var(--gold);font-style:italic}
-.sub{color:var(--text2);max-width:580px;margin:0 auto;font-size:1.05rem}
-.cta-row{margin-top:2rem;display:flex;justify-content:center;gap:.8rem;flex-wrap:wrap}
+.sub{color:var(--text2);max-width:600px;margin:0 auto;font-size:1.08rem;line-height:1.65}
+.cta-row{margin-top:2.1rem;display:flex;justify-content:center;gap:.8rem;flex-wrap:wrap}
 .btn-primary{padding:1rem 1.8rem;background:var(--gold);color:var(--black);border:none;border-radius:10px;font-weight:700;font-family:var(--mono);font-size:.9rem;cursor:pointer;text-decoration:none;display:inline-block}
 .btn-secondary{padding:1rem 1.6rem;background:transparent;border:1px solid var(--border2);color:var(--text);border-radius:10px;font-family:var(--mono);font-size:.85rem;text-decoration:none;display:inline-block}
-.reassure{text-align:center;margin-top:1rem;font-family:var(--mono);font-size:.75rem;color:var(--text3)}
+.reassure{text-align:center;margin-top:1.1rem;font-family:var(--mono);font-size:.75rem;color:var(--text3)}
+.moment{max-width:640px;margin:4rem auto;text-align:center}
+.moment .quote-mark{font-family:var(--serif);font-size:3.5rem;color:var(--gold);opacity:.35;line-height:0;display:block;margin-bottom:.3rem}
+.moment h2{font-family:var(--serif);font-size:1.9rem;font-style:italic;line-height:1.35;margin-bottom:.9rem}
+.moment p{color:var(--text2);font-size:1rem;line-height:1.7}
 .reasons{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin:3.5rem 0}
 .reason{background:var(--black2);border:1px solid var(--border);border-radius:14px;padding:1.5rem}
 .reason .icon{font-size:1.6rem;margin-bottom:.7rem;display:block}
 .reason h3{font-size:1rem;margin-bottom:.5rem}
 .reason p{color:var(--text2);font-size:.85rem;line-height:1.55}
+.grandparents{background:linear-gradient(135deg,rgba(255,200,94,.08),rgba(124,92,255,.06));border:1px solid rgba(255,200,94,.22);border-radius:16px;padding:1.7rem 1.8rem;margin:3rem 0;display:flex;gap:1.1rem;align-items:flex-start}
+.grandparents .icon{font-size:1.8rem;flex-shrink:0}
+.grandparents h3{font-size:1.05rem;margin-bottom:.4rem}
+.grandparents p{color:var(--text2);font-size:.9rem;line-height:1.6}
 .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin:2.2rem 0 3rem}
 .step{background:var(--black3);border:1px solid var(--border);border-radius:12px;padding:1.1rem;text-align:center}
 .step .n{font-family:var(--mono);color:var(--gold);font-size:.75rem;margin-bottom:.35rem}
@@ -43,9 +51,9 @@ h1 em{color:var(--gold);font-style:italic}
 .who h2{font-family:var(--serif);font-size:1.6rem;margin-bottom:.7rem}
 .who p{color:var(--text2);max-width:600px;margin:0 auto}
 .final{text-align:center;margin-top:3.5rem;padding-top:2.5rem;border-top:1px solid var(--border)}
-.final h2{font-family:var(--serif);font-size:2rem;margin-bottom:.8rem}
+.final h2{font-family:var(--serif);font-size:2.1rem;line-height:1.25;margin-bottom:.8rem}
 .final p{color:var(--text2);margin-bottom:1.6rem}
-@media(max-width:720px){.reasons,.steps{grid-template-columns:1fr}}
+@media(max-width:720px){.reasons,.steps{grid-template-columns:1fr}.grandparents{flex-direction:column}}
 </style>
 </head>
 <body>
@@ -58,14 +66,20 @@ h1 em{color:var(--gold);font-style:italic}
 </div>
 <div class="wrap">
   <div class="hero">
-    <span class="eyebrow" id="tEyebrow">🎄 Vianočný darček</span>
-    <h1 id="tH1">Pod stromček darček,<br>ktorý <em>naozaj pomôže</em></h1>
-    <p class="sub" id="tSub">Ďalší sveter alebo hra skončí v skrini. Daruj mu/jej niečo, čo mu reálne pomôže uspieť na prijímačkách — Premium, Elite alebo online kurz podľa vlastného výberu, ktorý si vyberie sám/sama pri uplatnení.</p>
+    <span class="eyebrow" id="tEyebrow">🎄 Vianočný darček, ktorý má zmysel</span>
+    <h1 id="tH1">Nie ďalšia vec<br>pod stromček. <em>Jeho budúcnosť.</em></h1>
+    <p class="sub" id="tSub">Vidíš, ako sa posledné mesiace trápi s učením a v duchu sa bojí, či to stihne. Nemôžeš mu urobiť prijímačky za neho — ale môžeš mu dať niečo, čo mu pri nich naozaj pomôže. Nie ďalšiu vec, ktorá skončí v skrini.</p>
     <div class="cta-row">
       <a class="btn-primary" href="/darcekova-karta" id="tCta1">Vybrať vianočný darček →</a>
       <a class="btn-secondary" href="#pre-koho" id="tCta2">Pre koho je to ↓</a>
     </div>
     <div class="reassure" id="tReassure">🖨️ Karta je hneď na stiahnutie a vytlačenie — stihneš to aj na Štedrý večer.</div>
+  </div>
+
+  <div class="moment">
+    <span class="quote-mark">"</span>
+    <h2 id="tMomentTitle">Rozbalí darček. Najprv nechápe.</h2>
+    <p id="tMomentDesc">Nie je to hračka ani oblečenie. Prečíta si, čo to je — a dôjde mu, že si mu práve dal niečo, čo mu skutočne pomôže. Nie preto, že si nevedel, čo iné kúpiť. Ale preto, že ti na jeho úspechu naozaj záleží.</p>
   </div>
 
   <div class="options-preview">
@@ -77,24 +91,32 @@ h1 em{color:var(--gold);font-style:italic}
 
   <div class="who" id="pre-koho">
     <h2 id="tWhoTitle">Pre rodičov, starých rodičov aj súrodencov</h2>
-    <p id="tWhoDesc">Máš doma alebo v rodine niekoho, kto sa tento rok pripravuje na prijímačky na vysokú školu? Namiesto hádania, čo by sa mu/jej páčilo, mu daruj niečo s jasným zmyslom — čas a nervy ušetrené vďaka poriadnej príprave.</p>
+    <p id="tWhoDesc">Máš doma alebo v rodine niekoho, kto sa tento rok pripravuje na prijímačky na vysokú školu? Namiesto hádania, čo by sa mu/jej páčilo, mu daruj niečo s jasným zmyslom — pokoj a náskok, ktoré si vďaka poriadnej príprave zaslúži.</p>
   </div>
 
   <div class="reasons">
     <div class="reason">
-      <span class="icon">🎯</span>
-      <h3 id="tR1Title">Skutočne to použije</h3>
-      <p id="tR1Desc">Žiadna vec, čo skončí v šuflíku. Prístup, ktorý mu reálne pomôže pripraviť sa a uspieť na VŠP.</p>
+      <span class="icon">💛</span>
+      <h3 id="tR1Title">Vieš, že sa trápi</h3>
+      <p id="tR1Desc">Večery pri knihách, stres, či to zvládne. Ty to vidíš a chceš pomôcť — toto je spôsob, ako pomôcť naozaj, nie len povzbudivými slovami.</p>
     </div>
     <div class="reason">
       <span class="icon">🧩</span>
-      <h3 id="tR2Title">Vyberie si sám, čo potrebuje</h3>
-      <p id="tR2Desc">Ty daruješ kartu pod stromček, on/ona si pri uplatnení vyberie presne ten plán alebo kurz, ktorý mu sedí.</p>
+      <h3 id="tR2Title">Nehádaš, čo chce</h3>
+      <p id="tR2Desc">Ty daruješ kartu pod stromček, on/ona si pri uplatnení sám/sama vyberie presne ten plán alebo kurz, ktorý mu sedí.</p>
     </div>
     <div class="reason">
       <span class="icon">🎁</span>
-      <h3 id="tR3Title">Pod stromček aj na poslednú chvíľu</h3>
+      <h3 id="tR3Title">Aj na poslednú chvíľu</h3>
       <p id="tR3Desc">Po zaplatení dostaneš PDF kartu s kódom — vytlačíš, zabalíš pod stromček, alebo pošleš rovno na Vianoce.</p>
+    </div>
+  </div>
+
+  <div class="grandparents">
+    <span class="icon">👵🎅</span>
+    <div>
+      <h3 id="tGpTitle">Nemusíš rozumieť aplikáciám</h3>
+      <p id="tGpDesc">Ak si starý rodič a nevieš si celkom predstaviť, čo je "online príprava" — nevadí. Stačí vytlačiť kartu a dať mu ju s láskou. Zvyšok si vyberie a spraví on/ona sám/sama.</p>
     </div>
   </div>
 
@@ -108,8 +130,8 @@ h1 em{color:var(--gold);font-style:italic}
   </div>
 
   <div class="final">
-    <h2 id="tFinalTitle">Daruj mu tento rok náskok, nie ďalšiu vec</h2>
-    <p id="tFinalSub">Vyber vianočný darček za pár minút.</p>
+    <h2 id="tFinalTitle">Daj mu tento rok niečo,<br>na čo si spomenie, keď to dokáže</h2>
+    <p id="tFinalSub">Vyber vianočný darček za pár minút. Vytlačíš, zabalíš — a spravil si niečo, čo má naozaj zmysel.</p>
     <a class="btn-primary" href="/darcekova-karta" id="tFinalCta">Vybrať vianočný darček →</a>
   </div>
 </div>
@@ -117,35 +139,43 @@ h1 em{color:var(--gold);font-style:italic}
 <script>
 const T = {
   sk: {
-    eyebrow: '🎄 Vianočný darček', h1: 'Pod stromček darček,<br>ktorý <em>naozaj pomôže</em>',
-    sub: 'Ďalší sveter alebo hra skončí v skrini. Daruj mu/jej niečo, čo mu reálne pomôže uspieť na prijímačkách — Premium, Elite alebo online kurz podľa vlastného výberu, ktorý si vyberie sám/sama pri uplatnení.',
+    eyebrow: '🎄 Vianočný darček, ktorý má zmysel', h1: 'Nie ďalšia vec<br>pod stromček. <em>Jeho budúcnosť.</em>',
+    sub: 'Vidíš, ako sa posledné mesiace trápi s učením a v duchu sa bojí, či to stihne. Nemôžeš mu urobiť prijímačky za neho — ale môžeš mu dať niečo, čo mu pri nich naozaj pomôže. Nie ďalšiu vec, ktorá skončí v skrini.',
     cta1: 'Vybrať vianočný darček →', cta2: 'Pre koho je to ↓',
     reassure: '🖨️ Karta je hneď na stiahnutie a vytlačenie — stihneš to aj na Štedrý večer.',
+    momentTitle: 'Rozbalí darček. Najprv nechápe.',
+    momentDesc: 'Nie je to hračka ani oblečenie. Prečíta si, čo to je — a dôjde mu, že si mu práve dal niečo, čo mu skutočne pomôže. Nie preto, že si nevedel, čo iné kúpiť. Ale preto, že ti na jeho úspechu naozaj záleží.',
     chip1: 'Premium na mesiace', chip2: 'Elite s AI mentorom', chip3: '1 kurz podľa výberu', chip4: 'Kombinácia viacerých',
     whoTitle: 'Pre rodičov, starých rodičov aj súrodencov',
-    whoDesc: 'Máš doma alebo v rodine niekoho, kto sa tento rok pripravuje na prijímačky na vysokú školu? Namiesto hádania, čo by sa mu/jej páčilo, mu daruj niečo s jasným zmyslom — čas a nervy ušetrené vďaka poriadnej príprave.',
-    r1Title: 'Skutočne to použije', r1Desc: 'Žiadna vec, čo skončí v šuflíku. Prístup, ktorý mu reálne pomôže pripraviť sa a uspieť na VŠP.',
-    r2Title: 'Vyberie si sám, čo potrebuje', r2Desc: 'Ty daruješ kartu pod stromček, on/ona si pri uplatnení vyberie presne ten plán alebo kurz, ktorý mu sedí.',
-    r3Title: 'Pod stromček aj na poslednú chvíľu', r3Desc: 'Po zaplatení dostaneš PDF kartu s kódom — vytlačíš, zabalíš pod stromček, alebo pošleš rovno na Vianoce.',
+    whoDesc: 'Máš doma alebo v rodine niekoho, kto sa tento rok pripravuje na prijímačky na vysokú školu? Namiesto hádania, čo by sa mu/jej páčilo, mu daruj niečo s jasným zmyslom — pokoj a náskok, ktoré si vďaka poriadnej príprave zaslúži.',
+    r1Title: 'Vieš, že sa trápi', r1Desc: 'Večery pri knihách, stres, či to zvládne. Ty to vidíš a chceš pomôcť — toto je spôsob, ako pomôcť naozaj, nie len povzbudivými slovami.',
+    r2Title: 'Nehádaš, čo chce', r2Desc: 'Ty daruješ kartu pod stromček, on/ona si pri uplatnení sám/sama vyberie presne ten plán alebo kurz, ktorý mu sedí.',
+    r3Title: 'Aj na poslednú chvíľu', r3Desc: 'Po zaplatení dostaneš PDF kartu s kódom — vytlačíš, zabalíš pod stromček, alebo pošleš rovno na Vianoce.',
+    gpTitle: 'Nemusíš rozumieť aplikáciám',
+    gpDesc: 'Ak si starý rodič a nevieš si celkom predstaviť, čo je "online príprava" — nevadí. Stačí vytlačiť kartu a dať mu ju s láskou. Zvyšok si vyberie a spraví on/ona sám/sama.',
     howTitle: 'Ako to funguje',
     step1: 'Vyberieš typ a dĺžku darčeka', step2: 'Zaplatíš bezpečne cez Stripe', step3: 'Dostaneš PDF na vytlačenie s kódom',
-    finalTitle: 'Daruj mu tento rok náskok, nie ďalšiu vec', finalSub: 'Vyber vianočný darček za pár minút.', finalCta: 'Vybrať vianočný darček →',
+    finalTitle: 'Daj mu tento rok niečo,<br>na čo si spomenie, keď to dokáže', finalSub: 'Vyber vianočný darček za pár minút. Vytlačíš, zabalíš — a spravil si niečo, čo má naozaj zmysel.', finalCta: 'Vybrať vianočný darček →',
     pageTitle: 'Vianočný darček pre budúceho vysokoškoláka — SP Tréner'
   },
   cs: {
-    eyebrow: '🎄 Vánoční dárek', h1: 'Pod stromeček dárek,<br>který <em>opravdu pomůže</em>',
-    sub: 'Další svetr nebo hra skončí ve skříni. Daruj mu/jí něco, co mu reálně pomůže uspět u přijímaček — Premium, Elite nebo online kurz podle vlastního výběru, který si vybere sám/sama při uplatnění.',
+    eyebrow: '🎄 Vánoční dárek, který má smysl', h1: 'Ne další věc<br>pod stromeček. <em>Jeho budoucnost.</em>',
+    sub: 'Vidíš, jak se poslední měsíce trápí s učením a v duchu se bojí, jestli to stihne. Nemůžeš mu udělat přijímačky za něj — ale můžeš mu dát něco, co mu při nich opravdu pomůže. Ne další věc, která skončí ve skříni.',
     cta1: 'Vybrat vánoční dárek →', cta2: 'Pro koho to je ↓',
     reassure: '🖨️ Karta je hned ke stažení a vytisknutí — stihneš to i na Štědrý den.',
+    momentTitle: 'Rozbalí dárek. Nejdřív nechápe.',
+    momentDesc: 'Není to hračka ani oblečení. Přečte si, co to je — a dojde mu, že jsi mu právě dal něco, co mu skutečně pomůže. Ne proto, že jsi nevěděl, co jiného koupit. Ale proto, že ti na jeho úspěchu opravdu záleží.',
     chip1: 'Premium na měsíce', chip2: 'Elite s AI mentorem', chip3: '1 kurz dle výběru', chip4: 'Kombinace více',
     whoTitle: 'Pro rodiče, prarodiče i sourozence',
-    whoDesc: 'Máš doma nebo v rodině někoho, kdo se letos připravuje na přijímačky na vysokou školu? Místo hádání, co by se mu/jí líbilo, mu daruj něco s jasným smyslem — čas a nervy ušetřené díky pořádné přípravě.',
-    r1Title: 'Opravdu to použije', r1Desc: 'Žádná věc, co skončí v šuplíku. Přístup, který mu reálně pomůže připravit se a uspět u VŠP.',
-    r2Title: 'Vybere si sám, co potřebuje', r2Desc: 'Ty daruješ kartu pod stromeček, on/ona si při uplatnění vybere přesně ten plán nebo kurz, který mu sedí.',
-    r3Title: 'Pod stromeček i na poslední chvíli', r3Desc: 'Po zaplacení dostaneš PDF kartu s kódem — vytiskneš, zabalíš pod stromeček, nebo pošleš rovnou na Vánoce.',
+    whoDesc: 'Máš doma nebo v rodině někoho, kdo se letos připravuje na přijímačky na vysokou školu? Místo hádání, co by se mu/jí líbilo, mu daruj něco s jasným smyslem — klid a náskok, který si díky pořádné přípravě zaslouží.',
+    r1Title: 'Víš, že se trápí', r1Desc: 'Večery u knih, stres, jestli to zvládne. Ty to vidíš a chceš pomoct — tohle je způsob, jak pomoct opravdu, ne jen povzbudivými slovy.',
+    r2Title: 'Nehádáš, co chce', r2Desc: 'Ty daruješ kartu pod stromeček, on/ona si při uplatnění sám/sama vybere přesně ten plán nebo kurz, který mu sedí.',
+    r3Title: 'I na poslední chvíli', r3Desc: 'Po zaplacení dostaneš PDF kartu s kódem — vytiskneš, zabalíš pod stromeček, nebo pošleš rovnou na Vánoce.',
+    gpTitle: 'Nemusíš rozumět aplikacím',
+    gpDesc: 'Pokud jsi prarodič a nedovedeš si úplně představit, co je "online příprava" — nevadí. Stačí vytisknout kartu a dát mu ji s láskou. Zbytek si vybere a udělá on/ona sám/sama.',
     howTitle: 'Jak to funguje',
     step1: 'Vybereš typ a délku dárku', step2: 'Zaplatíš bezpečně přes Stripe', step3: 'Dostaneš PDF k vytisknutí s kódem',
-    finalTitle: 'Daruj mu letos náskok, ne další věc', finalSub: 'Vyber vánoční dárek za pár minut.', finalCta: 'Vybrat vánoční dárek →',
+    finalTitle: 'Dej mu letos něco,<br>na co si vzpomene, až to dokáže', finalSub: 'Vyber vánoční dárek za pár minut. Vytiskneš, zabalíš — a udělal jsi něco, co má opravdu smysl.', finalCta: 'Vybrat vánoční dárek →',
     pageTitle: 'Vánoční dárek pro budoucího vysokoškoláka — SP Tréner'
   }
 };
@@ -163,6 +193,8 @@ function setLang(lang) {
   document.getElementById('tCta1').textContent = t.cta1;
   document.getElementById('tCta2').textContent = t.cta2;
   document.getElementById('tReassure').textContent = t.reassure;
+  document.getElementById('tMomentTitle').textContent = t.momentTitle;
+  document.getElementById('tMomentDesc').textContent = t.momentDesc;
   document.getElementById('tChip1').textContent = t.chip1;
   document.getElementById('tChip2').textContent = t.chip2;
   document.getElementById('tChip3').textContent = t.chip3;
@@ -172,9 +204,10 @@ function setLang(lang) {
   document.getElementById('tR1Title').textContent = t.r1Title; document.getElementById('tR1Desc').textContent = t.r1Desc;
   document.getElementById('tR2Title').textContent = t.r2Title; document.getElementById('tR2Desc').textContent = t.r2Desc;
   document.getElementById('tR3Title').textContent = t.r3Title; document.getElementById('tR3Desc').textContent = t.r3Desc;
+  document.getElementById('tGpTitle').textContent = t.gpTitle; document.getElementById('tGpDesc').textContent = t.gpDesc;
   document.getElementById('tHowTitle').textContent = t.howTitle;
   document.getElementById('tStep1').textContent = t.step1; document.getElementById('tStep2').textContent = t.step2; document.getElementById('tStep3').textContent = t.step3;
-  document.getElementById('tFinalTitle').textContent = t.finalTitle; document.getElementById('tFinalSub').textContent = t.finalSub; document.getElementById('tFinalCta').textContent = t.finalCta;
+  document.getElementById('tFinalTitle').innerHTML = t.finalTitle; document.getElementById('tFinalSub').textContent = t.finalSub; document.getElementById('tFinalCta').textContent = t.finalCta;
 }
 
 function detectInitialLang() {
