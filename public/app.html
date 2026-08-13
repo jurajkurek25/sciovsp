@@ -4034,6 +4034,16 @@ async function startAIFullTest(){
 // AUTH
 // ============================================================
 let currentUser=null;
+
+// Direct upgrade links (e.g. /app?upgrade=premium or /app?upgrade=elite):
+// capture intent now, checkout auto-starts once login (existing or fresh) resolves.
+function checkUpgradeLinkParam(){
+  const plan=new URLSearchParams(window.location.search).get('upgrade');
+  if(plan!=='premium'&&plan!=='elite')return;
+  window.history.replaceState({},'','/app');
+  localStorage.setItem('vsp_pending_upgrade',plan);
+}
+checkUpgradeLinkParam();
 function renderAuthButton(){
   const homeSlot=document.getElementById('home-auth-btn');if(!homeSlot)return;
   const existingBtn=document.getElementById('manage-sub-btn');if(existingBtn)existingBtn.remove();
@@ -5350,6 +5360,7 @@ const _supabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 async function initAuth(){
   const{data:{session}}=await _supabase.auth.getSession();
   if(session?.user)await onUserLoggedIn(session.user,session.access_token);
+  else if(localStorage.getItem('vsp_pending_upgrade'))loginWithGoogle();
   _supabase.auth.onAuthStateChange(async(event,session)=>{
     if(event==='SIGNED_IN'&&session?.user)await onUserLoggedIn(session.user,session.access_token);
     else if(event==='SIGNED_OUT')onUserLoggedOut();
@@ -5371,6 +5382,8 @@ async function onUserLoggedIn(user,token){
   if(isPremium()){const ol=document.getElementById('paywall-overlay');if(ol)ol.remove();}
   loadScioDateFromCloud();
   attachPendingPartnerRef();
+  const pendingUpgrade=localStorage.getItem('vsp_pending_upgrade');
+  if(pendingUpgrade){localStorage.removeItem('vsp_pending_upgrade');if(pendingUpgrade==='elite')startEliteCheckout();else startCheckout();}
 }
 async function attachPendingPartnerRef(){
   try{
@@ -5386,7 +5399,9 @@ function onUserLoggedOut(){
   renderAuthButton();updateHomeStats();renderCoursesSection();
 }
 async function loginWithGoogle(){
-  await _supabase.auth.signInWithOAuth({provider:'google',options:{redirectTo:'https://vsp.jurajkurek.com/app'}});
+  const pendingUpgrade=localStorage.getItem('vsp_pending_upgrade');
+  const redirectTo='https://vsp.jurajkurek.com/app'+(pendingUpgrade?('?upgrade='+encodeURIComponent(pendingUpgrade)):'');
+  await _supabase.auth.signInWithOAuth({provider:'google',options:{redirectTo}});
 }
 async function logout(){await _supabase.auth.signOut();showToast(t('loggedOut'));}
 async function loadScioDateFromCloud(){
