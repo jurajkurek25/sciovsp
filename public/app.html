@@ -4035,6 +4035,17 @@ async function startAIFullTest(){
 // ============================================================
 let currentUser=null;
 
+// Direct category links (e.g. /app?cat=medicina) — jump straight to a test
+// category's chip filter. Read before checkUpgradeLinkParam() strips the
+// query string via replaceState below.
+function checkCatLinkParam(){
+  const cat=new URLSearchParams(window.location.search).get('cat');
+  if(!cat)return;
+  const chipEl=document.querySelector('#modeCatFilter .chip[data-cat="'+cat+'"]');
+  if(chipEl)filterModes(cat,chipEl);
+}
+checkCatLinkParam();
+
 // Direct upgrade links (e.g. /app?upgrade=premium or /app?upgrade=elite):
 // capture intent now, checkout auto-starts once login (existing or fresh) resolves.
 // /app?upgrade=free auto-triggers login only, no checkout — for the free tier.
