@@ -79,7 +79,7 @@ function closeBanner() {
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SP Tréner — Dostaň sa na percentil 85</title>
+<title>SP Tréner — AI príprava na prijímačky | Dostaň sa na percentil 85</title>
 <meta name="description" content="AI-powered tréner na VŠP testy. Neobmedzené testy, personalizovaná analýza, reálna simulácia. Prvé 3 testy zadarmo.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@300;400;500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
@@ -106,6 +106,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1.25rem 2.5rem;displ
 nav.scrolled{background:rgba(8,8,13,.9);backdrop-filter:blur(12px);border-color:var(--border)}
 .nav-logo{font-family:var(--mono);font-size:13px;letter-spacing:.15em;color:var(--text);text-decoration:none;display:flex;align-items:center;gap:.5rem}
 .nav-dot{width:7px;height:7px;background:var(--volt);border-radius:50%;animation:pulse-dot 2s infinite}
+.nav-tagline{font-family:var(--sans);font-size:10px;letter-spacing:.02em;text-transform:none;font-weight:400;color:var(--text2);margin-left:.3rem}
+@media(max-width:680px){.nav-tagline{display:none}}
 @keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.7)}}
 .nav-cta{display:flex;align-items:center;gap:.5rem;padding:.55rem 1.25rem;background:var(--volt);color:var(--black);border-radius:6px;font-size:.82rem;font-weight:700;letter-spacing:.04em;text-decoration:none;transition:all .2s;font-family:var(--mono);cursor:pointer;border:none}
 .nav-cta:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(200,255,0,.3)}
@@ -660,7 +662,7 @@ body.has-banner{padding-top:42px}
 
 <!-- NAV -->
 <nav id="mainNav">
-  <a href="#" class="nav-logo"><div class="nav-dot"></div>SP TRÉNER</a>
+  <a href="#" class="nav-logo"><div class="nav-dot"></div>SP TRÉNER<span class="nav-tagline">AI príprava na prijímačky</span></a>
   <div style="display:flex;align-items:center;gap:.75rem">
     <a href="/blog" style="font-family:var(--mono);font-size:.78rem;letter-spacing:.05em;color:var(--text2);text-decoration:none">Blog</a>
     <div class="lang-switcher">
@@ -1007,7 +1009,7 @@ body.has-banner{padding-top:42px}
 
 <!-- FOOTER -->
 <footer>
-  <div class="footer-logo">SP TRÉNER © 2026</div>
+  <div class="footer-logo">SP TRÉNER — AI príprava na prijímačky © 2026</div>
   <div class="footer-links">
     <a href="https://sptrener.online/app">Aplikácia</a>
     <a href="/blog">Blog</a>
