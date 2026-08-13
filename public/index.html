@@ -234,6 +234,8 @@ nav.scrolled{background:rgba(8,8,13,.9);backdrop-filter:blur(12px);border-color:
 .btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(200,255,0,.35)}
 .btn-primary:hover::before{transform:translateX(100%)}
 .btn-secondary{display:inline-flex;align-items:center;gap:.6rem;padding:1rem 2rem;background:transparent;color:var(--text2);border:1px solid var(--border2);border-radius:8px;font-size:.9rem;text-decoration:none;transition:all .2s}
+.hero-quiz-link{display:inline-flex;align-items:center;gap:.4rem;margin-top:1.5rem;padding:.6rem 1.1rem;border:1px dashed rgba(124,92,255,.35);border-radius:30px;color:var(--purple2);text-decoration:none;font-family:var(--mono);font-size:.78rem;letter-spacing:.01em;transition:border-color .2s,color .2s,background .2s;position:relative;z-index:1;opacity:0;animation:fade-up .8s ease .9s forwards}
+.hero-quiz-link:hover{border-color:var(--purple);color:var(--text);background:rgba(124,92,255,.06)}
 .btn-secondary:hover{border-color:var(--purple);color:var(--text)}
 
 .ticker-wrap{border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--black2);overflow:hidden;padding:.75rem 0}
@@ -777,6 +779,7 @@ body.has-banner{padding-top:42px}
           <li><b>✓</b> Analýza výsledkov po každom teste</li>
           <li><b>✓</b> Percentilový odhad</li>
         </ul>
+        <a class="compare-col-btn" style="text-decoration:none" href="https://sptrener.online/app">🆓 Skúsiť zadarmo →</a>
       </div>
       <div class="compare-col">
         <div class="compare-col-name">Premium</div>
@@ -806,7 +809,6 @@ body.has-banner{padding-top:42px}
     </div>
 
     <div class="compare-extra-row">
-      <a class="compare-extra-btn" href="https://sptrener.online/app">🆓 Skúsiť zadarmo</a>
       <a class="compare-extra-btn" href="/kurzy">🎓 Prezrieť kurzy</a>
       <a class="compare-extra-btn" href="/uplatnit-darcek">🎁 Uplatniť darčekový kód</a>
     </div>
@@ -891,6 +893,7 @@ body.has-banner{padding-top:42px}
     <button class="btn-primary" id="heroBtn1" onclick="openComparePopup()">Spustiť prvý test →</button>
     <a href="#how" class="btn-secondary" id="heroBtn2">Ako to funguje ↓</a>
   </div>
+  <a href="/kam-na-vysoku" class="hero-quiz-link" id="heroQuizLink">🧭 Nevieš, na akú vysokú sa hodíš? Zisti to zadarmo za 7 minút →</a>
   <div class="hero-stats">
     <div class="hero-stat"><span class="hero-stat-val"><span>66</span></span><span class="hero-stat-label" id="heroStat1">úloh v simulácii</span></div>
     <div class="hero-stat"><span class="hero-stat-val">P<span>85</span></span><span class="hero-stat-label" id="heroStat2">cieľový percentil</span></div>
@@ -1288,6 +1291,7 @@ sk:{
   heroEyebrow:'VŠP Tréner',
   heroHeadline:'Prihlášky sa rozhodujú<br>na <em>percentile,</em><br>nie na <span class="volt-text">dúfaní.</span>',
   heroSub:'Prvý inteligentný tréner na VŠP testy. Reálna simulácia, AI analýza slabých miest, nekonečné nové úlohy. Prvé 3 testy zadarmo.',
+  heroQuizLink:'🧭 Nevieš, na akú vysokú sa hodíš? Zisti to zadarmo za 7 minút →',
   heroBtn1:'Spustiť prvý test →',heroBtn2:'Ako to funguje ↓',
   heroStat1:'úloh v simulácii',heroStat2:'cieľový percentil',heroStat3:'AI úloh mesačne',heroStat4:'testy zadarmo',
   heroSchoolsCompat:'🇸🇰🇨🇿 Appka je kompatibilná so všetkými slovenskými a českými vysokými školami — AI sa prispôsobí aj prijímačkám, ktoré nie sú len VŠP.',
@@ -1397,6 +1401,7 @@ cs:{
   heroEyebrow:'VŠP Trenér',
   heroHeadline:'Přihlášky se rozhodují<br>na <em>percentilu,</em><br>ne na <span class="volt-text">doufání.</span>',
   heroSub:'První inteligentní trenér na VŠP testy. Reálná simulace, AI analýza slabých míst, nekonečné nové úlohy. První 3 testy zdarma.',
+  heroQuizLink:'🧭 Nevíš, na jakou vysokou se hodíš? Zjisti to zdarma za 7 minut →',
   heroBtn1:'Spustit první test →',heroBtn2:'Jak to funguje ↓',
   heroStat1:'úloh v simulaci',heroStat2:'cílový percentil',heroStat3:'AI úloh měsíčně',heroStat4:'testy zdarma',
   heroSchoolsCompat:'🇸🇰🇨🇿 Appka je kompatibilní se všemi slovenskými a českými vysokými školami — AI se přizpůsobí i přijímačkám, které nejsou jen VŠP.',
@@ -1533,6 +1538,7 @@ function applyLanguage(lang){
   sT('heroEyebrow', t.heroEyebrow);
   sH('heroHeadline', t.heroHeadline);
   sT('heroSub', t.heroSub);
+  sT('heroQuizLink', t.heroQuizLink);
   sT('heroBtn1', t.heroBtn1);
   sT('heroBtn2', t.heroBtn2);
   sT('heroStat1', t.heroStat1); sT('heroStat2', t.heroStat2);
