@@ -468,6 +468,8 @@ body.has-banner{padding-top:42px}
 .popup-elite-fields{padding:0 2.25rem;margin-bottom:.75rem;display:flex;flex-direction:column;gap:.5rem}
 
 .referral-section{padding:6rem 2rem;background:var(--black);border-top:1px solid var(--border)}
+.gift-section{padding:6rem 2rem;max-width:900px;margin:0 auto;text-align:center}
+.gift-icon{font-size:2.5rem;margin-bottom:1rem}
 .referral-inner{max-width:860px;margin:0 auto}
 .ref-layout{display:grid;grid-template-columns:1fr 1fr;gap:3.5rem;align-items:start;margin-top:3rem}
 .ref-flow{display:flex;flex-direction:column;gap:1.25rem}
@@ -1008,6 +1010,19 @@ body.has-banner{padding-top:42px}
   </div>
 </div>
 
+<!-- GIFT CARDS -->
+<div class="gift-section" id="gift">
+  <div class="reveal">
+    <div class="gift-icon">🎁</div>
+    <div class="section-label" style="justify-content:center" id="giftLabel">Darček</div>
+    <h2 class="section-title" id="giftTitle">Daruj prípravu,<br><em>nie stres.</em></h2>
+    <p style="color:var(--text2);font-size:.95rem;line-height:1.7;max-width:560px;margin:0 auto 2rem" id="giftDesc">Darčeková karta na Premium alebo Elite prípravu — ideálny darček pre maturanta pred prijímačkami. Vyber si 1, 3 alebo 12 mesiacov.</p>
+    <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
+      <a href="/darcekova-karta" class="btn-primary" style="text-decoration:none;font-size:1rem;padding:1.1rem 2.25rem" id="giftCta">Kúpiť darčekovú kartu →</a>
+    </div>
+  </div>
+</div>
+
 <!-- REFERRAL -->
 <div class="referral-section" id="referral">
   <div class="referral-inner">
@@ -1187,6 +1202,9 @@ sk:{
   clanPerk4Title:'Len pre Premium',clanPerk4Desc:'Vytváranie klanov je prémiová funkcia. Vstúpiť môže každý prihlásený.',
   clanYouLabel:'ty',clanCodeLabel:'Kód:',
   premiumToast:'✓ Premium aktivovaný! Otvor aplikáciu.',
+  giftLabel:'Darček',giftTitle:'Daruj prípravu,<br><em>nie stres.</em>',
+  giftDesc:'Darčeková karta na Premium alebo Elite prípravu — ideálny darček pre maturanta pred prijímačkami. Vyber si 1, 3 alebo 12 mesiacov.',
+  giftCta:'Kúpiť darčekovú kartu →',
   refSectionLabel:'Odporúčanie',refSectionTitle:'Zdieľaj.<br><em>Oba vyhrávate.</em>',
   refSectionDesc:'Každý Premium dostane unikátny kód. Keď ho kamarát použije pri platbe, obaja dostanú +14 dní Premiumu zadarmo.',
   refStep1Title:'Dostaneš svoj kód',refStep1Desc:'Po aktivácii Premiumu ti systém automaticky vygeneruje unikátny 8-znakový kód viazaný na tvoj účet.',
@@ -1282,6 +1300,9 @@ cs:{
   clanPerk4Title:'Jen pro Premium',clanPerk4Desc:'Vytváření klanů je prémiová funkce. Vstoupit může každý přihlášený.',
   clanYouLabel:'ty',clanCodeLabel:'Kód:',
   premiumToast:'✓ Premium aktivováno! Otevři aplikaci.',
+  giftLabel:'Dárek',giftTitle:'Věnuj přípravu,<br><em>ne stres.</em>',
+  giftDesc:'Dárková karta na Premium nebo Elite přípravu — ideální dárek pro maturanta před přijímačkami. Vyber si 1, 3 nebo 12 měsíců.',
+  giftCta:'Koupit dárkovou kartu →',
   refSectionLabel:'Doporučení',refSectionTitle:'Sdílej.<br><em>Oba vyhráváte.</em>',
   refSectionDesc:'Každý Premium dostane unikátní kód. Když ho kamarád použije při platbě, oba dostanou +14 dní Premiumu zdarma.',
   refStep1Title:'Dostaneš svůj kód',refStep1Desc:'Po aktivaci Premiumu ti systém automaticky vygeneruje unikátní 8-znakový kód vázaný na tvůj účet.',
@@ -1404,6 +1425,7 @@ function applyLanguage(lang){
   sT('clanPerk3Title', t.clanPerk3Title); sT('clanPerk3Desc', t.clanPerk3Desc);
   sT('clanPerk4Title', t.clanPerk4Title); sT('clanPerk4Desc', t.clanPerk4Desc);
   sT('clanYouLabel', t.clanYouLabel); sT('clanCodeLabel', t.clanCodeLabel);
+  sT('giftLabel', t.giftLabel); sH('giftTitle', t.giftTitle); sT('giftDesc', t.giftDesc); sT('giftCta', t.giftCta);
   sT('refSectionLabel', t.refSectionLabel); sH('refSectionTitle', t.refSectionTitle);
   sT('refSectionDesc', t.refSectionDesc);
   sT('refStep1Title', t.refStep1Title); sT('refStep1Desc', t.refStep1Desc);
