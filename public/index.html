@@ -440,6 +440,24 @@ body.has-banner{padding-top:42px}
 .popup-btn-primary.loading .popup-btn-label{display:none}
 
 .elite-popup-inner{border-color:rgba(124,92,255,.3) !important}
+.compare-popup-inner{max-width:720px !important}
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);margin:1.5rem 2.25rem 0;border-radius:14px;overflow:hidden;border:1px solid var(--border)}
+.compare-col{background:var(--black2);padding:1.5rem 1.4rem}
+.compare-col.elite{background:rgba(124,92,255,.05)}
+.compare-col-name{font-family:var(--serif,var(--mono));font-size:1.15rem;font-weight:700;margin-bottom:.35rem}
+.compare-col.elite .compare-col-name{color:var(--purple2)}
+.compare-col-price{font-family:var(--mono);font-size:1.6rem;font-weight:700;margin-bottom:.9rem}
+.compare-col-price span{font-size:.85rem;color:var(--text3);font-weight:400}
+.compare-col ul{list-style:none;display:flex;flex-direction:column;gap:.55rem;margin-bottom:1.25rem}
+.compare-col li{font-size:.8rem;color:var(--text2);display:flex;gap:.5rem;align-items:flex-start;line-height:1.4}
+.compare-col li b{color:var(--volt);flex-shrink:0}
+.compare-col.elite li b{color:var(--purple2)}
+.compare-col-btn{display:block;width:100%;padding:.8rem;border:none;border-radius:10px;font-family:var(--mono);font-size:.82rem;font-weight:700;cursor:pointer;text-align:center;color:var(--black);background:var(--volt)}
+.compare-col.elite .compare-col-btn{color:#fff;background:linear-gradient(135deg,#7c5cff,#ff3f5e)}
+.compare-extra-row{display:flex;gap:.75rem;flex-wrap:wrap;padding:1.5rem 2.25rem 2rem;justify-content:center}
+.compare-extra-btn{flex:1;min-width:180px;text-align:center;padding:.75rem 1rem;border-radius:10px;border:1px solid var(--border2);color:var(--text2);text-decoration:none;font-family:var(--mono);font-size:.78rem;transition:all .2s}
+.compare-extra-btn:hover{border-color:var(--text2);color:var(--text)}
+@media(max-width:560px){.compare-grid{grid-template-columns:1fr}.compare-popup-inner{max-width:400px !important}}
 .popup-features-mini{display:flex;flex-wrap:wrap;gap:.5rem;padding:0 2.25rem 1.5rem}
 .popup-features-mini span{font-family:var(--mono);font-size:.72rem;padding:.25rem .65rem;background:rgba(124,92,255,.08);border:1px solid rgba(124,92,255,.18);border-radius:20px;color:var(--purple2)}
 .popup-submit-btn{display:block;width:100%;margin:1rem 0;padding:.9rem;border:none;border-radius:12px;font-family:var(--mono);font-size:.9rem;font-weight:700;letter-spacing:.04em;cursor:pointer;transition:all .2s;color:#fff}
@@ -637,6 +655,52 @@ body.has-banner{padding-top:42px}
     </div>
 
     <p style="text-align:center;font-size:.75rem;color:var(--text3);font-family:var(--mono);padding:0 2.25rem 1.5rem">Stripe · Bezpečná platba · Zruš kedykoľvek</p>
+  </div>
+</div>
+
+<!-- COMPARE PLANS POPUP -->
+<div class="premium-popup-overlay" id="comparePopup" onclick="closeComparePopupOnOverlay(event)">
+  <div class="premium-popup compare-popup-inner">
+    <button class="popup-close" onclick="closeComparePopup()">✕</button>
+
+    <div class="popup-header">
+      <div class="popup-eyebrow">Porovnanie plánov</div>
+      <h2 class="popup-title">Ktorý plán je <em>pre teba</em>?</h2>
+      <p class="popup-subtitle">Premium ťa pripraví. Elite ťa nenechá zlyhať. Oba zrušíš kedykoľvek.</p>
+    </div>
+
+    <div class="compare-grid">
+      <div class="compare-col">
+        <div class="compare-col-name">Premium</div>
+        <div class="compare-col-price">9<span>,90 € / mesiac</span></div>
+        <ul>
+          <li><b>✓</b> Neobmedzené VŠP simulácie s časomierou</li>
+          <li><b>✓</b> AI generátor — nové úlohy každý deň</li>
+          <li><b>✓</b> AI Coach analýza po každom teste</li>
+          <li><b>✓</b> Percentilový tracker + história výsledkov</li>
+          <li><b>✓</b> Cielené precvičovanie slabých miest</li>
+        </ul>
+        <button class="compare-col-btn" onclick="closeComparePopup();openPremiumPopup();">Vybrať Premium →</button>
+      </div>
+      <div class="compare-col elite">
+        <div class="compare-col-name">Elite</div>
+        <div class="compare-col-price">19<span>,90 € / mesiac</span></div>
+        <ul>
+          <li><b>✓</b> Všetko z Premium</li>
+          <li><b>✓</b> AI Mentor chat</li>
+          <li><b>✓</b> Mirror Mode</li>
+          <li><b>✓</b> Time-Kill Alert</li>
+          <li><b>✓</b> Týždenný Audit</li>
+          <li><b>✓</b> Zebra Builder + Zlatý Status</li>
+        </ul>
+        <button class="compare-col-btn" onclick="closeComparePopup();openElitePopup();">Vybrať Elite →</button>
+      </div>
+    </div>
+
+    <div class="compare-extra-row">
+      <a class="compare-extra-btn" href="/kurzy">🎓 Prezrieť kurzy</a>
+      <a class="compare-extra-btn" href="/uplatnit-darcek">🎁 Uplatniť darčekový kód</a>
+    </div>
   </div>
 </div>
 
@@ -1421,8 +1485,21 @@ function closePremiumPopupOnOverlay(e){
   if(e.target === document.getElementById('premiumPopup')) closePremiumPopup();
 }
 
+function openComparePopup(){
+  const overlay = document.getElementById('comparePopup');
+  overlay.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+function closeComparePopup(){
+  document.getElementById('comparePopup').classList.remove('active');
+  document.body.style.overflow = '';
+}
+function closeComparePopupOnOverlay(e){
+  if(e.target === document.getElementById('comparePopup')) closeComparePopup();
+}
+
 document.addEventListener('keydown', e => {
-  if(e.key === 'Escape'){ closePremiumPopup(); closeElitePopup(); closeExitPopup(); }
+  if(e.key === 'Escape'){ closePremiumPopup(); closeElitePopup(); closeExitPopup(); closeComparePopup(); }
 });
 
 function openElitePopup(){
@@ -1556,6 +1633,9 @@ async function handlePremiumCheckout(){
 }
 
 const urlParams = new URLSearchParams(window.location.search);
+if(urlParams.get('openPremium') === '1' || urlParams.get('openElite') === '1'){
+  document.addEventListener('DOMContentLoaded', () => { openComparePopup(); });
+}
 if(urlParams.get('premium') === '1'){
   document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
