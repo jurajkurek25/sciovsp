@@ -95,7 +95,7 @@ function closeBanner() {
   --sans:'DM Sans',sans-serif;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
+html{scroll-behavior:smooth;overflow-x:hidden;max-width:100%}
 body{background:var(--black);color:var(--text);font-family:var(--sans);overflow-x:hidden;cursor:none}
 
 .cursor{position:fixed;width:10px;height:10px;background:var(--volt);border-radius:50%;pointer-events:none;z-index:10010;transform:translate(-50%,-50%);transition:transform .1s,width .2s,height .2s,background .2s;mix-blend-mode:difference}
