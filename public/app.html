@@ -5360,7 +5360,15 @@ const _supabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 async function initAuth(){
   const{data:{session}}=await _supabase.auth.getSession();
   if(session?.user)await onUserLoggedIn(session.user,session.access_token);
-  else if(localStorage.getItem('vsp_pending_upgrade'))loginWithGoogle();
+  // Guarded to fire at most once per tab: right after the OAuth redirect lands back
+  // here, getSession() can resolve before Supabase finishes parsing the token out of
+  // the URL hash, which would otherwise misread "not logged in yet" and loop back
+  // into another login redirect forever. The SIGNED_IN listener below still catches
+  // the real session a moment later and completes the pending upgrade normally.
+  else if(localStorage.getItem('vsp_pending_upgrade')&&!sessionStorage.getItem('vsp_upgrade_redirect_attempted')){
+    sessionStorage.setItem('vsp_upgrade_redirect_attempted','1');
+    loginWithGoogle();
+  }
   _supabase.auth.onAuthStateChange(async(event,session)=>{
     if(event==='SIGNED_IN'&&session?.user)await onUserLoggedIn(session.user,session.access_token);
     else if(event==='SIGNED_OUT')onUserLoggedOut();
