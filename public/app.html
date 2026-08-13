@@ -4040,7 +4040,10 @@ let currentUser=null;
 function checkUpgradeLinkParam(){
   const plan=new URLSearchParams(window.location.search).get('upgrade');
   if(plan!=='premium'&&plan!=='elite')return;
-  window.history.replaceState({},'','/app');
+  // Preserve any URL hash (Supabase's OAuth tokens land here on the redirect
+  // back) — the Supabase client is constructed later in this file and needs
+  // to read it; stripping it here would silently discard a fresh login.
+  window.history.replaceState({},'','/app'+window.location.hash);
   localStorage.setItem('vsp_pending_upgrade',plan);
 }
 checkUpgradeLinkParam();
