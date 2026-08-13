@@ -259,6 +259,12 @@ nav.scrolled{background:rgba(8,8,13,.9);backdrop-filter:blur(12px);border-color:
 .step-desc{font-size:.88rem;color:var(--text2);line-height:1.65}
 
 .proof-section{padding:6rem 2rem;max-width:1100px;margin:0 auto}
+.schools-section{padding:6rem 2rem;max-width:1100px;margin:0 auto}
+.schools-grid{display:grid;grid-template-columns:1fr 1fr;gap:2.5rem;margin-top:3rem}
+@media (max-width:820px){.schools-grid{grid-template-columns:1fr}}
+.schools-group-title{font-family:var(--mono);font-size:.85rem;letter-spacing:.05em;color:var(--text2);margin-bottom:1rem;font-weight:700}
+.schools-list{display:flex;flex-wrap:wrap;gap:.5rem}
+.school-chip{font-family:var(--mono);font-size:.72rem;padding:.4rem .75rem;border-radius:20px;border:1px solid var(--border);color:var(--text2);background:rgba(255,255,255,.02)}
 .testimonials-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem;margin-top:3rem}
 .testimonial-card{background:var(--black2);border:1px solid var(--border);border-radius:14px;padding:1.5rem;position:relative;transition:all .2s}
 .testimonial-card:hover{border-color:var(--border2);transform:translateY(-2px)}
@@ -950,6 +956,64 @@ body.has-banner{padding-top:42px}
   </div>
 </div>
 
+<!-- SCHOOLS -->
+<div class="schools-section" id="schools">
+  <div class="section-label reveal" style="justify-content:center" id="schoolsLabel">Pokryté školy</div>
+  <h2 class="section-title reveal" style="text-align:center" id="schoolsTitle">Pripravíme ťa na <em>39 škôl</em><br>na Slovensku aj v Česku</h2>
+  <p class="reveal" style="text-align:center;color:var(--text2);font-size:.95rem;line-height:1.7;max-width:620px;margin:0 auto" id="schoolsDesc">Aktuálny zoznam verejných vysokých škôl a univerzít, na ktoré ťa appka pripraví — a keď tvoja škola nemá presne VŠP formát, AI sa prispôsobí aj jej vlastným prijímačkám.</p>
+  <div class="schools-grid reveal">
+    <div class="schools-group">
+      <div class="schools-group-title">🇸🇰 Slovensko</div>
+      <div class="schools-list">
+        <span class="school-chip">Univerzita Komenského v Bratislave</span>
+        <span class="school-chip">Slovenská technická univerzita v Bratislave</span>
+        <span class="school-chip">Ekonomická univerzita v Bratislave</span>
+        <span class="school-chip">Univerzita Pavla Jozefa Šafárika (Košice)</span>
+        <span class="school-chip">Technická univerzita v Košiciach</span>
+        <span class="school-chip">Univerzita veterinárskeho lekárstva a farmácie (Košice)</span>
+        <span class="school-chip">Žilinská univerzita v Žiline</span>
+        <span class="school-chip">Univerzita Mateja Bela (Banská Bystrica)</span>
+        <span class="school-chip">Univerzita Konštantína Filozofa (Nitra)</span>
+        <span class="school-chip">Slovenská poľnohospodárska univerzita (Nitra)</span>
+        <span class="school-chip">Trnavská univerzita</span>
+        <span class="school-chip">Univerzita sv. Cyrila a Metoda (Trnava)</span>
+        <span class="school-chip">Katolícka univerzita (Ružomberok)</span>
+        <span class="school-chip">Prešovská univerzita</span>
+        <span class="school-chip">Akadémia umení (Banská Bystrica)</span>
+        <span class="school-chip">Vysoká škola múzických umení (Bratislava)</span>
+        <span class="school-chip">Vysoká škola výtvarných umení (Bratislava)</span>
+        <span class="school-chip">Technická univerzita vo Zvolene</span>
+        <span class="school-chip">Trenčianska univerzita Alexandra Dubčeka</span>
+        <span class="school-chip">Slovenská zdravotnícka univerzita (Bratislava)</span>
+      </div>
+    </div>
+    <div class="schools-group">
+      <div class="schools-group-title">🇨🇿 Česko</div>
+      <div class="schools-list">
+        <span class="school-chip">Univerzita Karlova (Praha)</span>
+        <span class="school-chip">České vysoké učení technické (Praha)</span>
+        <span class="school-chip">Vysoká škola ekonomická (Praha)</span>
+        <span class="school-chip">Masarykova univerzita (Brno)</span>
+        <span class="school-chip">Vysoké učení technické (Brno)</span>
+        <span class="school-chip">Univerzita Palackého (Olomouc)</span>
+        <span class="school-chip">Ostravská univerzita</span>
+        <span class="school-chip">Vysoká škola báňská – Technická univerzita (Ostrava)</span>
+        <span class="school-chip">Jihočeská univerzita (České Budějovice)</span>
+        <span class="school-chip">Univerzita Pardubice</span>
+        <span class="school-chip">Technická univerzita v Liberci</span>
+        <span class="school-chip">Univerzita Hradec Králové</span>
+        <span class="school-chip">Západočeská univerzita (Plzeň)</span>
+        <span class="school-chip">Mendelova univerzita (Brno)</span>
+        <span class="school-chip">Veterinární univerzita Brno</span>
+        <span class="school-chip">Akademie múzických umění (Praha)</span>
+        <span class="school-chip">Vysoká škola uměleckoprůmyslová (Praha)</span>
+        <span class="school-chip">Akademie výtvarných umění (Praha)</span>
+        <span class="school-chip">Slezská univerzita v Opavě</span>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- PRICING -->
 <div class="pricing-section" id="pricing">
   <div class="pricing-inner">
@@ -1202,6 +1266,8 @@ sk:{
   clanPerk4Title:'Len pre Premium',clanPerk4Desc:'Vytváranie klanov je prémiová funkcia. Vstúpiť môže každý prihlásený.',
   clanYouLabel:'ty',clanCodeLabel:'Kód:',
   premiumToast:'✓ Premium aktivovaný! Otvor aplikáciu.',
+  schoolsLabel:'Pokryté školy',schoolsTitle:'Pripravíme ťa na <em>39 škôl</em><br>na Slovensku aj v Česku',
+  schoolsDesc:'Aktuálny zoznam verejných vysokých škôl a univerzít, na ktoré ťa appka pripraví — a keď tvoja škola nemá presne VŠP formát, AI sa prispôsobí aj jej vlastným prijímačkám.',
   giftLabel:'Darček',giftTitle:'Daruj prípravu,<br><em>nie stres.</em>',
   giftDesc:'Darčeková karta na Premium alebo Elite prípravu — ideálny darček pre maturanta pred prijímačkami. Vyber si 1, 3 alebo 12 mesiacov.',
   giftCta:'Kúpiť darčekovú kartu →',
@@ -1300,6 +1366,8 @@ cs:{
   clanPerk4Title:'Jen pro Premium',clanPerk4Desc:'Vytváření klanů je prémiová funkce. Vstoupit může každý přihlášený.',
   clanYouLabel:'ty',clanCodeLabel:'Kód:',
   premiumToast:'✓ Premium aktivováno! Otevři aplikaci.',
+  schoolsLabel:'Pokryté školy',schoolsTitle:'Připravíme tě na <em>39 škol</em><br>na Slovensku i v Česku',
+  schoolsDesc:'Aktuální seznam veřejných vysokých škol a univerzit, na které tě appka připraví — a když tvoje škola nemá přesně formát VŠP, AI se přizpůsobí i jejím vlastním přijímačkám.',
   giftLabel:'Dárek',giftTitle:'Věnuj přípravu,<br><em>ne stres.</em>',
   giftDesc:'Dárková karta na Premium nebo Elite přípravu — ideální dárek pro maturanta před přijímačkami. Vyber si 1, 3 nebo 12 měsíců.',
   giftCta:'Koupit dárkovou kartu →',
@@ -1425,6 +1493,7 @@ function applyLanguage(lang){
   sT('clanPerk3Title', t.clanPerk3Title); sT('clanPerk3Desc', t.clanPerk3Desc);
   sT('clanPerk4Title', t.clanPerk4Title); sT('clanPerk4Desc', t.clanPerk4Desc);
   sT('clanYouLabel', t.clanYouLabel); sT('clanCodeLabel', t.clanCodeLabel);
+  sT('schoolsLabel', t.schoolsLabel); sH('schoolsTitle', t.schoolsTitle); sT('schoolsDesc', t.schoolsDesc);
   sT('giftLabel', t.giftLabel); sH('giftTitle', t.giftTitle); sT('giftDesc', t.giftDesc); sT('giftCta', t.giftCta);
   sT('refSectionLabel', t.refSectionLabel); sH('refSectionTitle', t.refSectionTitle);
   sT('refSectionDesc', t.refSectionDesc);
