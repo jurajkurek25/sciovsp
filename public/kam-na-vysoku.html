@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kam na vysokú? Zisti to zadarmo za 5 minút — test odboru SP Tréner</title>
-<meta name="description" content="Nevieš, či ísť na vysokú a na akú? Bezplatný 5-minútový test ti ukáže, ktorý odbor a ktoré univerzity na Slovensku aj v Česku ti sedia najviac — a prečo.">
+<title>Kam na vysokú? Zisti to zadarmo za 7 minút — test odboru SP Tréner</title>
+<meta name="description" content="Nevieš, či ísť na vysokú a na akú? Bezplatný test s AI vyhodnotením ti za 7 minút ukáže, ktorý odbor a ktoré univerzity na Slovensku aj v Česku ti sedia najviac — a prečo.">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://sptrener.online/kam-na-vysoku">
 <meta name="theme-color" content="#faf6ef">
@@ -13,14 +13,14 @@
 <meta property="og:site_name" content="SP Tréner">
 <meta property="og:locale" content="sk_SK">
 <meta property="og:url" content="https://sptrener.online/kam-na-vysoku">
-<meta property="og:title" content="Kam na vysokú? Zisti to zadarmo za 5 minút">
-<meta property="og:description" content="Bezplatný test odboru — zisti, ktorá vysoká škola a ktorý odbor na Slovensku aj v Česku ti sedí najviac, a prečo.">
+<meta property="og:title" content="Kam na vysokú? Zisti to zadarmo za 7 minút">
+<meta property="og:description" content="Bezplatný test odboru s AI vyhodnotením — zisti, ktorá vysoká škola a ktorý odbor na Slovensku aj v Česku ti sedí najviac, a prečo.">
 <meta property="og:image" content="https://sptrener.online/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Kam na vysokú? Zisti to zadarmo za 5 minút">
-<meta name="twitter:description" content="Bezplatný test odboru — zisti, ktorá vysoká škola a ktorý odbor ti sedí najviac, a prečo.">
+<meta name="twitter:title" content="Kam na vysokú? Zisti to zadarmo za 7 minút">
+<meta name="twitter:description" content="Bezplatný test odboru s AI vyhodnotením — zisti, ktorá vysoká škola a ktorý odbor ti sedí najviac, a prečo.">
 <meta name="twitter:image" content="https://sptrener.online/og-image.png">
 
 <script type="application/ld+json">
@@ -36,7 +36,7 @@
     {
       "@type": "Question",
       "name": "Ako dlho test trvá?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Približne 5 minút — 20 krátkych otázok, na ktoré odpovieš jedným klikom." }
+      "acceptedAnswer": { "@type": "Answer", "text": "Približne 7 minút — väčšina otázok je na jeden klik, plus pár otázok vlastnými slovami, aby bol výsledok presnejší." }
     },
     {
       "@type": "Question",
@@ -122,6 +122,15 @@ h1 em{font-style:italic;color:var(--teal)}
 .q-back{background:none;border:none;color:var(--ink3);font-size:.82rem;cursor:pointer;font-family:var(--sans);text-decoration:underline}
 .q-back:disabled{visibility:hidden}
 
+/* REFLECTIONS */
+#reflectSection{display:none;padding:1rem 0 5rem}
+.reflect-item{margin-bottom:1.6rem}
+.reflect-item label{display:block;font-size:.92rem;font-weight:600;margin-bottom:.6rem;line-height:1.4}
+.reflect-item textarea{width:100%;min-height:80px;border-radius:12px;border:1.5px solid var(--border2);background:var(--card2);padding:.8rem .9rem;font-family:var(--sans);font-size:.9rem;color:var(--ink);resize:vertical}
+.reflect-item textarea:focus{outline:none;border-color:var(--teal-light)}
+.reflect-hint{font-size:.74rem;color:var(--ink3);margin-top:.3rem}
+#reflectSubmitBtn:disabled{opacity:.45;cursor:not-allowed}
+
 /* GATE */
 #gateSection{display:none;padding:1rem 0 5rem;text-align:center}
 .gate-card{background:var(--card2);border:1px solid var(--border2);border-radius:22px;padding:3rem 2rem;max-width:520px;margin:0 auto}
@@ -137,6 +146,12 @@ h1 em{font-style:italic;color:var(--teal)}
 .result-card .r-eyebrow{font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;opacity:.75;font-weight:600;margin-bottom:.5rem}
 .result-card h2{font-family:var(--serif);font-size:2rem;font-weight:600;margin:0 0 1rem}
 .result-card p{font-size:.98rem;opacity:.92;max-width:520px;margin:0 auto}
+
+.ai-block{display:none;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.5rem 1.6rem;margin:0 0 2.2rem}
+.ai-block .ai-label{display:flex;align-items:center;gap:.5rem;font-size:.78rem;font-weight:700;letter-spacing:.03em;color:var(--teal);margin-bottom:.7rem;text-transform:uppercase}
+.ai-block p{font-size:.93rem;color:var(--ink2);margin:0;line-height:1.65}
+.ai-spinner{display:inline-block;width:13px;height:13px;border:2px solid var(--teal-soft);border-top-color:var(--teal);border-radius:50%;animation:ai-spin .7s linear infinite}
+@keyframes ai-spin{to{transform:rotate(360deg)}}
 
 .breakdown{margin:0 0 2.4rem}
 .bd-row{display:flex;align-items:center;gap:.8rem;margin-bottom:.6rem;font-size:.84rem}
@@ -236,6 +251,17 @@ footer{border-top:1px solid var(--border);margin-top:3rem;padding:2.2rem 0}
     </div>
   </div>
 
+  <!-- REFLECTIONS (open-ended) -->
+  <div id="reflectSection">
+    <div class="quiz-card">
+      <div class="q-text" id="tReflectIntro" style="font-size:1.1rem;margin-bottom:1.8rem">Ešte pár otázok vlastnými slovami — pomôžu nám dať ti presnejší a osobnejší výsledok.</div>
+      <div id="reflectRows"></div>
+      <div style="text-align:center;margin-top:.6rem">
+        <button class="btn-primary" id="reflectSubmitBtn" onclick="submitReflections()">Zistiť výsledok →</button>
+      </div>
+    </div>
+  </div>
+
   <!-- GATE -->
   <div id="gateSection">
     <div class="gate-card">
@@ -257,6 +283,11 @@ footer{border-top:1px solid var(--border);margin-top:3rem;padding:2.2rem 0}
       <div class="r-eyebrow" id="tResultEyebrow">Tvoj odbor</div>
       <h2 id="resultTitle"></h2>
       <p id="resultDesc"></p>
+    </div>
+
+    <div class="ai-block" id="aiBlock">
+      <div class="ai-label"><span id="aiSpinner" class="ai-spinner"></span><span id="tAiLabel">Tvoj osobný rozbor od AI</span></div>
+      <p id="aiText"></p>
     </div>
 
     <div class="breakdown" id="breakdownRows"></div>
@@ -456,8 +487,29 @@ const QUESTIONS = [
   {id:'q14',tag:'ekonomia',sk:'Rád/rada by si viedol/viedla tím, projekt alebo vlastný biznis.',cs:'Rád/a bys vedl/a tým, projekt nebo vlastní byznys.'},
   {id:'q16',tag:'humanitne',sk:'Zaujíma ťa história, filozofia alebo to, prečo spoločnosti a kultúry fungujú tak, ako fungujú.',cs:'Zajímá tě historie, filozofie nebo to, proč společnosti a kultury fungují tak, jak fungují.'},
   {id:'q18',tag:'umenie',sk:'Všímaš si dizajn, farby a estetiku vecí okolo seba viac než väčšina ľudí.',cs:'Všímáš si designu, barev a estetiky věcí kolem sebe víc než většina lidí.'},
+  {id:'q21',tag:'vsp',sk:'Rád/rada by si vedel/a viac o tom, ako funguje štát, verejná správa alebo medzinárodná politika.',cs:'Rád/a bys věděl/a víc o tom, jak funguje stát, veřejná správa nebo mezinárodní politika.'},
+  {id:'q22',tag:'psych',sk:'Všímaš si, keď sa niekto v skupine cíti trápne alebo vylúčene — a chceš to napraviť.',cs:'Všímáš si, když se někdo ve skupině cítí trapně nebo vyloučeně — a chceš to napravit.'},
+  {id:'q23',tag:'law',sk:'Čítaš zmluvy, pravidlá hier alebo predpisy dôkladnejšie než väčšina ľudí okolo teba.',cs:'Čteš smlouvy, pravidla her nebo předpisy důkladněji než většina lidí kolem tebe.'},
+  {id:'q24',tag:'medicina',sk:'Baví ťa starať sa o niekoho, keď je chorý alebo zranený.',cs:'Baví tě starat se o někoho, když je nemocný nebo zraněný.'},
+  {id:'q25',tag:'technika',sk:'Keď sa ti niečo pokazí (počítač, bicykel...), skôr sa to pokúsiš opraviť sám/sama, než to hneď niesť niekomu inému.',cs:'Když se ti něco pokazí (počítač, kolo...), spíš se to pokusíš opravit sám/sama, než to hned nést někomu jinému.'},
+  {id:'q26',tag:'pedagogika',sk:'Ako dieťa si rád/rada "hral/a na učiteľa" alebo organizoval/a hry pre mladších.',cs:'Jako dítě sis rád/a "hrál/a na učitele" nebo organizoval/a hry pro mladší.'},
+  {id:'q27',tag:'ekonomia',sk:'Sleduješ akcie, kryptomeny, startupy alebo biznis novinky aspoň občas z vlastného záujmu.',cs:'Sleduješ akcie, kryptoměny, startupy nebo byznys novinky aspoň občas z vlastního zájmu.'},
+  {id:'q28',tag:'humanitne',sk:'Vieš stráviť hodiny čítaním knihy alebo skúmaním témy, ktorá ťa jednoducho zaujala.',cs:'Umíš strávit hodiny čtením knihy nebo zkoumáním tématu, které tě jednoduše zaujalo.'},
+  {id:'q29',tag:'umenie',sk:'Aj keď ťa nikto nepožiadal, občas si niečo nakreslíš, nafotíš alebo vytvoríš len tak, pre seba.',cs:'I když tě nikdo nepožádal, občas si něco nakreslíš, nafotíš nebo vytvoříš jen tak, pro sebe.'},
   {id:'q19',tag:'orient',sk:'Vieš si predstaviť, že budeš ešte niekoľko rokov študovať, než naplno začneš zarábať.',cs:'Umíš si představit, že budeš ještě několik let studovat, než naplno začneš vydělávat.'},
   {id:'q20',tag:'orient',sk:'Baví ťa učiť sa nové veci, aj keď nie sú hneď prakticky využiteľné.',cs:'Baví tě učit se nové věci, i když nejsou hned prakticky využitelné.'}
+];
+
+const REFLECTIONS = [
+  {id:'r1',
+    sk:'Opíš chvíľu, kedy si bol/a úplne pohltený/á tým, čo robíš — čo si vtedy robil/a?',
+    cs:'Popiš chvíli, kdy jsi byl/a úplně pohlcený/á tím, co děláš — co jsi tehdy dělal/a?'},
+  {id:'r2',
+    sk:'Keby si mohol/mohla zajtra začať pracovať bez obáv o peniaze, čo by si robil/a?',
+    cs:'Kdybys mohl/a zítra začít pracovat bez obav o peníze, co bys dělal/a?'},
+  {id:'r3',
+    sk:'Čo ťa v škole alebo v živote najviac frustruje — a čo by si na tom zmenil/a?',
+    cs:'Co tě ve škole nebo v životě nejvíc frustruje — a co bys na tom změnil/a?'}
 ];
 
 const FIELD_TEXT = {
@@ -503,15 +555,18 @@ const T = {
   sk: {
     eyebrow:'🎓 Bezplatný test odboru',
     h1:'Nevieš, <em>kam na vysokú?</em><br>Zisti to za 5 minút.',
-    sub:'20 krátkych otázok o tebe — a dostaneš odbor aj konkrétne školy na Slovensku a v Česku, ktoré ti sedia najviac. Zadarmo.',
+    sub:'Krátke otázky na klik plus pár otázok vlastnými slovami — a dostaneš odbor aj konkrétne školy na Slovensku a v Česku, ktoré ti sedia najviac. Zadarmo.',
     ctaStart:'Začať test →', ctaHow:'Ako to funguje ↓',
-    reassure:'🎯 Žiadne dlhé formuláre — len klikneš, čo ti sedí. Výsledok hneď.',
-    trust1:'100% zadarmo', trust2:'5 minút', trust3:'SK aj CZ školy',
+    reassure:'🎯 Žiadne dlhé formuláre — väčšina otázok je na jeden klik. Výsledok takmer hneď.',
+    trust1:'100% zadarmo', trust2:'7 minút', trust3:'SK aj CZ školy',
     howTitle:'Ako to funguje', howSub:'Tri kroky, žiadne nejasnosti.',
-    step1T:'Odpovieš na 20 otázok', step1D:'O tom, čo ťa baví, čo vieš a ako rozmýšľaš. Jeden klik na otázku.',
+    step1T:'Odpovieš na otázky', step1D:'Väčšina na jeden klik, pár vlastnými slovami — o tom, čo ťa baví, čo vieš a ako rozmýšľaš.',
     step2T:'Zaregistruješ sa cez Google', step2D:'Zadarmo, na 5 sekúnd — aby sme ti výsledok mohli uložiť a poslať.',
-    step3T:'Dostaneš odbor aj školy', step3D:'Presný odbor, prečo ti sedí, a konkrétne univerzity na Slovensku aj v Česku.',
+    step3T:'Dostaneš odbor aj školy', step3D:'Presný odbor, prečo ti sedí (aj s osobným rozborom od AI), a konkrétne univerzity na Slovensku aj v Česku.',
     likertLo:'Vôbec nesúhlasím', likertHi:'Úplne súhlasím',
+    reflectIntro:'Ešte pár otázok vlastnými slovami — pomôžu nám dať ti presnejší a osobnejší výsledok.',
+    reflectHint:'Napíš aspoň pár slov.', reflectSubmit:'Zistiť výsledok →',
+    aiLabel:'Tvoj osobný rozbor od AI', aiLoading:'AI pripravuje tvoj osobný rozbor…',
     gateTitle:'Tvoj výsledok je hotový!', gateDesc:'Zaregistruj sa zadarmo cez Google a hneď ho uvidíš — aj so zoznamom škôl, ktoré ti sedia.', googleBtn:'Prihlásiť sa cez Google',
     resultEyebrow:'Tvoj odbor', schoolsTitle:'Školy, ktoré ti sedia',
     upsellTitle:'Priprav sa na prijímačky rovno teraz',
@@ -519,27 +574,30 @@ const T = {
     ctaFree:'Skús zadarmo →', ctaPremium:'Pozrieť Premium/Elite', retake:'↺ Spraviť test znova',
     faqTitle:'Časté otázky',
     faqQ1:'Je test naozaj zadarmo?', faqA1:'Áno, celý test aj výsledok sú úplne zadarmo. Jediné, čo potrebuješ, je bezplatná registrácia cez Google, aby sme ti výsledok mohli uložiť.',
-    faqQ2:'Ako dlho test trvá?', faqA2:'Približne 5 minút — 20 krátkych otázok, na ktoré odpovieš jedným klikom.',
+    faqQ2:'Ako dlho test trvá?', faqA2:'Približne 7 minút — väčšina otázok je na jeden klik, plus pár otázok vlastnými slovami, aby bol výsledok presnejší.',
     faqQ3:'Je to vedecký test?', faqA3:'Test vychádza z bežne používaných princípov kariérového poradenstva, ale nenahrádza odborné psychologické poradenstvo. Je to skvelý prvý krok na zúženie výberu, nie definitívna odpoveď.',
     faqQ4:'Čo ak mi vyjde odbor, na ktorý SP Tréner nemá testy?', faqA4:'Aj tak dostaneš zoznam škôl a fakúlt, ktoré ti sedia. Na prijímačky, ktoré testujú všeobecné študijné predpoklady, čo robí väčšina škôl, ti pomôže náš VŠP tréning.',
     faqQ5:'Musím platiť, aby som videl výsledok?', faqA5:'Nie. Výsledok je zadarmo hneď po registrácii. Platené je len samotné SP Tréner Premium alebo Elite, ak sa rozhodneš pripraviť sa na prijímačky u nás.',
     faqQ6:'Môžem si test spraviť znova?', faqA6:'Áno, kedykoľvek — napríklad ak sa tvoje záujmy zmenia alebo si chceš výsledok overiť.',
     fLink1:'SP Tréner', fLink2:'Obchodné podmienky', fLink3:'Kontakt',
-    pageTitle:'Kam na vysokú? Zisti to zadarmo za 5 minút — test odboru SP Tréner',
+    pageTitle:'Kam na vysokú? Zisti to zadarmo za 7 minút — test odboru SP Tréner',
     progressLabel:function(i,n){return 'Otázka '+i+' / '+n;}
   },
   cs: {
     eyebrow:'🎓 Bezplatný test oboru',
     h1:'Nevíš, <em>kam na vysokou?</em><br>Zjisti to za 5 minut.',
-    sub:'20 krátkých otázek o tobě — a dostaneš obor i konkrétní školy na Slovensku a v Česku, které ti sedí nejvíc. Zdarma.',
+    sub:'Krátké otázky na klik plus pár otázek vlastními slovy — a dostaneš obor i konkrétní školy na Slovensku a v Česku, které ti sedí nejvíc. Zdarma.',
     ctaStart:'Začít test →', ctaHow:'Jak to funguje ↓',
-    reassure:'🎯 Žádné dlouhé formuláře — jen klikneš, co ti sedí. Výsledek hned.',
-    trust1:'100% zdarma', trust2:'5 minut', trust3:'SK i CZ školy',
+    reassure:'🎯 Žádné dlouhé formuláře — většina otázek je na jeden klik. Výsledek skoro hned.',
+    trust1:'100% zdarma', trust2:'7 minut', trust3:'SK i CZ školy',
     howTitle:'Jak to funguje', howSub:'Tři kroky, žádné nejasnosti.',
-    step1T:'Odpovíš na 20 otázek', step1D:'O tom, co tě baví, co umíš a jak přemýšlíš. Jeden klik na otázku.',
+    step1T:'Odpovíš na otázky', step1D:'Většina na jeden klik, pár vlastními slovy — o tom, co tě baví, co umíš a jak přemýšlíš.',
     step2T:'Zaregistruješ se přes Google', step2D:'Zdarma, na 5 sekund — abychom ti výsledek mohli uložit a poslat.',
-    step3T:'Dostaneš obor i školy', step3D:'Přesný obor, proč ti sedí, a konkrétní univerzity na Slovensku i v Česku.',
+    step3T:'Dostaneš obor i školy', step3D:'Přesný obor, proč ti sedí (i s osobním rozborem od AI), a konkrétní univerzity na Slovensku i v Česku.',
     likertLo:'Vůbec nesouhlasím', likertHi:'Úplně souhlasím',
+    reflectIntro:'Ještě pár otázek vlastními slovy — pomůžou nám dát ti přesnější a osobnější výsledek.',
+    reflectHint:'Napiš aspoň pár slov.', reflectSubmit:'Zjistit výsledek →',
+    aiLabel:'Tvůj osobní rozbor od AI', aiLoading:'AI připravuje tvůj osobní rozbor…',
     gateTitle:'Tvůj výsledek je hotový!', gateDesc:'Zaregistruj se zdarma přes Google a hned ho uvidíš — i se seznamem škol, které ti sedí.', googleBtn:'Přihlásit se přes Google',
     resultEyebrow:'Tvůj obor', schoolsTitle:'Školy, které ti sedí',
     upsellTitle:'Připrav se na přijímačky rovnou teď',
@@ -547,13 +605,13 @@ const T = {
     ctaFree:'Zkus zdarma →', ctaPremium:'Podívat se na Premium/Elite', retake:'↺ Udělat test znovu',
     faqTitle:'Časté otázky',
     faqQ1:'Je test opravdu zdarma?', faqA1:'Ano, celý test i výsledek jsou úplně zdarma. Jediné, co potřebuješ, je bezplatná registrace přes Google, abychom ti výsledek mohli uložit.',
-    faqQ2:'Jak dlouho test trvá?', faqA2:'Přibližně 5 minut — 20 krátkých otázek, na které odpovíš jedním klikem.',
+    faqQ2:'Jak dlouho test trvá?', faqA2:'Přibližně 7 minut — většina otázek je na jeden klik, plus pár otázek vlastními slovy, aby byl výsledek přesnější.',
     faqQ3:'Je to vědecký test?', faqA3:'Test vychází z běžně používaných principů kariérového poradenství, ale nenahrazuje odborné psychologické poradenství. Je to skvělý první krok k zúžení výběru, ne definitivní odpověď.',
     faqQ4:'Co když mi vyjde obor, na který SP Tréner nemá testy?', faqA4:'I tak dostaneš seznam škol a fakult, které ti sedí. Na přijímačky, které testují všeobecné studijní předpoklady, což dělá většina škol, ti pomůže náš VŠP trénink.',
     faqQ5:'Musím platit, abych viděl výsledek?', faqA5:'Ne. Výsledek je zdarma hned po registraci. Placené je jen samotné SP Tréner Premium nebo Elite, pokud se rozhodneš připravit se na přijímačky u nás.',
     faqQ6:'Můžu si test udělat znovu?', faqA6:'Ano, kdykoliv — například pokud se tvoje zájmy změní nebo si chceš výsledek ověřit.',
     fLink1:'SP Tréner', fLink2:'Obchodní podmínky', fLink3:'Kontakt',
-    pageTitle:'Kam na vysokou? Zjisti to zdarma za 5 minut — test oboru SP Tréner',
+    pageTitle:'Kam na vysokou? Zjisti to zdarma za 7 minut — test oboru SP Tréner',
     progressLabel:function(i,n){return 'Otázka '+i+' / '+n;}
   }
 };
@@ -601,8 +659,12 @@ function setLang(lang) {
   document.getElementById('tFaqQ5').textContent = t.faqQ5; document.getElementById('tFaqA5').textContent = t.faqA5;
   document.getElementById('tFaqQ6').textContent = t.faqQ6; document.getElementById('tFaqA6').textContent = t.faqA6;
   document.getElementById('tFLink1').textContent = t.fLink1; document.getElementById('tFLink2').textContent = t.fLink2; document.getElementById('tFLink3').textContent = t.fLink3;
-  if (qIndex >= 0 && qIndex < QUESTIONS.length && document.getElementById('quizSection').style.display !== 'none') renderQuestion();
-  if (document.getElementById('resultSection').style.display !== 'none' && Object.keys(answers).length >= QUESTIONS.length) renderResult();
+  document.getElementById('tReflectIntro').textContent = t.reflectIntro;
+  document.getElementById('reflectSubmitBtn').textContent = t.reflectSubmit;
+  document.getElementById('tAiLabel').textContent = t.aiLabel;
+  if (typeof resultRevealed !== 'undefined' && resultRevealed) { renderResultUI(); return; }
+  if (typeof qIndex !== 'undefined' && qIndex >= 0 && qIndex < QUESTIONS.length && document.getElementById('quizSection').style.display === 'block') renderQuestion();
+  if (document.getElementById('reflectSection').style.display === 'block') renderReflectQuestions();
 }
 
 function detectInitialLang() {
@@ -659,18 +721,59 @@ function prevQuestion(){
   renderQuestion();
 }
 
+let reflections = {};
+
 function finishQuiz(){
   document.getElementById('quizSection').style.display='none';
+  document.getElementById('reflectSection').style.display='block';
+  renderReflectQuestions();
+  document.getElementById('reflectSection').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function renderReflectQuestions(){
+  const root = document.getElementById('reflectRows');
+  root.innerHTML = '';
+  REFLECTIONS.forEach(r => {
+    const item = document.createElement('div');
+    item.className = 'reflect-item';
+    const label = document.createElement('label');
+    label.textContent = r[currentLang];
+    const ta = document.createElement('textarea');
+    ta.id = 'reflect_' + r.id;
+    ta.value = reflections[r.id] || '';
+    ta.maxLength = 600;
+    ta.oninput = () => { reflections[r.id] = ta.value; updateReflectSubmitState(); };
+    const hint = document.createElement('div');
+    hint.className = 'reflect-hint';
+    hint.textContent = T[currentLang].reflectHint;
+    item.appendChild(label); item.appendChild(ta); item.appendChild(hint);
+    root.appendChild(item);
+  });
+  updateReflectSubmitState();
+}
+
+function updateReflectSubmitState(){
+  const allFilled = REFLECTIONS.every(r => (reflections[r.id] || '').trim().length >= 8);
+  document.getElementById('reflectSubmitBtn').disabled = !allFilled;
+}
+
+function submitReflections(){
+  const allFilled = REFLECTIONS.every(r => (reflections[r.id] || '').trim().length >= 8);
+  if (!allFilled) return;
+  document.getElementById('reflectSection').style.display='none';
   document.getElementById('gateSection').style.display='block';
   document.getElementById('gateSection').scrollIntoView({behavior:'smooth',block:'start'});
   if (currentUser){ revealResult(); }
 }
 
 function retakeQuiz(){
-  answers = {}; qIndex = 0;
+  answers = {}; reflections = {}; qIndex = 0; resultRevealed = false;
   sessionStorage.removeItem('kv_answers');
+  sessionStorage.removeItem('kv_reflections');
   sessionStorage.removeItem('kv_pending_reveal');
   document.getElementById('resultSection').style.display='none';
+  document.getElementById('reflectSection').style.display='none';
+  document.getElementById('aiBlock').style.display='none';
   document.getElementById('heroSection').style.display='block';
   document.querySelector('.trust-row').style.display='flex';
   document.getElementById('ako-to-funguje').style.display='block';
@@ -694,19 +797,22 @@ async function initAuth(){
 }
 function onLoggedInKV(){
   if (sessionStorage.getItem('kv_pending_reveal') === '1'){
-    const saved = loadProgress();
-    if (saved) answers = saved;
+    const savedAnswers = loadProgress('kv_answers');
+    const savedReflections = loadProgress('kv_reflections');
+    if (savedAnswers) answers = savedAnswers;
+    if (savedReflections) reflections = savedReflections;
     revealResult();
     sessionStorage.removeItem('kv_pending_reveal');
   }
 }
 function startLoginKV(){
   sessionStorage.setItem('kv_answers', JSON.stringify(answers));
+  sessionStorage.setItem('kv_reflections', JSON.stringify(reflections));
   sessionStorage.setItem('kv_pending_reveal', '1');
   _supabase.auth.signInWithOAuth({provider:'google', options:{redirectTo: location.origin + location.pathname}});
 }
-function loadProgress(){
-  try { return JSON.parse(sessionStorage.getItem('kv_answers') || 'null'); } catch(e){ return null; }
+function loadProgress(key){
+  try { return JSON.parse(sessionStorage.getItem(key) || 'null'); } catch(e){ return null; }
 }
 
 // ============================================================
@@ -722,13 +828,41 @@ function computeScores(){
   return scores;
 }
 
+let resultRevealed = false;
+let lastTopTag = null;
+
 function revealResult(){
   document.getElementById('gateSection').style.display='none';
   document.getElementById('quizSection').style.display='none';
+  document.getElementById('reflectSection').style.display='none';
 
+  const topTag = renderResultUI();
+  document.getElementById('resultSection').style.display='block';
+  document.getElementById('resultSection').scrollIntoView({behavior:'smooth',block:'start'});
+
+  if (resultRevealed) return;
+  resultRevealed = true;
+
+  const scores = computeScores();
+  if (currentUser){
+    try {
+      _supabase.from('career_quiz_results').insert({
+        user_id: currentUser.id, email: currentUser.email,
+        answers: answers, scores: scores, top_field: topTag
+      }).then(()=>{}, ()=>{});
+    } catch(e){}
+  }
+  fetchAiAnalysis(topTag, scores);
+}
+
+// Pure re-render of the result UI in the current language — safe to call
+// repeatedly (e.g. on a language switch) without re-firing the AI call or
+// the DB insert. Returns the computed top field tag.
+function renderResultUI(){
   const scores = computeScores();
   let topTag = FIELD_ORDER[0];
   FIELD_ORDER.forEach(f => { if (scores[f] > scores[topTag]) topTag = f; });
+  lastTopTag = topTag;
 
   const orientSum = (answers.q19||0) + (answers.q20||0);
   const tier = orientSum <= 5 ? 'low' : (orientSum <= 8 ? 'mid' : 'high');
@@ -738,7 +872,7 @@ function revealResult(){
   document.getElementById('resultTitle').textContent = FIELD_TEXT[topTag][currentLang].name;
   document.getElementById('resultDesc').textContent = FIELD_TEXT[topTag][currentLang].desc;
 
-  const maxScore = 10;
+  const maxScore = 15;
   const rows = FIELD_ORDER.slice().sort((a,b) => scores[b]-scores[a]).map(f => {
     const pct = Math.round(scores[f]/maxScore*100);
     const top = f === topTag ? ' top' : '';
@@ -762,16 +896,39 @@ function revealResult(){
   document.getElementById('ctaFree').href = '/app?cat='+appCat+'&upgrade=free';
   document.getElementById('ctaPremium').href = '/app?cat='+appCat+'&upgrade=premium';
 
-  document.getElementById('resultSection').style.display='block';
-  document.getElementById('resultSection').scrollIntoView({behavior:'smooth',block:'start'});
+  return topTag;
+}
 
-  if (currentUser){
-    try {
-      _supabase.from('career_quiz_results').insert({
-        user_id: currentUser.id, email: currentUser.email,
-        answers: answers, scores: scores, top_field: topTag
-      }).then(()=>{}, ()=>{});
-    } catch(e){}
+// Fires once per result — asks the backend for a personalized paragraph
+// grounded in the free-text reflection answers. Never blocks the base
+// (already-visible) algorithmic result: on any failure the AI block just
+// stays hidden.
+async function fetchAiAnalysis(topTag, scores){
+  const block = document.getElementById('aiBlock');
+  const spinner = document.getElementById('aiSpinner');
+  const textEl = document.getElementById('aiText');
+  block.style.display = 'block';
+  spinner.style.display = 'inline-block';
+  textEl.textContent = T[currentLang].aiLoading;
+
+  const reflectionsPayload = REFLECTIONS.map(r => ({
+    question: r[currentLang],
+    answer: (reflections[r.id] || '').trim().slice(0, 600)
+  }));
+
+  try {
+    const res = await fetch('/api/career-quiz/analyze', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ topField: topTag, scores: scores, reflections: reflectionsPayload, lang: currentLang })
+    });
+    if (!res.ok) throw new Error('bad status');
+    const data = await res.json();
+    if (!data.text) throw new Error('empty text');
+    spinner.style.display = 'none';
+    textEl.textContent = data.text;
+  } catch(e){
+    block.style.display = 'none';
   }
 }
 
