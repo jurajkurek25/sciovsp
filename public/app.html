@@ -1068,7 +1068,7 @@ const TRANSLATIONS={
     homeSubtitle:'Cvič reálne testy · Meria čas · AI generuje nové úlohy',
     catAll:'🏠 Domov',catVsp:'📘 VŠP',catAi:'🤖 AI nástroje',catPsych:'🧠 Psychológia UCM',catLaw:'⚖️ Právo',catMedicina:'🩺 Medicína',catTechnika:'🔧 Technika',catPedagogika:'🍎 Pedagogika',catProgress:'📊 Pokrok',catCourses:'🎓 Kurzy',
     secVsp:'Všeobecné študijné predpoklady',secAi:'AI nástroje',secPsych:'Psychológia — UCM Trnava',secLaw:'Právo — vedomostné okruhy',secMedicina:'Medicína',secTechnika:'Technika',secPedagogika:'Pedagogika',secCourses:'Kurzy',secProgress:'Pokrok a komunita',
-    noCoursesTitle:'Zatiaľ nemáš žiadne kurzy.',addCourseBtn:'+ Pridať',browseCoursesBtn:'Pozrieť kurzy',lessonsLabel:'lekcií',
+    noCoursesTitle:'Zatiaľ nemáš žiadne kurzy.',addCourseBtn:'+ Pridať',browseCoursesBtn:'Pozrieť kurzy',lessonsLabel:'lekcií',redeemGiftLink:'🎁 Uplatniť darčekový kód',
     badgeRecommended:'Odporúčané',modeFullTitle:'Celý test (na čas)',modeFullDesc:'Verbálna (35 min) + Analytická (45 min). Presná simulácia ostrého testu.',
     modeVerbalTitle:'Len verbálna časť',modeVerbalDesc:'33 úloh, 35 min.',
     modeAnalyticalTitle:'Len analytická časť',modeAnalyticalDesc:'33 úloh, 45 min.',
@@ -1224,7 +1224,7 @@ const TRANSLATIONS={
     homeSubtitle:'Cvič reálné testy · Měří čas · AI generuje nové úkoly',
     catAll:'🏠 Domů',catVsp:'📘 VŠP',catAi:'🤖 AI nástroje',catPsych:'🧠 Psychologie UCM',catLaw:'⚖️ Právo',catMedicina:'🩺 Medicína',catTechnika:'🔧 Technika',catPedagogika:'🍎 Pedagogika',catProgress:'📊 Pokrok',catCourses:'🎓 Kurzy',
     secVsp:'Všeobecné studijní předpoklady',secAi:'AI nástroje',secPsych:'Psychologie — UCM Trnava',secLaw:'Právo — znalostní okruhy',secMedicina:'Medicína',secTechnika:'Technika',secPedagogika:'Pedagogika',secCourses:'Kurzy',secProgress:'Pokrok a komunita',
-    noCoursesTitle:'Zatím nemáš žádné kurzy.',addCourseBtn:'+ Přidat',browseCoursesBtn:'Prohlédnout kurzy',lessonsLabel:'lekcí',
+    noCoursesTitle:'Zatím nemáš žádné kurzy.',addCourseBtn:'+ Přidat',browseCoursesBtn:'Prohlédnout kurzy',lessonsLabel:'lekcí',redeemGiftLink:'🎁 Uplatnit dárkový kód',
     badgeRecommended:'Doporučeno',modeFullTitle:'Celý test (na čas)',modeFullDesc:'Verbální (35 min) + Analytická (45 min). Přesná simulace ostrého testu.',
     modeVerbalTitle:'Jen verbální část',modeVerbalDesc:'33 úkolů, 35 min.',
     modeAnalyticalTitle:'Jen analytická část',modeAnalyticalDesc:'33 úkolů, 45 min.',
@@ -4069,6 +4069,7 @@ function renderAuthButton(){
       <div style="display:flex;align-items:center;justify-content:space-between;gap:.4rem;">${pb}<button onclick="logout()" style="background:none;border:none;color:var(--text3);font-size:.72rem;padding:0;font-family:var(--mono);cursor:pointer;">${t('logoutBtn')}</button></div>
       <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${email}">${short}</span>
       ${ub}
+      <a href="/uplatnit-darcek" style="text-decoration:none;color:var(--text3);font-size:.72rem;font-family:var(--mono);">${t('redeemGiftLink')}</a>
     </div>`;
   }else{
     homeSlot.innerHTML=`<button onclick="loginWithGoogle()" style="display:flex;align-items:center;justify-content:center;gap:.5rem;width:100%;background:var(--black2);border:1px solid var(--border2);border-radius:10px;padding:.55rem .85rem;color:var(--text);font-size:.78rem;cursor:pointer;font-family:var(--mono);letter-spacing:.02em;">${gSvg}${t('loginGoogle')}</button>`;
