@@ -684,6 +684,7 @@ h1.title span{font-style:italic;color:var(--purple2)}
         <div class="chip" data-cat="technika" onclick="filterModes('technika',this)" data-i18n="catTechnika">🔧 Technika</div>
         <div class="chip" data-cat="pedagogika" onclick="filterModes('pedagogika',this)" data-i18n="catPedagogika">🍎 Pedagogika</div>
         <div class="chip" data-cat="courses" onclick="filterModes('courses',this)" data-i18n="catCourses">🎓 Kurzy</div>
+        <div class="chip" data-cat="gifts" onclick="filterModes('gifts',this)" data-i18n="catGifts">🎁 Darčeky</div>
         <div class="chip" data-cat="progress" onclick="filterModes('progress',this)" data-i18n="catProgress">📊 Pokrok</div>
       </nav>
     </aside>
@@ -729,6 +730,9 @@ h1.title span{font-style:italic;color:var(--purple2)}
 
     <div class="mode-section-title" data-cat="courses" data-i18n="secCourses">Kurzy</div>
     <template id="coursesAnchor"></template>
+
+    <div class="mode-section-title" data-cat="gifts" data-i18n="secGifts">Darčekové karty</div>
+    <div class="mode-card" data-cat="gifts" onclick="location.href='/darcekova-karta'"><span class="card-badge" style="background:linear-gradient(135deg,var(--yellow),var(--red));color:#1a1200;">🎁 DARČEK</span><span class="card-icon">🎁</span><div class="card-title" data-i18n="modeGiftTitle">Kúpiť darčekovú kartu</div><div class="card-desc" data-i18n="modeGiftDesc">Daruj prístup k Premium alebo Elite príprave niekomu blízkemu — na 1, 3 alebo 12 mesiacov.</div></div>
 
     <div class="mode-section-title" data-cat="progress" data-i18n="secProgress">Pokrok a komunita</div>
     <div class="mode-card" data-cat="progress" onclick="showHistory()"><span class="card-icon">📊</span><div class="card-title" data-i18n="modeHistoryTitle">Výsledky a história</div><div class="card-desc" data-i18n="modeHistoryDesc">Pokroky, analýza podľa okruhov, percentilový odhad.</div></div>
@@ -1090,7 +1094,8 @@ const TRANSLATIONS={
     logoTag:'SP TRÉNER',homeTitle:'Dostaň sa<br>na <span>percentil 85</span>',
     homeSubtitle:'Cvič reálne testy · Meria čas · AI generuje nové úlohy',
     catAll:'🏠 Domov',catVsp:'📘 VŠP',catAi:'🤖 AI nástroje',catPsych:'🧠 Psychológia UCM',catLaw:'⚖️ Právo',catMedicina:'🩺 Medicína',catTechnika:'🔧 Technika',catPedagogika:'🍎 Pedagogika',catProgress:'📊 Pokrok',catCourses:'🎓 Kurzy',
-    secVsp:'Všeobecné študijné predpoklady',secAi:'AI nástroje',secPsych:'Psychológia — UCM Trnava',secLaw:'Právo — vedomostné okruhy',secMedicina:'Medicína',secTechnika:'Technika',secPedagogika:'Pedagogika',secCourses:'Kurzy',secProgress:'Pokrok a komunita',
+    secVsp:'Všeobecné študijné predpoklady',secAi:'AI nástroje',secPsych:'Psychológia — UCM Trnava',secLaw:'Právo — vedomostné okruhy',secMedicina:'Medicína',secTechnika:'Technika',secPedagogika:'Pedagogika',secCourses:'Kurzy',secGifts:'Darčekové karty',secProgress:'Pokrok a komunita',
+    catGifts:'🎁 Darčeky',modeGiftTitle:'Kúpiť darčekovú kartu',modeGiftDesc:'Daruj prístup k Premium alebo Elite príprave niekomu blízkemu — na 1, 3 alebo 12 mesiacov.',
     noCoursesTitle:'Zatiaľ nemáš žiadne kurzy.',addCourseBtn:'+ Pridať',browseCoursesBtn:'Pozrieť kurzy',lessonsLabel:'lekcií',redeemGiftLink:'🎁 Uplatniť darčekový kód',
     badgeRecommended:'Odporúčané',modeFullTitle:'Celý test (na čas)',modeFullDesc:'Verbálna (35 min) + Analytická (45 min). Presná simulácia ostrého testu.',
     modeVerbalTitle:'Len verbálna časť',modeVerbalDesc:'33 úloh, 35 min.',
@@ -1246,7 +1251,8 @@ const TRANSLATIONS={
     logoTag:'SP TRENÉR',homeTitle:'Dostaň se<br>na <span>percentil 85</span>',
     homeSubtitle:'Cvič reálné testy · Měří čas · AI generuje nové úkoly',
     catAll:'🏠 Domů',catVsp:'📘 VŠP',catAi:'🤖 AI nástroje',catPsych:'🧠 Psychologie UCM',catLaw:'⚖️ Právo',catMedicina:'🩺 Medicína',catTechnika:'🔧 Technika',catPedagogika:'🍎 Pedagogika',catProgress:'📊 Pokrok',catCourses:'🎓 Kurzy',
-    secVsp:'Všeobecné studijní předpoklady',secAi:'AI nástroje',secPsych:'Psychologie — UCM Trnava',secLaw:'Právo — znalostní okruhy',secMedicina:'Medicína',secTechnika:'Technika',secPedagogika:'Pedagogika',secCourses:'Kurzy',secProgress:'Pokrok a komunita',
+    secVsp:'Všeobecné studijní předpoklady',secAi:'AI nástroje',secPsych:'Psychologie — UCM Trnava',secLaw:'Právo — znalostní okruhy',secMedicina:'Medicína',secTechnika:'Technika',secPedagogika:'Pedagogika',secCourses:'Kurzy',secGifts:'Dárkové karty',secProgress:'Pokrok a komunita',
+    catGifts:'🎁 Dárky',modeGiftTitle:'Koupit dárkovou kartu',modeGiftDesc:'Věnuj přístup k Premium nebo Elite přípravě někomu blízkému — na 1, 3 nebo 12 měsíců.',
     noCoursesTitle:'Zatím nemáš žádné kurzy.',addCourseBtn:'+ Přidat',browseCoursesBtn:'Prohlédnout kurzy',lessonsLabel:'lekcí',redeemGiftLink:'🎁 Uplatnit dárkový kód',
     badgeRecommended:'Doporučeno',modeFullTitle:'Celý test (na čas)',modeFullDesc:'Verbální (35 min) + Analytická (45 min). Přesná simulace ostrého testu.',
     modeVerbalTitle:'Jen verbální část',modeVerbalDesc:'33 úkolů, 35 min.',
