@@ -641,6 +641,15 @@ body.has-banner{padding-top:42px}
     <div class="popup-elite-fields">
       <input type="email" id="popupEliteEmail" class="popup-email-input" placeholder="tvoj@email.sk" autocomplete="email">
       <input type="text" id="popupEliteRef" class="popup-ref-input" placeholder="Referral kód (nepovinné)" style="margin-top:.25rem">
+      <div class="popup-consent-wrap" style="padding:0;margin:.5rem 0 0">
+        <label class="popup-consent-label">
+          <input type="checkbox" id="popupEliteConsentCheckbox">
+          Súhlasím s
+          <a href="https://sptrener.online/legal.html#vop" target="_blank">obchodnými podmienkami</a>
+          a
+          <a href="https://sptrener.online/legal.html#privacy" target="_blank">ochranou osobných údajov</a>.
+        </label>
+      </div>
       <div id="popupEliteError" class="popup-error"></div>
       <button class="popup-submit-btn" style="background:linear-gradient(135deg,#7c5cff,#ff3f5e)" onclick="submitEliteCheckout()">Nesmiem zlyhať →</button>
     </div>
@@ -1520,8 +1529,14 @@ async function submitEliteCheckout(){
   const refCode = document.getElementById('popupEliteRef').value.trim();
   const errEl = document.getElementById('popupEliteError');
   const btn = document.querySelector('#elitePopup .popup-submit-btn');
+  const consent = document.getElementById('popupEliteConsentCheckbox');
   if(!email || !email.includes('@')){
     errEl.textContent = 'Zadaj platný email.';
+    errEl.classList.add('show');
+    return;
+  }
+  if(!consent.checked){
+    errEl.textContent = 'Musíš súhlasiť s obchodnými podmienkami a ochranou údajov.';
     errEl.classList.add('show');
     return;
   }
