@@ -70,6 +70,11 @@
       "@type": "Question",
       "name": "Aký je rozdiel medzi Premium a Elite darčekom?",
       "acceptedAnswer": { "@type": "Answer", "text": "Premium zahŕňa neobmedzené testy a AI generátor úloh. Elite navyše pridáva AI mentora, osobné vedenie a týždenný audit pokroku." }
+    },
+    {
+      "@type": "Question",
+      "name": "Môžem naraz kúpiť viac kariet, napríklad pre viac súrodencov?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Áno — v jednej objednávke si vyberieš ľubovoľný počet kariet a ľubovoľnú kombináciu (napríklad 2× Premium + 1× Elite) a zaplatíš len raz." }
     }
   ]
 }
@@ -203,6 +208,7 @@ footer .flinks a:hover{color:var(--text2)}
     <div class="opt-chip">🔥 <span id="tChip2">Elite s AI mentorom</span></div>
     <div class="opt-chip">🎓 <span id="tChip3">1 kurz podľa výberu</span></div>
     <div class="opt-chip">⚡ <span id="tChip4">Kombinácia viacerých</span></div>
+    <div class="opt-chip">🛒 <span id="tChip5">Ľubovoľný počet v 1 objednávke</span></div>
   </div>
 
   <div id="pre-koho" class="reveal" style="margin:3.5rem 0 0">
@@ -269,6 +275,10 @@ footer .flinks a:hover{color:var(--text2)}
         <summary id="tFaqQ5">Aký je rozdiel medzi Premium a Elite darčekom?</summary>
         <p id="tFaqA5">Premium zahŕňa neobmedzené testy a AI generátor úloh. Elite navyše pridáva AI mentora, osobné vedenie a týždenný audit pokroku.</p>
       </details>
+      <details class="faq-item">
+        <summary id="tFaqQ6">Môžem naraz kúpiť viac kariet, napríklad pre viac súrodencov?</summary>
+        <p id="tFaqA6">Áno — v jednej objednávke si vyberieš ľubovoľný počet kariet a ľubovoľnú kombináciu (napríklad 2× Premium + 1× Elite) a zaplatíš len raz.</p>
+      </details>
     </div>
   </div>
 
@@ -304,7 +314,7 @@ const T = {
     reassure: '🖨️ Karta je hneď na stiahnutie a vytlačenie — stihneš to aj na Štedrý večer.',
     momentTitle: 'Rozbalí to. Najprv nechápe.',
     momentDesc: 'Nie je to hračka ani oblečenie. Prečíta si, čo to je — a dôjde mu, že si mu dal niečo, čo mu skutočne pomôže. Nie preto, že si nevedel, čo iné kúpiť. Ale preto, že ti na jeho úspechu naozaj záleží.',
-    chip1: 'Premium na mesiace', chip2: 'Elite s AI mentorom', chip3: '1 kurz podľa výberu', chip4: 'Kombinácia viacerých',
+    chip1: 'Premium na mesiace', chip2: 'Elite s AI mentorom', chip3: '1 kurz podľa výberu', chip4: 'Kombinácia viacerých', chip5: 'Ľubovoľný počet v 1 objednávke',
     whoTitle: 'Pre rodičov, starých rodičov aj súrodencov',
     whoDesc: 'Máš v rodine niekoho, kto sa tento rok pripravuje na prijímačky? Namiesto hádania, čo by sa mu páčilo, mu daruj niečo s jasným zmyslom.',
     r1Title: 'Naozaj to použije', r1Desc: 'Žiadna vec, čo skončí zabudnutá v skrini. Prístup, ktorý mu reálne pomôže pripraviť sa — nie len dobre vyzerajúci darček.',
@@ -320,6 +330,7 @@ const T = {
     faqQ3: 'Ako si obdarovaný vyberie, čo presne chce?', faqA3: 'Pri uplatnení kódu si sám alebo sama vyberie konkrétny plán (Premium alebo Elite) alebo kurz, ktorý mu vyhovuje.',
     faqQ4: 'Funguje darček aj pre niekoho, kto nerozumie aplikáciám?', faqA4: 'Áno — stačí vytlačiť kartu a odovzdať ju s láskou. Zvyšok (výber plánu, prihlásenie) si obdarovaný spraví sám.',
     faqQ5: 'Aký je rozdiel medzi Premium a Elite darčekom?', faqA5: 'Premium zahŕňa neobmedzené testy a AI generátor úloh. Elite navyše pridáva AI mentora, osobné vedenie a týždenný audit pokroku.',
+    faqQ6: 'Môžem naraz kúpiť viac kariet, napríklad pre viac súrodencov?', faqA6: 'Áno — v jednej objednávke si vyberieš ľubovoľný počet kariet a ľubovoľnú kombináciu (napríklad 2× Premium + 1× Elite) a zaplatíš len raz.',
     finalTitle: 'Daj mu tento rok niečo,<br><em>na čo si spomenie</em>, keď to dokáže.',
     finalSub: 'Vyber darček za pár minút. Vytlačíš, zabalíš — a spravil si niečo, čo má naozaj zmysel.', finalCta: 'Vybrať darček →',
     fLink1: 'SP Tréner', fLink2: 'Obchodné podmienky', fLink3: 'Kontakt',
@@ -333,7 +344,7 @@ const T = {
     reassure: '🖨️ Karta je hned ke stažení a vytisknutí — stihneš to i na Štědrý den.',
     momentTitle: 'Rozbalí to. Nejdřív nechápe.',
     momentDesc: 'Není to hračka ani oblečení. Přečte si, co to je — a dojde mu, že jsi mu dal něco, co mu skutečně pomůže. Ne proto, že jsi nevěděl, co jiného koupit. Ale proto, že ti na jeho úspěchu opravdu záleží.',
-    chip1: 'Premium na měsíce', chip2: 'Elite s AI mentorem', chip3: '1 kurz dle výběru', chip4: 'Kombinace více',
+    chip1: 'Premium na měsíce', chip2: 'Elite s AI mentorem', chip3: '1 kurz dle výběru', chip4: 'Kombinace více', chip5: 'Libovolný počet v 1 objednávce',
     whoTitle: 'Pro rodiče, prarodiče i sourozence',
     whoDesc: 'Máš v rodině někoho, kdo se letos připravuje na přijímačky? Místo hádání, co by se mu líbilo, mu daruj něco s jasným smyslem.',
     r1Title: 'Opravdu to použije', r1Desc: 'Žádná věc, co skončí zapomenutá ve skříni. Přístup, který mu reálně pomůže připravit se — ne jen dobře vypadající dárek.',
@@ -349,6 +360,7 @@ const T = {
     faqQ3: 'Jak si obdarovaný vybere, co přesně chce?', faqA3: 'Při uplatnění kódu si sám nebo sama vybere konkrétní plán (Premium nebo Elite) nebo kurz, který mu vyhovuje.',
     faqQ4: 'Funguje dárek i pro někoho, kdo nerozumí aplikacím?', faqA4: 'Ano — stačí vytisknout kartu a předat ji s láskou. Zbytek (výběr plánu, přihlášení) si obdarovaný udělá sám.',
     faqQ5: 'Jaký je rozdíl mezi Premium a Elite dárkem?', faqA5: 'Premium zahrnuje neomezené testy a AI generátor úloh. Elite navíc přidává AI mentora, osobní vedení a týdenní audit pokroku.',
+    faqQ6: 'Můžu si najednou koupit víc karet, například pro víc sourozenců?', faqA6: 'Ano — v jedné objednávce si vybereš libovolný počet karet a libovolnou kombinaci (například 2× Premium + 1× Elite) a zaplatíš jen jednou.',
     finalTitle: 'Dej mu letos něco,<br><em>na co si vzpomene</em>, až to dokáže.',
     finalSub: 'Vyber dárek za pár minut. Vytiskneš, zabalíš — a udělal jsi něco, co má opravdu smysl.', finalCta: 'Vybrat dárek →',
     fLink1: 'SP Tréner', fLink2: 'Obchodní podmínky', fLink3: 'Kontakt',
@@ -375,6 +387,7 @@ function setLang(lang) {
   document.getElementById('tChip2').textContent = t.chip2;
   document.getElementById('tChip3').textContent = t.chip3;
   document.getElementById('tChip4').textContent = t.chip4;
+  document.getElementById('tChip5').textContent = t.chip5;
   document.getElementById('tWhoTitle').textContent = t.whoTitle;
   document.getElementById('tWhoDesc').textContent = t.whoDesc;
   document.getElementById('tR1Title').textContent = t.r1Title; document.getElementById('tR1Desc').textContent = t.r1Desc;
@@ -389,6 +402,7 @@ function setLang(lang) {
   document.getElementById('tFaqQ3').textContent = t.faqQ3; document.getElementById('tFaqA3').textContent = t.faqA3;
   document.getElementById('tFaqQ4').textContent = t.faqQ4; document.getElementById('tFaqA4').textContent = t.faqA4;
   document.getElementById('tFaqQ5').textContent = t.faqQ5; document.getElementById('tFaqA5').textContent = t.faqA5;
+  document.getElementById('tFaqQ6').textContent = t.faqQ6; document.getElementById('tFaqA6').textContent = t.faqA6;
   document.getElementById('tFinalTitle').innerHTML = t.finalTitle; document.getElementById('tFinalSub').textContent = t.finalSub; document.getElementById('tFinalCta').textContent = t.finalCta;
   document.getElementById('tFLink1').textContent = t.fLink1; document.getElementById('tFLink2').textContent = t.fLink2; document.getElementById('tFLink3').textContent = t.fLink3;
 }
