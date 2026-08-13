@@ -4,56 +4,96 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Vianočný darček pre budúceho vysokoškoláka — SP Tréner</title>
-<meta name="description" content="Namiesto ďalšej veci pod stromček mu daruj niečo, na čom mu naozaj záleží — prípravu na prijímačky. Darčeková karta SP Tréner, hneď na stiahnutie a vytlačenie.">
+<meta name="description" content="Tento rok mu pod stromček daj niečo, čo naozaj pomôže pri prijímačkách. Darčeková karta SP Tréner — Premium, Elite alebo kurz podľa jeho výberu, hneď na stiahnutie a vytlačenie.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@300;400;500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,340;0,9..144,500;0,9..144,600;1,9..144,420;1,9..144,500&family=Manrope:wght@400;500;600;700;800&family=Caveat:wght@500;600&display=swap" rel="stylesheet">
 <style>
-:root{--black:#08080d;--black2:#0f0f18;--black3:#15151f;--border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.13);--text:#eeeef5;--text2:#a1a1bc;--text3:#5c5c7a;--volt:#c8ff00;--purple:#7c5cff;--purple2:#b09bff;--red:#ff3f5e;--gold:#ffc85e;--green:#36e896;--serif:'Instrument Serif',Georgia,serif;--mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif}
+:root{
+  --bg:#12180f; --bg2:#1a2216; --card:#1d2618; --card2:#212b1b;
+  --parchment:#f3ead9; --paper:#efe3cd;
+  --text:#f1ead9; --text2:#c2b89e; --text3:#8a8168;
+  --berry:#b34756; --berry-soft:rgba(179,71,86,.16);
+  --brass:#d6a24a; --brass-light:#eec978;
+  --pine:#3c5a3f; --pine-light:#6b8e6f;
+  --border:rgba(241,234,217,.09); --border2:rgba(241,234,217,.17);
+  --serif:'Fraunces',Georgia,serif; --sans:'Manrope',sans-serif; --hand:'Caveat',cursive;
+}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--black);color:var(--text);font-family:var(--sans);line-height:1.6;min-height:100vh;background-image:radial-gradient(circle at 15% 0%, rgba(124,92,255,.16), transparent 45%),radial-gradient(circle at 85% 8%, rgba(255,200,94,.10), transparent 42%),radial-gradient(circle at 50% 100%, rgba(200,255,0,.06), transparent 50%)}
-a{color:var(--purple2)}
-.top{max-width:900px;margin:0 auto;padding:1.6rem 1.2rem 0;display:flex;justify-content:space-between;align-items:center}
-.top a.back{font-family:var(--mono);font-size:.8rem;color:var(--text2);text-decoration:none}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg); color:var(--text); font-family:var(--sans); line-height:1.65; min-height:100vh;
+  background-image:
+    radial-gradient(circle at 12% -5%, rgba(214,162,74,.10), transparent 40%),
+    radial-gradient(circle at 90% 15%, rgba(179,71,86,.10), transparent 38%),
+    radial-gradient(circle at 50% 100%, rgba(107,142,111,.08), transparent 45%);
+}
+/* subtle grain — decorative wildcard texture, pure CSS, no image request */
+body::before{
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:1; opacity:.05; mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+a{color:var(--brass-light)}
+.top{max-width:920px;margin:0 auto;padding:1.7rem 1.2rem 0;display:flex;justify-content:space-between;align-items:center;position:relative;z-index:2}
+.top a.back{font-family:var(--sans);font-weight:600;font-size:.82rem;color:var(--text2);text-decoration:none}
 .lang-switch{display:flex;gap:.35rem}
-.lang-switch button{font-family:var(--mono);font-size:.72rem;padding:.3rem .6rem;background:var(--black2);border:1px solid var(--border2);border-radius:6px;color:var(--text2);cursor:pointer}
-.lang-switch button.active{color:var(--gold);border-color:var(--gold)}
-.wrap{max-width:900px;margin:0 auto;padding:2.4rem 1.2rem 6rem}
-.hero{padding:2.4rem 0 1.6rem;text-align:center}
-.eyebrow{display:inline-block;font-family:var(--mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);background:rgba(255,200,94,.09);border:1px solid rgba(255,200,94,.28);padding:.3rem .8rem;border-radius:99px;margin-bottom:1rem}
-h1{font-family:var(--serif);font-size:clamp(2.2rem,5vw,3.4rem);line-height:1.12;margin-bottom:1.1rem}
-h1 em{color:var(--gold);font-style:italic}
-.sub{color:var(--text2);max-width:600px;margin:0 auto;font-size:1.08rem;line-height:1.65}
-.cta-row{margin-top:2.1rem;display:flex;justify-content:center;gap:.8rem;flex-wrap:wrap}
-.btn-primary{padding:1rem 1.8rem;background:var(--gold);color:var(--black);border:none;border-radius:10px;font-weight:700;font-family:var(--mono);font-size:.9rem;cursor:pointer;text-decoration:none;display:inline-block}
-.btn-secondary{padding:1rem 1.6rem;background:transparent;border:1px solid var(--border2);color:var(--text);border-radius:10px;font-family:var(--mono);font-size:.85rem;text-decoration:none;display:inline-block}
-.reassure{text-align:center;margin-top:1.1rem;font-family:var(--mono);font-size:.75rem;color:var(--text3)}
-.moment{max-width:640px;margin:4rem auto;text-align:center}
-.moment .quote-mark{font-family:var(--serif);font-size:3.5rem;color:var(--gold);opacity:.35;line-height:0;display:block;margin-bottom:.3rem}
-.moment h2{font-family:var(--serif);font-size:1.9rem;font-style:italic;line-height:1.35;margin-bottom:.9rem}
-.moment p{color:var(--text2);font-size:1rem;line-height:1.7}
-.reasons{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin:3.5rem 0}
-.reason{background:var(--black2);border:1px solid var(--border);border-radius:14px;padding:1.5rem}
-.reason .icon{font-size:1.6rem;margin-bottom:.7rem;display:block}
-.reason h3{font-size:1rem;margin-bottom:.5rem}
-.reason p{color:var(--text2);font-size:.85rem;line-height:1.55}
-.grandparents{background:linear-gradient(135deg,rgba(255,200,94,.08),rgba(124,92,255,.06));border:1px solid rgba(255,200,94,.22);border-radius:16px;padding:1.7rem 1.8rem;margin:3rem 0;display:flex;gap:1.1rem;align-items:flex-start}
-.grandparents .icon{font-size:1.8rem;flex-shrink:0}
-.grandparents h3{font-size:1.05rem;margin-bottom:.4rem}
+.lang-switch button{font-family:var(--sans);font-weight:600;font-size:.72rem;padding:.32rem .65rem;background:var(--card);border:1px solid var(--border2);border-radius:6px;color:var(--text2);cursor:pointer}
+.lang-switch button.active{color:var(--brass-light);border-color:var(--brass)}
+.wrap{max-width:760px;margin:0 auto;padding:2.6rem 1.2rem 6.5rem;position:relative;z-index:2}
+.reveal{opacity:0;transform:translateY(14px);transition:opacity .7s ease,transform .7s ease}
+.reveal.in{opacity:1;transform:translateY(0)}
+@media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}}
+
+.hero{padding:2.8rem 0 1.8rem;text-align:center}
+.eyebrow{display:inline-flex;align-items:center;gap:.4rem;font-family:var(--sans);font-weight:700;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--brass-light);background:var(--berry-soft);border:1px solid rgba(214,162,74,.3);padding:.35rem .85rem;border-radius:99px;margin-bottom:1.3rem}
+h1{font-family:var(--serif);font-weight:500;font-size:clamp(2.15rem,5.2vw,3.15rem);line-height:1.18;letter-spacing:-.01em;margin-bottom:1.2rem;color:var(--parchment)}
+h1 em{font-style:italic;font-weight:420;color:var(--brass-light)}
+.sub{color:var(--text2);max-width:520px;margin:0 auto;font-size:1.08rem;line-height:1.7}
+.cta-row{margin-top:2.2rem;display:flex;justify-content:center;gap:.8rem;flex-wrap:wrap}
+.btn-primary{padding:1rem 1.9rem;background:linear-gradient(135deg,var(--brass-light),var(--brass));color:#1a1305;border:none;border-radius:10px;font-weight:800;font-family:var(--sans);font-size:.92rem;cursor:pointer;text-decoration:none;display:inline-block;box-shadow:0 10px 26px -10px rgba(214,162,74,.55);transition:transform .18s ease}
+.btn-primary:hover{transform:translateY(-2px)}
+.btn-secondary{padding:1rem 1.6rem;background:transparent;border:1px solid var(--border2);color:var(--text);border-radius:10px;font-family:var(--sans);font-weight:600;font-size:.87rem;text-decoration:none;display:inline-block}
+.reassure{text-align:center;margin-top:1.2rem;font-family:var(--sans);font-weight:600;font-size:.76rem;color:var(--text3)}
+
+/* wildcard: the handwritten note card */
+.note{max-width:480px;margin:4.5rem auto 4rem;background:var(--paper);color:#2a2417;border-radius:6px;padding:2rem 2.1rem 1.9rem;transform:rotate(-1.1deg);box-shadow:0 22px 44px -18px rgba(0,0,0,.55),0 2px 0 rgba(0,0,0,.05);position:relative}
+.note::after{content:'';position:absolute;top:-14px;left:50%;transform:translateX(-50%) rotate(-3deg);width:64px;height:26px;background:rgba(214,162,74,.55);border:1px solid rgba(214,162,74,.7);opacity:.85}
+.note h2{font-family:var(--hand);font-weight:600;font-size:2.1rem;line-height:1.2;color:#3c2f16;margin-bottom:.6rem}
+.note p{font-family:var(--serif);font-style:italic;font-size:1.02rem;line-height:1.65;color:#4a3d24}
+
+.options-preview{display:flex;gap:.7rem;justify-content:center;flex-wrap:wrap;margin:2.8rem 0}
+.opt-chip{background:var(--card);border:1px solid var(--border2);border-radius:99px;padding:.55rem 1.1rem;font-size:.83rem;font-weight:600;display:flex;align-items:center;gap:.5rem;color:var(--text2)}
+
+.section-title{font-family:var(--serif);font-weight:500;font-size:1.7rem;text-align:center;margin:0 0 .4rem;color:var(--parchment)}
+.section-sub{text-align:center;color:var(--text3);font-size:.92rem;max-width:440px;margin:0 auto 2.2rem}
+
+.reasons{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin:2.2rem 0 3.5rem}
+.reason{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.6rem 1.4rem}
+.reason .icon{font-size:1.5rem;margin-bottom:.8rem;display:block}
+.reason h3{font-family:var(--serif);font-weight:600;font-size:1.05rem;margin-bottom:.5rem;color:var(--parchment)}
+.reason p{color:var(--text2);font-size:.87rem;line-height:1.6}
+
+.grandparents{background:var(--card2);border:1px solid var(--border2);border-radius:16px;padding:1.8rem 1.9rem;margin:3rem 0;display:flex;gap:1.2rem;align-items:flex-start}
+.grandparents .icon{font-size:1.9rem;flex-shrink:0}
+.grandparents h3{font-family:var(--serif);font-weight:600;font-size:1.1rem;margin-bottom:.4rem;color:var(--parchment)}
 .grandparents p{color:var(--text2);font-size:.9rem;line-height:1.6}
-.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin:2.2rem 0 3rem}
-.step{background:var(--black3);border:1px solid var(--border);border-radius:12px;padding:1.1rem;text-align:center}
-.step .n{font-family:var(--mono);color:var(--gold);font-size:.75rem;margin-bottom:.35rem}
+
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin:0 0 3.5rem}
+.step{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:1.2rem 1rem;text-align:center}
+.step .n{font-family:var(--serif);font-style:italic;color:var(--brass-light);font-size:1.15rem;margin-bottom:.4rem}
 .step .t{font-size:.85rem;color:var(--text2)}
-.options-preview{display:flex;gap:.9rem;justify-content:center;flex-wrap:wrap;margin:2.5rem 0}
-.opt-chip{background:var(--black2);border:1px solid var(--border2);border-radius:99px;padding:.6rem 1.2rem;font-size:.85rem;display:flex;align-items:center;gap:.5rem}
-.who{background:var(--black2);border:1px solid var(--border);border-radius:16px;padding:1.8rem;margin:3rem 0;text-align:center}
-.who h2{font-family:var(--serif);font-size:1.6rem;margin-bottom:.7rem}
-.who p{color:var(--text2);max-width:600px;margin:0 auto}
-.final{text-align:center;margin-top:3.5rem;padding-top:2.5rem;border-top:1px solid var(--border)}
-.final h2{font-family:var(--serif);font-size:2.1rem;line-height:1.25;margin-bottom:.8rem}
-.final p{color:var(--text2);margin-bottom:1.6rem}
-@media(max-width:720px){.reasons,.steps{grid-template-columns:1fr}.grandparents{flex-direction:column}}
+
+.final{text-align:center;margin-top:3.5rem;padding:2.8rem 1.5rem;border-radius:20px;background:linear-gradient(160deg,var(--card2),var(--bg2));border:1px solid var(--border2)}
+.final h2{font-family:var(--serif);font-weight:500;font-size:2rem;line-height:1.25;margin-bottom:.9rem;color:var(--parchment)}
+.final h2 em{font-style:italic;color:var(--brass-light);font-weight:420}
+.final p{color:var(--text2);margin-bottom:1.7rem;font-size:.98rem}
+
+footer{max-width:760px;margin:3.5rem auto 0;padding:1.6rem 1.2rem 0;border-top:1px solid var(--border);text-align:center;position:relative;z-index:2}
+footer .flinks{display:flex;justify-content:center;gap:1.4rem;flex-wrap:wrap;font-size:.78rem}
+footer .flinks a{color:var(--text3);text-decoration:none}
+footer .flinks a:hover{color:var(--text2)}
+
+@media(max-width:680px){.reasons,.steps{grid-template-columns:1fr}.grandparents{flex-direction:column}.note{transform:rotate(0)}}
 </style>
 </head>
 <body>
@@ -65,76 +105,84 @@ h1 em{color:var(--gold);font-style:italic}
   </div>
 </div>
 <div class="wrap">
-  <div class="hero">
-    <span class="eyebrow" id="tEyebrow">🎄 Vianočný darček, ktorý má zmysel</span>
-    <h1 id="tH1">Nie ďalšia vec<br>pod stromček. <em>Jeho budúcnosť.</em></h1>
-    <p class="sub" id="tSub">Vidíš, ako sa posledné mesiace trápi s učením a v duchu sa bojí, či to stihne. Nemôžeš mu urobiť prijímačky za neho — ale môžeš mu dať niečo, čo mu pri nich naozaj pomôže. Nie ďalšiu vec, ktorá skončí v skrini.</p>
+  <div class="hero reveal in">
+    <span class="eyebrow" id="tEyebrow">🎄 Vianočný darček</span>
+    <h1 id="tH1">Tento rok mu pod stromček daj niečo,<br><em>čo naozaj pomôže</em> pri prijímačkách.</h1>
+    <p class="sub" id="tSub">Darčeková karta SP Tréner — Premium, Elite alebo kurz podľa jeho výberu. Vytlačíš, zabalíš, a dáš mu niečo, na čom mu bude skutočne záležať.</p>
     <div class="cta-row">
-      <a class="btn-primary" href="/darcekova-karta" id="tCta1">Vybrať vianočný darček →</a>
+      <a class="btn-primary" href="/darcekova-karta" id="tCta1">Vybrať darček →</a>
       <a class="btn-secondary" href="#pre-koho" id="tCta2">Pre koho je to ↓</a>
     </div>
     <div class="reassure" id="tReassure">🖨️ Karta je hneď na stiahnutie a vytlačenie — stihneš to aj na Štedrý večer.</div>
   </div>
 
-  <div class="moment">
-    <span class="quote-mark">"</span>
-    <h2 id="tMomentTitle">Rozbalí darček. Najprv nechápe.</h2>
-    <p id="tMomentDesc">Nie je to hračka ani oblečenie. Prečíta si, čo to je — a dôjde mu, že si mu práve dal niečo, čo mu skutočne pomôže. Nie preto, že si nevedel, čo iné kúpiť. Ale preto, že ti na jeho úspechu naozaj záleží.</p>
+  <div class="note reveal">
+    <h2 id="tMomentTitle">Rozbalí to. Najprv nechápe.</h2>
+    <p id="tMomentDesc">Nie je to hračka ani oblečenie. Prečíta si, čo to je — a dôjde mu, že si mu dal niečo, čo mu skutočne pomôže. Nie preto, že si nevedel, čo iné kúpiť. Ale preto, že ti na jeho úspechu naozaj záleží.</p>
   </div>
 
-  <div class="options-preview">
+  <div class="options-preview reveal">
     <div class="opt-chip">💎 <span id="tChip1">Premium na mesiace</span></div>
     <div class="opt-chip">🔥 <span id="tChip2">Elite s AI mentorom</span></div>
     <div class="opt-chip">🎓 <span id="tChip3">1 kurz podľa výberu</span></div>
     <div class="opt-chip">⚡ <span id="tChip4">Kombinácia viacerých</span></div>
   </div>
 
-  <div class="who" id="pre-koho">
-    <h2 id="tWhoTitle">Pre rodičov, starých rodičov aj súrodencov</h2>
-    <p id="tWhoDesc">Máš doma alebo v rodine niekoho, kto sa tento rok pripravuje na prijímačky na vysokú školu? Namiesto hádania, čo by sa mu/jej páčilo, mu daruj niečo s jasným zmyslom — pokoj a náskok, ktoré si vďaka poriadnej príprave zaslúži.</p>
+  <div id="pre-koho" class="reveal" style="margin:3.5rem 0 0">
+    <h2 class="section-title" id="tWhoTitle">Pre rodičov, starých rodičov aj súrodencov</h2>
+    <p class="section-sub" id="tWhoDesc">Máš v rodine niekoho, kto sa tento rok pripravuje na prijímačky? Namiesto hádania, čo by sa mu páčilo, mu daruj niečo s jasným zmyslom.</p>
   </div>
 
-  <div class="reasons">
+  <div class="reasons reveal">
     <div class="reason">
-      <span class="icon">💛</span>
-      <h3 id="tR1Title">Vieš, že sa trápi</h3>
-      <p id="tR1Desc">Večery pri knihách, stres, či to zvládne. Ty to vidíš a chceš pomôcť — toto je spôsob, ako pomôcť naozaj, nie len povzbudivými slovami.</p>
+      <span class="icon">🎯</span>
+      <h3 id="tR1Title">Naozaj to použije</h3>
+      <p id="tR1Desc">Žiadna vec, čo skončí zabudnutá v skrini. Prístup, ktorý mu reálne pomôže pripraviť sa — nie len dobre vyzerajúci darček.</p>
     </div>
     <div class="reason">
       <span class="icon">🧩</span>
       <h3 id="tR2Title">Nehádaš, čo chce</h3>
-      <p id="tR2Desc">Ty daruješ kartu pod stromček, on/ona si pri uplatnení sám/sama vyberie presne ten plán alebo kurz, ktorý mu sedí.</p>
+      <p id="tR2Desc">Ty daruješ kartu, on/ona si pri uplatnení sám/sama vyberie presne ten plán alebo kurz, ktorý mu sedí. Nemôžeš to netrafiť.</p>
     </div>
     <div class="reason">
       <span class="icon">🎁</span>
-      <h3 id="tR3Title">Aj na poslednú chvíľu</h3>
-      <p id="tR3Desc">Po zaplatení dostaneš PDF kartu s kódom — vytlačíš, zabalíš pod stromček, alebo pošleš rovno na Vianoce.</p>
+      <h3 id="tR3Title">Máš čo dať do rúk</h3>
+      <p id="tR3Desc">Po zaplatení dostaneš PDF kartu s kódom — vytlačíš, zabalíš pod stromček, aj na poslednú chvíľu, aj na Štedrý večer.</p>
     </div>
   </div>
 
-  <div class="grandparents">
+  <div class="grandparents reveal">
     <span class="icon">👵🎅</span>
     <div>
       <h3 id="tGpTitle">Nemusíš rozumieť aplikáciám</h3>
-      <p id="tGpDesc">Ak si starý rodič a nevieš si celkom predstaviť, čo je "online príprava" — nevadí. Stačí vytlačiť kartu a dať mu ju s láskou. Zvyšok si vyberie a spraví on/ona sám/sama.</p>
+      <p id="tGpDesc">Ak si starý rodič a "online príprava" ti nič nehovorí — nevadí. Stačí vytlačiť kartu a dať mu ju s láskou. Zvyšok si vyberie a spraví on/ona sám/sama.</p>
     </div>
   </div>
 
-  <div>
-    <h2 style="font-family:var(--serif);font-size:1.6rem;text-align:center;margin-bottom:.5rem" id="tHowTitle">Ako to funguje</h2>
+  <div class="reveal">
+    <h2 class="section-title" id="tHowTitle">Ako to funguje</h2>
+    <p class="section-sub" id="tHowSub">Tri kroky, pár minút, hotovo.</p>
     <div class="steps">
-      <div class="step"><div class="n">01</div><div class="t" id="tStep1">Vyberieš typ a dĺžku darčeka</div></div>
-      <div class="step"><div class="n">02</div><div class="t" id="tStep2">Zaplatíš bezpečne cez Stripe</div></div>
-      <div class="step"><div class="n">03</div><div class="t" id="tStep3">Dostaneš PDF na vytlačenie s kódom</div></div>
+      <div class="step"><div class="n">Prvý</div><div class="t" id="tStep1">Vyberieš typ a dĺžku darčeka</div></div>
+      <div class="step"><div class="n">Druhý</div><div class="t" id="tStep2">Zaplatíš bezpečne cez Stripe</div></div>
+      <div class="step"><div class="n">Tretí</div><div class="t" id="tStep3">Dostaneš PDF na vytlačenie s kódom</div></div>
     </div>
   </div>
 
-  <div class="final">
-    <h2 id="tFinalTitle">Daj mu tento rok niečo,<br>na čo si spomenie, keď to dokáže</h2>
-    <p id="tFinalSub">Vyber vianočný darček za pár minút. Vytlačíš, zabalíš — a spravil si niečo, čo má naozaj zmysel.</p>
-    <a class="btn-primary" href="/darcekova-karta" id="tFinalCta">Vybrať vianočný darček →</a>
+  <div class="final reveal">
+    <h2 id="tFinalTitle">Daj mu tento rok niečo,<br><em>na čo si spomenie</em>, keď to dokáže.</h2>
+    <p id="tFinalSub">Vyber darček za pár minút. Vytlačíš, zabalíš — a spravil si niečo, čo má naozaj zmysel.</p>
+    <a class="btn-primary" href="/darcekova-karta" id="tFinalCta">Vybrať darček →</a>
   </div>
 </div>
+
+<footer>
+  <div class="flinks">
+    <a href="/" id="tFLink1">SP Tréner</a>
+    <a href="/legal.html" id="tFLink2">Obchodné podmienky</a>
+    <a href="mailto:juraj@jurajkurek.com" id="tFLink3">Kontakt</a>
+  </div>
+</footer>
 
 <script>
 (function() {
@@ -146,43 +194,49 @@ h1 em{color:var(--gold);font-style:italic}
 
 const T = {
   sk: {
-    eyebrow: '🎄 Vianočný darček, ktorý má zmysel', h1: 'Nie ďalšia vec<br>pod stromček. <em>Jeho budúcnosť.</em>',
-    sub: 'Vidíš, ako sa posledné mesiace trápi s učením a v duchu sa bojí, či to stihne. Nemôžeš mu urobiť prijímačky za neho — ale môžeš mu dať niečo, čo mu pri nich naozaj pomôže. Nie ďalšiu vec, ktorá skončí v skrini.',
-    cta1: 'Vybrať vianočný darček →', cta2: 'Pre koho je to ↓',
+    eyebrow: '🎄 Vianočný darček',
+    h1: 'Tento rok mu pod stromček daj niečo,<br><em>čo naozaj pomôže</em> pri prijímačkách.',
+    sub: 'Darčeková karta SP Tréner — Premium, Elite alebo kurz podľa jeho výberu. Vytlačíš, zabalíš, a dáš mu niečo, na čom mu bude skutočne záležať.',
+    cta1: 'Vybrať darček →', cta2: 'Pre koho je to ↓',
     reassure: '🖨️ Karta je hneď na stiahnutie a vytlačenie — stihneš to aj na Štedrý večer.',
-    momentTitle: 'Rozbalí darček. Najprv nechápe.',
-    momentDesc: 'Nie je to hračka ani oblečenie. Prečíta si, čo to je — a dôjde mu, že si mu práve dal niečo, čo mu skutočne pomôže. Nie preto, že si nevedel, čo iné kúpiť. Ale preto, že ti na jeho úspechu naozaj záleží.',
+    momentTitle: 'Rozbalí to. Najprv nechápe.',
+    momentDesc: 'Nie je to hračka ani oblečenie. Prečíta si, čo to je — a dôjde mu, že si mu dal niečo, čo mu skutočne pomôže. Nie preto, že si nevedel, čo iné kúpiť. Ale preto, že ti na jeho úspechu naozaj záleží.',
     chip1: 'Premium na mesiace', chip2: 'Elite s AI mentorom', chip3: '1 kurz podľa výberu', chip4: 'Kombinácia viacerých',
     whoTitle: 'Pre rodičov, starých rodičov aj súrodencov',
-    whoDesc: 'Máš doma alebo v rodine niekoho, kto sa tento rok pripravuje na prijímačky na vysokú školu? Namiesto hádania, čo by sa mu/jej páčilo, mu daruj niečo s jasným zmyslom — pokoj a náskok, ktoré si vďaka poriadnej príprave zaslúži.',
-    r1Title: 'Vieš, že sa trápi', r1Desc: 'Večery pri knihách, stres, či to zvládne. Ty to vidíš a chceš pomôcť — toto je spôsob, ako pomôcť naozaj, nie len povzbudivými slovami.',
-    r2Title: 'Nehádaš, čo chce', r2Desc: 'Ty daruješ kartu pod stromček, on/ona si pri uplatnení sám/sama vyberie presne ten plán alebo kurz, ktorý mu sedí.',
-    r3Title: 'Aj na poslednú chvíľu', r3Desc: 'Po zaplatení dostaneš PDF kartu s kódom — vytlačíš, zabalíš pod stromček, alebo pošleš rovno na Vianoce.',
+    whoDesc: 'Máš v rodine niekoho, kto sa tento rok pripravuje na prijímačky? Namiesto hádania, čo by sa mu páčilo, mu daruj niečo s jasným zmyslom.',
+    r1Title: 'Naozaj to použije', r1Desc: 'Žiadna vec, čo skončí zabudnutá v skrini. Prístup, ktorý mu reálne pomôže pripraviť sa — nie len dobre vyzerajúci darček.',
+    r2Title: 'Nehádaš, čo chce', r2Desc: 'Ty daruješ kartu, on/ona si pri uplatnení sám/sama vyberie presne ten plán alebo kurz, ktorý mu sedí. Nemôžeš to netrafiť.',
+    r3Title: 'Máš čo dať do rúk', r3Desc: 'Po zaplatení dostaneš PDF kartu s kódom — vytlačíš, zabalíš pod stromček, aj na poslednú chvíľu, aj na Štedrý večer.',
     gpTitle: 'Nemusíš rozumieť aplikáciám',
-    gpDesc: 'Ak si starý rodič a nevieš si celkom predstaviť, čo je "online príprava" — nevadí. Stačí vytlačiť kartu a dať mu ju s láskou. Zvyšok si vyberie a spraví on/ona sám/sama.',
-    howTitle: 'Ako to funguje',
+    gpDesc: 'Ak si starý rodič a "online príprava" ti nič nehovorí — nevadí. Stačí vytlačiť kartu a dať mu ju s láskou. Zvyšok si vyberie a spraví on/ona sám/sama.',
+    howTitle: 'Ako to funguje', howSub: 'Tri kroky, pár minút, hotovo.',
     step1: 'Vyberieš typ a dĺžku darčeka', step2: 'Zaplatíš bezpečne cez Stripe', step3: 'Dostaneš PDF na vytlačenie s kódom',
-    finalTitle: 'Daj mu tento rok niečo,<br>na čo si spomenie, keď to dokáže', finalSub: 'Vyber vianočný darček za pár minút. Vytlačíš, zabalíš — a spravil si niečo, čo má naozaj zmysel.', finalCta: 'Vybrať vianočný darček →',
+    finalTitle: 'Daj mu tento rok niečo,<br><em>na čo si spomenie</em>, keď to dokáže.',
+    finalSub: 'Vyber darček za pár minút. Vytlačíš, zabalíš — a spravil si niečo, čo má naozaj zmysel.', finalCta: 'Vybrať darček →',
+    fLink1: 'SP Tréner', fLink2: 'Obchodné podmienky', fLink3: 'Kontakt',
     pageTitle: 'Vianočný darček pre budúceho vysokoškoláka — SP Tréner'
   },
   cs: {
-    eyebrow: '🎄 Vánoční dárek, který má smysl', h1: 'Ne další věc<br>pod stromeček. <em>Jeho budoucnost.</em>',
-    sub: 'Vidíš, jak se poslední měsíce trápí s učením a v duchu se bojí, jestli to stihne. Nemůžeš mu udělat přijímačky za něj — ale můžeš mu dát něco, co mu při nich opravdu pomůže. Ne další věc, která skončí ve skříni.',
-    cta1: 'Vybrat vánoční dárek →', cta2: 'Pro koho to je ↓',
+    eyebrow: '🎄 Vánoční dárek',
+    h1: 'Letos mu pod stromeček dej něco,<br><em>co opravdu pomůže</em> u přijímaček.',
+    sub: 'Dárková karta SP Tréner — Premium, Elite nebo kurz podle jeho výběru. Vytiskneš, zabalíš, a dáš mu něco, na čem mu bude opravdu záležet.',
+    cta1: 'Vybrat dárek →', cta2: 'Pro koho to je ↓',
     reassure: '🖨️ Karta je hned ke stažení a vytisknutí — stihneš to i na Štědrý den.',
-    momentTitle: 'Rozbalí dárek. Nejdřív nechápe.',
-    momentDesc: 'Není to hračka ani oblečení. Přečte si, co to je — a dojde mu, že jsi mu právě dal něco, co mu skutečně pomůže. Ne proto, že jsi nevěděl, co jiného koupit. Ale proto, že ti na jeho úspěchu opravdu záleží.',
+    momentTitle: 'Rozbalí to. Nejdřív nechápe.',
+    momentDesc: 'Není to hračka ani oblečení. Přečte si, co to je — a dojde mu, že jsi mu dal něco, co mu skutečně pomůže. Ne proto, že jsi nevěděl, co jiného koupit. Ale proto, že ti na jeho úspěchu opravdu záleží.',
     chip1: 'Premium na měsíce', chip2: 'Elite s AI mentorem', chip3: '1 kurz dle výběru', chip4: 'Kombinace více',
     whoTitle: 'Pro rodiče, prarodiče i sourozence',
-    whoDesc: 'Máš doma nebo v rodině někoho, kdo se letos připravuje na přijímačky na vysokou školu? Místo hádání, co by se mu/jí líbilo, mu daruj něco s jasným smyslem — klid a náskok, který si díky pořádné přípravě zaslouží.',
-    r1Title: 'Víš, že se trápí', r1Desc: 'Večery u knih, stres, jestli to zvládne. Ty to vidíš a chceš pomoct — tohle je způsob, jak pomoct opravdu, ne jen povzbudivými slovy.',
-    r2Title: 'Nehádáš, co chce', r2Desc: 'Ty daruješ kartu pod stromeček, on/ona si při uplatnění sám/sama vybere přesně ten plán nebo kurz, který mu sedí.',
-    r3Title: 'I na poslední chvíli', r3Desc: 'Po zaplacení dostaneš PDF kartu s kódem — vytiskneš, zabalíš pod stromeček, nebo pošleš rovnou na Vánoce.',
+    whoDesc: 'Máš v rodině někoho, kdo se letos připravuje na přijímačky? Místo hádání, co by se mu líbilo, mu daruj něco s jasným smyslem.',
+    r1Title: 'Opravdu to použije', r1Desc: 'Žádná věc, co skončí zapomenutá ve skříni. Přístup, který mu reálně pomůže připravit se — ne jen dobře vypadající dárek.',
+    r2Title: 'Nehádáš, co chce', r2Desc: 'Ty daruješ kartu, on/ona si při uplatnění sám/sama vybere přesně ten plán nebo kurz, který mu sedí. Nemůžeš to netrefit.',
+    r3Title: 'Máš co dát do rukou', r3Desc: 'Po zaplacení dostaneš PDF kartu s kódem — vytiskneš, zabalíš pod stromeček, i na poslední chvíli, i na Štědrý den.',
     gpTitle: 'Nemusíš rozumět aplikacím',
-    gpDesc: 'Pokud jsi prarodič a nedovedeš si úplně představit, co je "online příprava" — nevadí. Stačí vytisknout kartu a dát mu ji s láskou. Zbytek si vybere a udělá on/ona sám/sama.',
-    howTitle: 'Jak to funguje',
+    gpDesc: 'Pokud jsi prarodič a "online příprava" ti nic neříká — nevadí. Stačí vytisknout kartu a dát mu ji s láskou. Zbytek si vybere a udělá on/ona sám/sama.',
+    howTitle: 'Jak to funguje', howSub: 'Tři kroky, pár minut, hotovo.',
     step1: 'Vybereš typ a délku dárku', step2: 'Zaplatíš bezpečně přes Stripe', step3: 'Dostaneš PDF k vytisknutí s kódem',
-    finalTitle: 'Dej mu letos něco,<br>na co si vzpomene, až to dokáže', finalSub: 'Vyber vánoční dárek za pár minut. Vytiskneš, zabalíš — a udělal jsi něco, co má opravdu smysl.', finalCta: 'Vybrat vánoční dárek →',
+    finalTitle: 'Dej mu letos něco,<br><em>na co si vzpomene</em>, až to dokáže.',
+    finalSub: 'Vyber dárek za pár minut. Vytiskneš, zabalíš — a udělal jsi něco, co má opravdu smysl.', finalCta: 'Vybrat dárek →',
+    fLink1: 'SP Tréner', fLink2: 'Obchodní podmínky', fLink3: 'Kontakt',
     pageTitle: 'Vánoční dárek pro budoucího vysokoškoláka — SP Tréner'
   }
 };
@@ -212,9 +266,10 @@ function setLang(lang) {
   document.getElementById('tR2Title').textContent = t.r2Title; document.getElementById('tR2Desc').textContent = t.r2Desc;
   document.getElementById('tR3Title').textContent = t.r3Title; document.getElementById('tR3Desc').textContent = t.r3Desc;
   document.getElementById('tGpTitle').textContent = t.gpTitle; document.getElementById('tGpDesc').textContent = t.gpDesc;
-  document.getElementById('tHowTitle').textContent = t.howTitle;
+  document.getElementById('tHowTitle').textContent = t.howTitle; document.getElementById('tHowSub').textContent = t.howSub;
   document.getElementById('tStep1').textContent = t.step1; document.getElementById('tStep2').textContent = t.step2; document.getElementById('tStep3').textContent = t.step3;
   document.getElementById('tFinalTitle').innerHTML = t.finalTitle; document.getElementById('tFinalSub').textContent = t.finalSub; document.getElementById('tFinalCta').textContent = t.finalCta;
+  document.getElementById('tFLink1').textContent = t.fLink1; document.getElementById('tFLink2').textContent = t.fLink2; document.getElementById('tFLink3').textContent = t.fLink3;
 }
 
 function detectInitialLang() {
@@ -223,6 +278,15 @@ function detectInitialLang() {
   return (navigator.language || '').toLowerCase().startsWith('cs') ? 'cs' : 'sk';
 }
 setLang(detectInitialLang());
+
+if ('IntersectionObserver' in window) {
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, { threshold: 0.15 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+} else {
+  document.querySelectorAll('.reveal').forEach(el => el.classList.add('in'));
+}
 </script>
 </body>
 </html>
