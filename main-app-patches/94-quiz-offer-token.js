@@ -26,7 +26,7 @@ const ANCHOR = `const MEMBERSHIP_PRICES = { premium: { 3: 2700, 6: 4900, 12: 970
 const CLASSIC_MEMBERSHIP_PRICES = { premium: { 3: 2970, 6: 5940, 12: 11880 }, elite: { 3: 5970, 6: 11940, 12: 23880 } };
 
 app.post('/api/membership/checkout', rateLimit, async (req, res) => {
-  const { email, tier, months, pricingMode } = req.body || {};
+  const { email, tier, months, pricingMode, refCode } = req.body || {};
   if (!email || !email.includes('@')) return res.status(400).json({ error: 'Neplatný email.' });
   const cleanTier = tier === 'elite' ? 'elite' : 'premium';
   const cleanMonths = Number(months);
@@ -62,7 +62,7 @@ app.get('/api/quiz-offer/validate', rateLimit, async (req, res) => {
 });
 
 app.post('/api/membership/checkout', rateLimit, async (req, res) => {
-  let { email, tier, months, pricingMode } = req.body || {};
+  let { email, tier, months, pricingMode, refCode } = req.body || {};
   const token = (req.body && req.body.token || '').toString();
   // Token z e-mailu po teste odboru — email aj cena SA NEDÔVERUJÚ klientovi,
   // vyriešia sa server-side z career_quiz_results (na rozdiel od pôvodnej
