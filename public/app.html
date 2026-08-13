@@ -4037,9 +4037,10 @@ let currentUser=null;
 
 // Direct upgrade links (e.g. /app?upgrade=premium or /app?upgrade=elite):
 // capture intent now, checkout auto-starts once login (existing or fresh) resolves.
+// /app?upgrade=free auto-triggers login only, no checkout — for the free tier.
 function checkUpgradeLinkParam(){
   const plan=new URLSearchParams(window.location.search).get('upgrade');
-  if(plan!=='premium'&&plan!=='elite')return;
+  if(plan!=='premium'&&plan!=='elite'&&plan!=='free')return;
   // Preserve any URL hash (Supabase's OAuth tokens land here on the redirect
   // back) — the Supabase client is constructed later in this file and needs
   // to read it; stripping it here would silently discard a fresh login.
@@ -5394,7 +5395,7 @@ async function onUserLoggedIn(user,token){
   loadScioDateFromCloud();
   attachPendingPartnerRef();
   const pendingUpgrade=localStorage.getItem('vsp_pending_upgrade');
-  if(pendingUpgrade){localStorage.removeItem('vsp_pending_upgrade');if(pendingUpgrade==='elite')startEliteCheckout();else startCheckout();}
+  if(pendingUpgrade){localStorage.removeItem('vsp_pending_upgrade');if(pendingUpgrade==='elite')startEliteCheckout();else if(pendingUpgrade==='premium')startCheckout();}
 }
 async function attachPendingPartnerRef(){
   try{
