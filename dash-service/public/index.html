@@ -379,6 +379,10 @@ async function renderOverview() {
   const m = [...Object.values(data.main), ...Object.values(data.partner), ...Object.values(data.ads)];
   const html = `
     <div class="pagehead"><h2>Prehľad</h2><button class="btn secondary" onclick="navigate('overview')">Obnoviť</button></div>
+    <div class="table-wrap" style="margin-bottom:1.25rem;padding:1rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap">
+      <div>sptrener.online: <span id="maintStatus">načítavam…</span></div>
+      <button id="maintToggleBtn" class="btn" onclick="toggleMaintenance()" disabled>…</button>
+    </div>
     <div class="grid">
       ${m.map(x => metricCard(x, v => Array.isArray(v) ? v.map(r => `${r.plan||r.n}: ${r.n||''}`).join(', ') || '0' : (typeof v === 'number' ? v : ''))).join('')}
       ${metricCard(data.bugReports, v => v)}
@@ -395,6 +399,44 @@ async function renderOverview() {
       </table>
     </div>`;
   $('#main').innerHTML = html;
+  loadMaintenanceStatus();
+}
+
+async function loadMaintenanceStatus() {
+  const statusEl = document.getElementById('maintStatus');
+  const btnEl = document.getElementById('maintToggleBtn');
+  if (!statusEl || !btnEl) return;
+  try {
+    const d = await api('/api/dash/maintenance');
+    if (d.enabled) {
+      statusEl.innerHTML = '<span class="pill open">VYPNUTÁ (maintenance)</span>';
+      btnEl.textContent = 'Zapnúť appku';
+    } else {
+      statusEl.innerHTML = '<span class="pill resolved">Beží normálne</span>';
+      btnEl.textContent = 'Vypnúť appku (maintenance)';
+    }
+    btnEl.disabled = false;
+  } catch (e) {
+    statusEl.innerHTML = '<span class="pill open">Chyba načítania</span>';
+  }
+}
+
+async function toggleMaintenance() {
+  const btn = document.getElementById('maintToggleBtn');
+  if (!btn) return;
+  const turningOn = btn.textContent.indexOf('Vypnúť') === 0; // button label reflects the action, not current state
+  const msg = turningOn
+    ? 'Naozaj chceš appku VYPNÚŤ? Všetci návštevníci budú presmerovaní na /unavalible, bez ohľadu na to, akú stránku otvoria.'
+    : 'Naozaj chceš appku znova zapnúť?';
+  if (!confirm(msg)) return;
+  btn.disabled = true;
+  try {
+    await api('/api/dash/maintenance', { method: 'POST', body: JSON.stringify({ enabled: turningOn }) });
+    await loadMaintenanceStatus();
+  } catch (e) {
+    alert('Chyba: ' + e.message);
+    btn.disabled = false;
+  }
 }
 
 // ─────────────────────────── TRENDS ───────────────────────────
