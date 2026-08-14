@@ -81,11 +81,17 @@ SEO pravidlá pre výstup (rovnaká appka to zobrazuje na sptrener.online/blog/:
 Na konci — a IBA na konci, po dokončení vyhľadávania — odpovedz POSLEDNÝM textovým blokom, ktorý obsahuje IBA validný JSON objekt a nič iné (žiadny komentár pred ani za ním), v tvare:
 {"title":"...", "slug":"kebab-case-slug-bez-diakritiky", "excerpt":"...", "content":"...", "tag":"jeden z existujúcich alebo nový vhodný tag", "readTime":"X min čítania", "trendReason":"1 veta - aký konkrétny vyhľadávací trend/otázku článok rieši"}`;
 
+    // claude-haiku-4-5 namiesto claude-sonnet-5 (pôvodný default) — 3x
+    // lacnejší per-token a pre "napíš SEO článok podľa tejto témy" úlohu
+    // viac než dostatočný. Spolu s 1 web_search (namiesto 5) a nižším
+    // maxTokens (900-slovný článok reálne potrebuje ~1800, nie 4000) ide
+    // odhadovaný náklad na beh z desiatok centov na ~1-2 centy.
     const raw = await callClaude({
       system,
       messages: [{ role: 'user', content: 'Zisti aktuálne trendy vo vyhľadávaní a navrhni článok.' }],
-      maxTokens: 4000,
-      tools: [{ type: 'web_search_20260209', name: 'web_search', max_uses: 5 }]
+      model: 'claude-haiku-4-5',
+      maxTokens: 1800,
+      tools: [{ type: 'web_search_20260209', name: 'web_search', max_uses: 1 }]
     });
     const jsonMatch = raw.match(/\{[\s\S]*\}/);
     if (!jsonMatch) throw new Error('AI nevrátila platný JSON.');
