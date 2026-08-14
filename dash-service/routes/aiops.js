@@ -44,9 +44,57 @@ async function logAction({ actionType, targetSystem, targetId, reasoning, result
   }
 }
 
+// Poistka proti presne tomu, čo sa reálne stalo: appka failovala 10x za
+// sebou po dobu týždňa, každý pokus stál peniaze, a nikto si to nevšimol,
+// kým sa minul kredit. Po 2 zlyhaniach v rade sa ďalšie behy PRESKOČIA
+// (žiadne Claude volanie, žiadny náklad) až kým niekto ručne nespustí
+// úspešný beh cez "Spustiť teraz" v dashboarde — úspech počítadlo vynuluje.
+const FAILURE_STREAK_KEY = 'aiops_blog_failure_streak';
+const FAILURE_STREAK_LIMIT = 2;
+
+async function getFailureStreak() {
+  try {
+    const { data } = await mainDb.from('app_settings').select('value').eq('key', FAILURE_STREAK_KEY).maybeSingle();
+    const n = data ? Number(data.value) : 0;
+    return Number.isFinite(n) ? n : 0;
+  } catch {
+    return 0;
+  }
+}
+
+async function setFailureStreak(n) {
+  try {
+    await mainDb.from('app_settings').upsert(
+      { key: FAILURE_STREAK_KEY, value: n, updated_at: new Date().toISOString() },
+      { onConflict: 'key' }
+    );
+  } catch {
+    // ak sa počítadlo nepodarí zapísať, ďalší beh jednoducho skúsi znova — bezpečné zlyhanie
+  }
+}
+
+// AI modely majú tendenciu zabaliť finálny JSON do ```json ... ``` code
+// fence napriek inštrukcii v prompte, aby to nerobili — skús fence najprv,
+// až potom padni na pôvodný "prvá { po poslednú }" regex.
+function extractJson(raw) {
+  const fenced = raw.match(/```(?:json)?\s*(\{[\s\S]*?\})\s*```/);
+  if (fenced) return fenced[1];
+  const bare = raw.match(/\{[\s\S]*\}/);
+  return bare ? bare[0] : null;
+}
+
 async function runBlogTrendPublisher() {
   if (!AIOPS_BLOG_ENABLED) {
     return { ok: false, error: 'Disabled (DASH_AIOPS_BLOG_ENABLED is not "true") — no Claude call made, no cost incurred.' };
+  }
+  const streak = await getFailureStreak();
+  if (streak >= FAILURE_STREAK_LIMIT) {
+    await logAction({
+      actionType: 'blog_draft_published', targetSystem: 'main',
+      reasoning: `Preskočené — ${streak} zlyhaní za sebou. Spusti ručne cez "Spustiť teraz", nech sa overí, že to funguje, potom sa počítadlo vynuluje.`,
+      result: 'failed', detail: { skipped: true, failureStreak: streak }
+    });
+    return { ok: false, error: `Skipped — ${streak} consecutive failures, no Claude call made.` };
   }
   try {
     const { data: allTagged, error: tagErr } = await mainDb.from('blog_posts').select('tag, created_at').not('tag', 'is', null).limit(2000);
@@ -93,9 +141,9 @@ Na konci — a IBA na konci, po dokončení vyhľadávania — odpovedz POSLEDN�
       maxTokens: 1800,
       tools: [{ type: 'web_search_20260209', name: 'web_search', max_uses: 1 }]
     });
-    const jsonMatch = raw.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error('AI nevrátila platný JSON.');
-    const draft = JSON.parse(jsonMatch[0]);
+    const jsonStr = extractJson(raw);
+    if (!jsonStr) throw new Error('AI nevrátila platný JSON.');
+    const draft = JSON.parse(jsonStr);
     if (!draft.title || !draft.slug || !draft.content) throw new Error('AI návrh chýba povinné polia.');
 
     const { data: existing, error: existingErr } = await mainDb.from('blog_posts').select('id').eq('slug', draft.slug);
@@ -117,9 +165,11 @@ Na konci — a IBA na konci, po dokončení vyhľadávania — odpovedz POSLEDN�
         : `Tag/téma "${draft.tag}" sa dlho nepokrývala. AI vygenerovala nový článok a ${AUTO_PUBLISH_BLOG ? 'rovno ho publikovala' : 'uložila ako draft na schválenie'}.`,
       result: 'success', detail: { slug, title: draft.title, tag: draft.tag, trendReason: draft.trendReason || null }
     });
+    await setFailureStreak(0);
     return { ok: true, slug, title: draft.title, published: AUTO_PUBLISH_BLOG };
   } catch (err) {
     await logAction({ actionType: 'blog_draft_published', targetSystem: 'main', reasoning: 'Pokus o automatický blog článok zlyhal.', result: 'failed', detail: { error: err.message } });
+    await setFailureStreak(streak + 1);
     return { ok: false, error: err.message };
   }
 }

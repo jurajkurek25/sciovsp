@@ -52,8 +52,15 @@ async function getNewestUntriedModel(triedIds) {
 async function callClaude({ system, messages, maxTokens = 1500, tools, model: forcedModel }) {
   if (!ANTHROPIC_API_KEY) throw new Error('ANTHROPIC_API_KEY nie je nastavený.');
   // Web search predlžuje odpoveď (viacero serverových vyhľadávaní pred finálnou
-  // odpoveďou) — dlhší timeout len keď je tools naozaj použité.
-  const timeoutMs = tools && tools.length ? 240000 : 60000;
+  // odpoveďou) — dlhší timeout len keď je tools naozaj použité. POZOR: keď
+  // klient timeoutne (AbortController), Anthropic serverovo často dokončí
+  // (a naúčtuje) rozpracovaný request aj tak — dlhší timeout tu neznamená
+  // "bezpečnejšie", len že sa čaká dlhšie na niečo, čo sa možno aj tak
+  // zaplatí. Bývalých 240s (4 min) bolo príliš veľa pre bežný beh a viedlo
+  // k opakovaným "This operation was aborted" chybám, ktoré stále stáli
+  // peniaze bez akéhokoľvek výsledku — 90s je dosť aj pre viacero
+  // web_search kôl pri rozumnom max_uses.
+  const timeoutMs = tools && tools.length ? 90000 : 60000;
 
   // Volajúci si môže vynútiť konkrétny (typicky lacný) model — vtedy sa
   // NIKDY neeskaluje na "najnovší dostupný" pri chybe, lebo najnovší často
