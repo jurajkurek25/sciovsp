@@ -1,6 +1,30 @@
 <!DOCTYPE html>
 <html lang="sk">
 <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SP Tréner — AI príprava na prijímačky na vysokú školu</title>
+<meta name="description" content="AI tréner na prijímačky VŠP aj vlastné testy 39 slovenských a českých univerzít. Neobmedzené AI úlohy, reálna simulácia, osobný AI mentor. Prvé 3 testy zadarmo.">
+<link rel="canonical" href="https://sptrener.online/">
+<meta name="robots" content="index, follow">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="SP Tréner">
+<meta property="og:locale" content="sk_SK">
+<meta property="og:locale:alternate" content="cs_CZ">
+<meta property="og:url" content="https://sptrener.online/">
+<meta property="og:title" content="SP Tréner — AI príprava na prijímačky na vysokú školu">
+<meta property="og:description" content="AI tréner na prijímačky VŠP aj vlastné testy 39 slovenských a českých univerzít. Neobmedzené AI úlohy, reálna simulácia, osobný AI mentor. Prvé 3 testy zadarmo.">
+<meta property="og:image" content="https://sptrener.online/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="SP Tréner — AI príprava na prijímačky na vysokú školu">
+<meta name="twitter:description" content="AI tréner na prijímačky VŠP aj vlastné testy 39 slovenských a českých univerzít. Prvé 3 testy zadarmo.">
+<meta name="twitter:image" content="https://sptrener.online/og-image.png">
+<!-- Font resource hints moved up before all tracking scripts — lets the
+     browser start fetching the hero font as early in parsing as possible
+     instead of waiting for the tracker/session-check scripts below to
+     execute first (was a real contributor to LCP render delay). -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@300;400;500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
 <script id="Cookiebot" src="https://consent.cookiebot.com/uc.js" data-cbid="082b4b18-7f50-41b6-b374-be0c015a5fe0" type="text/javascript" async></script>
 <!-- Google tag (gtag.js) — deferred to idle time; dataLayer queue preserves gtag() calls made before it loads -->
 <script>
@@ -77,24 +101,6 @@ function closeBanner() {
   document.body.classList.remove('has-banner');
 }
 </script>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SP Tréner — AI príprava na prijímačky na vysokú školu</title>
-<meta name="description" content="AI tréner na prijímačky VŠP aj vlastné testy 39 slovenských a českých univerzít. Neobmedzené AI úlohy, reálna simulácia, osobný AI mentor. Prvé 3 testy zadarmo.">
-<link rel="canonical" href="https://sptrener.online/">
-<meta name="robots" content="index, follow">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="SP Tréner">
-<meta property="og:locale" content="sk_SK">
-<meta property="og:locale:alternate" content="cs_CZ">
-<meta property="og:url" content="https://sptrener.online/">
-<meta property="og:title" content="SP Tréner — AI príprava na prijímačky na vysokú školu">
-<meta property="og:description" content="AI tréner na prijímačky VŠP aj vlastné testy 39 slovenských a českých univerzít. Neobmedzené AI úlohy, reálna simulácia, osobný AI mentor. Prvé 3 testy zadarmo.">
-<meta property="og:image" content="https://sptrener.online/og-image.png">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="SP Tréner — AI príprava na prijímačky na vysokú školu">
-<meta name="twitter:description" content="AI tréner na prijímačky VŠP aj vlastné testy 39 slovenských a českých univerzít. Prvé 3 testy zadarmo.">
-<meta name="twitter:image" content="https://sptrener.online/og-image.png">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -157,8 +163,6 @@ function closeBanner() {
   ]
 }
 </script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@300;400;500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
 <style>
 :root{
   --black:#08080d;--black2:#0f0f18;--black3:#171724;
@@ -189,7 +193,7 @@ nav.scrolled{background:rgba(8,8,13,.9);backdrop-filter:blur(12px);border-color:
 .nav-link:hover{color:var(--text);border-color:var(--border2)}
 
 .lang-switcher{display:flex;align-items:center;gap:.35rem}
-.lang-btn{padding:.45rem .7rem;border:1px solid var(--border2);background:transparent;color:var(--text2);border-radius:6px;font-family:var(--mono);font-size:.72rem;letter-spacing:.06em;cursor:pointer;transition:all .2s}
+.lang-btn{padding:.45rem .7rem;border:1px solid var(--border2);background:transparent;color:var(--text2);border-radius:6px;font-family:var(--mono);font-size:.72rem;letter-spacing:.06em;cursor:pointer;transition:color .2s,border-color .2s}
 .lang-btn:hover{color:var(--text);border-color:var(--purple)}
 .lang-btn.active{color:var(--volt);border-color:var(--volt)}
 
@@ -201,7 +205,7 @@ nav.scrolled{background:rgba(8,8,13,.9);backdrop-filter:blur(12px);border-color:
 .hero-orb-3{width:300px;height:300px;background:rgba(255,63,94,.07);top:40%;right:10%;animation-delay:-2s}
 @keyframes orb-float{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(30px,-30px) scale(1.05)}66%{transform:translate(-20px,20px) scale(.95)}}
 .hero-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.3em;color:var(--volt);text-transform:uppercase;margin-bottom:1.75rem;position:relative;z-index:1;opacity:0;animation:fade-up .8s ease .2s forwards}
-.hero-headline{font-family:var(--serif);font-size:clamp(3rem,7vw,6.5rem);line-height:1.05;letter-spacing:-.02em;position:relative;z-index:1;max-width:900px;margin-bottom:1.5rem;opacity:0;animation:fade-up .8s ease .4s forwards}
+.hero-headline{font-family:var(--serif);font-size:clamp(3rem,7vw,6.5rem);line-height:1.05;letter-spacing:-.02em;position:relative;z-index:1;max-width:900px;margin-bottom:1.5rem}
 .hero-headline em{font-style:italic;color:var(--purple2)}
 .hero-headline .volt-text{color:var(--volt);font-style:normal}
 .hero-sub{font-size:1.1rem;color:var(--text2);font-weight:300;max-width:520px;line-height:1.7;position:relative;z-index:1;margin-bottom:1.75rem;opacity:0;animation:fade-up .8s ease .6s forwards}
