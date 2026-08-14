@@ -1,9 +1,10 @@
 // AutoSEO (getautoseo.com) webhook receiver.
 //
-// Self-contained on purpose: creates its own pg Pool from DATABASE_URL
-// instead of requiring ../db/pool, so it has zero dependency on the
-// exact internal file layout of whatever server.js is running this —
-// a missing/renamed shared module here must never crash app startup.
+// Deliberately zero-dependency: talks to Supabase via its REST API
+// (PostgREST) using Node's built-in global fetch() instead of the
+// @supabase/supabase-js SDK — that package isn't a dependency of the main
+// app (only dash-service/instructor-service have it), and a missing
+// module here must never crash server.js at require-time again.
 //
 // module.exports is a function you call as require('./routes/autoseoWebhook')(app)
 // as EARLY as possible (right after `const app = express()`), before the
@@ -24,14 +25,45 @@ const path = require('path');
 const fs = require('fs');
 const https = require('https');
 const http = require('http');
-const { Pool } = require('pg');
 
 const BASE_URL = (process.env.BASE_URL || 'https://sptrener.online').replace(/\/$/, '');
 const UPLOAD_DIR = path.join(__dirname, '..', 'public', 'uploads', 'autoseo');
 const UPLOAD_URL_PREFIX = '/uploads/autoseo/';
 
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-pool.on('error', (err) => console.error('[AutoSEO webhook] pg pool error:', err));
+const SUPABASE_URL = (process.env.SUPABASE_URL || '').replace(/\/$/, '');
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
+
+function supabaseHeaders(extra) {
+  return Object.assign(
+    {
+      apikey: SUPABASE_SERVICE_KEY,
+      Authorization: 'Bearer ' + SUPABASE_SERVICE_KEY,
+      'Content-Type': 'application/json',
+    },
+    extra || {}
+  );
+}
+
+async function supabaseUpsert(table, row, conflictColumn) {
+  const url = `${SUPABASE_URL}/rest/v1/${table}?on_conflict=${encodeURIComponent(conflictColumn)}`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: supabaseHeaders({ Prefer: 'resolution=merge-duplicates,return=minimal' }),
+    body: JSON.stringify(row),
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(`Supabase upsert failed (${res.status}): ${text}`);
+  }
+}
+
+async function supabaseSelectBySlug(table, slug) {
+  const url = `${SUPABASE_URL}/rest/v1/${table}?slug=eq.${encodeURIComponent(slug)}&select=*&limit=1`;
+  const res = await fetch(url, { headers: supabaseHeaders() });
+  if (!res.ok) return null;
+  const rows = await res.json();
+  return Array.isArray(rows) && rows.length ? rows[0] : null;
+}
 
 function timingSafeEqualStr(a, b) {
   const bufA = Buffer.from(String(a || ''), 'utf8');
@@ -181,6 +213,9 @@ module.exports = function registerAutoseoRoutes(app) {
   if (!TOKEN) {
     console.warn('[AutoSEO webhook] AUTOSEO_WEBHOOK_TOKEN not set — /api/webhooks/autoseo will reject every request with 401 until it is configured in .env.');
   }
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
+    console.warn('[AutoSEO webhook] SUPABASE_URL / SUPABASE_SERVICE_KEY not set — /api/webhooks/autoseo will fail on every non-test event until they are configured in .env.');
+  }
 
   app.post(
     '/api/webhooks/autoseo',
@@ -214,6 +249,9 @@ module.exports = function registerAutoseoRoutes(app) {
         if (!payload.id || !payload.title) {
           return res.status(400).json({ error: 'Missing required fields (id, title).' });
         }
+        if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
+          return res.status(500).json({ error: 'Server misconfigured: SUPABASE_URL/SUPABASE_SERVICE_KEY missing.' });
+        }
 
         const slug = payload.slug ? slugify(payload.slug) : slugify(payload.title);
         const basename = 'article-' + payload.id + '-' + Date.now();
@@ -237,9 +275,9 @@ module.exports = function registerAutoseoRoutes(app) {
           hero_image_url: heroLocal || payload.heroImageUrl || null,
           hero_image_alt: payload.heroImageAlt || null,
           infographic_image_url: infographicLocal || payload.infographicImageUrl || null,
-          keywords: JSON.stringify(payload.keywords || []),
+          keywords: payload.keywords || [],
           meta_keywords: payload.metaKeywords || null,
-          faq_schema: payload.faqSchema ? JSON.stringify(payload.faqSchema) : null,
+          faq_schema: payload.faqSchema || null,
           language_code: payload.languageCode || 'en',
           source_article_id: payload.sourceArticleId || null,
           status: payload.status || 'published',
@@ -248,40 +286,7 @@ module.exports = function registerAutoseoRoutes(app) {
           created_at: payload.createdAt || new Date().toISOString(),
         };
 
-        await pool.query(
-          `INSERT INTO autoseo_posts (
-             id, event, title, slug, published_url, meta_description,
-             content_html, content_markdown, hero_image_url, hero_image_alt,
-             infographic_image_url, keywords, meta_keywords, faq_schema,
-             language_code, source_article_id, status, published_at, updated_at, created_at
-           ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20)
-           ON CONFLICT (id) DO UPDATE SET
-             event = EXCLUDED.event,
-             title = EXCLUDED.title,
-             slug = EXCLUDED.slug,
-             published_url = EXCLUDED.published_url,
-             meta_description = EXCLUDED.meta_description,
-             content_html = EXCLUDED.content_html,
-             content_markdown = EXCLUDED.content_markdown,
-             hero_image_url = EXCLUDED.hero_image_url,
-             hero_image_alt = EXCLUDED.hero_image_alt,
-             infographic_image_url = EXCLUDED.infographic_image_url,
-             keywords = EXCLUDED.keywords,
-             meta_keywords = EXCLUDED.meta_keywords,
-             faq_schema = EXCLUDED.faq_schema,
-             language_code = EXCLUDED.language_code,
-             source_article_id = EXCLUDED.source_article_id,
-             status = EXCLUDED.status,
-             published_at = EXCLUDED.published_at,
-             updated_at = EXCLUDED.updated_at`,
-          [
-            row.id, row.event, row.title, row.slug, row.published_url, row.meta_description,
-            row.content_html, row.content_markdown, row.hero_image_url, row.hero_image_alt,
-            row.infographic_image_url, row.keywords, row.meta_keywords, row.faq_schema,
-            row.language_code, row.source_article_id, row.status, row.published_at,
-            row.updated_at, row.created_at,
-          ]
-        );
+        await supabaseUpsert('autoseo_posts', row, 'id');
 
         return res.status(200).json({ url: publicUrl });
       } catch (err) {
@@ -296,15 +301,16 @@ module.exports = function registerAutoseoRoutes(app) {
   // match, so existing blog posts keep working exactly as before.
   app.get('/blog/:slug', async (req, res, next) => {
     try {
-      const { rows } = await pool.query('SELECT * FROM autoseo_posts WHERE slug = $1 LIMIT 1', [req.params.slug]);
-      if (!rows.length) return next();
+      if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) return next();
+      const row = await supabaseSelectBySlug('autoseo_posts', req.params.slug);
+      if (!row) return next();
       res.set({
         'Content-Type': 'text/html; charset=utf-8',
         'X-Content-Type-Options': 'nosniff',
         'X-Frame-Options': 'SAMEORIGIN',
         'Referrer-Policy': 'same-origin',
       });
-      return res.status(200).send(renderArticlePage(rows[0]));
+      return res.status(200).send(renderArticlePage(row));
     } catch (err) {
       console.error('[AutoSEO blog route] error:', err);
       return next();
