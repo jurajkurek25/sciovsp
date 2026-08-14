@@ -6,7 +6,7 @@ const { requireAuth, requirePro } = require('../middleware/auth');
 const ANTHROPIC_API = 'https://api.anthropic.com/v1/messages';
 // Dynamický fallback na NAJNOVŠÍ dostupný model (nikdy na starší pevne
 // zadaný) — pozri poznámku pri jeho použití nižšie a resolveModel.js.
-const { pickStartingModel, markModelGood, getNewestUntriedModel } = require('./lib/resolveModel');
+const { pickStartingModel, markModelGood, getNewestUntriedModel, tierOf } = require('./lib/resolveModel');
 
 // Systémový prompt — znalosť štruktúry SCIO VSP testov
 const SYSTEM_PROMPT = `Si odborník na tvorbu úloh pre slovenské SCIO Všeobecné študijné predpoklady (VSP/VŠP) testy.
@@ -103,7 +103,7 @@ Vrát validný JSON podľa schémy.`;
         console.error('Claude API error:', err);
         return res.status(502).json({ error: 'Chyba pri komunikácii s AI.' });
       }
-      const next = await getNewestUntriedModel(triedModels);
+      const next = await getNewestUntriedModel(triedModels, tierOf(model));
       if (!next) {
         console.error('Claude API error:', err);
         return res.status(502).json({ error: 'Chyba pri komunikácii s AI.' });

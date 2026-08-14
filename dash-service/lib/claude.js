@@ -18,6 +18,18 @@ let _lastGoodClaudeModel = null;
 function pickStartingModel() { return _lastGoodClaudeModel || MODEL_FALLBACK_BASELINE; }
 function markModelGood(model) { _lastGoodClaudeModel = model; }
 
+// Fallback najprv skúsi najnovší model v ROVNAKEJ cenovej triede ako ten,
+// čo zlyhal (haiku→haiku, sonnet→sonnet) — až keď taký nie je dostupný,
+// padne na čokoľvek najnovšie ako posledný záchranný bod.
+function tierOf(modelId) {
+  const id = (modelId || '').toLowerCase();
+  if (id.includes('haiku')) return 'haiku';
+  if (id.includes('sonnet')) return 'sonnet';
+  if (id.includes('opus')) return 'opus';
+  if (id.includes('fable') || id.includes('mythos')) return 'premium';
+  return null;
+}
+
 async function fetchAnthropicModelList() {
   let all = [];
   let afterId = null;
@@ -34,12 +46,16 @@ async function fetchAnthropicModelList() {
   return all;
 }
 
-async function getNewestUntriedModel(triedIds) {
+async function getNewestUntriedModel(triedIds, preferTier) {
   try {
     if (!_modelListCache || Date.now() - _modelListCache.fetchedAt > MODEL_LIST_CACHE_TTL_MS) {
       const models = await fetchAnthropicModelList();
       models.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
       _modelListCache = { models, fetchedAt: Date.now() };
+    }
+    if (preferTier) {
+      const sameTier = _modelListCache.models.find(m => m && m.id && !triedIds.includes(m.id) && tierOf(m.id) === preferTier);
+      if (sameTier) return sameTier.id;
     }
     const found = _modelListCache.models.find(m => m && m.id && !triedIds.includes(m.id));
     return found ? found.id : null;
@@ -125,7 +141,7 @@ async function callClaude({ system, messages, maxTokens = 1500, tools, model: fo
     if (!looksLikeModelIssue) {
       throw new Error(`Claude API vrátila chybu ${res.status}: ${errText.slice(0, 300)}`);
     }
-    const next = await getNewestUntriedModel(triedModels);
+    const next = await getNewestUntriedModel(triedModels, tierOf(model));
     if (!next) {
       throw new Error(`Claude API vrátila chybu ${res.status}: ${errText.slice(0, 300)}`);
     }

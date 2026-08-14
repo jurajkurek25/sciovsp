@@ -14,6 +14,19 @@ let _lastGoodClaudeModel = null;
 function pickStartingModel() { return _lastGoodClaudeModel || MODEL_FALLBACK_BASELINE; }
 function markModelGood(model) { _lastGoodClaudeModel = model; }
 
+// Zámerne NESKOČÍ rovno na najnovší model bez ohľadu na cenu — fallback
+// najprv skúsi najnovší model v ROVNAKEJ cenovej triede ako ten, čo
+// zlyhal (haiku→haiku, sonnet→sonnet), a až keď taký vôbec nie je
+// dostupný, padne na čokoľvek najnovšie ako posledný záchranný bod.
+function tierOf(modelId) {
+  const id = (modelId || '').toLowerCase();
+  if (id.includes('haiku')) return 'haiku';
+  if (id.includes('sonnet')) return 'sonnet';
+  if (id.includes('opus')) return 'opus';
+  if (id.includes('fable') || id.includes('mythos')) return 'premium';
+  return null;
+}
+
 async function fetchAnthropicModelList() {
   let all = [];
   let afterId = null;
@@ -32,12 +45,16 @@ async function fetchAnthropicModelList() {
   return all;
 }
 
-async function getNewestUntriedModel(triedIds) {
+async function getNewestUntriedModel(triedIds, preferTier) {
   try {
     if (!_modelListCache || Date.now() - _modelListCache.fetchedAt > MODEL_LIST_CACHE_TTL_MS) {
       const models = await fetchAnthropicModelList();
       models.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
       _modelListCache = { models, fetchedAt: Date.now() };
+    }
+    if (preferTier) {
+      const sameTier = _modelListCache.models.find(m => m && m.id && !triedIds.includes(m.id) && tierOf(m.id) === preferTier);
+      if (sameTier) return sameTier.id;
     }
     const found = _modelListCache.models.find(m => m && m.id && !triedIds.includes(m.id));
     return found ? found.id : null;
@@ -47,4 +64,4 @@ async function getNewestUntriedModel(triedIds) {
   }
 }
 
-module.exports = { pickStartingModel, markModelGood, getNewestUntriedModel };
+module.exports = { pickStartingModel, markModelGood, getNewestUntriedModel, tierOf };

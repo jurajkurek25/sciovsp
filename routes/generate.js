@@ -4,7 +4,7 @@ const router = express.Router();
 const ANTHROPIC_API = 'https://api.anthropic.com/v1/messages';
 // Dynamický fallback na NAJNOVŠÍ dostupný model (nikdy na starší pevne
 // zadaný) — pozri poznámku pri jeho použití nižšie a lib/resolveModel.js.
-const { pickStartingModel, markModelGood, getNewestUntriedModel } = require('./lib/resolveModel');
+const { pickStartingModel, markModelGood, getNewestUntriedModel, tierOf } = require('./lib/resolveModel');
 
 // Spoločná JSON schéma, ktorú očakáva public/app.html (generateQuestions()) —
 // pole "text" (nie "question"!), voliteľný "context", "options" (4, alebo 8 pri
@@ -163,7 +163,7 @@ Vráť validný JSON presne podľa schémy zo systémového promptu, žiadny in�
         console.error('Anthropic API error:', errText);
         return res.status(response.status).json(data);
       }
-      const next = await getNewestUntriedModel(triedModels);
+      const next = await getNewestUntriedModel(triedModels, tierOf(model));
       if (!next) {
         console.error('Anthropic API error:', errText);
         return res.status(response.status).json(data);

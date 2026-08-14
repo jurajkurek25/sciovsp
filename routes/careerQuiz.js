@@ -5,7 +5,7 @@ const rateLimit = require('express-rate-limit');
 const ANTHROPIC_API = 'https://api.anthropic.com/v1/messages';
 // Dynamický fallback na NAJNOVŠÍ dostupný model (nikdy na starší pevne
 // zadaný) — rovnaký mechanizmus ako AI generátor úloh, pozri lib/resolveModel.js.
-const { pickStartingModel, markModelGood, getNewestUntriedModel } = require('./lib/resolveModel');
+const { pickStartingModel, markModelGood, getNewestUntriedModel, tierOf } = require('./lib/resolveModel');
 
 // Verejný, neprihlásený endpoint (stránka /kam-na-vysoku používa Supabase
 // auth na klientovi, nie backendový JWT z requireAuth) — vlastný rate limit
@@ -94,7 +94,7 @@ Napíš ten odsek v ${targetLang === 'cs' ? 'češtine' : 'slovenčine'}, podľa
         console.error('Career quiz AI error:', err);
         return res.status(502).json({ error: 'Chyba pri komunikácii s AI.' });
       }
-      const next = await getNewestUntriedModel(triedModels);
+      const next = await getNewestUntriedModel(triedModels, tierOf(model));
       if (!next) {
         console.error('Career quiz AI error:', err);
         return res.status(502).json({ error: 'Chyba pri komunikácii s AI.' });

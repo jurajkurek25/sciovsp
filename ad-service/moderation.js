@@ -33,6 +33,18 @@ let _lastGoodClaudeModel = null;
 function pickStartingModel() { return _lastGoodClaudeModel || MODEL_FALLBACK_BASELINE; }
 function markModelGood(model) { _lastGoodClaudeModel = model; }
 
+// Skúša najprv najnovší model v ROVNAKEJ cenovej triede (haiku→haiku) —
+// funkčnosť má prednosť pred cenou (fail-closed politika vyššie), ale
+// nemusí to hneď znamenať skok na Opus, ak existuje novší Haiku.
+function tierOf(modelId) {
+  const id = (modelId || '').toLowerCase();
+  if (id.includes('haiku')) return 'haiku';
+  if (id.includes('sonnet')) return 'sonnet';
+  if (id.includes('opus')) return 'opus';
+  if (id.includes('fable') || id.includes('mythos')) return 'premium';
+  return null;
+}
+
 async function fetchAnthropicModelList() {
   let all = [];
   let afterId = null;
@@ -49,12 +61,16 @@ async function fetchAnthropicModelList() {
   return all;
 }
 
-async function getNewestUntriedModel(triedIds) {
+async function getNewestUntriedModel(triedIds, preferTier) {
   try {
     if (!_modelListCache || Date.now() - _modelListCache.fetchedAt > MODEL_LIST_CACHE_TTL_MS) {
       const models = await fetchAnthropicModelList();
       models.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
       _modelListCache = { models, fetchedAt: Date.now() };
+    }
+    if (preferTier) {
+      const sameTier = _modelListCache.models.find(m => m && m.id && !triedIds.includes(m.id) && tierOf(m.id) === preferTier);
+      if (sameTier) return sameTier.id;
     }
     const found = _modelListCache.models.find(m => m && m.id && !triedIds.includes(m.id));
     return found ? found.id : null;
@@ -320,7 +336,7 @@ async function moderateContent({ buffer, mimeType, linkUrl }) {
       if (!looksLikeModelIssue) {
         return { allowed: false, category: 'api_error', reason: `AI kontrola vrátila chybu ${res.status} — zamietnuté pre istotu.`, raw: errText.slice(0, 500) };
       }
-      const next = await getNewestUntriedModel(triedModels);
+      const next = await getNewestUntriedModel(triedModels, tierOf(model));
       if (!next) {
         return { allowed: false, category: 'api_error', reason: `AI kontrola vrátila chybu ${res.status} — zamietnuté pre istotu.`, raw: errText.slice(0, 500) };
       }
