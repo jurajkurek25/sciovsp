@@ -174,8 +174,8 @@ function closeBanner() {
 html{scroll-behavior:smooth;overflow-x:hidden;max-width:100%}
 body{background:var(--black);color:var(--text);font-family:var(--sans);overflow-x:hidden;cursor:none}
 
-.cursor{position:fixed;width:10px;height:10px;background:var(--volt);border-radius:50%;pointer-events:none;z-index:10010;transform:translate(-50%,-50%);transition:transform .1s,width .2s,height .2s,background .2s;mix-blend-mode:difference}
-.cursor-ring{position:fixed;width:36px;height:36px;border:1px solid rgba(200,255,0,.4);border-radius:50%;pointer-events:none;z-index:10009;transform:translate(-50%,-50%);transition:transform .15s ease-out,width .25s,height .25s}
+.cursor{position:fixed;width:10px;height:10px;background:var(--volt);border-radius:50%;pointer-events:none;z-index:10010;top:0;left:0;transform:translate(-50%,-50%);transition:width .2s,height .2s,background .2s;mix-blend-mode:difference;will-change:transform}
+.cursor-ring{position:fixed;width:36px;height:36px;border:1px solid rgba(200,255,0,.4);border-radius:50%;pointer-events:none;z-index:10009;top:0;left:0;transform:translate(-50%,-50%);transition:width .25s,height .25s;will-change:transform}
 body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");pointer-events:none;z-index:9997}
 
 nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1.25rem 2.5rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid transparent;transition:border-color .3s,background .3s}
@@ -1660,11 +1660,11 @@ const ring = document.getElementById('cursorRing');
 let mx = 0, my = 0, rx = 0, ry = 0;
 document.addEventListener('mousemove', e => {
   mx = e.clientX; my = e.clientY;
-  cursor.style.left = mx + 'px'; cursor.style.top = my + 'px';
+  cursor.style.transform = 'translate3d(' + mx + 'px,' + my + 'px,0) translate(-50%,-50%)';
 });
 (function animRing(){
   rx += (mx - rx) * .12; ry += (my - ry) * .12;
-  ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+  ring.style.transform = 'translate3d(' + rx + 'px,' + ry + 'px,0) translate(-50%,-50%)';
   requestAnimationFrame(animRing);
 })();
 document.querySelectorAll('a,button,.pain-card,.feature-card,.clan-mockup').forEach(el => {
