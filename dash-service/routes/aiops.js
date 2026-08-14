@@ -16,6 +16,11 @@ const { supabase: mainDb } = require('../lib/db-main');
 const { callClaude } = require('../lib/claude');
 
 const AUTO_PUBLISH_BLOG = process.env.DASH_AUTO_PUBLISH_BLOG !== 'false'; // default true — user explicitly asked for automatic publisher
+// Kill switch: AI blog generátor (web_search + generovanie) stál neúmerne veľa
+// pri každom behu (až 5 web_search volaní + 4000 tokenov generovania), preto
+// je teraz OFF by default. Nastav DASH_AIOPS_BLOG_ENABLED=true v .env ak ho
+// niekedy chceš znova zapnúť.
+const AIOPS_BLOG_ENABLED = process.env.DASH_AIOPS_BLOG_ENABLED === 'true';
 const PAYOUT_READY_THRESHOLD_EUR = Number(process.env.DASH_PAYOUT_READY_THRESHOLD_EUR) || 20;
 const DASH_CRON_KEY = process.env.DASH_CRON_KEY;
 
@@ -40,6 +45,9 @@ async function logAction({ actionType, targetSystem, targetId, reasoning, result
 }
 
 async function runBlogTrendPublisher() {
+  if (!AIOPS_BLOG_ENABLED) {
+    return { ok: false, error: 'Disabled (DASH_AIOPS_BLOG_ENABLED is not "true") — no Claude call made, no cost incurred.' };
+  }
   try {
     const { data: allTagged, error: tagErr } = await mainDb.from('blog_posts').select('tag, created_at').not('tag', 'is', null).limit(2000);
     if (tagErr) throw new Error(tagErr.message);
