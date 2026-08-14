@@ -1025,7 +1025,7 @@
             Prevádzkovateľ si vyhradzuje právo tieto VOP meniť. Nové znenie je účinné dňom zverejnenia, ak nie je uvedené inak.
           </p>
           <p>
-            Posledná aktualizácia: <strong>6.8.2026</strong>.
+            Posledná aktualizácia: <strong>14.8.2026</strong>.
           </p>
         </div>
       </div>
@@ -1061,6 +1061,11 @@
             <li>údaje o referral kóde a jeho použití, ak sa používateľ zapojí do referral programu,</li>
             <li>údaje o zakúpených kurzoch, postupe v lekciách a súboroch nahraných na vyhodnotenie AI,</li>
             <li>pri darčekových kartách email kupujúceho, meno príjemcu a sprievodný odkaz (ak ich vyplníš) a email osoby, ktorá kartu uplatní,</li>
+            <li>osobný termín testu (ak si ho v aplikácii nastavíš) a údaje o tréningovej sérii (streak),</li>
+            <li>obsah spätnej väzby/recenzie, ktorú nám zašleš po teste (hodnotenie a text),</li>
+            <li>meno, email a vybraný termín pri registrácii na webinár,</li>
+            <li>ak sa prihlásiš cez Google účet, základné profilové údaje z tohto účtu (meno, email, profilová fotka),</li>
+            <li>obsah komunikácie s AI chatbotom zobrazeným na stránke,</li>
             <li>technické údaje, napríklad IP adresu, cookies a základné údaje o zariadení.</li>
           </ul>
         </div>
@@ -1076,6 +1081,9 @@
             <li>prevádzka referral programu a SP Klanov,</li>
             <li>poskytovanie video kurzov a vyhodnocovanie nahraných úloh pomocou AI,</li>
             <li>spracovanie nákupu a uplatnenia darčekových kariet,</li>
+            <li>zasielanie automatických pripomienkových emailov (napríklad odpočet do termínu testu, tréningová séria, potvrdenie registrácie na webinár),</li>
+            <li>zber a zobrazovanie recenzií služby,</li>
+            <li>prevádzka AI chatbota na stránke na účely zákazníckej podpory a predaja,</li>
             <li>zlepšovanie funkčnosti, bezpečnosti a kvality služby,</li>
             <li>plnenie zákonných povinností.</li>
           </ul>
@@ -1087,7 +1095,7 @@
           <ul>
             <li>plnenia zmluvy alebo vykonania opatrení pred uzavretím zmluvy,</li>
             <li>oprávneného záujmu, najmä pri zabezpečení prevádzky, ochrany služby a základnej analytiky,</li>
-            <li>súhlasu, ak ide o marketingové alebo nepovinné cookies.</li>
+            <li>súhlasu, ak ide o marketingové emaily, marketingové cookies alebo iné nepovinné spracúvanie.</li>
           </ul>
         </div>
 
@@ -1104,13 +1112,17 @@
         </div>
 
         <div class="legal-item" data-i18n="priv6">
-          <h3>6. Platobní a technickí sprostredkovatelia</h3>
+          <h3>6. Sprostredkovatelia a tretie strany</h3>
           <p>
             Pri prevádzke služby využívame externých poskytovateľov, ktorí môžu spracúvať osobné údaje v postavení sprostredkovateľov alebo samostatných prevádzkovateľov podľa povahy služby.
           </p>
           <ul>
             <li><strong>Stripe</strong> – spracovanie platieb a súvisiace fakturačné údaje,</li>
-            <li><strong>Anthropic</strong> – AI spracovanie odpovedí a výsledkov na účel generovania výstupov.</li>
+            <li><strong>Anthropic</strong> – AI spracovanie odpovedí a výsledkov na účel generovania výstupov,</li>
+            <li><strong>Supabase</strong> – hosting databázy, autentifikácia používateľov (vrátane prihlásenia cez Google) a ukladanie väčšiny údajov uvedených v tomto dokumente,</li>
+            <li><strong>Google</strong> – prihlásenie cez Google účet (Google Sign-In) a webová analytika (Google Analytics),</li>
+            <li><strong>Neoworkly</strong> – AI chatbotový widget zobrazený na stránke, ktorý môže spracúvať obsah konverzácie a kontaktné údaje zanechané v chate,</li>
+            <li>poskytovateľ e-mailových služieb (SMTP) – doručovanie transakčných a marketingových e-mailov.</li>
           </ul>
         </div>
 
@@ -1158,6 +1170,9 @@
           <p>
             Ak používaš analytiku alebo remarketing, samotný text nestačí. Musíš mať aj reálne implementovaný cookie banner a evidenciu súhlasov.
           </p>
+          <p>
+            Na stránke používame službu <strong>Cookiebot</strong> na správu súhlasov a <strong>Google Analytics</strong> na základnú webovú analytiku — tá beží až po udelení súhlasu.
+          </p>
         </div>
 
         <div class="legal-item" data-i18n="priv11">
@@ -1186,6 +1201,13 @@
           <p>
             Ak si používateľ želá uplatniť svoje práva alebo má otázky k spracúvaniu osobných údajov,
             môže kontaktovať prevádzkovateľa na adrese <strong>juraj@jurajkurek.com</strong>.
+          </p>
+        </div>
+
+        <div class="legal-item" data-i18n="priv14">
+          <h3>14. Posledná aktualizácia</h3>
+          <p>
+            Tento dokument bol naposledy aktualizovaný <strong>14.8.2026</strong>.
           </p>
         </div>
       </div>
@@ -1435,7 +1457,7 @@ vop18: `<h3>18. Záverečné ustanovenia</h3>
             Prevádzkovateľ si vyhradzuje právo tieto VOP meniť. Nové znenie je účinné dňom zverejnenia, ak nie je uvedené inak.
           </p>
           <p>
-            Posledná aktualizácia: <strong>6.8.2026</strong>.
+            Posledná aktualizácia: <strong>14.8.2026</strong>.
           </p>`,
 privLabel: 'Dokument 02',
 privTitle: 'Zásady ochrany <em>osobných údajov</em>',
@@ -1456,6 +1478,11 @@ priv2: `<h3>2. Aké údaje spracúvame</h3>
             <li>údaje o referral kóde a jeho použití, ak sa používateľ zapojí do referral programu,</li>
             <li>údaje o zakúpených kurzoch, postupe v lekciách a súboroch nahraných na vyhodnotenie AI,</li>
             <li>pri darčekových kartách email kupujúceho, meno príjemcu a sprievodný odkaz (ak ich vyplníš) a email osoby, ktorá kartu uplatní,</li>
+            <li>osobný termín testu (ak si ho v aplikácii nastavíš) a údaje o tréningovej sérii (streak),</li>
+            <li>obsah spätnej väzby/recenzie, ktorú nám zašleš po teste (hodnotenie a text),</li>
+            <li>meno, email a vybraný termín pri registrácii na webinár,</li>
+            <li>ak sa prihlásiš cez Google účet, základné profilové údaje z tohto účtu (meno, email, profilová fotka),</li>
+            <li>obsah komunikácie s AI chatbotom zobrazeným na stránke,</li>
             <li>technické údaje, napríklad IP adresu, cookies a základné údaje o zariadení.</li>
           </ul>`,
 priv3: `<h3>3. Účely spracúvania</h3>
@@ -1468,6 +1495,9 @@ priv3: `<h3>3. Účely spracúvania</h3>
             <li>prevádzka referral programu a SP Klanov,</li>
             <li>poskytovanie video kurzov a vyhodnocovanie nahraných úloh pomocou AI,</li>
             <li>spracovanie nákupu a uplatnenia darčekových kariet,</li>
+            <li>zasielanie automatických pripomienkových emailov (napríklad odpočet do termínu testu, tréningová séria, potvrdenie registrácie na webinár),</li>
+            <li>zber a zobrazovanie recenzií služby,</li>
+            <li>prevádzka AI chatbota na stránke na účely zákazníckej podpory a predaja,</li>
             <li>zlepšovanie funkčnosti, bezpečnosti a kvality služby,</li>
             <li>plnenie zákonných povinností.</li>
           </ul>`,
@@ -1476,7 +1506,7 @@ priv4: `<h3>4. Právny základ spracúvania</h3>
           <ul>
             <li>plnenia zmluvy alebo vykonania opatrení pred uzavretím zmluvy,</li>
             <li>oprávneného záujmu, najmä pri zabezpečení prevádzky, ochrany služby a základnej analytiky,</li>
-            <li>súhlasu, ak ide o marketingové alebo nepovinné cookies.</li>
+            <li>súhlasu, ak ide o marketingové emaily, marketingové cookies alebo iné nepovinné spracúvanie.</li>
           </ul>`,
 priv5: `<h3>5. AI spracovanie údajov</h3>
           <p>
@@ -1487,13 +1517,17 @@ priv5: `<h3>5. AI spracovanie údajov</h3>
             výsledkové dáta a tematické zhrnutie slabých miest. Identifikačné údaje, ako meno alebo email,
             sa do AI spracovania neodosielajú, pokiaľ to nie je nevyhnutné pre konkrétnu funkcionalitu.
           </p>`,
-priv6: `<h3>6. Platobní a technickí sprostredkovatelia</h3>
+priv6: `<h3>6. Sprostredkovatelia a tretie strany</h3>
           <p>
             Pri prevádzke služby využívame externých poskytovateľov, ktorí môžu spracúvať osobné údaje v postavení sprostredkovateľov alebo samostatných prevádzkovateľov podľa povahy služby.
           </p>
           <ul>
             <li><strong>Stripe</strong> – spracovanie platieb a súvisiace fakturačné údaje,</li>
-            <li><strong>Anthropic</strong> – AI spracovanie odpovedí a výsledkov na účel generovania výstupov.</li>
+            <li><strong>Anthropic</strong> – AI spracovanie odpovedí a výsledkov na účel generovania výstupov,</li>
+            <li><strong>Supabase</strong> – hosting databázy, autentifikácia používateľov (vrátane prihlásenia cez Google) a ukladanie väčšiny údajov uvedených v tomto dokumente,</li>
+            <li><strong>Google</strong> – prihlásenie cez Google účet (Google Sign-In) a webová analytika (Google Analytics),</li>
+            <li><strong>Neoworkly</strong> – AI chatbotový widget zobrazený na stránke, ktorý môže spracúvať obsah konverzácie a kontaktné údaje zanechané v chate,</li>
+            <li>poskytovateľ e-mailových služieb (SMTP) – doručovanie transakčných a marketingových e-mailov.</li>
           </ul>`,
 priv7: `<h3>7. Prenos do tretích krajín</h3>
           <p>
@@ -1528,6 +1562,9 @@ priv10: `<h3>10. Cookies</h3>
           </p>
           <p>
             Ak používaš analytiku alebo remarketing, samotný text nestačí. Musíš mať aj reálne implementovaný cookie banner a evidenciu súhlasov.
+          </p>
+          <p>
+            Na stránke používame službu <strong>Cookiebot</strong> na správu súhlasov a <strong>Google Analytics</strong> na základnú webovú analytiku — tá beží až po udelení súhlasu.
           </p>`,
 priv11: `<h3>11. Bezpečnosť</h3>
           <p>
@@ -1548,6 +1585,10 @@ priv13: `<h3>13. Kontakt</h3>
           <p>
             Ak si používateľ želá uplatniť svoje práva alebo má otázky k spracúvaniu osobných údajov,
             môže kontaktovať prevádzkovateľa na adrese <strong>juraj@jurajkurek.com</strong>.
+          </p>`,
+priv14: `<h3>14. Posledná aktualizácia</h3>
+          <p>
+            Tento dokument bol naposledy aktualizovaný <strong>14.8.2026</strong>.
           </p>`,
 footerCtaTitle: 'Právny základ má byť<br><em>jasný, nie ukrytý.</em>',
 footerCtaBtn: 'Späť na landing page →',
@@ -1782,7 +1823,7 @@ vop18: `<h3>18. Závěrečná ustanovení</h3>
             Provozovatel si vyhrazuje právo tyto VOP měnit. Nové znění je účinné dnem zveřejnění, pokud není uvedeno jinak.
           </p>
           <p>
-            Poslední aktualizace: <strong>6.8.2026</strong>.
+            Poslední aktualizace: <strong>14.8.2026</strong>.
           </p>`,
 privLabel: 'Dokument 02',
 privTitle: 'Zásady ochrany <em>osobních údajů</em>',
@@ -1803,6 +1844,11 @@ priv2: `<h3>2. Jaké údaje zpracováváme</h3>
             <li>údaje o referral kódu a jeho použití, pokud se uživatel zapojí do referral programu,</li>
             <li>údaje o zakoupených kurzech, postupu v lekcích a souborech nahraných k vyhodnocení AI,</li>
             <li>u dárkových karet e-mail kupujícího, jméno příjemce a doprovodný vzkaz (pokud je vyplníš) a e-mail osoby, která kartu uplatní,</li>
+            <li>osobní termín testu (pokud si ho v aplikaci nastavíš) a údaje o tréninkové sérii (streak),</li>
+            <li>obsah zpětné vazby/recenze, kterou nám zašleš po testu (hodnocení a text),</li>
+            <li>jméno, e-mail a vybraný termín při registraci na webinář,</li>
+            <li>pokud se přihlásíš přes Google účet, základní profilové údaje z tohoto účtu (jméno, e-mail, profilová fotka),</li>
+            <li>obsah komunikace s AI chatbotem zobrazeným na stránce,</li>
             <li>technické údaje, například IP adresu, cookies a základní údaje o zařízení.</li>
           </ul>`,
 priv3: `<h3>3. Účely zpracování</h3>
@@ -1815,6 +1861,9 @@ priv3: `<h3>3. Účely zpracování</h3>
             <li>provoz referral programu a SP Klanů,</li>
             <li>poskytování video kurzů a vyhodnocování nahraných úloh pomocí AI,</li>
             <li>zpracování nákupu a uplatnění dárkových karet,</li>
+            <li>zasílání automatických připomínkových e-mailů (například odpočet do termínu testu, tréninková série, potvrzení registrace na webinář),</li>
+            <li>sběr a zobrazování recenzí služby,</li>
+            <li>provoz AI chatbota na stránce za účelem zákaznické podpory a prodeje,</li>
             <li>zlepšování funkčnosti, bezpečnosti a kvality služby,</li>
             <li>plnění zákonných povinností.</li>
           </ul>`,
@@ -1823,7 +1872,7 @@ priv4: `<h3>4. Právní základ zpracování</h3>
           <ul>
             <li>plnění smlouvy nebo provedení opatření před uzavřením smlouvy,</li>
             <li>oprávněného zájmu, zejména při zajištění provozu, ochrany služby a základní analytiky,</li>
-            <li>souhlasu, jde-li o marketingové nebo nepovinné cookies.</li>
+            <li>souhlasu, jde-li o marketingové e-maily, marketingové cookies nebo jiné nepovinné zpracování.</li>
           </ul>`,
 priv5: `<h3>5. AI zpracování údajů</h3>
           <p>
@@ -1834,13 +1883,17 @@ priv5: `<h3>5. AI zpracování údajů</h3>
             výsledková data a tematické shrnutí slabých míst. Identifikační údaje, jako jméno nebo e-mail,
             se do AI zpracování neodesílají, pokud to není nezbytné pro konkrétní funkcionalitu.
           </p>`,
-priv6: `<h3>6. Platební a techničtí zprostředkovatelé</h3>
+priv6: `<h3>6. Zprostředkovatelé a třetí strany</h3>
           <p>
             Při provozu služby využíváme externí poskytovatele, kteří mohou zpracovávat osobní údaje v postavení zprostředkovatelů nebo samostatných provozovatelů podle povahy služby.
           </p>
           <ul>
             <li><strong>Stripe</strong> – zpracování plateb a související fakturační údaje,</li>
-            <li><strong>Anthropic</strong> – AI zpracování odpovědí a výsledků za účelem generování výstupů.</li>
+            <li><strong>Anthropic</strong> – AI zpracování odpovědí a výsledků za účelem generování výstupů,</li>
+            <li><strong>Supabase</strong> – hosting databáze, autentizace uživatelů (včetně přihlášení přes Google) a ukládání většiny údajů uvedených v tomto dokumentu,</li>
+            <li><strong>Google</strong> – přihlášení přes Google účet (Google Sign-In) a webová analytika (Google Analytics),</li>
+            <li><strong>Neoworkly</strong> – AI chatbotový widget zobrazený na stránce, který může zpracovávat obsah konverzace a kontaktní údaje zanechané v chatu,</li>
+            <li>poskytovatel e-mailových služeb (SMTP) – doručování transakčních a marketingových e-mailů.</li>
           </ul>`,
 priv7: `<h3>7. Přenos do třetích zemí</h3>
           <p>
@@ -1875,6 +1928,9 @@ priv10: `<h3>10. Cookies</h3>
           </p>
           <p>
             Pokud používáš analytiku nebo remarketing, samotný text nestačí. Musíš mít i reálně implementovaný cookie banner a evidenci souhlasů.
+          </p>
+          <p>
+            Na stránce používáme službu <strong>Cookiebot</strong> ke správě souhlasů a <strong>Google Analytics</strong> k základní webové analytice — ta běží až po udělení souhlasu.
           </p>`,
 priv11: `<h3>11. Bezpečnost</h3>
           <p>
@@ -1895,6 +1951,10 @@ priv13: `<h3>13. Kontakt</h3>
           <p>
             Pokud si uživatel přeje uplatnit svá práva nebo má otázky ke zpracování osobních údajů,
             může kontaktovat provozovatele na adrese <strong>juraj@jurajkurek.com</strong>.
+          </p>`,
+priv14: `<h3>14. Poslední aktualizace</h3>
+          <p>
+            Tento dokument byl naposledy aktualizován <strong>14.8.2026</strong>.
           </p>`,
 footerCtaTitle: 'Právní základ má být<br><em>jasný, ne skrytý.</em>',
 footerCtaBtn: 'Zpět na landing page →',
