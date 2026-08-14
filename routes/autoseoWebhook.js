@@ -153,6 +153,68 @@ function downloadImage(url, basename) {
   });
 }
 
+// Matches public/blog's own visual system exactly (nav, CSS classes, footer)
+// as defined in ad-service/20-blog-czech.js's blogLayout() — kept as a
+// self-contained copy here since that function lives inline in server.js
+// and can't be imported from a separate route file.
+const SITE_CSS = `:root{--black:#08080d;--black2:#0f0f18;--border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.13);--text:#eeeef5;--text2:#a1a1bc;--text3:#5c5c7a;--volt:#c8ff00;--purple:#7c5cff;--purple2:#b09bff;--serif:'Instrument Serif',Georgia,serif;--mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--black);color:var(--text);font-family:var(--sans);line-height:1.65;overflow-x:hidden}
+a{color:inherit}
+nav{position:sticky;top:0;z-index:100;padding:1rem clamp(1rem,4vw,2rem);padding-top:calc(1rem + env(safe-area-inset-top));display:flex;justify-content:space-between;align-items:center;gap:.75rem;flex-wrap:wrap;background:rgba(8,8,13,.9);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+.nav-logo{font-family:var(--mono);font-size:13px;letter-spacing:.15em;color:var(--text);text-decoration:none;white-space:nowrap;display:inline-flex;align-items:center;gap:.55rem}
+.nav-dot{width:7px;height:7px;background:var(--volt);border-radius:50%;animation:pulse-dot 2s infinite;display:inline-block}
+@keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.7)}}
+.nav-link{text-decoration:none;font-family:var(--mono);font-size:.78rem;letter-spacing:.05em;border-radius:8px;transition:all .2s;color:var(--text2);padding:.65rem .85rem;border:1px solid transparent}
+.nav-link:hover{color:var(--text);border-color:var(--border2)}
+.nav-cta{padding:.6rem 1rem;background:var(--volt);color:var(--black);border-radius:8px;font-weight:700;font-family:var(--mono);font-size:.78rem;text-decoration:none;white-space:nowrap;border:none;cursor:pointer}
+.page{max-width:900px;margin:0 auto;padding:clamp(2rem,6vw,3.5rem) clamp(1rem,4vw,2rem) clamp(3rem,6vw,6rem)}
+.breadcrumb{font-family:var(--mono);font-size:.72rem;color:var(--text3);margin-bottom:1.5rem;display:flex;gap:.4rem;flex-wrap:wrap}
+.breadcrumb a{color:var(--text3);text-decoration:none}
+.breadcrumb a:hover{color:var(--purple2)}
+.hero-title{font-family:var(--serif);font-size:clamp(2rem,6vw,3.6rem);line-height:1.1;margin-bottom:1rem}
+.prose{max-width:720px;margin:0 auto;line-height:1.8}
+.prose-meta{display:flex;gap:.75rem;align-items:center;margin-bottom:2rem;font-family:var(--mono);font-size:.72rem;color:var(--text3);flex-wrap:wrap}
+.prose-meta .tag{color:var(--purple2);text-decoration:none}
+.prose h2{font-family:var(--serif);font-size:clamp(1.5rem,3vw,1.9rem);margin:2.4rem 0 1.1rem}
+.prose h3{font-family:var(--sans);font-weight:700;font-size:1.05rem;margin:1.8rem 0 .8rem}
+.prose p{color:var(--text2);margin-bottom:1.25rem;font-size:1.02rem}
+.prose ul,.prose ol{color:var(--text2);margin:0 0 1.25rem 1.2rem}
+.prose li{margin-bottom:.5rem}
+.prose strong{color:var(--text)}
+.prose img{max-width:100%;height:auto;border-radius:12px;margin:1.5rem 0}
+.prose a{color:var(--purple2)}
+.prose blockquote{border-left:3px solid var(--purple2);padding-left:1.2rem;margin:1.5rem 0;color:var(--text2);font-style:italic}
+footer{border-top:1px solid var(--border);padding:2rem clamp(1rem,4vw,2rem);padding-bottom:calc(2rem + env(safe-area-inset-bottom));display:flex;justify-content:space-between;flex-wrap:wrap;gap:1rem;max-width:900px;margin:0 auto}
+.footer-logo{font-family:var(--mono);font-size:12px;color:var(--text3)}
+.footer-links{display:flex;gap:1.4rem;flex-wrap:wrap}
+.footer-links a{font-family:var(--mono);font-size:12px;color:var(--text3);text-decoration:none}
+.footer-links a:hover{color:var(--text2)}`;
+
+function siteNav() {
+  return `<nav id="mainNav">
+  <a href="/" class="nav-logo"><span class="nav-dot"></span>SP TRÉNER</a>
+  <div style="display:flex;align-items:center;gap:.75rem">
+    <a href="/blog" class="nav-link">Blog</a>
+    <button class="nav-cta" onclick="location.href='/?openPremium=1'">Začať zadarmo →</button>
+  </div>
+</nav>`;
+}
+
+function siteFooter() {
+  return `<footer>
+  <div class="footer-logo">SP TRÉNER © 2026</div>
+  <div class="footer-links">
+    <a href="/app">Aplikácia</a>
+    <a href="/blog">Blog</a>
+    <a href="mailto:juraj@jurajkurek.com">Kontakt</a>
+    <a href="/legal.html#vop">Obchodné podmienky</a>
+    <a href="/legal.html#privacy">Ochrana súkromia</a>
+  </div>
+</footer>`;
+}
+
 function renderArticlePage(row) {
   const title = escapeHtml(row.title);
   const desc = escapeHtml(row.meta_description);
@@ -174,34 +236,67 @@ function renderArticlePage(row) {
     faqLd = `<script type="application/ld+json">${JSON.stringify(ld).replace(/</g, '\\u003c')}</script>`;
   }
 
+  const articleLd = `<script type="application/ld+json">${JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: row.title,
+    description: row.meta_description,
+    datePublished: row.published_at || row.created_at,
+    dateModified: row.updated_at || row.published_at || row.created_at,
+    author: { '@type': 'Organization', name: 'SP Tréner' },
+    publisher: { '@type': 'Organization', name: 'SP Tréner' },
+    mainEntityOfPage: { '@type': 'WebPage', '@id': canonical },
+    inLanguage: row.language_code || 'en',
+    ...(row.hero_image_url ? { image: BASE_URL + row.hero_image_url } : {}),
+  }).replace(/</g, '\\u003c')}</script>`;
+
   const hero = row.hero_image_url
-    ? `<img src="${escapeHtml(row.hero_image_url)}" alt="${escapeHtml(row.hero_image_alt)}" style="width:100%;max-width:900px;border-radius:12px;margin:0 0 1.5rem;display:block">`
+    ? `<img src="${escapeHtml(row.hero_image_url)}" alt="${escapeHtml(row.hero_image_alt)}" style="width:100%;border-radius:12px;margin:0 0 1.5rem;display:block">`
     : '';
   const infographic = row.infographic_image_url
-    ? `<img src="${escapeHtml(row.infographic_image_url)}" alt="" style="width:100%;max-width:900px;border-radius:12px;margin:1.5rem 0;display:block">`
+    ? `<img src="${escapeHtml(row.infographic_image_url)}" alt="" style="border-radius:12px;margin:1.5rem 0;display:block">`
     : '';
+
+  const dateStr = row.published_at
+    ? new Date(row.published_at).toLocaleDateString(row.language_code === 'sk' ? 'sk-SK' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+    : '';
+  const proseMeta = dateStr ? `<div class="prose-meta"><time datetime="${escapeHtml(row.published_at)}">${escapeHtml(dateStr)}</time></div>` : '';
+
+  const breadcrumb = `<nav class="breadcrumb"><a href="/">SP Tréner</a><span>/</span><a href="/blog">Blog</a><span>/</span><span>${title}</span></nav>`;
 
   return `<!DOCTYPE html>
 <html lang="${escapeHtml(row.language_code || 'en')}">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>${title}</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>${title} — SP Tréner</title>
 <meta name="description" content="${desc}">
 <link rel="canonical" href="${canonical}">
 <meta property="og:type" content="article">
 <meta property="og:title" content="${title}">
 <meta property="og:description" content="${desc}">
+<meta property="og:site_name" content="SP Tréner">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="${title}">
+<meta name="twitter:description" content="${desc}">
+<meta name="theme-color" content="#08080d">
 ${row.hero_image_url ? `<meta property="og:image" content="${escapeHtml(BASE_URL + row.hero_image_url)}">` : ''}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@300;400;500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
 ${faqLd}
+${articleLd}
+<style>${SITE_CSS}</style>
 </head>
-<body style="max-width:760px;margin:0 auto;padding:2.5rem 1.5rem;font-family:system-ui,-apple-system,sans-serif;line-height:1.7;color:#1a1a1a">
-<article>
-<h1 style="font-size:2rem;line-height:1.25;margin-bottom:1.25rem">${title}</h1>
+<body>
+${siteNav()}
+<main class="page">${breadcrumb}<article class="prose">
+<h1 class="hero-title">${title}</h1>
+${proseMeta}
 ${hero}
 ${row.content_html || ''}
 ${infographic}
-</article>
+</article></main>
+${siteFooter()}
 </body>
 </html>`;
 }
