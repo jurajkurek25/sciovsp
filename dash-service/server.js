@@ -26,6 +26,7 @@ app.use(require('./routes/ads'));
 app.use(require('./routes/giftcardsales'));
 app.use(require('./routes/webinar'));
 app.use(require('./routes/maintenance'));
+app.use(require('./routes/reviews'));
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.get('/{*splat}', (req, res) => {

@@ -397,9 +397,33 @@ async function renderOverview() {
           <td><span class="pill ${a.result==='success'?'resolved':'open'}">${a.result}</span></td>
         </tr>`).join('') || '<tr><td class="muted" colspan="5">Zatiaľ žiadne AI akcie.</td></tr>'}</tbody>
       </table>
+    </div>
+    <div class="table-wrap" style="margin-top:1.25rem">
+      <div class="pagehead" style="margin-bottom:.5rem"><h3 style="margin:0">Recenzie (deň po teste)</h3></div>
+      <table>
+        <thead><tr><th>Čas</th><th>Email</th><th>Hodnotenie</th><th>Správa</th></tr></thead>
+        <tbody id="reviewsTbody"><tr><td class="muted" colspan="4">načítavam…</td></tr></tbody>
+      </table>
     </div>`;
   $('#main').innerHTML = html;
   loadMaintenanceStatus();
+  loadReviews();
+}
+
+async function loadReviews() {
+  const tbody = document.getElementById('reviewsTbody');
+  if (!tbody) return;
+  try {
+    const d = await api('/api/dash/reviews');
+    tbody.innerHTML = (d.reviews || []).map(r => `<tr>
+      <td class="muted">${new Date(r.created_at).toLocaleString('sk-SK')}</td>
+      <td>${r.email}</td>
+      <td>${r.rating ? '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating) : '—'}</td>
+      <td>${(r.message || '').replace(/</g, '&lt;')}</td>
+    </tr>`).join('') || '<tr><td class="muted" colspan="4">Zatiaľ žiadne recenzie.</td></tr>';
+  } catch (e) {
+    tbody.innerHTML = '<tr><td class="muted" colspan="4">Chyba načítania.</td></tr>';
+  }
 }
 
 async function loadMaintenanceStatus() {

@@ -4099,10 +4099,15 @@ function renderAuthButton(){
     const email=currentUser.email,short=email.length>20?email.substring(0,18)+'...':email;
     const pb=isPremium()?`<span style="background:var(--volt);color:var(--black);font-size:9px;padding:2px 8px;border-radius:10px;font-family:var(--mono);font-weight:700;">PREMIUM</span>`:`<span style="background:var(--black3);color:var(--text3);font-size:9px;padding:2px 8px;border-radius:10px;font-family:var(--mono);">FREE</span>`;
     const ub=!isPremium()?`<button onclick="startCheckout()" style="width:100%;background:var(--volt);border:none;border-radius:8px;padding:.4rem .6rem;color:var(--black);font-family:var(--mono);font-size:.74rem;font-weight:700;cursor:pointer;">${t('getPremiumBtn')}</button>`:'';
+    const examDateVal=localStorage.getItem('vsp_exam_date')||'';
     homeSlot.innerHTML=`<div style="display:flex;flex-direction:column;gap:.5rem;width:100%;background:var(--black2);border:1px solid var(--border2);border-radius:10px;padding:.65rem .8rem;font-size:.78rem;color:var(--text2);">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:.4rem;">${pb}<button onclick="logout()" style="background:none;border:none;color:var(--text3);font-size:.72rem;padding:0;font-family:var(--mono);cursor:pointer;">${t('logoutBtn')}</button></div>
       <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${email}">${short}</span>
       ${ub}
+      <div style="display:flex;align-items:center;gap:.4rem;">
+        <span style="font-size:.68rem;color:var(--text3);white-space:nowrap;" title="Deň testu: pošleme ti veľa šťastia a spýtame sa na recenziu.">🎯 Termín testu</span>
+        <input type="date" id="examDateInput" value="${examDateVal}" onchange="saveExamDate(this.value)" style="flex:1;min-width:0;background:var(--black3);border:1px solid var(--border2);border-radius:6px;color:var(--text2);font-family:var(--mono);font-size:.7rem;padding:.2rem .3rem;">
+      </div>
       <a href="/uplatnit-darcek" style="text-decoration:none;color:var(--text3);font-size:.72rem;font-family:var(--mono);">${t('redeemGiftLink')}</a>
     </div>`;
   }else{
@@ -4110,6 +4115,17 @@ function renderAuthButton(){
   }
 }
 
+async function saveExamDate(value){
+  if(!currentUser)return;
+  try{
+    const {data:{session}}=await _supabase.auth.getSession();
+    const token=session?.access_token;if(!token)return;
+    const res=await fetch('/api/profile/exam-date',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({examDate:value||null})});
+    if(!res.ok)throw new Error();
+    if(value)localStorage.setItem('vsp_exam_date',value);else localStorage.removeItem('vsp_exam_date');
+    showToast(value?'✅ Termín testu uložený':'Termín testu zmazaný');
+  }catch(e){showToast('⚠️ Termín sa nepodarilo uložiť.');}
+}
 function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 function getWrongIds(){return JSON.parse(localStorage.getItem('vsp_wrong')||'[]');}
 
@@ -5424,6 +5440,7 @@ async function onUserLoggedIn(user,token){
     if(data.refCode)localStorage.setItem('vsp_ref_code',data.refCode);
     if(data.premiumExpiresAt)localStorage.setItem('vsp_premium_expires',data.premiumExpiresAt);
     if(typeof data.usedTests==='number')localStorage.setItem('vsp_trial_count',String(data.usedTests));
+    if(data.examDate)localStorage.setItem('vsp_exam_date',data.examDate);else localStorage.removeItem('vsp_exam_date');
   }catch(e){}
   renderAuthButton();updateHomeStats();loadRefCard();renderEliteHomeCards();initEliteFeatures();renderCoursesSection();
   if(isPremium()){const ol=document.getElementById('paywall-overlay');if(ol)ol.remove();}
