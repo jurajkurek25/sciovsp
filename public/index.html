@@ -781,6 +781,7 @@ body.has-banner{padding-top:42px}
       <span>📊 Týždenný Audit</span>
       <span>🧩 Zebra Builder</span>
       <span>⚡ Zlatý Status</span>
+      <span>🔥 Denný streak + odpočet</span>
     </div>
 
     <p style="text-align:center;font-size:.75rem;color:var(--text3);font-family:var(--mono);padding:0 2.25rem 1.5rem">Stripe · Bezpečná platba · Zruš kedykoľvek</p>
@@ -831,6 +832,7 @@ body.has-banner{padding-top:42px}
           <li><b>✓</b> Time-Kill Alert</li>
           <li><b>✓</b> Týždenný Audit</li>
           <li><b>✓</b> Zebra Builder + Zlatý Status</li>
+          <li><b>✓</b> Denný streak + odpočet do testu (email)</li>
         </ul>
         <button class="compare-col-btn" onclick="closeComparePopup();openElitePopup();">Vybrať Elite →</button>
       </div>
@@ -985,6 +987,7 @@ body.has-banner{padding-top:42px}
       <a href="/darcekova-karta" class="feature-card reveal" style="text-decoration:none;color:inherit;display:block;transition-delay:.15s"><span class="feature-icon">🎁</span><div class="feature-title" id="eco4Title">Darčekové karty</div><div class="feature-desc" id="eco4Desc">Daruj prípravu niekomu blízkemu — Premium alebo Elite na 1, 3, 6 alebo 12 mesiacov.</div></a>
       <a href="#clans" class="feature-card reveal" style="text-decoration:none;color:inherit;display:block;transition-delay:.2s"><span class="feature-icon">⚔️</span><div class="feature-title" id="eco5Title">SP Klany</div><div class="feature-desc" id="eco5Desc">Súkromná skupina s kamarátmi, spoločný leaderboard a streaky. Motivácia, ktorá funguje lepšie ako disciplína sama.</div></a>
       <a href="#referral" class="feature-card reveal" style="text-decoration:none;color:inherit;display:block;transition-delay:.25s"><span class="feature-icon">🤝</span><div class="feature-title" id="eco6Title">Odporúčaj a získaj dni zadarmo</div><div class="feature-desc" id="eco6Desc">Za každého kamaráta, ktorý si kúpi Premium cez tvoj kód, dostanete obaja +14 dní navyše. Bez limitu.</div></a>
+      <a href="javascript:void(0)" onclick="openElitePopup()" class="feature-card reveal" style="text-decoration:none;color:inherit;display:block;transition-delay:.3s"><span class="feature-icon">🔥</span><div class="feature-title" id="eco7Title">Denný streak — ako Duolingo</div><div class="feature-desc" id="eco7Desc">Elite ti každý deň pošle pripomienku: akú máš sériu a koľko dní zostáva do termínu testu. Jeden email, ktorý ťa nenechá poľaviť.</div><div class="feature-tag">🔥 Elite</div></a>
     </div>
   </div>
 </div>
@@ -1194,6 +1197,7 @@ body.has-banner{padding-top:42px}
           <li class="included" id="priceElite5">📊 Týždenný Audit — šanca na prijatie v %</li>
           <li class="included" id="priceElite6">🧩 Zebra Builder — logika krok za krokom</li>
           <li class="included" id="priceElite7">⚡ Zlatý Status v klanoch</li>
+          <li class="included" id="priceElite8">🔥 Denný streak + odpočet do testu (email)</li>
         </ul>
         <button class="pricing-cta elite-cta" onclick="openElitePopup()" id="priceEliteCta">Nesmiem zlyhať →</button>
       </div>
@@ -1410,6 +1414,7 @@ sk:{
   eco4Title:'Darčekové karty',eco4Desc:'Daruj prípravu niekomu blízkemu — Premium alebo Elite na 1, 3, 6 alebo 12 mesiacov.',
   eco5Title:'SP Klany',eco5Desc:'Súkromná skupina s kamarátmi, spoločný leaderboard a streaky. Motivácia, ktorá funguje lepšie ako disciplína sama.',
   eco6Title:'Odporúčaj a získaj dni zadarmo',eco6Desc:'Za každého kamaráta, ktorý si kúpi Premium cez tvoj kód, dostanete obaja +14 dní navyše. Bez limitu.',
+  eco7Title:'Denný streak — ako Duolingo',eco7Desc:'Elite ti každý deň pošle pripomienku: akú máš sériu a koľko dní zostáva do termínu testu. Jeden email, ktorý ťa nenechá poľaviť.',
   giftLabel:'Darček',giftTitle:'Daruj prípravu,<br><em>nie stres.</em>',
   giftDesc:'Darčeková karta na Premium alebo Elite prípravu — ideálny darček pre maturanta pred prijímačkami. Vyber si 1, 3 alebo 12 mesiacov.',
   giftCta:'Kúpiť darčekovú kartu →',
@@ -1520,6 +1525,7 @@ cs:{
   eco4Title:'Dárkové karty',eco4Desc:'Věnuj přípravu někomu blízkému — Premium nebo Elite na 1, 3, 6 nebo 12 měsíců.',
   eco5Title:'SP Klany',eco5Desc:'Soukromá skupina s kamarády, společný leaderboard a streaky. Motivace, která funguje lépe než disciplína samotná.',
   eco6Title:'Doporučuj a získej dny zdarma',eco6Desc:'Za každého kamaráda, který si koupí Premium přes tvůj kód, dostanete oba +14 dní navíc. Bez limitu.',
+  eco7Title:'Denní streak — jako Duolingo',eco7Desc:'Elite ti každý den pošle připomínku: jak dlouhá je tvá série a kolik dní zbývá do termínu testu. Jeden e-mail, který tě nenechá polevit.',
   giftLabel:'Dárek',giftTitle:'Věnuj přípravu,<br><em>ne stres.</em>',
   giftDesc:'Dárková karta na Premium nebo Elite přípravu — ideální dárek pro maturanta před přijímačkami. Vyber si 1, 3 nebo 12 měsíců.',
   giftCta:'Koupit dárkovou kartu →',
@@ -1663,6 +1669,7 @@ function applyLanguage(lang, skipIfDefault){
   sT('eco4Title', t.eco4Title); sT('eco4Desc', t.eco4Desc);
   sT('eco5Title', t.eco5Title); sT('eco5Desc', t.eco5Desc);
   sT('eco6Title', t.eco6Title); sT('eco6Desc', t.eco6Desc);
+  sT('eco7Title', t.eco7Title); sT('eco7Desc', t.eco7Desc);
   sT('giftLabel', t.giftLabel); sH('giftTitle', t.giftTitle); sT('giftDesc', t.giftDesc); sT('giftCta', t.giftCta);
   sT('refSectionLabel', t.refSectionLabel); sH('refSectionTitle', t.refSectionTitle);
   sT('refSectionDesc', t.refSectionDesc);
