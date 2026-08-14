@@ -1554,13 +1554,21 @@ function setLanguage(lang){
   applyLanguage(currentLang);
 }
 
-function applyLanguage(lang){
+function applyLanguage(lang, skipIfDefault){
   const t = translations[lang];
   if(!t) return;
   document.documentElement.lang = lang;
   document.title = t.pageTitle;
   document.getElementById('langSkBtn').classList.toggle('active', lang === 'sk');
   document.getElementById('langCsBtn').classList.toggle('active', lang === 'cs');
+
+  // The markup is hand-authored in Slovak, so on first load for the (majority)
+  // SK visitor there is nothing to translate — skip ~150 getElementById +
+  // textContent/innerHTML writes that would just re-set the same text.
+  // Only the initial-load path passes skipIfDefault; explicit language
+  // switches (setLanguage from the SK/CZ buttons) always run the full pass,
+  // including switching back to 'sk' from 'cs' where the DOM does need it.
+  if(skipIfDefault && lang === 'sk') return;
 
   const sH = (id, v) => { const e = document.getElementById(id); if(e) e.innerHTML = v; };
   const sT = (id, v) => { const e = document.getElementById(id); if(e) e.textContent = v; };
@@ -1674,7 +1682,12 @@ function applyLanguage(lang){
   if(lbl) lbl.textContent = getStoredEmail() ? t.popupMainBtnLoggedIn : t.popupMainBtnLoggedOut;
 }
 
-document.addEventListener('DOMContentLoaded', () => setLanguage(detectInitialLanguage()));
+document.addEventListener('DOMContentLoaded', () => {
+  const lang = detectInitialLanguage();
+  currentLang = lang;
+  localStorage.setItem('vsp-lang', lang);
+  applyLanguage(lang, true);
+});
 
 const cursor = document.getElementById('cursor');
 const ring = document.getElementById('cursorRing');
