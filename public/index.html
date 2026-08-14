@@ -1700,11 +1700,12 @@ function toggleFaq(btn){
   const item = btn.closest('.faq-item');
   const answer = item.querySelector('.faq-answer');
   const isOpen = item.classList.contains('open');
+  const targetHeight = isOpen ? 0 : answer.scrollHeight;
   document.querySelectorAll('.faq-item.open').forEach(i => {
     i.classList.remove('open');
     i.querySelector('.faq-answer').style.maxHeight = '0';
   });
-  if(!isOpen){ item.classList.add('open'); answer.style.maxHeight = answer.scrollHeight + 'px'; }
+  if(!isOpen){ item.classList.add('open'); answer.style.maxHeight = targetHeight + 'px'; }
 }
 
 function getStoredEmail(){
