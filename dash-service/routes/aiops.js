@@ -115,7 +115,7 @@ async function runBlogTrendPublisher() {
     const system = `Si obsahový editor blogu SP Tréner (príprava na VŠP/SCIO prijímacie testy pre SR/ČR stredoškolákov, ktorí zvažujú kúpu prípravného kurzu). Tvoja úloha: zisti, čo si potenciálni zákazníci (uchádzači a ich rodičia) AKTUÁLNE vyhľadávajú na internete ohľadom prijímačiek na vysoké školy, VŠP, SCIO testov, prijímacieho konania — a na základe toho navrhni a napíš JEDEN nový blogový článok, ktorý na to reálne odpovedá.
 
 Postup:
-1. Použi web_search na zistenie aktuálnych vyhľadávaní/otázok/trendov okolo VŠP, SCIO testov, prijímačiek na VŠ v SR/ČR (termíny, zmeny formátu, časté otázky uchádzačov, diskusie na fórach a Redditoch). Urob aspoň 2-3 vyhľadávania s rôznymi dopytmi.
+1. Použi web_search na zistenie aktuálnych vyhľadávaní/otázok/trendov okolo VŠP, SCIO testov, prijímačiek na VŠ v SR/ČR (termíny, zmeny formátu, časté otázky uchádzačov, diskusie na fórach a Redditoch). Máš k dispozícii 2 vyhľadávania — využi oba, s rôznymi dopytmi.
 2. Zváž aj interné dáta: tagy, ktoré sa na blogu dlho nepokrývali: ${JSON.stringify(tagRows)}
 3. Neopakuj témy nedávnych článkov: ${JSON.stringify(recentTitles)}
 4. Vyber tému, ktorá reálne rieši niečo, čo ľudia teraz vyhľadávajú (nie hocijakú z dlho-nepokrytých tagov, ak po nej nie je dopyt). Titulok aj prvý odsek nech prirodzene obsahujú hlavné kľúčové slovo/frázu, ktorú si zistil vo vyhľadávaní.
@@ -123,7 +123,7 @@ Postup:
 SEO pravidlá pre výstup (rovnaká appka to zobrazuje na sptrener.online/blog/:slug a k titulku pripája " — SP Tréner", preto:):
 - "title": max 55 znakov, obsahuje hlavné kľúčové slovo, žiadne clickbait bez obsahu
 - "excerpt": presne 140-160 znakov, funguje aj ako meta description — zhrň konkrétny prínos článku, nie všeobecnú frázu
-- "content": HTML, 600-900 slov, štruktúrované do 3+ sekcií pomocou <h2>...</h2> medzititulkov (nie jeden blok textu), odseky v <p>, zoznamy v <ul><li> kde sa hodia, žiadne <html>/<body>/<script>/inline styly
+- "content": HTML, 1000-1200 slov, štruktúrované do 4+ sekcií pomocou <h2>...</h2> medzititulkov (nie jeden blok textu), odseky v <p>, zoznamy v <ul><li> kde sa hodia, žiadne <html>/<body>/<script>/inline styly
 - niekde v "content" prirodzene vlož JEDEN interný odkaz na <a href="https://sptrener.online/?openPremium=1">appku SP Tréner</a> tam, kde to dáva kontextový zmysel (nie ako vnucená reklama)
 
 Na konci — a IBA na konci, po dokončení vyhľadávania — odpovedz POSLEDNÝM textovým blokom, ktorý obsahuje IBA validný JSON objekt a nič iné (žiadny komentár pred ani za ním), v tvare:
@@ -131,15 +131,16 @@ Na konci — a IBA na konci, po dokončení vyhľadávania — odpovedz POSLEDN�
 
     // claude-haiku-4-5 namiesto claude-sonnet-5 (pôvodný default) — 3x
     // lacnejší per-token a pre "napíš SEO článok podľa tejto témy" úlohu
-    // viac než dostatočný. Spolu s 1 web_search (namiesto 5) a nižším
-    // maxTokens (900-slovný článok reálne potrebuje ~1800, nie 4000) ide
-    // odhadovaný náklad na beh z desiatok centov na ~1-2 centy.
+    // viac než dostatočný. 2 web_search (namiesto pôvodných 5) je kompromis
+    // medzi širším prieskumom trendu a cenou; maxTokens 2400 pokrýva
+    // 1000-1200-slovný článok s rezervou. Odhadovaný náklad na beh:
+    // ~3-4 centy (predtým 900-slovný/1 search variant vychádzal na ~1-2 centy).
     const raw = await callClaude({
       system,
       messages: [{ role: 'user', content: 'Zisti aktuálne trendy vo vyhľadávaní a navrhni článok.' }],
       model: 'claude-haiku-4-5',
-      maxTokens: 1800,
-      tools: [{ type: 'web_search_20260209', name: 'web_search', max_uses: 1 }]
+      maxTokens: 2400,
+      tools: [{ type: 'web_search_20260209', name: 'web_search', max_uses: 2 }]
     });
     const jsonStr = extractJson(raw);
     if (!jsonStr) throw new Error('AI nevrátila platný JSON.');
