@@ -5,6 +5,10 @@
 // ad-service, ad-subdomain-service a routes/lib/resolveModel.js (posledné
 // sa ale ukázalo byť mŕtvy, nepoužívaný kód — táto kópia v server.js je tá
 // skutočná, živá, ktorá sa vtedy vynechala).
+//
+// Verzia 2: namiesto jedného veľkého viacriadkového bloku (ktorý sa
+// nezhodoval — pravdepodobne kvôli neviditeľnému rozdielu v riadkoch
+// s diakritikou/emoji) používa tri malé, čisto ASCII kotvy.
 const fs = require('fs');
 const FILE = 'server.js';
 const src = fs.readFileSync(FILE, 'utf8');
@@ -20,44 +24,13 @@ function replaceOnce(s, oldStr, newStr, label) {
   return s.replace(oldStr, newStr);
 }
 
-const OLD_BLOCK = `async function getNewestUntriedModel(triedIds) {
-  try {
-    if (!_modelListCache || Date.now() - _modelListCache.fetchedAt > MODEL_LIST_CACHE_TTL_MS) {
-      const models = await fetchAnthropicModelPage(null, []);
-      models.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-      _modelListCache = { models, fetchedAt: Date.now() };
-    }
-    const found = _modelListCache.models.find(m => m && m.id && !triedIds.includes(m.id));
-    return found ? found.id : null;
-  } catch (e) {
-    console.error('⚠️ Nepodarilo sa zistiť aktuálny zoznam Claude modelov:', e.message);
-    return null;
-  }
-}
+let patched = src;
 
-async function callClaudeWithFallback(makeRequest) {
-  let triedModels = [];
-  let currentModel = pickStartingModel();
-  let lastResult = null;
-  for (let attempt = 0; attempt < 4; attempt++) {
-    triedModels.push(currentModel);
-    lastResult = await makeRequest(currentModel);
-    if (lastResult.ok) {
-      markModelGood(currentModel);
-      if (attempt > 0) console.error(\`⚠️ Claude model fallback: úspešne použitý novší model '\${currentModel}' (predtým zlyhalo: \${triedModels.slice(0, -1).join(', ')}).\`);
-      return lastResult;
-    }
-    const looksLikeModelIssue = lastResult.statusCode === 404 || /model/i.test(lastResult.data || '');
-    if (!looksLikeModelIssue) return lastResult;
-    const next = await getNewestUntriedModel(triedModels);
-    if (!next) return lastResult;
-    console.error(\`⚠️ Claude model '\${currentModel}' zlyhal (vyzerá na problém s modelom), skúšam novší dostupný '\${next}'.\`);
-    currentModel = next;
-  }
-  return lastResult;
-}`;
-
-const NEW_BLOCK = `// Zámerne NESKOČÍ rovno na najnovší model bez ohľadu na cenu — fallback
+// 1) Pridaj tierOf() a rozšír signatúru getNewestUntriedModel o preferTier
+patched = replaceOnce(
+  patched,
+  'async function getNewestUntriedModel(triedIds) {',
+  `// Zámerne NESKOČÍ rovno na najnovší model bez ohľadu na cenu — fallback
 // najprv skúsi najnovší model v ROVNAKEJ cenovej triede ako ten, čo
 // zlyhal (haiku→haiku, sonnet→sonnet), a až keď taký vôbec nie je
 // dostupný, padne na čokoľvek najnovšie ako posledný záchranný bod.
@@ -70,48 +43,30 @@ function tierOf(modelId) {
   return null;
 }
 
-async function getNewestUntriedModel(triedIds, preferTier) {
-  try {
-    if (!_modelListCache || Date.now() - _modelListCache.fetchedAt > MODEL_LIST_CACHE_TTL_MS) {
-      const models = await fetchAnthropicModelPage(null, []);
-      models.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-      _modelListCache = { models, fetchedAt: Date.now() };
-    }
-    if (preferTier) {
+async function getNewestUntriedModel(triedIds, preferTier) {`,
+  'signatura getNewestUntriedModel'
+);
+
+// 2) Vlož preferTier logiku pred fallback na "hocijaky najnovsi"
+patched = replaceOnce(
+  patched,
+  '    const found = _modelListCache.models.find(m => m && m.id && !triedIds.includes(m.id));\n    return found ? found.id : null;',
+  `    if (preferTier) {
       const sameTier = _modelListCache.models.find(m => m && m.id && !triedIds.includes(m.id) && tierOf(m.id) === preferTier);
       if (sameTier) return sameTier.id;
     }
     const found = _modelListCache.models.find(m => m && m.id && !triedIds.includes(m.id));
-    return found ? found.id : null;
-  } catch (e) {
-    console.error('⚠️ Nepodarilo sa zistiť aktuálny zoznam Claude modelov:', e.message);
-    return null;
-  }
-}
+    return found ? found.id : null;`,
+  'preferTier vetva'
+);
 
-async function callClaudeWithFallback(makeRequest) {
-  let triedModels = [];
-  let currentModel = pickStartingModel();
-  let lastResult = null;
-  for (let attempt = 0; attempt < 4; attempt++) {
-    triedModels.push(currentModel);
-    lastResult = await makeRequest(currentModel);
-    if (lastResult.ok) {
-      markModelGood(currentModel);
-      if (attempt > 0) console.error(\`⚠️ Claude model fallback: úspešne použitý novší model '\${currentModel}' (predtým zlyhalo: \${triedModels.slice(0, -1).join(', ')}).\`);
-      return lastResult;
-    }
-    const looksLikeModelIssue = lastResult.statusCode === 404 || /model/i.test(lastResult.data || '');
-    if (!looksLikeModelIssue) return lastResult;
-    const next = await getNewestUntriedModel(triedModels, tierOf(currentModel));
-    if (!next) return lastResult;
-    console.error(\`⚠️ Claude model '\${currentModel}' zlyhal (vyzerá na problém s modelom), skúšam novší dostupný '\${next}'.\`);
-    currentModel = next;
-  }
-  return lastResult;
-}`;
-
-const patched = replaceOnce(src, OLD_BLOCK, NEW_BLOCK, 'callClaudeWithFallback blok');
+// 3) Odovzdaj tier zlyhaneho modelu pri volani z callClaudeWithFallback
+patched = replaceOnce(
+  patched,
+  '    const next = await getNewestUntriedModel(triedModels);',
+  '    const next = await getNewestUntriedModel(triedModels, tierOf(currentModel));',
+  'volanie v callClaudeWithFallback'
+);
 
 const backup = FILE + '.pre-tier-aware-inline-fallback-' + Date.now();
 fs.copyFileSync(FILE, backup);
