@@ -135,6 +135,7 @@ Vráť validný JSON presne podľa schémy zo systémového promptu, žiadny in�
     let response, data;
     let triedModels = [];
     let model = pickStartingModel();
+    let succeeded = false;
     for (let attempt = 0; attempt < 4; attempt++) {
       triedModels.push(model);
       response = await fetch(ANTHROPIC_API, {
@@ -155,6 +156,7 @@ Vráť validný JSON presne podľa schémy zo systémového promptu, žiadny in�
       if (response.ok) {
         markModelGood(model);
         if (attempt > 0) console.error(`⚠️ Claude model fallback: úspešne použitý novší model '${model}'.`);
+        succeeded = true;
         break;
       }
       const errText = JSON.stringify(data);
@@ -170,6 +172,16 @@ Vráť validný JSON presne podľa schémy zo systémového promptu, žiadny in�
       }
       console.error(`⚠️ Claude model '${model}' zlyhal, skúšam novší dostupný '${next}'.`);
       model = next;
+    }
+    // Slučka sa môže minúť (4 pokusy) aj keď KAŽDÝ pokus našiel ďalšieho
+    // kandidáta — vtedy niet čo vrátiť ako úspech. Bez tejto poistky by sa
+    // sem spadlo s `data` z POSLEDNÉHO zlyhaného pokusu a res.json(data) by
+    // to poslalo s implicitným HTTP 200 — frontend kontroluje len
+    // response.ok, takže by chybovú Anthropic obálku omylom spracoval ako
+    // úspešnú odpoveď.
+    if (!succeeded) {
+      console.error('Anthropic API error: fallback retry budget vyčerpaný', JSON.stringify(data));
+      return res.status(response.status || 502).json(data);
     }
     res.json(data);
   } catch (e) {
