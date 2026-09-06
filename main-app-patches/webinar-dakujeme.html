@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registrácia potvrdená — SP Tréner</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Manrope:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+/* Rovnaká vizuálna identita ako zvyšok lievika (/webinar, /webinar/live, /ponuka). */
+:root{
+  --ink:#14100D; --ink2:#1c1610; --ink3:#241c14;
+  --text:#F6F1E7; --text2:rgba(246,241,231,.66); --text3:rgba(246,241,231,.4);
+  --ignite:#c8ff00; --ignite2:#d9ff66;
+  --signal:#7c5cff; --signal2:#b09bff;
+  --brand-volt:#c8ff00; --brand-mono:'DM Mono',monospace;
+  --border:rgba(246,241,231,.14); --border2:rgba(246,241,231,.24);
+  --serif:'Bricolage Grotesque',Georgia,serif; --mono:'Space Mono',monospace; --sans:'Manrope',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--ink);color:var(--text);font-family:var(--sans);line-height:1.6;min-height:100vh}
+a{color:var(--signal)}
+button{font-family:inherit}
+
+.top{max-width:900px;margin:0 auto;padding:1.5rem 1.2rem 0;display:flex;justify-content:space-between;align-items:center}
+.top a.back{font-family:var(--brand-mono);font-weight:500;font-size:.82rem;color:var(--brand-volt);text-decoration:none}
+.lang-switch{display:flex;gap:.35rem}
+.lang-switch button{font-family:var(--mono);font-size:.7rem;padding:.3rem .6rem;background:var(--ink2);border:1px solid var(--border2);border-radius:4px;color:var(--text2);cursor:pointer}
+.lang-switch button.active{color:var(--ignite);border-color:var(--ignite)}
+
+.wrap{max-width:600px;margin:0 auto;padding:1.6rem 1.2rem 5rem}
+.hero{text-align:center;padding:2.5rem 0 1rem}
+.check-badge{width:64px;height:64px;border-radius:50%;background:rgba(200,255,0,.1);border:1px solid rgba(200,255,0,.35);display:flex;align-items:center;justify-content:center;margin:0 auto 1.4rem}
+h1{font-family:var(--serif);font-weight:800;font-size:clamp(1.7rem,4.5vw,2.3rem);line-height:1.15;margin-bottom:.9rem}
+.sub{color:var(--text2);font-size:1rem;max-width:480px;margin:0 auto 2rem}
+
+.next-session{max-width:420px;margin:0 auto 2rem;background:var(--ink3);border:1px solid var(--border2);border-left:3px solid var(--signal);border-radius:10px;padding:1.2rem 1.4rem;text-align:center}
+.next-session .label{font-family:var(--mono);font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:.4rem}
+.next-session .date{font-family:var(--serif);font-weight:800;font-size:1.3rem}
+
+.optin-box{max-width:480px;margin:0 auto 1.6rem;background:var(--ink3);border:1px solid rgba(200,255,0,.3);border-radius:12px;padding:1.5rem}
+.optin-box .oi-title{display:flex;align-items:center;gap:.6rem;font-family:var(--serif);font-weight:800;font-size:1.15rem;margin-bottom:.6rem}
+.optin-box p{color:var(--text2);font-size:.9rem}
+.optin-box .oi-email{color:var(--ignite);font-weight:700;word-break:break-all}
+.optin-box .oi-note{margin-top:.7rem;font-size:.8rem;color:var(--text3)}
+
+.next-steps{max-width:480px;margin:0 auto 2rem;text-align:left}
+.next-steps .label{font-family:var(--mono);font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ignite2);margin-bottom:.8rem;text-align:center}
+.next-steps ul{list-style:none;display:flex;flex-direction:column;gap:.7rem}
+.next-steps li{font-size:.88rem;color:var(--text2);display:flex;gap:.6rem;align-items:flex-start}
+.next-steps li .idx{font-family:var(--mono);font-size:.72rem;color:var(--signal2);flex-shrink:0;padding-top:.1rem}
+
+.soft-cta{text-align:center;margin-top:1rem}
+.soft-cta a{font-family:var(--mono);font-size:.82rem;color:var(--text3);text-decoration:none}
+.soft-cta a:hover{color:var(--text2)}
+
+.site-footer{max-width:640px;margin:2rem auto 0;padding:2rem 1.2rem 2.5rem;text-align:center;border-top:1px solid var(--border)}
+.footer-links{display:flex;justify-content:center;gap:.6rem;font-family:var(--mono);font-size:.78rem;margin-bottom:.8rem}
+.footer-links a{color:var(--text2);text-decoration:none}
+.footer-links a:hover{color:var(--text)}
+.footer-dot{color:var(--text3)}
+.footer-disclaimer{font-size:.72rem;color:var(--text3);line-height:1.5;max-width:480px;margin:0 auto}
+</style>
+</head>
+<body>
+<div class="top">
+  <a class="back" href="/" id="tBack">← SP Tréner</a>
+  <div class="lang-switch">
+    <button id="langSkBtn" onclick="setLang('sk')">SK</button>
+    <button id="langCsBtn" onclick="setLang('cs')">CZ</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="hero">
+    <div class="check-badge">
+      <svg width="28" height="28" viewBox="0 0 28 28"><path d="M5 14l6 6L23 7" stroke="#c8ff00" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <h1 id="tH1">Ďakujeme, si zaregistrovaný/á! 🎉</h1>
+    <p class="sub" id="tSub">Tvoje miesto na vysielaní je rezervované. Ešte jeden krok, nech ti nič neunikne.</p>
+  </div>
+
+  <div class="next-session">
+    <div class="label" id="tNextLabel">Tvoj termín</div>
+    <div class="date" id="nextSessionDate">—</div>
+  </div>
+
+  <div class="optin-box">
+    <div class="oi-title">✉️ <span id="tOptinTitle">Skontroluj si email</span></div>
+    <p id="optinBodyText"></p>
+    <p class="oi-note" id="tOptinNote">Email nevidíš? Skontroluj aj priečinok Spam / Hromadné.</p>
+  </div>
+
+  <div class="next-steps">
+    <div class="label" id="tStepsLabel">Čo bude ďalej</div>
+    <ul>
+      <li><span class="idx">01</span> <span id="tStep1">Potvrď email — dostaneš pripomienku pred termínom.</span></li>
+      <li><span class="idx">02</span> <span id="tStep2">Vysielanie sa spustí presne v termíne vyššie, priamo v prehliadači.</span></li>
+      <li><span class="idx">03</span> <span id="tStep3">Ak prídeš neskôr, video sa spustí od miesta, kde je práve vysielanie — nič nezmeškáš od začiatku.</span></li>
+    </ul>
+  </div>
+
+  <div class="soft-cta">
+    <a href="/webinar/live" id="tSoftCta">Chcem sa pozrieť už teraz →</a>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <div class="footer-links">
+    <a href="/legal.html#vop" id="tFooterTerms">Obchodné podmienky</a>
+    <span class="footer-dot">·</span>
+    <a href="/legal.html#privacy" id="tFooterPrivacy">Ochrana osobných údajov</a>
+  </div>
+  <p class="footer-disclaimer" id="tFooterDisclaimer">Táto stránka nie je súčasťou webu Facebook ani spoločnosti Meta, Inc. a nie je nimi žiadnym spôsobom podporovaná ani sponzorovaná. FACEBOOK a INSTAGRAM sú ochranné známky spoločnosti Meta, Inc.</p>
+</footer>
+
+<script>
+// Bez platnej registrácie tu niet čo potvrdzovať — presmeruj rovno na
+// registráciu namiesto zobrazenia prázdnej/nezmyselnej stránky.
+let session = null;
+try {
+  const saved = localStorage.getItem('sp_webinar_session');
+  if (saved) session = JSON.parse(saved);
+} catch (e) { session = null; }
+if (!session || !session.email) {
+  location.href = '/webinar';
+}
+
+function fmtSessionDate(ms, l) {
+  const d = new Date(ms);
+  const dayNamesSk = ['nedeľu', 'pondelok', 'utorok', 'stredu', 'štvrtok', 'piatok', 'sobotu'];
+  const dayNamesCs = ['neděli', 'pondělí', 'úterý', 'středu', 'čtvrtek', 'pátek', 'sobotu'];
+  const names = l === 'cs' ? dayNamesCs : dayNamesSk;
+  const dayName = names[d.getDay()];
+  const dd = String(d.getDate()).padStart(2, '0');
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const hh = String(d.getHours()).padStart(2, '0');
+  return dayName.charAt(0).toUpperCase() + dayName.slice(1) + ' ' + dd + '.' + mm + ' o ' + hh + ':00';
+}
+
+// ==================== i18n ====================
+const T = {
+  sk: {
+    pageTitle: 'Registrácia potvrdená — SP Tréner',
+    h1: 'Ďakujeme, si zaregistrovaný/á! 🎉',
+    sub: 'Tvoje miesto na vysielaní je rezervované. Ešte jeden krok, nech ti nič neunikne.',
+    nextLabel: 'Tvoj termín',
+    optinTitle: 'Skontroluj si email',
+    optinBodyBefore: 'Na adresu ',
+    optinBodyAfter: ' sme poslali potvrdzovací email. Klikni na odkaz v ňom, aby sme ti mohli poslať pripomienku tesne pred začiatkom vysielania.',
+    optinNote: 'Email nevidíš? Skontroluj aj priečinok Spam / Hromadné.',
+    stepsLabel: 'Čo bude ďalej',
+    step1: 'Potvrď email — dostaneš pripomienku pred termínom.',
+    step2: 'Vysielanie sa spustí presne v termíne vyššie, priamo v prehliadači.',
+    step3: 'Ak prídeš neskôr, video sa spustí od miesta, kde je práve vysielanie — nič nezmeškáš od začiatku.',
+    softCta: 'Chcem sa pozrieť už teraz →',
+    footerTerms: 'Obchodné podmienky', footerPrivacy: 'Ochrana osobných údajov',
+    footerDisclaimer: 'Táto stránka nie je súčasťou webu Facebook ani spoločnosti Meta, Inc. a nie je nimi žiadnym spôsobom podporovaná ani sponzorovaná. FACEBOOK a INSTAGRAM sú ochranné známky spoločnosti Meta, Inc.'
+  },
+  cs: {
+    pageTitle: 'Registrace potvrzena — SP Tréner',
+    h1: 'Děkujeme, jsi zaregistrovaný/á! 🎉',
+    sub: 'Tvoje místo na vysílání je rezervované. Ještě jeden krok, ať ti nic neunikne.',
+    nextLabel: 'Tvůj termín',
+    optinTitle: 'Zkontroluj si email',
+    optinBodyBefore: 'Na adresu ',
+    optinBodyAfter: ' jsme poslali potvrzovací email. Klikni na odkaz v něm, abychom ti mohli poslat připomínku těsně před začátkem vysílání.',
+    optinNote: 'Email nevidíš? Zkontroluj i složku Spam / Hromadné.',
+    stepsLabel: 'Co bude dál',
+    step1: 'Potvrď email — dostaneš připomínku před termínem.',
+    step2: 'Vysílání se spustí přesně v termínu výše, přímo v prohlížeči.',
+    step3: 'Pokud přijdeš později, video se spustí od místa, kde právě vysílání je — nic nezmeškáš od začátku.',
+    softCta: 'Chci se podívat už teď →',
+    footerTerms: 'Obchodní podmínky', footerPrivacy: 'Ochrana osobních údajů',
+    footerDisclaimer: 'Tato stránka není součástí webu Facebook ani společnosti Meta, Inc. a není jimi žádným způsobem podporována ani sponzorována. FACEBOOK a INSTAGRAM jsou ochranné známky společnosti Meta, Inc.'
+  }
+};
+
+let lang = localStorage.getItem('sp_webinar_lang') || 'sk';
+function t(key) { return (T[lang] && T[lang][key] !== undefined) ? T[lang][key] : T.sk[key]; }
+
+// Emailová adresa je vložená cez textContent (nie innerHTML), aby vlastný
+// email používateľa (odrazený späť z jeho registrácie) nikdy nemohol
+// skončiť interpretovaný ako HTML.
+function renderOptinBody() {
+  const el = document.getElementById('optinBodyText');
+  el.textContent = '';
+  el.appendChild(document.createTextNode(t('optinBodyBefore')));
+  const emailSpan = document.createElement('span');
+  emailSpan.className = 'oi-email';
+  emailSpan.textContent = session ? session.email : '—';
+  el.appendChild(emailSpan);
+  el.appendChild(document.createTextNode(t('optinBodyAfter')));
+}
+
+function setLang(l) {
+  lang = l;
+  localStorage.setItem('sp_webinar_lang', l);
+  document.documentElement.lang = l === 'cs' ? 'cs' : 'sk';
+  document.title = t('pageTitle');
+  document.getElementById('langSkBtn').classList.toggle('active', l === 'sk');
+  document.getElementById('langCsBtn').classList.toggle('active', l === 'cs');
+
+  document.getElementById('tH1').textContent = t('h1');
+  document.getElementById('tSub').textContent = t('sub');
+  document.getElementById('tNextLabel').textContent = t('nextLabel');
+  document.getElementById('tOptinTitle').textContent = t('optinTitle');
+  document.getElementById('tOptinNote').textContent = t('optinNote');
+  renderOptinBody();
+  document.getElementById('tStepsLabel').textContent = t('stepsLabel');
+  document.getElementById('tStep1').textContent = t('step1');
+  document.getElementById('tStep2').textContent = t('step2');
+  document.getElementById('tStep3').textContent = t('step3');
+  document.getElementById('tSoftCta').textContent = t('softCta');
+  document.getElementById('tFooterTerms').textContent = t('footerTerms');
+  document.getElementById('tFooterPrivacy').textContent = t('footerPrivacy');
+  document.getElementById('tFooterDisclaimer').textContent = t('footerDisclaimer');
+
+  if (session) {
+    document.getElementById('nextSessionDate').textContent = fmtSessionDate(session.slotStartMs, l);
+  }
+}
+
+if (session) setLang(lang);
+</script>
+</body>
+</html>

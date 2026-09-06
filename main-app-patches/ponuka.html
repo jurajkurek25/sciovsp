@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ponuka pre účastníkov webinára — SP Tréner</title>
+<meta name="description" content="Špeciálna ponuka členstva len pre účastníkov webinára — Premium a Elite na 3, 6 alebo 12 mesiacov, s kurzami zahrnutými.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Manrope:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+/* ── Vibe: "Ignition Signal" ─────────────────────────────────────────────
+   Kolízia: fyzická energia štartovacej čiary (sklony, asymetria, sklonené
+   pricing karty) × presnosť AI dátového signálu (mono readouty, ticker).
+   Farby zámerne zladené s appkou (--ignite = brand volt zelená, --signal
+   = brand fialová) — layout/fonty/wildcard prvky ostávajú vlastné tejto
+   kampani, ale paleta si teraz vedome požičiava identitu appky, aby
+   platobná stránka po webinári jasne kotvila k dôvere v hlavnú značku. */
+:root{
+  --ink:#14100D; --ink2:#1c1610; --ink3:#241c14;
+  --paper:#F6F1E7; --text:#F6F1E7; --text2:rgba(246,241,231,.66); --text3:rgba(246,241,231,.4);
+  --ignite:#c8ff00; --ignite2:#d9ff66;
+  --signal:#7c5cff; --signal2:#b09bff;
+  --brand-volt:#c8ff00; --brand-mono:'DM Mono',monospace;
+  --border:rgba(246,241,231,.14); --border2:rgba(246,241,231,.24);
+  --serif:'Bricolage Grotesque',Georgia,serif; --mono:'Space Mono',monospace; --sans:'Manrope',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--ink);color:var(--text);font-family:var(--sans);line-height:1.6;min-height:100vh;overflow-x:hidden}
+a{color:var(--signal)}
+button{font-family:inherit}
+.noise{position:fixed;inset:0;pointer-events:none;opacity:.05;z-index:1;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+.top{max-width:1040px;margin:0 auto;padding:1.5rem 1.2rem 0;display:flex;justify-content:space-between;align-items:center;position:relative;z-index:2}
+.top a.back{font-family:var(--brand-mono);font-weight:500;font-size:.82rem;color:var(--brand-volt);text-decoration:none;letter-spacing:.02em}
+.top .brand-note{font-family:var(--brand-mono);font-size:.68rem;color:var(--text3);margin-top:.15rem}
+.lang-switch{display:flex;gap:.35rem}
+.lang-switch button{font-family:var(--mono);font-size:.7rem;padding:.3rem .6rem;background:var(--ink2);border:1px solid var(--border2);border-radius:4px;color:var(--text2);cursor:pointer}
+.lang-switch button.active{color:var(--ignite);border-color:var(--ignite)}
+
+/* ── HERO ── */
+.hero{position:relative;max-width:1040px;margin:0 auto;padding:3rem 1.2rem 4rem;z-index:2}
+.hero-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:2.5rem;align-items:center}
+.eyebrow{display:inline-flex;align-items:center;gap:.5rem;font-family:var(--mono);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ignite);border:1px solid rgba(255,77,28,.4);background:rgba(255,77,28,.08);padding:.4rem .8rem;border-radius:3px;margin-bottom:1.3rem}
+h1{font-family:var(--serif);font-weight:800;font-size:clamp(2.1rem,4.6vw,3.4rem);line-height:1.05;letter-spacing:-.01em;margin-bottom:1.1rem}
+h1 .accent{color:var(--ignite);font-style:italic}
+.sub{color:var(--text2);font-size:1.05rem;max-width:480px;margin-bottom:1.8rem}
+.hero-cta{display:inline-flex;align-items:center;gap:.7rem;background:var(--ignite);color:var(--ink);font-family:var(--mono);font-weight:700;font-size:.9rem;padding:1rem 1.6rem;border:none;border-radius:3px;cursor:pointer;transform:skewX(-4deg);transition:transform .15s}
+.hero-cta:hover{transform:skewX(-4deg) translateY(-2px)}
+.hero-cta span{display:inline-block;transform:skewX(4deg)}
+
+/* signal ticker — wildcard prvok: zivy "personalizovany" readout */
+.signal-box{margin-top:2.2rem;background:var(--ink2);border:1px solid var(--border2);border-left:3px solid var(--signal);border-radius:4px;padding:.9rem 1.1rem;max-width:480px}
+.signal-box .sb-label{font-family:var(--mono);font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--signal);margin-bottom:.4rem;display:flex;align-items:center;gap:.4rem}
+.signal-box .sb-dot{width:6px;height:6px;border-radius:50%;background:var(--signal);animation:pulse 1.6s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.signal-box .sb-text{font-family:var(--mono);font-size:.82rem;color:var(--text);min-height:2.6em}
+
+.hero-visual{position:relative;aspect-ratio:1/1;max-width:340px;justify-self:center}
+.track-rings{position:absolute;inset:0;border-radius:50%;border:1px dashed var(--border2)}
+.track-rings::before{content:'';position:absolute;inset:14%;border-radius:50%;border:1px solid var(--border)}
+.track-rings::after{content:'';position:absolute;inset:30%;border-radius:50%;background:radial-gradient(circle,rgba(255,77,28,.25),transparent 70%)}
+.hero-icon{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+
+.countdown{max-width:420px;margin:2.4rem auto 0;text-align:center}
+.countdown .label{font-family:var(--mono);font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ignite2);margin-bottom:.5rem}
+.countdown .clock{font-family:var(--mono);font-size:1.9rem;font-weight:700;color:var(--text);letter-spacing:.04em}
+
+.offer-ended{max-width:520px;margin:2.4rem auto 0;text-align:center;background:var(--ink3);border:1px solid var(--border2);border-left:3px solid var(--signal);border-radius:6px;padding:1.3rem 1.5rem}
+.offer-ended-title{font-family:var(--serif);font-weight:800;font-size:clamp(1.2rem,2.6vw,1.6rem);margin-bottom:.5rem}
+.offer-ended-body{color:var(--text2);font-size:.9rem}
+
+/* ── diagonal section dividers ── */
+.lane{position:relative;padding:4rem 1.2rem;z-index:2}
+.lane.tilt-a{background:var(--ink2);clip-path:polygon(0 3%, 100% 0, 100% 97%, 0 100%)}
+.lane.tilt-b{background:var(--ink);clip-path:polygon(0 0, 100% 3%, 100% 100%, 0 97%)}
+.lane-inner{max-width:1040px;margin:0 auto}
+
+.section-title{font-family:var(--serif);font-weight:800;font-size:clamp(1.5rem,3vw,2rem);margin-bottom:.5rem}
+.section-sub{color:var(--text2);max-width:560px;font-size:.92rem;margin-bottom:2rem}
+
+/* ── pricing ── */
+.toggle-row{display:flex;justify-content:center;margin-bottom:2.2rem}
+.toggle{display:inline-flex;background:var(--ink3);border:1px solid var(--border2);border-radius:99px;padding:.25rem}
+.toggle button{padding:.55rem 1.3rem;border:none;background:transparent;color:var(--text2);border-radius:99px;font-family:var(--mono);font-size:.8rem;cursor:pointer}
+.toggle button.active{background:var(--signal);color:var(--ink);font-weight:700}
+
+.plans{display:grid;grid-template-columns:1fr 1fr;gap:1.3rem;max-width:760px;margin:0 auto}
+.plan{background:var(--ink3);border:1px solid var(--border2);border-radius:6px;padding:1.7rem;display:flex;flex-direction:column;gap:.8rem;position:relative;transition:transform .2s}
+.plan.featured{border-color:var(--ignite);transform:rotate(-1deg)}
+.plan.featured:hover{transform:rotate(0deg) translateY(-3px)}
+.plan:not(.featured){transform:rotate(1deg)}
+.plan:not(.featured):hover{transform:rotate(0deg) translateY(-3px)}
+.plan .badge{position:absolute;top:-.7rem;right:1.1rem;background:var(--ignite);color:var(--ink);font-family:var(--mono);font-size:.65rem;padding:.25rem .6rem;border-radius:3px;font-weight:700;transform:rotate(-2deg)}
+.plan .name{font-family:var(--serif);font-weight:800;font-size:1.5rem}
+.plan .price{font-family:var(--mono);font-size:2.2rem;color:var(--text);font-weight:700}
+.plan .price small{font-size:.85rem;color:var(--text3);font-weight:400;font-family:var(--sans)}
+.plan ul{list-style:none;display:flex;flex-direction:column;gap:.55rem;margin:.3rem 0}
+.plan li{font-size:.85rem;color:var(--text2);display:flex;gap:.55rem;align-items:flex-start}
+.plan li svg{flex-shrink:0;margin-top:.15rem}
+.plan-btn{margin-top:auto;padding:.9rem 1.2rem;border:none;border-radius:3px;font-family:var(--mono);font-size:.85rem;font-weight:700;cursor:pointer;text-align:center}
+.plan-btn.primary{background:var(--ignite);color:var(--ink)}
+.plan-btn.secondary{background:transparent;border:1px solid var(--border2);color:var(--text)}
+.plan-btn:disabled{opacity:.6;cursor:not-allowed}
+#planFeedback{text-align:center;margin-top:1rem;font-size:.85rem;color:var(--ignite)}
+
+/* ── courses ── */
+.course-groups{display:grid;grid-template-columns:1fr 1fr;gap:1.3rem}
+.course-card{background:var(--ink3);border:1px solid var(--border);border-radius:6px;padding:1.4rem}
+.course-card h3{font-family:var(--mono);font-size:.82rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:1rem;display:flex;align-items:center;gap:.55rem;color:var(--signal)}
+.course-card ul{list-style:none;display:flex;flex-direction:column;gap:.9rem}
+.course-card li{font-size:.9rem;color:var(--text2);display:flex;gap:.6rem;align-items:baseline}
+.course-card li .idx{font-family:var(--mono);font-size:.72rem;color:var(--ignite2);flex-shrink:0;padding-top:.15rem}
+.course-item-title{color:var(--text);font-weight:600}
+.course-item-desc{color:var(--text3);font-size:.8rem;margin-top:.2rem;line-height:1.45}
+
+/* ── bonuses ── */
+.bonuses{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem}
+.bonus{background:var(--ink2);border:1px solid var(--border);border-radius:6px;padding:1.2rem}
+.bonus .bi{margin-bottom:.7rem}
+.bonus h4{font-size:.88rem;margin-bottom:.4rem}
+.bonus p{font-size:.78rem;color:var(--text3)}
+
+/* ── faq ── */
+.faq-item{border-bottom:1px solid var(--border);padding:1.15rem 0}
+.faq-item h4{font-size:.95rem;margin-bottom:.4rem;font-family:var(--sans);font-weight:700}
+.faq-item p{font-size:.85rem;color:var(--text2)}
+
+/* ── final ── */
+.final{text-align:center;padding:4.5rem 1.2rem 5rem;position:relative;z-index:2}
+.final h2{font-family:var(--serif);font-weight:800;font-size:clamp(1.8rem,4vw,2.6rem);margin-bottom:.8rem}
+.final p{color:var(--text2);margin-bottom:1.8rem}
+
+.site-footer{max-width:640px;margin:0 auto;padding:0 1.2rem 3rem;text-align:center;position:relative;z-index:2}
+.footer-links{display:flex;justify-content:center;gap:.6rem;font-family:var(--mono);font-size:.78rem;margin-bottom:.8rem}
+.footer-links a{color:var(--text2);text-decoration:none}
+.footer-links a:hover{color:var(--text)}
+.footer-dot{color:var(--text3)}
+.footer-disclaimer{font-size:.72rem;color:var(--text3);line-height:1.5;max-width:480px;margin:0 auto}
+
+@media(max-width:760px){.hero-grid{grid-template-columns:1fr}.hero-visual{display:none}.plans,.course-groups{grid-template-columns:1fr}.bonuses{grid-template-columns:1fr 1fr}.plan.featured,.plan:not(.featured){transform:none}}
+</style>
+</head>
+<body>
+<div class="noise"></div>
+<div class="top">
+  <div>
+    <a class="back" href="/" id="tBack">← SP Tréner</a>
+    <div class="brand-note" id="tBrandNote">Táto ponuka je súčasťou platformy SP Tréner</div>
+  </div>
+  <div class="lang-switch">
+    <button id="langSkBtn" onclick="setLang('sk')">SK</button>
+    <button id="langCsBtn" onclick="setLang('cs')">CZ</button>
+  </div>
+</div>
+
+<div class="hero">
+  <div class="hero-grid">
+    <div>
+      <span class="eyebrow" id="tEyebrow">🚩 Špeciálna ponuka po webinári</span>
+      <h1 id="tH1">Nie ďalší balík testov pre všetkých.<br><span class="accent" id="tH1Accent">AI príprava, ktorá sa prispôsobí presne tebe.</span></h1>
+      <p class="sub" id="tSub">Táto cena platí len obmedzený čas po webinári. Potom sa členstvo vracia na plnú cenu.</p>
+      <button class="hero-cta" onclick="document.getElementById('plans-anchor').scrollIntoView({behavior:'smooth'})"><span id="tHeroCta">Na štart, priprav sa →</span></button>
+
+      <div class="signal-box">
+        <div class="sb-label"><span class="sb-dot"></span> <span id="tSignalLabel">Živý príklad personalizácie</span></div>
+        <div class="sb-text" id="signalTicker"></div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="track-rings"></div>
+      <div class="hero-icon">
+        <svg width="76" height="76" viewBox="0 0 76 76" fill="none">
+          <path d="M14 62V14l40 16-40 16" stroke="#c8ff00" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>
+          <circle cx="58" cy="20" r="4" fill="#7c5cff"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="countdown" id="countdownBox">
+    <div class="label" id="tCountdownLabel">Ponuka končí o</div>
+    <div class="clock" id="clock">--:--:--</div>
+  </div>
+  <div class="offer-ended" id="offerEndedBanner" style="display:none">
+    <div class="offer-ended-title" id="tOfferEndedTitle">Táto špeciálna ponuka po webinári už skončila.</div>
+    <div class="offer-ended-body" id="tOfferEndedBody">Členstvo je stále dostupné, teraz za bežnú cenu.</div>
+    <div class="offer-ended-body" id="tOfferEndedCoursesNote" style="margin-top:.5rem;color:var(--ignite2)">Bonusový balík kurzov už nie je súčasťou ponuky.</div>
+  </div>
+</div>
+
+<div class="lane tilt-a" id="plans-anchor">
+  <div class="lane-inner">
+    <h2 class="section-title" style="text-align:center" id="tPlansTitle">Vyber si tempo</h2>
+    <p class="section-sub" style="text-align:center;margin-left:auto;margin-right:auto" id="tPlansSub">Jednorazová platba, žiadne skryté opakované strhávanie.</p>
+
+    <div class="toggle-row">
+      <div class="toggle">
+        <button id="btn3m" class="active" onclick="setDuration(3)">3 mesiace</button>
+        <button id="btn6m" onclick="setDuration(6)">6 mesiacov</button>
+        <button id="btn12m" onclick="setDuration(12)">12 mesiacov</button>
+      </div>
+    </div>
+
+    <div class="plans">
+      <div class="plan">
+        <div class="name">Premium</div>
+        <div class="price"><span id="premiumPrice">27</span> € <small id="premiumPeriod">/ 3 mesiace</small></div>
+        <ul>
+          <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3.5" stroke="#7c5cff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> <span id="tPF1">Neobmedzený prístup k AI generátoru testov</span></li>
+          <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3.5" stroke="#7c5cff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> <span id="tPF2">6 univerzálnych kurzov zahrnutých</span></li>
+          <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3.5" stroke="#7c5cff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> <span id="tPF3">Prístup do celej odborovej knižnice kurzov</span></li>
+          <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3.5" stroke="#7c5cff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> <span id="tPF4">Sledovanie pokroku a štatistiky</span></li>
+        </ul>
+        <button class="plan-btn secondary js-plan-btn" data-tier="premium" id="premiumBtn">Získať Premium →</button>
+      </div>
+      <div class="plan featured">
+        <span class="badge" id="tEliteBadge">Odporúčame</span>
+        <div class="name">Elite</div>
+        <div class="price"><span id="elitePrice">57</span> € <small id="elitePeriod">/ 3 mesiace</small></div>
+        <ul>
+          <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3.5" stroke="#c8ff00" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> <span id="tEF1">Všetko z Premium</span></li>
+          <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3.5" stroke="#c8ff00" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> <span id="tEF2">Osobný AI mentor</span></li>
+          <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3.5" stroke="#c8ff00" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> <span id="tEF3">Pokročilé AI nástroje na mieru tvojim slabinám</span></li>
+          <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3.5" stroke="#c8ff00" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> <span id="tEF4">Prioritná podpora</span></li>
+        </ul>
+        <button class="plan-btn primary js-plan-btn" data-tier="elite" id="eliteBtn">Získať Elite →</button>
+      </div>
+    </div>
+    <div id="planFeedback"></div>
+  </div>
+</div>
+
+<div class="lane tilt-b" id="courses-section">
+  <div class="lane-inner">
+    <h2 class="section-title" id="tCoursesTitle">Kurzy zahrnuté v členstve</h2>
+    <p class="section-sub" id="tCoursesSub">6 kurzov, ktoré potrebuje každý uchádzač bez ohľadu na odbor — a prístup do celej odborovej knižnice navyše.</p>
+    <div class="course-groups">
+      <div class="course-card">
+        <h3>◆ <span id="tUniTitle">Univerzálne — pre každého</span></h3>
+        <ul>
+          <li><span class="idx">01</span> <div><div class="course-item-title" id="tUni1">TSP na jeden pokus (stratégia)</div><div class="course-item-desc" id="tUni1Desc">Časovanie, eliminačné techniky a najčastejšie pasce v teste študijných predpokladov.</div></div></li>
+          <li><span class="idx">02</span> <div><div class="course-item-title" id="tUni2">Time manažment</div><div class="course-item-desc" id="tUni2Desc">Ako si rozvrhnúť prípravu na mesiace dopredu, aby si sa na poslednú chvíľu neučil všetko naraz.</div></div></li>
+          <li><span class="idx">03</span> <div><div class="course-item-title" id="tUni3">Ako sa efektívne učiť</div><div class="course-item-desc" id="tUni3Desc">Techniky učenia (aktívne opakovanie, spaced repetition), ktoré si zapamätáš, nielen prečítaš.</div></div></li>
+          <li><span class="idx">04</span> <div><div class="course-item-title" id="tUni4">Ústny pohovor nanečisto</div><div class="course-item-desc" id="tUni4Desc">Nácvik typických otázok komisie a sebaprezentácie — na kameru, s reálnou spätnou väzbou.</div></div></li>
+          <li><span class="idx">05</span> <div><div class="course-item-title" id="tUni5">Motivačný list a esej</div><div class="course-item-desc" id="tUni5Desc">Ako napísať motivačný list, ktorý ťa odlíši od stoviek rovnakých prihlášok.</div></div></li>
+          <li><span class="idx">06</span> <div><div class="course-item-title" id="tUni6">Zvládni stres pred prijímačkami</div><div class="course-item-desc" id="tUni6Desc">Dýchacie a kognitívne techniky na deň D, aby ťa nervy nepripravili o výsledok, na ktorý máš.</div></div></li>
+        </ul>
+      </div>
+      <div class="course-card">
+        <h3>◆ <span id="tSpecTitle">Odborová knižnica</span></h3>
+        <ul>
+          <li><span class="idx">01</span> <div><div class="course-item-title" id="tSpec1">Ako sa dostať na psychológiu</div><div class="course-item-desc" id="tSpec1Desc">Čo presne testujú prijímačky na psychológiu a ako sa pripraviť s lektorkou, ktorá si tým sama prešla.</div></div></li>
+          <li><span class="idx">02</span> <div><div class="course-item-title" id="tSpec2">Biológia a chémia pre medicínu</div><div class="course-item-desc" id="tSpec2Desc">Zrýchlený prehľad učiva, na ktoré sa najčastejšie pýtajú prijímačky na medicínu, farmáciu a veterinu.</div></div></li>
+          <li><span class="idx">03</span> <div><div class="course-item-title" id="tSpec3">Právo — testy a logické úlohy</div><div class="course-item-desc" id="tSpec3Desc">Ako riešiť testy študijných predpokladov a logické úlohy typické pre právnické fakulty.</div></div></li>
+          <li><span class="idx">04</span> <div><div class="course-item-title" id="tSpec4">Pedagogika — prijímačky a pohovor</div><div class="course-item-desc" id="tSpec4Desc">Pedagogicko-psychologický základ aj príprava na pohovor pre pedagogické odbory.</div></div></li>
+          <li><span class="idx">05</span> <div><div class="course-item-title" id="tSpec5">Matematika a logika pre IT a techniku</div><div class="course-item-desc" id="tSpec5Desc">Matematika a logické úlohy presne v tom formáte, ako ich dávajú technické a IT fakulty.</div></div></li>
+          <li><span class="idx">06</span> <div><div class="course-item-title" id="tSpecNote">+ sprievodca pre rodičov</div><div class="course-item-desc" id="tSpecNoteDesc">Ako podporiť dieťa počas prípravy bez zbytočného tlaku — pre rodičov a starých rodičov.</div></div></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="lane tilt-a" id="bonuses-section">
+  <div class="lane-inner">
+    <h2 class="section-title" id="tBonusTitle">Bonusy len teraz</h2>
+    <div class="bonuses">
+      <div class="bonus"><div class="bi"><svg width="22" height="22" viewBox="0 0 22 22"><rect x="3" y="9" width="16" height="10" rx="1" stroke="#7c5cff" stroke-width="1.6"/><path d="M3 12h16M11 9v10M7 9c0-2 1.5-4 4-4s4 2 4 4" stroke="#7c5cff" stroke-width="1.6"/></svg></div><h4 id="tB1Title">Bonusové dni</h4><p id="tB1Desc">Navyše dni členstva, ak si ho aktivuješ počas platnosti tejto ponuky.</p></div>
+      <div class="bonus"><div class="bi"><svg width="22" height="22" viewBox="0 0 22 22"><circle cx="8" cy="8" r="3.5" stroke="#c8ff00" stroke-width="1.6"/><circle cx="16" cy="10" r="2.5" stroke="#c8ff00" stroke-width="1.6"/><path d="M2 19c0-3.5 2.7-6 6-6s6 2.5 6 6M14 19c0-2.3 1-4.3 2.6-5.4" stroke="#c8ff00" stroke-width="1.6" stroke-linecap="round"/></svg></div><h4 id="tB2Title">Súkromná skupina</h4><p id="tB2Desc">Prístup k ostatným účastníkom pred termínmi.</p></div>
+      <div class="bonus"><div class="bi"><svg width="22" height="22" viewBox="0 0 22 22"><path d="M11 2v4M11 16v4M2 11h4M16 11h4M4.5 4.5l2.8 2.8M14.7 14.7l2.8 2.8M4.5 17.5l2.8-2.8M14.7 7.3l2.8-2.8" stroke="#7c5cff" stroke-width="1.6" stroke-linecap="round"/><circle cx="11" cy="11" r="3" stroke="#7c5cff" stroke-width="1.6"/></svg></div><h4 id="tB3Title">Extra AI testy</h4><p id="tB3Desc">Navýšený limit generovaných testov počas prvého mesiaca.</p></div>
+      <div class="bonus"><div class="bi"><svg width="22" height="22" viewBox="0 0 22 22"><path d="M3 5h16v10H8l-5 4V5z" stroke="#c8ff00" stroke-width="1.6" stroke-linejoin="round"/></svg></div><h4 id="tB4Title">Osobná podpora</h4><p id="tB4Desc">Priama pomoc, ak si počas prípravy niečím neistý.</p></div>
+    </div>
+  </div>
+</div>
+
+<div class="lane tilt-b">
+  <div class="lane-inner">
+    <h2 class="section-title" id="tFaqTitle">Časté otázky</h2>
+    <div class="faq">
+      <div class="faq-item">
+        <h4 id="tFaq1Q">Aký je rozdiel medzi Premium a Elite?</h4>
+        <p id="tFaq1A">Premium ti dáva neobmedzený prístup k appke aj ku všetkým kurzom. Elite navyše pridáva pokročilé AI nástroje vrátane osobného AI mentora a prioritnú podporu.</p>
+      </div>
+      <div class="faq-item">
+        <h4 id="tFaq2Q">Čo sa stane po uplynutí 3, 6 alebo 12 mesiacov?</h4>
+        <p id="tFaq2A">Členstvo je jednorazová platba na presne dohodnutú dĺžku — nič sa samo neobnovuje ani nestrháva ďalšia platba. Ak budeš chcieť pokračovať, jednoducho si dokúpiš ďalšie obdobie.</p>
+      </div>
+      <div class="faq-item">
+        <h4 id="tFaq3Q">Môžem si vybrať kurzy z knižnice kedykoľvek?</h4>
+        <p id="tFaq3A">Áno, počas trvania členstva máš prístup ku všetkým kurzom v knižnici, nielen k jednému.</p>
+      </div>
+      <div class="faq-item">
+        <h4 id="tFaq4Q">Ako presne appka vie, že mi to pomôže — čo ak som iný prípad?</h4>
+        <p id="tFaq4A">AI generátor sleduje presne to, v čom robíš chyby, a testy prispôsobuje tomu — nie univerzálnej sade pre všetkých. Čím viac testov spravíš, tým presnejšie appka vie, kde máš medzery.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="final">
+  <h2 id="tFinalTitle">Poď na to s plánom, nie s chaosom</h2>
+  <p id="tFinalSub">Vyber si Premium alebo Elite a začni ešte dnes.</p>
+  <button class="plan-btn primary js-plan-btn" data-tier="elite" style="max-width:280px;margin:0 auto;display:block" id="finalCtaBtn">Získať Elite →</button>
+</div>
+
+<footer class="site-footer">
+  <div class="footer-links">
+    <a href="/legal.html#vop" id="tFooterTerms">Obchodné podmienky</a>
+    <span class="footer-dot">·</span>
+    <a href="/legal.html#privacy" id="tFooterPrivacy">Ochrana osobných údajov</a>
+  </div>
+  <p class="footer-disclaimer" id="tFooterDisclaimer">Táto stránka nie je súčasťou webu Facebook ani spoločnosti Meta, Inc. a nie je nimi žiadnym spôsobom podporovaná ani sponzorovaná. FACEBOOK a INSTAGRAM sú ochranné známky spoločnosti Meta, Inc.</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://zrnqiwareacqyndwchsv.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpybnFpd2FyZWFjcXluZHdjaHN2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMDA3NTAsImV4cCI6MjA4OTc3Njc1MH0.iUne23YDxp12Iwxdk9U8MfcV0NTBtrNf9OgsjQdiADk';
+const _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let currentUser = null;
+let duration = 3;
+
+const PRICES = { premium: { 3: 27, 6: 49, 12: 97 }, elite: { 3: 57, 6: 97, 12: 187 } };
+// Bežná (neakciová) cena po skončení ponuky — lineárny prepočet z reálnej
+// mesačnej sadzby appky (Premium 9,90 €/mes., Elite 19,90 €/mes., viď
+// public/app.html), žiadny objemový popust za dlhší záväzok.
+const CLASSIC_PRICES = { premium: { 3: 29.70, 6: 59.40, 12: 118.80 }, elite: { 3: 59.70, 6: 119.40, 12: 238.80 } };
+const PERIOD_KEYS = { 3: 'period3', 6: 'period6', 12: 'period12' };
+let offerExpired = false;
+
+// Akciové ceny sú vždy celé eurá, klasické (po vypršaní) majú desatiny
+// (odvodené z reálnej mesačnej sadzby 9,90 € / 19,90 €) — zobraz desatinné
+// miesta len keď skutočne existujú, so slovenskou desatinnou čiarkou.
+function formatPrice(n) {
+  return Number.isInteger(n) ? String(n) : n.toFixed(2).replace('.', ',');
+}
+function setDuration(months) {
+  duration = months;
+  document.getElementById('btn3m').classList.toggle('active', months === 3);
+  document.getElementById('btn6m').classList.toggle('active', months === 6);
+  document.getElementById('btn12m').classList.toggle('active', months === 12);
+  const priceTable = offerExpired ? CLASSIC_PRICES : PRICES;
+  document.getElementById('premiumPrice').textContent = formatPrice(priceTable.premium[months]);
+  document.getElementById('elitePrice').textContent = formatPrice(priceTable.elite[months]);
+  const periodTxt = t(PERIOD_KEYS[months]);
+  document.getElementById('premiumPeriod').textContent = periodTxt;
+  document.getElementById('elitePeriod').textContent = periodTxt;
+}
+
+// Po vypršaní ponuky (cookie deadline): veľké oznámenie namiesto odpočtu,
+// bonusy aj bonusový kurzový balík preč (ten patrí len k akcii), ceny
+// prepočítané na bežnú (nezvýhodnenú) sadzbu — ale 3/6/12 mesiacov
+// ostávajú dostupné.
+function enterExpiredMode() {
+  if (offerExpired) return;
+  offerExpired = true;
+  const countdownBox = document.getElementById('countdownBox');
+  const banner = document.getElementById('offerEndedBanner');
+  const bonuses = document.getElementById('bonuses-section');
+  const courses = document.getElementById('courses-section');
+  if (countdownBox) countdownBox.style.display = 'none';
+  if (banner) banner.style.display = 'block';
+  if (bonuses) bonuses.style.display = 'none';
+  if (courses) courses.style.display = 'none';
+  setDuration(duration);
+}
+
+// Ponuka končí vždy o 23:59:59 dňa, kedy návštevník prišiel PRVÝKRÁT —
+// zapamätané cez cookie (nie localStorage), nech to prežije aj vymazanie
+// site dát, ktoré niekedy nechá cookies bokom.
+function getCookie(name) {
+  const match = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
+  return match ? decodeURIComponent(match[1]) : null;
+}
+function setCookie(name, value, expiresDate) {
+  document.cookie = name + '=' + encodeURIComponent(value) + '; expires=' + expiresDate.toUTCString() + '; path=/; SameSite=Lax';
+}
+// Webinár je týždenný (každý štvrtok) — bez tohto by si niekto, kto sa
+// zaregistruje znova o týždeň neskôr, priniesol starú (už dávno prepadnutú)
+// cookie a akciu by už nikdy nedostal. Preto sa deadline cookie viaže na
+// konkrétny termín (slotStartMs) z aktuálnej registrácie: nová registrácia
+// na iný termín = nový odpočet; opakovaná návšteva v rámci toho istého
+// termínu = ten istý (už bežiaci/prepadnutý) odpočet ostáva.
+function currentWebinarSlotKey() {
+  try {
+    const raw = localStorage.getItem('sp_webinar_session');
+    if (!raw) return null;
+    const session = JSON.parse(raw);
+    return session && session.slotStartMs ? String(session.slotStartMs) : null;
+  } catch (e) { return null; }
+}
+function getDeadline() {
+  const slotKey = currentWebinarSlotKey();
+  const stored = getCookie('sp_offer_deadline');
+  const parts = stored ? stored.split('|') : [];
+  const storedSlotKey = parts.length > 1 ? parts[0] : null;
+  let deadline = parts.length > 1 ? parts[1] : null;
+  if (!deadline || storedSlotKey !== slotKey) {
+    const now = new Date();
+    const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+    deadline = String(endOfDay.getTime());
+    // cookie samotná nech vydrží pár dní navyše — hodnota v nej (koniec
+    // dňa prvej návštevy k danému termínu) je to, čo skutočne určuje odpočet, nie expirácia cookie.
+    const cookieExpiry = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+    setCookie('sp_offer_deadline', slotKey + '|' + deadline, cookieExpiry);
+  }
+  return Number(deadline);
+}
+function tickClock() {
+  const remaining = getDeadline() - Date.now();
+  if (remaining <= 0) { enterExpiredMode(); return; }
+  const clockEl = document.getElementById('clock');
+  const h = Math.floor(remaining / 3600000);
+  const m = Math.floor((remaining % 3600000) / 60000);
+  const s = Math.floor((remaining % 60000) / 1000);
+  clockEl.textContent = String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+}
+// Wildcard signal ticker — cyklické priklady personalizacie, priamo adresuju
+// namietku "zabera to aj mne?" primo v hero, este pred cenami.
+let tickerIdx = 0;
+let tickerTimer = null;
+function tickSignal() {
+  const el = document.getElementById('signalTicker');
+  if (!el) return;
+  const examples = t('signalExamples');
+  el.textContent = examples[tickerIdx % examples.length];
+  tickerIdx++;
+}
+function startSignalTicker() {
+  if (tickerTimer) clearInterval(tickerTimer);
+  tickerIdx = 0;
+  tickSignal();
+  tickerTimer = setInterval(tickSignal, 3200);
+}
+
+async function startPlanCheckout(tier) {
+  const feedback = document.getElementById('planFeedback');
+  feedback.textContent = '';
+  if (!currentUser) {
+    await _supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.href } });
+    return;
+  }
+  const btns = document.querySelectorAll('.js-plan-btn');
+  btns.forEach(b => { b.disabled = true; });
+  const clicked = document.querySelector('.js-plan-btn[data-tier="' + tier + '"]');
+  const originalText = clicked ? clicked.textContent : '';
+  if (clicked) clicked.textContent = t('redirecting');
+  try {
+    const res = await fetch('/api/membership/checkout', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ email: currentUser.email, tier, months: duration, pricingMode: offerExpired ? 'classic' : 'promo', refCode: sessionStorage.getItem('partner_ref') || null })
+    });
+    const data = await res.json();
+    if (data.url) {
+      location.href = data.url;
+    } else {
+      feedback.textContent = data.error || t('checkoutError');
+      btns.forEach(b => { b.disabled = false; });
+      if (clicked) clicked.textContent = originalText;
+    }
+  } catch (e) {
+    feedback.textContent = t('networkError');
+    btns.forEach(b => { b.disabled = false; });
+    if (clicked) clicked.textContent = originalText;
+  }
+}
+
+document.querySelectorAll('.js-plan-btn').forEach(btn => {
+  btn.onclick = () => startPlanCheckout(btn.dataset.tier);
+});
+
+_supabase.auth.getSession().then(({ data: { session } }) => {
+  currentUser = session ? session.user : null;
+});
+_supabase.auth.onAuthStateChange((event, session) => {
+  if (event === 'SIGNED_IN') currentUser = session.user;
+  if (event === 'SIGNED_OUT') currentUser = null;
+});
+
+// ==================== i18n ====================
+const T = {
+  sk: {
+    brandNote: 'Táto ponuka je súčasťou platformy SP Tréner',
+    eyebrow: '🚩 Špeciálna ponuka po webinári',
+    h1: 'Nie ďalší balík testov pre všetkých.',
+    h1Accent: 'AI príprava, ktorá sa prispôsobí presne tebe.',
+    sub: 'Táto cena platí len obmedzený čas po webinári. Potom sa členstvo vracia na plnú cenu.',
+    heroCta: 'Na štart, priprav sa →',
+    signalLabel: 'Živý príklad personalizácie',
+    signalExamples: [
+      'Peter — o 40 % viac úloh z chémie po 3 chybách za sebou',
+      'Zuzka — prepnuté na ťažšiu logiku, posledných 5 správne',
+      'Martin — pridaný opakovací test z minulého týždňa',
+      'Kika — spomalené tempo testu, zvýšená chybovosť pri strese'
+    ],
+    countdownLabel: 'Ponuka končí o',
+    offerEndedTitle: 'Táto špeciálna ponuka po webinári už skončila.',
+    offerEndedBody: 'Členstvo je stále dostupné, teraz za bežnú cenu.',
+    offerEndedCoursesNote: 'Bonusový balík kurzov už nie je súčasťou ponuky.',
+    plansTitle: 'Vyber si tempo', plansSub: 'Jednorazová platba, žiadne skryté opakované strhávanie.',
+    eliteBadge: 'Odporúčame',
+    pf1: 'Neobmedzený prístup k AI generátoru testov', pf2: '6 univerzálnych kurzov zahrnutých', pf3: 'Prístup do celej odborovej knižnice kurzov', pf4: 'Sledovanie pokroku a štatistiky',
+    ef1: 'Všetko z Premium', ef2: 'Osobný AI mentor', ef3: 'Pokročilé AI nástroje na mieru tvojim slabinám', ef4: 'Prioritná podpora',
+    premiumBtn: 'Získať Premium →', eliteBtn: 'Získať Elite →',
+    period3: '/ 3 mesiace', period6: '/ 6 mesiacov', period12: '/ 12 mesiacov',
+    coursesTitle: 'Kurzy zahrnuté v členstve',
+    coursesSub: '6 kurzov, ktoré potrebuje každý uchádzač bez ohľadu na odbor — a prístup do celej odborovej knižnice navyše.',
+    uniTitle: 'Univerzálne — pre každého',
+    uni1: 'TSP na jeden pokus (stratégia)', uni2: 'Time manažment', uni3: 'Ako sa efektívne učiť', uni4: 'Ústny pohovor nanečisto', uni5: 'Motivačný list a esej', uni6: 'Zvládni stres pred prijímačkami',
+    uni1Desc: 'Časovanie, eliminačné techniky a najčastejšie pasce v teste študijných predpokladov.',
+    uni2Desc: 'Ako si rozvrhnúť prípravu na mesiace dopredu, aby si sa na poslednú chvíľu neučil všetko naraz.',
+    uni3Desc: 'Techniky učenia (aktívne opakovanie, spaced repetition), ktoré si zapamätáš, nielen prečítaš.',
+    uni4Desc: 'Nácvik typických otázok komisie a sebaprezentácie — na kameru, s reálnou spätnou väzbou.',
+    uni5Desc: 'Ako napísať motivačný list, ktorý ťa odlíši od stoviek rovnakých prihlášok.',
+    uni6Desc: 'Dýchacie a kognitívne techniky na deň D, aby ťa nervy nepripravili o výsledok, na ktorý máš.',
+    specTitle: 'Odborová knižnica',
+    spec1: 'Ako sa dostať na psychológiu', spec2: 'Biológia a chémia pre medicínu', spec3: 'Právo — testy a logické úlohy', spec4: 'Pedagogika — prijímačky a pohovor', spec5: 'Matematika a logika pre IT a techniku', specNote: '+ sprievodca pre rodičov',
+    spec1Desc: 'Čo presne testujú prijímačky na psychológiu a ako sa pripraviť s lektorkou, ktorá si tým sama prešla.',
+    spec2Desc: 'Zrýchlený prehľad učiva, na ktoré sa najčastejšie pýtajú prijímačky na medicínu, farmáciu a veterinu.',
+    spec3Desc: 'Ako riešiť testy študijných predpokladov a logické úlohy typické pre právnické fakulty.',
+    spec4Desc: 'Pedagogicko-psychologický základ aj príprava na pohovor pre pedagogické odbory.',
+    spec5Desc: 'Matematika a logické úlohy presne v tom formáte, ako ich dávajú technické a IT fakulty.',
+    specNoteDesc: 'Ako podporiť dieťa počas prípravy bez zbytočného tlaku — pre rodičov a starých rodičov.',
+    bonusTitle: 'Bonusy len teraz',
+    b1Title: 'Bonusové dni', b1Desc: 'Navyše dni členstva, ak si ho aktivuješ počas platnosti tejto ponuky.',
+    b2Title: 'Súkromná skupina', b2Desc: 'Prístup k ostatným účastníkom pred termínmi.',
+    b3Title: 'Extra AI testy', b3Desc: 'Navýšený limit generovaných testov počas prvého mesiaca.',
+    b4Title: 'Osobná podpora', b4Desc: 'Priama pomoc, ak si počas prípravy niečím neistý.',
+    faqTitle: 'Časté otázky',
+    faq1Q: 'Aký je rozdiel medzi Premium a Elite?', faq1A: 'Premium ti dáva neobmedzený prístup k appke aj ku všetkým kurzom. Elite navyše pridáva pokročilé AI nástroje vrátane osobného AI mentora a prioritnú podporu.',
+    faq2Q: 'Čo sa stane po uplynutí 3, 6 alebo 12 mesiacov?', faq2A: 'Členstvo je jednorazová platba na presne dohodnutú dĺžku — nič sa samo neobnovuje ani nestrháva ďalšia platba. Ak budeš chcieť pokračovať, jednoducho si dokúpiš ďalšie obdobie.',
+    faq3Q: 'Môžem si vybrať kurzy z knižnice kedykoľvek?', faq3A: 'Áno, počas trvania členstva máš prístup ku všetkým kurzom v knižnici, nielen k jednému.',
+    faq4Q: 'Ako presne appka vie, že mi to pomôže — čo ak som iný prípad?', faq4A: 'AI generátor sleduje presne to, v čom robíš chyby, a testy prispôsobuje tomu — nie univerzálnej sade pre všetkých. Čím viac testov spravíš, tým presnejšie appka vie, kde máš medzery.',
+    finalTitle: 'Poď na to s plánom, nie s chaosom', finalSub: 'Vyber si Premium alebo Elite a začni ešte dnes.',
+    redirecting: 'Presmerovávam…', checkoutError: 'Chyba pri vytváraní platby.', networkError: 'Chyba servera.',
+    footerTerms: 'Obchodné podmienky', footerPrivacy: 'Ochrana osobných údajov',
+    footerDisclaimer: 'Táto stránka nie je súčasťou webu Facebook ani spoločnosti Meta, Inc. a nie je nimi žiadnym spôsobom podporovaná ani sponzorovaná. FACEBOOK a INSTAGRAM sú ochranné známky spoločnosti Meta, Inc.',
+    pageTitle: 'Ponuka pre účastníkov webinára — SP Tréner'
+  },
+  cs: {
+    brandNote: 'Tato nabídka je součástí platformy SP Tréner',
+    eyebrow: '🚩 Speciální nabídka po webináři',
+    h1: 'Ne další balík testů pro všechny.',
+    h1Accent: 'AI příprava, která se přizpůsobí přesně tobě.',
+    sub: 'Tato cena platí jen omezenou dobu po webináři. Poté se členství vrací na plnou cenu.',
+    heroCta: 'Na start, připrav se →',
+    signalLabel: 'Živý příklad personalizace',
+    signalExamples: [
+      'Petr — o 40 % víc úloh z chemie po 3 chybách za sebou',
+      'Zuzka — přepnuto na těžší logiku, posledních 5 správně',
+      'Martin — přidán opakovací test z minulého týdne',
+      'Kika — zpomalené tempo testu, zvýšená chybovost při stresu'
+    ],
+    countdownLabel: 'Nabídka končí za',
+    offerEndedTitle: 'Tato speciální nabídka po webináři už skončila.',
+    offerEndedBody: 'Členství je stále dostupné, teď za běžnou cenu.',
+    offerEndedCoursesNote: 'Bonusový balíček kurzů už není součástí nabídky.',
+    plansTitle: 'Vyber si tempo', plansSub: 'Jednorázová platba, žádné skryté opakované strhávání.',
+    eliteBadge: 'Doporučujeme',
+    pf1: 'Neomezený přístup k AI generátoru testů', pf2: '6 univerzálních kurzů zahrnuto', pf3: 'Přístup do celé oborové knihovny kurzů', pf4: 'Sledování pokroku a statistiky',
+    ef1: 'Vše z Premium', ef2: 'Osobní AI mentor', ef3: 'Pokročilé AI nástroje na míru tvým slabinám', ef4: 'Prioritní podpora',
+    premiumBtn: 'Získat Premium →', eliteBtn: 'Získat Elite →',
+    period3: '/ 3 měsíce', period6: '/ 6 měsíců', period12: '/ 12 měsíců',
+    coursesTitle: 'Kurzy zahrnuté v členství',
+    coursesSub: '6 kurzů, které potřebuje každý uchazeč bez ohledu na obor — a přístup do celé oborové knihovny navíc.',
+    uniTitle: 'Univerzální — pro každého',
+    uni1: 'TSP na jeden pokus (strategie)', uni2: 'Time management', uni3: 'Jak se efektivně učit', uni4: 'Ústní pohovor nanečisto', uni5: 'Motivační dopis a esej', uni6: 'Zvládni stres před přijímačkami',
+    uni1Desc: 'Časování, eliminační techniky a nejčastější pasti v testu studijních předpokladů.',
+    uni2Desc: 'Jak si rozvrhnout přípravu na měsíce dopředu, abys se na poslední chvíli neučil všechno najednou.',
+    uni3Desc: 'Techniky učení (aktivní opakování, spaced repetition), které si zapamatuješ, ne jen přečteš.',
+    uni4Desc: 'Nácvik typických otázek komise a sebeprezentace — na kameru, s reálnou zpětnou vazbou.',
+    uni5Desc: 'Jak napsat motivační dopis, který tě odliší od stovek stejných přihlášek.',
+    uni6Desc: 'Dýchací a kognitivní techniky na den D, aby tě nervy nepřipravily o výsledek, na který máš.',
+    specTitle: 'Oborová knihovna',
+    spec1: 'Jak se dostat na psychologii', spec2: 'Biologie a chemie pro medicínu', spec3: 'Právo — testy a logické úlohy', spec4: 'Pedagogika — přijímačky a pohovor', spec5: 'Matematika a logika pro IT a techniku', specNote: '+ průvodce pro rodiče',
+    spec1Desc: 'Co přesně testují přijímačky na psychologii a jak se připravit s lektorkou, která si tím sama prošla.',
+    spec2Desc: 'Zrychlený přehled učiva, na které se nejčastěji ptají přijímačky na medicínu, farmacii a veterinu.',
+    spec3Desc: 'Jak řešit testy studijních předpokladů a logické úlohy typické pro právnické fakulty.',
+    spec4Desc: 'Pedagogicko-psychologický základ i příprava na pohovor pro pedagogické obory.',
+    spec5Desc: 'Matematika a logické úlohy přesně v tom formátu, jak je zadávají technické a IT fakulty.',
+    specNoteDesc: 'Jak podpořit dítě během přípravy bez zbytečného tlaku — pro rodiče a prarodiče.',
+    bonusTitle: 'Bonusy jen teď',
+    b1Title: 'Bonusové dny', b1Desc: 'Navíc dny členství, pokud si ho aktivuješ během platnosti této nabídky.',
+    b2Title: 'Soukromá skupina', b2Desc: 'Přístup k ostatním účastníkům před termíny.',
+    b3Title: 'Extra AI testy', b3Desc: 'Navýšený limit generovaných testů během prvního měsíce.',
+    b4Title: 'Osobní podpora', b4Desc: 'Přímá pomoc, pokud si během přípravy něčím nejistý/á.',
+    faqTitle: 'Časté otázky',
+    faq1Q: 'Jaký je rozdíl mezi Premium a Elite?', faq1A: 'Premium ti dává neomezený přístup k appce i ke všem kurzům. Elite navíc přidává pokročilé AI nástroje včetně osobního AI mentora a prioritní podporu.',
+    faq2Q: 'Co se stane po uplynutí 3, 6 nebo 12 měsíců?', faq2A: 'Členství je jednorázová platba na přesně dohodnutou dobu — nic se samo neobnovuje ani nestrhává další platba. Pokud budeš chtít pokračovat, jednoduše si dokoupíš další období.',
+    faq3Q: 'Můžu si vybrat kurzy z knihovny kdykoliv?', faq3A: 'Ano, po dobu trvání členství máš přístup ke všem kurzům v knihovně, nejen k jednomu.',
+    faq4Q: 'Jak přesně appka ví, že mi to pomůže — co když jsem jiný případ?', faq4A: 'AI generátor sleduje přesně to, v čem děláš chyby, a testy tomu přizpůsobuje — ne univerzální sadě pro všechny. Čím víc testů uděláš, tím přesněji appka ví, kde máš mezery.',
+    finalTitle: 'Pojď do toho s plánem, ne s chaosem', finalSub: 'Vyber si Premium nebo Elite a začni ještě dnes.',
+    redirecting: 'Přesměrovávám…', checkoutError: 'Chyba při vytváření platby.', networkError: 'Chyba serveru.',
+    footerTerms: 'Obchodní podmínky', footerPrivacy: 'Ochrana osobních údajů',
+    footerDisclaimer: 'Tato stránka není součástí webu Facebook ani společnosti Meta, Inc. a není jimi žádným způsobem podporována ani sponzorována. FACEBOOK a INSTAGRAM jsou ochranné známky společnosti Meta, Inc.',
+    pageTitle: 'Nabídka pro účastníky webináře — SP Tréner'
+  }
+};
+
+let lang = localStorage.getItem('sp_offer_lang') || 'sk';
+
+function t(key) { return (T[lang] && T[lang][key] !== undefined) ? T[lang][key] : T.sk[key]; }
+
+function setLang(l) {
+  lang = l;
+  localStorage.setItem('sp_offer_lang', l);
+  document.documentElement.lang = l === 'cs' ? 'cs' : 'sk';
+  document.title = t('pageTitle');
+  document.getElementById('langSkBtn').classList.toggle('active', l === 'sk');
+  document.getElementById('langCsBtn').classList.toggle('active', l === 'cs');
+
+  document.getElementById('tBrandNote').textContent = t('brandNote');
+  document.getElementById('tEyebrow').textContent = t('eyebrow');
+  document.getElementById('tH1').firstChild.textContent = t('h1');
+  document.getElementById('tH1Accent').textContent = t('h1Accent');
+  document.getElementById('tSub').textContent = t('sub');
+  document.getElementById('tHeroCta').textContent = t('heroCta');
+  document.getElementById('tSignalLabel').textContent = t('signalLabel');
+  document.getElementById('tCountdownLabel').textContent = t('countdownLabel');
+  document.getElementById('tOfferEndedTitle').textContent = t('offerEndedTitle');
+  document.getElementById('tOfferEndedBody').textContent = t('offerEndedBody');
+  document.getElementById('tOfferEndedCoursesNote').textContent = t('offerEndedCoursesNote');
+  document.getElementById('tPlansTitle').textContent = t('plansTitle');
+  document.getElementById('tPlansSub').textContent = t('plansSub');
+  document.getElementById('tEliteBadge').textContent = t('eliteBadge');
+  document.getElementById('tPF1').textContent = t('pf1');
+  document.getElementById('tPF2').textContent = t('pf2');
+  document.getElementById('tPF3').textContent = t('pf3');
+  document.getElementById('tPF4').textContent = t('pf4');
+  document.getElementById('tEF1').textContent = t('ef1');
+  document.getElementById('tEF2').textContent = t('ef2');
+  document.getElementById('tEF3').textContent = t('ef3');
+  document.getElementById('tEF4').textContent = t('ef4');
+  document.getElementById('premiumBtn').textContent = t('premiumBtn');
+  document.getElementById('eliteBtn').textContent = t('eliteBtn');
+  document.getElementById('finalCtaBtn').textContent = t('eliteBtn');
+  document.getElementById('tCoursesTitle').textContent = t('coursesTitle');
+  document.getElementById('tCoursesSub').textContent = t('coursesSub');
+  document.getElementById('tUniTitle').textContent = t('uniTitle');
+  document.getElementById('tUni1').textContent = t('uni1');
+  document.getElementById('tUni1Desc').textContent = t('uni1Desc');
+  document.getElementById('tUni2').textContent = t('uni2');
+  document.getElementById('tUni2Desc').textContent = t('uni2Desc');
+  document.getElementById('tUni3').textContent = t('uni3');
+  document.getElementById('tUni3Desc').textContent = t('uni3Desc');
+  document.getElementById('tUni4').textContent = t('uni4');
+  document.getElementById('tUni4Desc').textContent = t('uni4Desc');
+  document.getElementById('tUni5').textContent = t('uni5');
+  document.getElementById('tUni5Desc').textContent = t('uni5Desc');
+  document.getElementById('tUni6').textContent = t('uni6');
+  document.getElementById('tUni6Desc').textContent = t('uni6Desc');
+  document.getElementById('tSpecTitle').textContent = t('specTitle');
+  document.getElementById('tSpec1').textContent = t('spec1');
+  document.getElementById('tSpec1Desc').textContent = t('spec1Desc');
+  document.getElementById('tSpec2').textContent = t('spec2');
+  document.getElementById('tSpec2Desc').textContent = t('spec2Desc');
+  document.getElementById('tSpec3').textContent = t('spec3');
+  document.getElementById('tSpec3Desc').textContent = t('spec3Desc');
+  document.getElementById('tSpec4').textContent = t('spec4');
+  document.getElementById('tSpec4Desc').textContent = t('spec4Desc');
+  document.getElementById('tSpec5').textContent = t('spec5');
+  document.getElementById('tSpec5Desc').textContent = t('spec5Desc');
+  document.getElementById('tSpecNote').textContent = t('specNote');
+  document.getElementById('tSpecNoteDesc').textContent = t('specNoteDesc');
+  document.getElementById('tBonusTitle').textContent = t('bonusTitle');
+  document.getElementById('tB1Title').textContent = t('b1Title'); document.getElementById('tB1Desc').textContent = t('b1Desc');
+  document.getElementById('tB2Title').textContent = t('b2Title'); document.getElementById('tB2Desc').textContent = t('b2Desc');
+  document.getElementById('tB3Title').textContent = t('b3Title'); document.getElementById('tB3Desc').textContent = t('b3Desc');
+  document.getElementById('tB4Title').textContent = t('b4Title'); document.getElementById('tB4Desc').textContent = t('b4Desc');
+  document.getElementById('tFaqTitle').textContent = t('faqTitle');
+  document.getElementById('tFaq1Q').textContent = t('faq1Q'); document.getElementById('tFaq1A').textContent = t('faq1A');
+  document.getElementById('tFaq2Q').textContent = t('faq2Q'); document.getElementById('tFaq2A').textContent = t('faq2A');
+  document.getElementById('tFaq3Q').textContent = t('faq3Q'); document.getElementById('tFaq3A').textContent = t('faq3A');
+  document.getElementById('tFaq4Q').textContent = t('faq4Q'); document.getElementById('tFaq4A').textContent = t('faq4A');
+  document.getElementById('tFinalTitle').textContent = t('finalTitle');
+  document.getElementById('tFinalSub').textContent = t('finalSub');
+  document.getElementById('tFooterTerms').textContent = t('footerTerms');
+  document.getElementById('tFooterPrivacy').textContent = t('footerPrivacy');
+  document.getElementById('tFooterDisclaimer').textContent = t('footerDisclaimer');
+
+  setDuration(duration);
+  startSignalTicker();
+}
+
+// Akciová cena patrí len tým, čo prešli cez /webinar registráciu (rovnaké
+// localStorage, rovnaká doména) — kto príde na /ponuka priamo bez toho,
+// vidí rovno stav "po vypršaní" (bežná cena, žiadne bonusy).
+function hasWebinarRegistration() {
+  try { return !!localStorage.getItem('sp_webinar_session'); }
+  catch (e) { return false; }
+}
+
+setLang(lang);
+
+// Spustené až po setLang (nie skôr) — ak návštevník príde na stránku
+// s už uplynutým deadlinom (napr. na druhý deň), enterExpiredMode()
+// volá t(), ktoré potrebuje T definované vyššie v skripte.
+if (hasWebinarRegistration()) {
+  setInterval(tickClock, 1000);
+  tickClock();
+} else {
+  enterExpiredMode();
+}
+</script>
+</body>
+</html>

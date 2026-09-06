@@ -1,0 +1,1688 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>dash — SP Tréner</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet">
+<style>
+:root{--black:#08080d;--black2:#0f0f18;--black3:#15151f;--border:rgba(255,255,255,.08);--border2:rgba(255,255,255,.14);--text:#eeeef5;--text2:#a1a1bc;--text3:#5c5c7a;--volt:#c8ff00;--purple:#7c5cff;--purple2:#b09bff;--red:#ff3f5e;--green:#36e896;--yellow:#ffc94d;--serif:'Instrument Serif',Georgia,serif;--mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif}
+*{box-sizing:border-box}
+body{margin:0;background:var(--black);color:var(--text);font-family:var(--sans);line-height:1.5;min-height:100vh}
+button,input,textarea,select{font-family:inherit;color:inherit}
+a{color:var(--purple2)}
+.hidden{display:none !important}
+
+/* login */
+#loginScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1.5rem}
+.login-card{width:100%;max-width:360px;background:var(--black2);border:1px solid var(--border);border-radius:14px;padding:2rem}
+.login-card h1{font-family:var(--serif);font-size:1.8rem;margin:0 0 .3rem}
+.login-card p{color:var(--text3);font-size:.85rem;margin:0 0 1.5rem}
+.login-card input{width:100%;padding:.8rem 1rem;background:var(--black3);border:1px solid var(--border2);border-radius:9px;font-size:.9rem;margin-bottom:.9rem}
+.login-card button{width:100%;padding:.85rem;background:var(--volt);color:var(--black);border:none;border-radius:9px;font-weight:700;font-family:var(--mono);cursor:pointer}
+#loginError{color:var(--red);font-size:.8rem;margin-top:.7rem;min-height:1em}
+
+/* shell */
+#app{display:flex;min-height:100vh}
+nav.side{width:220px;flex-shrink:0;background:var(--black2);border-right:1px solid var(--border);padding:1.2rem .8rem;position:sticky;top:0;height:100vh;overflow-y:auto}
+.brand{font-family:var(--mono);font-size:.8rem;letter-spacing:.1em;color:var(--text);padding:.4rem .6rem 1.2rem}
+.brand span{color:var(--volt)}
+.navlink{display:block;padding:.6rem .7rem;border-radius:8px;color:var(--text2);text-decoration:none;font-size:.83rem;cursor:pointer;margin-bottom:.15rem;border:1px solid transparent}
+.navlink.active{background:var(--black3);color:var(--text);border-color:var(--border2)}
+.navlink:hover{color:var(--text)}
+main{flex:1;min-width:0;padding:1.8rem 2rem 4rem}
+.pagehead{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:.6rem;margin-bottom:1.4rem}
+.pagehead h2{font-family:var(--serif);font-size:1.7rem;margin:0}
+.btn{padding:.6rem 1rem;background:var(--volt);color:var(--black);border:none;border-radius:8px;font-weight:700;font-family:var(--mono);font-size:.78rem;cursor:pointer}
+.btn.secondary{background:transparent;border:1px solid var(--border2);color:var(--text2)}
+.btn.danger{background:var(--red);color:#fff}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:.9rem;margin-bottom:1.6rem}
+.card{background:var(--black2);border:1px solid var(--border);border-radius:12px;padding:1.1rem 1.2rem}
+.card h3{font-family:var(--mono);font-size:.68rem;letter-spacing:.07em;text-transform:uppercase;color:var(--text3);margin:0 0 .5rem}
+.card .num{font-family:var(--serif);font-size:1.9rem}
+.card .err{color:var(--red);font-size:.75rem}
+.card.wide{grid-column:1 / -1}
+
+table{width:100%;border-collapse:collapse;font-size:.83rem}
+th{text-align:left;font-family:var(--mono);font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);padding:.5rem .6rem;border-bottom:1px solid var(--border2)}
+td{padding:.6rem;border-bottom:1px solid var(--border)}
+.table-wrap{overflow-x:auto;background:var(--black2);border:1px solid var(--border);border-radius:12px}
+
+.pill{display:inline-block;padding:.2rem .55rem;border-radius:20px;font-family:var(--mono);font-size:.68rem}
+.pill.open{background:rgba(255,63,94,.15);color:var(--red)}
+.pill.pending{background:rgba(255,201,77,.15);color:var(--yellow)}
+.pill.resolved,.pill.completed{background:rgba(54,232,150,.15);color:var(--green)}
+.pill.in_progress{background:rgba(124,92,255,.15);color:var(--purple2)}
+
+.formrow{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1rem}
+.formrow input,.formrow textarea,.formrow select{padding:.6rem .8rem;background:var(--black3);border:1px solid var(--border2);border-radius:8px;font-size:.83rem}
+textarea{width:100%;min-height:110px;padding:.7rem;background:var(--black3);border:1px solid var(--border2);border-radius:8px;font-size:.85rem;resize:vertical}
+
+.lesson-item,.card-item,.bug-item{background:var(--black2);border:1px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:.7rem}
+.lesson-item h4,.card-item h4{margin:0 0 .4rem;font-family:var(--serif);font-size:1.15rem}
+.muted{color:var(--text3);font-size:.78rem}
+
+.chat{display:flex;flex-direction:column;height:70vh;background:var(--black2);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.chat-msgs{flex:1;overflow-y:auto;padding:1rem 1.2rem;display:flex;flex-direction:column;gap:.8rem}
+.msg{max-width:80%;padding:.7rem .9rem;border-radius:10px;font-size:.87rem;white-space:pre-wrap}
+.msg.user{align-self:flex-end;background:var(--purple);color:#fff}
+.msg.assistant{align-self:flex-start;background:var(--black3);border:1px solid var(--border2)}
+.chat-input{display:flex;gap:.6rem;padding:.8rem;border-top:1px solid var(--border)}
+.chat-input textarea{flex:1;min-height:44px}
+
+.qr-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:50}
+.qr-modal{background:var(--black2);border:1px solid var(--border2);border-radius:14px;padding:1.6rem;max-width:340px;width:90%;text-align:center}
+.qr-modal img{width:220px;height:220px;background:#fff;border-radius:8px;margin:.8rem auto}
+
+.rich-editor{background:var(--black3);border:1px solid var(--border2);border-radius:8px;margin-top:.6rem;overflow:hidden}
+.rich-editor .ql-toolbar{background:var(--black2);border:none;border-bottom:1px solid var(--border2)}
+.rich-editor .ql-toolbar .ql-stroke{stroke:var(--text2)}
+.rich-editor .ql-toolbar .ql-fill{fill:var(--text2)}
+.rich-editor .ql-toolbar .ql-picker-label{color:var(--text2)}
+.rich-editor .ql-toolbar button:hover .ql-stroke,.rich-editor .ql-toolbar button.ql-active .ql-stroke{stroke:var(--volt)}
+.rich-editor .ql-toolbar button:hover .ql-fill,.rich-editor .ql-toolbar button.ql-active .ql-fill{fill:var(--volt)}
+.rich-editor .ql-toolbar button.ql-active .ql-picker-label{color:var(--volt)}
+.rich-editor .ql-container{border:none;font-family:var(--sans);font-size:.9rem;color:var(--text);min-height:240px}
+.rich-editor .ql-editor{min-height:240px}
+.rich-editor .ql-editor.ql-blank::before{color:var(--text3);font-style:normal}
+.rich-editor .ql-editor h2{font-family:var(--serif);font-size:1.4rem}
+.rich-editor .ql-editor h3{font-weight:700}
+.rich-editor .ql-editor a{color:var(--purple2)}
+.rich-editor .ql-picker-options{background:var(--black2);border:1px solid var(--border2)}
+.rich-editor .ql-picker-item{color:var(--text2)}
+
+/* mobile */
+.mobile-topbar{display:none}
+.nav-overlay{display:none}
+#navToggle{display:none}
+@media (max-width:860px){
+  .mobile-topbar{display:flex;align-items:center;justify-content:space-between;padding:.7rem 1rem;background:var(--black2);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:40}
+  .mobile-topbar .brand{padding:0}
+  #navToggle{display:inline-flex;align-items:center;justify-content:center;width:2.4rem;height:2.4rem;background:transparent;border:1px solid var(--border2);color:var(--text);border-radius:8px;font-size:1.2rem;cursor:pointer;line-height:1}
+  #app{flex-direction:column}
+  nav.side{position:fixed;top:0;left:0;height:100vh;width:78vw;max-width:280px;transform:translateX(-100%);transition:transform .25s ease;z-index:50;box-shadow:2px 0 24px rgba(0,0,0,.5)}
+  nav.side.open{transform:translateX(0)}
+  .nav-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:45;display:block}
+  .nav-overlay.hidden{display:none}
+  main{padding:1.2rem 1rem 3rem;width:100%}
+}
+@media (max-width:480px){
+  main{padding:1rem .8rem 3rem}
+  .pagehead{gap:.4rem}
+  .pagehead h2{font-size:1.4rem}
+  .grid{grid-template-columns:1fr}
+  table{font-size:.76rem}
+  th,td{padding:.45rem .4rem}
+  .chat{height:78vh}
+  .msg{max-width:92%}
+  .qr-modal{padding:1.2rem}
+  .qr-modal img{width:170px;height:170px}
+}
+</style>
+</head>
+<body>
+
+<div id="loginScreen">
+  <div class="login-card">
+    <h1>dash<span style="color:var(--volt)">.</span></h1>
+    <p>sptrener.online — prístup iba pre Juraja (Google účet)</p>
+    <button id="loginGoogleBtn" style="display:flex;align-items:center;justify-content:center;gap:.6rem;background:var(--black3);border:1px solid var(--border2);color:var(--text)"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg> Prihlásiť sa cez Google</button>
+    <div id="loginError"></div>
+  </div>
+</div>
+
+<div id="app" class="hidden">
+  <div class="mobile-topbar">
+    <div class="brand">dash<span>.</span>sptrener</div>
+    <button id="navToggle" type="button" aria-label="Menu">☰</button>
+  </div>
+  <div class="nav-overlay hidden" id="navOverlay"></div>
+  <nav class="side" id="sideNav">
+    <div class="brand">dash<span>.</span>sptrener</div>
+    <a class="navlink" data-page="overview">Prehľad</a>
+    <a class="navlink" data-page="trends">Trendy</a>
+    <a class="navlink" data-page="academy">Akadémia</a>
+    <a class="navlink" data-page="courses">Kurzy</a>
+    <a class="navlink" data-page="blog">Blog</a>
+    <a class="navlink" data-page="houseads">Vlastné reklamy</a>
+    <a class="navlink" data-page="giftcards">Darčekové karty (partner shop)</a>
+    <a class="navlink" data-page="giftcardsales">Darčekové karty (predaj)</a>
+    <a class="navlink" data-page="webinar">Webinár — kontakty</a>
+    <a class="navlink" data-page="payouts">Výplaty (PAY by square)</a>
+    <a class="navlink" data-page="instructorpayouts">Výplaty inštruktorov</a>
+    <a class="navlink" data-page="discountcodes">Zľavové kódy</a>
+    <a class="navlink" data-page="instructors">Inštruktori</a>
+    <a class="navlink" data-page="bugs">Nahlásené chyby</a>
+    <a class="navlink" data-page="advisor">AI poradca</a>
+    <a class="navlink" data-page="aiops">AI ops log</a>
+    <a class="navlink" data-page="" id="logoutLink" style="margin-top:1.5rem;color:var(--red)">Odhlásiť sa</a>
+  </nav>
+  <main id="main"></main>
+</div>
+
+<div id="qrModalRoot"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
+<script>
+const $ = (sel, root=document) => root.querySelector(sel);
+const $$ = (sel, root=document) => [...root.querySelectorAll(sel)];
+
+const DASH_SUPABASE_URL = 'https://zrnqiwareacqyndwchsv.supabase.co';
+const DASH_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpybnFpd2FyZWFjcXluZHdjaHN2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMDA3NTAsImV4cCI6MjA4OTc3Njc1MH0.iUne23YDxp12Iwxdk9U8MfcV0NTBtrNf9OgsjQdiADk';
+const _dashAuth = window.supabase ? window.supabase.createClient(DASH_SUPABASE_URL, DASH_SUPABASE_ANON_KEY) : null;
+
+async function api(path, opts = {}) {
+  const res = await fetch(path, {
+    ...opts,
+    headers: { 'content-type': 'application/json', ...(opts.headers || {}) },
+    credentials: 'same-origin'
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+  return data;
+}
+
+// ─────────────────────────── AUTH (Google, obmedzené na 1 ucet) ───────────────────────────
+$('#loginGoogleBtn').addEventListener('click', () => {
+  $('#loginError').textContent = '';
+  if (!_dashAuth) { $('#loginError').textContent = 'Google prihlásenie sa nepodarilo načítať, skús obnoviť stránku.'; return; }
+  _dashAuth.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.origin + location.pathname } });
+});
+
+async function completeGoogleLogin(accessToken) {
+  $('#loginError').textContent = '';
+  try {
+    await api('/api/dash/login', { method: 'POST', body: JSON.stringify({ token: accessToken }) });
+    showApp();
+  } catch (err) {
+    $('#loginError').textContent = err.message;
+    if (_dashAuth) await _dashAuth.auth.signOut().catch(() => {});
+  }
+}
+
+$('#logoutLink').addEventListener('click', async (e) => {
+  e.preventDefault();
+  await api('/api/dash/logout', { method: 'POST' }).catch(() => {});
+  if (_dashAuth) await _dashAuth.auth.signOut().catch(() => {});
+  location.reload();
+});
+
+async function checkAuth() {
+  try {
+    await api('/api/dash/me');
+    showApp();
+    return;
+  } catch {}
+  if (_dashAuth) {
+    const { data: { session } } = await _dashAuth.auth.getSession();
+    if (session?.access_token) { await completeGoogleLogin(session.access_token); return; }
+  }
+  $('#loginScreen').classList.remove('hidden');
+  $('#app').classList.add('hidden');
+}
+
+if (_dashAuth) {
+  _dashAuth.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_IN' && session?.access_token && $('#loginScreen') && !$('#loginScreen').classList.contains('hidden')) {
+      completeGoogleLogin(session.access_token);
+    }
+  });
+}
+
+function showApp() {
+  $('#loginScreen').classList.add('hidden');
+  $('#app').classList.remove('hidden');
+  navigate('overview');
+}
+
+// ─────────────────────────── ROUTER ───────────────────────────
+const PAGES = { overview: renderOverview, trends: renderTrends, academy: renderAcademy, courses: renderCourses, blog: renderBlog, houseads: renderHouseAds, giftcards: renderGiftcards, giftcardsales: renderGiftCardSales, payouts: renderPayouts, instructorpayouts: renderInstructorPayouts, discountcodes: renderDiscountCodes, instructors: renderInstructors, bugs: renderBugs, advisor: renderAdvisor, aiops: renderAiops, webinar: renderWebinar };
+
+$$('.navlink[data-page]').forEach(a => a.addEventListener('click', () => { navigate(a.dataset.page); closeMobileNav(); }));
+
+// ─────────────────────────── MOBILE NAV DRAWER ───────────────────────────
+function openMobileNav() {
+  $('#sideNav').classList.add('open');
+  $('#navOverlay').classList.remove('hidden');
+}
+function closeMobileNav() {
+  $('#sideNav').classList.remove('open');
+  $('#navOverlay').classList.add('hidden');
+}
+$('#navToggle').addEventListener('click', openMobileNav);
+$('#navOverlay').addEventListener('click', closeMobileNav);
+
+let currentOverviewSnapshot = null;
+
+function navigate(page) {
+  $$('.navlink[data-page]').forEach(a => a.classList.toggle('active', a.dataset.page === page));
+  const main = $('#main');
+  main.innerHTML = '<p class="muted">Načítavam…</p>';
+  PAGES[page]().catch(err => { main.innerHTML = `<p style="color:var(--red)">${err.message}</p>`; });
+}
+
+// ─────────────────────────── COVER IMAGE FIELD (zdielane kurzy + blog) ───────────────────────────
+function coverFieldHtml(urlInputClass, currentUrl) {
+  const safeUrl = (currentUrl || '').replace(/"/g, '&quot;');
+  return `<div class="cover-field" style="margin-bottom:.6rem">
+    <input class="${urlInputClass}" placeholder="URL cover obrázku (alebo nahraj súbor / vygeneruj automaticky nižšie)" value="${safeUrl}" style="width:100%;padding:.6rem .8rem;background:var(--black3);border:1px solid var(--border2);border-radius:8px;margin-bottom:.5rem">
+    <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap">
+      <input type="file" class="cover-file" accept="image/png,image/jpeg,image/webp" style="font-size:.78rem;max-width:220px">
+      <button class="btn secondary cover-upload-btn" type="button">Nahrať súbor</button>
+      <button class="btn secondary cover-auto-btn" type="button">Vygenerovať automaticky</button>
+      <span class="muted cover-status"></span>
+    </div>
+    <div class="cover-preview" style="margin-top:.6rem">${currentUrl ? `<img src="${safeUrl}" style="max-width:220px;border-radius:8px;display:block">` : '<span class="muted">Bez URL sa vygeneruje automaticky (branded cover podľa názvu).</span>'}</div>
+  </div>`;
+}
+
+function bindCoverField(root, urlInputClass, kind) {
+  const urlInput = $('.' + urlInputClass, root);
+  const fileInput = $('.cover-file', root);
+  const uploadBtn = $('.cover-upload-btn', root);
+  const autoBtn = $('.cover-auto-btn', root);
+  const status = $('.cover-status', root);
+  const preview = $('.cover-preview', root);
+
+  function updatePreview() {
+    const url = urlInput.value.trim();
+    preview.innerHTML = url
+      ? `<img src="${url.replace(/"/g,'&quot;')}" style="max-width:220px;border-radius:8px;display:block">`
+      : '<span class="muted">Bez URL sa vygeneruje automaticky (branded cover podľa názvu).</span>';
+  }
+  urlInput.addEventListener('input', updatePreview);
+
+  uploadBtn.onclick = async () => {
+    const file = fileInput.files[0];
+    if (!file) { alert('Najprv vyber súbor.'); return; }
+    status.textContent = 'Nahrávam…';
+    try {
+      const fd = new FormData();
+      fd.append('kind', kind);
+      fd.append('file', file);
+      const res = await fetch('/api/dash/upload-cover', { method: 'POST', body: fd, credentials: 'same-origin' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Nahrávanie zlyhalo.');
+      urlInput.value = data.url;
+      updatePreview();
+      status.textContent = 'Nahraté ✓';
+    } catch (err) {
+      status.textContent = '';
+      alert(err.message);
+    }
+  };
+
+  autoBtn.onclick = () => {
+    urlInput.value = '';
+    updatePreview();
+    status.textContent = 'Vygeneruje sa automaticky';
+  };
+}
+
+// ─────────────────────────── RICH TEXT EDITOR (zdielane kurzy + blog) ───────────────────────────
+function richEditorHtml(containerClass, placeholder) {
+  return `<div class="rich-editor"><div class="${containerClass}" data-placeholder="${(placeholder||'').replace(/"/g,'&quot;')}"></div></div>`;
+}
+
+function initRichEditor(root, containerClass, initialHtml) {
+  const container = $('.' + containerClass, root);
+  if (typeof Quill === 'undefined') return fallbackTextEditor(container, initialHtml);
+  try {
+    const quill = new Quill(container, {
+      theme: 'snow',
+      placeholder: container.dataset.placeholder || '',
+      modules: {
+        toolbar: [
+          [{ header: [2, 3, false] }],
+          ['bold', 'italic'],
+          [{ list: 'ordered' }, { list: 'bullet' }],
+          ['blockquote', 'link'],
+          ['clean']
+        ]
+      }
+    });
+    if (initialHtml) quill.root.innerHTML = initialHtml;
+    return quill;
+  } catch (err) {
+    return fallbackTextEditor(container, initialHtml);
+  }
+}
+
+// Ak sa Quill nepodarí načítať z CDN (výpadok siete, adblock...), formulár
+// nesmie zostať nepoužiteľný — spadne na obyčajný textarea s rovnakým
+// rozhraním (.getText()/.root.innerHTML), aby zvyšok kódu fungoval bez zmeny.
+function fallbackTextEditor(container, initialHtml) {
+  container.innerHTML = '';
+  const ta = document.createElement('textarea');
+  ta.style.cssText = 'width:100%;min-height:240px;padding:.8rem;background:transparent;border:none;color:var(--text);font-family:var(--sans);font-size:.9rem;resize:vertical;display:block';
+  ta.value = initialHtml || '';
+  ta.placeholder = 'Rich editor sa nepodarilo načítať — vlož HTML priamo (h2, p, ul/li, strong...).';
+  container.appendChild(ta);
+  return { getText: () => ta.value, root: { get innerHTML() { return ta.value; } } };
+}
+
+function metricCard(m, formatFn) {
+  if (!m.ok) return `<div class="card"><h3>${m.label}</h3><div class="err">chyba: ${m.error}</div></div>`;
+  return `<div class="card"><h3>${m.label}</h3><div class="num">${formatFn ? formatFn(m.value) : m.value}</div></div>`;
+}
+
+// ─────────────────────────── OVERVIEW ───────────────────────────
+async function renderOverview() {
+  const data = await api('/api/dash/overview');
+  currentOverviewSnapshot = data;
+  const m = [...Object.values(data.main), ...Object.values(data.partner), ...Object.values(data.ads)];
+  const html = `
+    <div class="pagehead"><h2>Prehľad</h2><button class="btn secondary" onclick="navigate('overview')">Obnoviť</button></div>
+    <div class="table-wrap" style="margin-bottom:1.25rem;padding:1rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap">
+      <div>sptrener.online: <span id="maintStatus">načítavam…</span></div>
+      <button id="maintToggleBtn" class="btn" onclick="toggleMaintenance()" disabled>…</button>
+    </div>
+    <div class="grid">
+      ${m.map(x => metricCard(x, v => Array.isArray(v) ? v.map(r => `${r.plan||r.n}: ${r.n||''}`).join(', ') || '0' : (typeof v === 'number' ? v : ''))).join('')}
+      ${metricCard(data.bugReports, v => v)}
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Čas</th><th>Akcia</th><th>Systém</th><th>Dôvod</th><th>Výsledok</th></tr></thead>
+        <tbody>${(data.aiActions.ok ? data.aiActions.value : []).map(a => `<tr>
+          <td class="muted">${new Date(a.created_at).toLocaleString('sk-SK')}</td>
+          <td>${a.action_type}</td><td>${a.target_system||''}</td>
+          <td class="muted">${(a.reasoning||'').slice(0,120)}</td>
+          <td><span class="pill ${a.result==='success'?'resolved':'open'}">${a.result}</span></td>
+        </tr>`).join('') || '<tr><td class="muted" colspan="5">Zatiaľ žiadne AI akcie.</td></tr>'}</tbody>
+      </table>
+    </div>
+    <div class="table-wrap" style="margin-top:1.25rem">
+      <div class="pagehead" style="margin-bottom:.5rem"><h3 style="margin:0">Recenzie (deň po teste)</h3></div>
+      <table>
+        <thead><tr><th>Čas</th><th>Email</th><th>Hodnotenie</th><th>Správa</th></tr></thead>
+        <tbody id="reviewsTbody"><tr><td class="muted" colspan="4">načítavam…</td></tr></tbody>
+      </table>
+    </div>`;
+  $('#main').innerHTML = html;
+  loadMaintenanceStatus();
+  loadReviews();
+}
+
+async function loadReviews() {
+  const tbody = document.getElementById('reviewsTbody');
+  if (!tbody) return;
+  try {
+    const d = await api('/api/dash/reviews');
+    tbody.innerHTML = (d.reviews || []).map(r => `<tr>
+      <td class="muted">${new Date(r.created_at).toLocaleString('sk-SK')}</td>
+      <td>${r.email}</td>
+      <td>${r.rating ? '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating) : '—'}</td>
+      <td>${(r.message || '').replace(/</g, '&lt;')}</td>
+    </tr>`).join('') || '<tr><td class="muted" colspan="4">Zatiaľ žiadne recenzie.</td></tr>';
+  } catch (e) {
+    tbody.innerHTML = '<tr><td class="muted" colspan="4">Chyba načítania.</td></tr>';
+  }
+}
+
+async function loadMaintenanceStatus() {
+  const statusEl = document.getElementById('maintStatus');
+  const btnEl = document.getElementById('maintToggleBtn');
+  if (!statusEl || !btnEl) return;
+  try {
+    const d = await api('/api/dash/maintenance');
+    if (d.enabled) {
+      statusEl.innerHTML = '<span class="pill open">VYPNUTÁ (maintenance)</span>';
+      btnEl.textContent = 'Zapnúť appku';
+    } else {
+      statusEl.innerHTML = '<span class="pill resolved">Beží normálne</span>';
+      btnEl.textContent = 'Vypnúť appku (maintenance)';
+    }
+    btnEl.disabled = false;
+  } catch (e) {
+    statusEl.innerHTML = '<span class="pill open">Chyba načítania</span>';
+  }
+}
+
+async function toggleMaintenance() {
+  const btn = document.getElementById('maintToggleBtn');
+  if (!btn) return;
+  const turningOn = btn.textContent.indexOf('Vypnúť') === 0; // button label reflects the action, not current state
+  const msg = turningOn
+    ? 'Naozaj chceš appku VYPNÚŤ? Všetci návštevníci budú presmerovaní na /unavalible, bez ohľadu na to, akú stránku otvoria.'
+    : 'Naozaj chceš appku znova zapnúť?';
+  if (!confirm(msg)) return;
+  btn.disabled = true;
+  try {
+    await api('/api/dash/maintenance', { method: 'POST', body: JSON.stringify({ enabled: turningOn }) });
+    await loadMaintenanceStatus();
+  } catch (e) {
+    alert('Chyba: ' + e.message);
+    btn.disabled = false;
+  }
+}
+
+// ─────────────────────────── TRENDS ───────────────────────────
+async function renderTrends() {
+  const data = await api('/api/dash/trends');
+  const barList = (rows, keyLabel, keyVal) => (rows||[]).map(r => `<div style="display:flex;justify-content:space-between;padding:.35rem 0;border-bottom:1px solid var(--border)"><span>${r[keyLabel]}</span><span class="muted">${r[keyVal]}</span></div>`).join('') || '<p class="muted">Žiadne dáta.</p>';
+  $('#main').innerHTML = `
+    <div class="pagehead"><h2>Trendy</h2></div>
+    <div class="grid">
+      <div class="card wide"><h3>Registrácie / 30 dní</h3>${data.signupsByDay.ok ? barList(data.signupsByDay.value,'day','n') : `<div class="err">${data.signupsByDay.error}</div>`}</div>
+      <div class="card"><h3>Aktívne predplatné</h3>${data.subsByPlan.ok ? barList(data.subsByPlan.value,'plan','n') : `<div class="err">${data.subsByPlan.error}</div>`}</div>
+      <div class="card"><h3>Blog podľa tagu</h3>${data.blogByTag.ok ? barList(data.blogByTag.value,'tag','n') : `<div class="err">${data.blogByTag.error}</div>`}</div>
+      <div class="card wide"><h3>Blog podľa mesiaca</h3>${data.blogByMonth.ok ? barList(data.blogByMonth.value,'month','n') : `<div class="err">${data.blogByMonth.error}</div>`}</div>
+    </div>`;
+}
+
+// ─────────────────────────── ACADEMY ───────────────────────────
+async function renderAcademy() {
+  const { lessons } = await api('/api/dash/academy');
+  $('#main').innerHTML = `
+    <div class="pagehead"><h2>Partner Akadémia</h2><button class="btn" id="newLessonBtn">+ Nová lekcia</button></div>
+    <div id="lessonsList">${lessons.map(l => lessonEditorHtml(l)).join('')}</div>`;
+  $('#newLessonBtn').addEventListener('click', () => {
+    $('#lessonsList').insertAdjacentHTML('afterbegin', lessonEditorHtml({ id: '', lesson_key: '', title: '', content: '', minutes: 3, sort_order: 0 }, true));
+    bindLessonForms();
+  });
+  bindLessonForms();
+}
+
+function lessonEditorHtml(l, isNew) {
+  return `<div class="lesson-item" data-id="${l.id}" data-new="${!!isNew}">
+    <div class="formrow">
+      <input class="f-key" placeholder="lesson_key" value="${l.lesson_key||''}" ${isNew?'':'disabled'} style="width:220px">
+      <input class="f-minutes" type="number" placeholder="minúty" value="${l.minutes||3}" style="width:100px">
+      <input class="f-sort" type="number" placeholder="poradie" value="${l.sort_order||0}" style="width:100px">
+    </div>
+    <input class="f-title" placeholder="Názov" value="${(l.title||'').replace(/"/g,'&quot;')}" style="width:100%;padding:.6rem .8rem;background:var(--black3);border:1px solid var(--border2);border-radius:8px;margin-bottom:.6rem">
+    <textarea class="f-content" placeholder="Obsah lekcie">${l.content||''}</textarea>
+    <div style="display:flex;gap:.6rem;margin-top:.6rem">
+      <button class="btn save-lesson">Uložiť</button>
+      ${isNew ? '' : '<button class="btn danger delete-lesson">Zmazať</button>'}
+    </div>
+  </div>`;
+}
+
+function bindLessonForms() {
+  $$('.save-lesson').forEach(btn => btn.onclick = async () => {
+    const item = btn.closest('.lesson-item');
+    const isNew = item.dataset.new === 'true';
+    const body = {
+      title: $('.f-title', item).value, content: $('.f-content', item).value,
+      minutes: Number($('.f-minutes', item).value) || 3, sortOrder: Number($('.f-sort', item).value) || 0
+    };
+    try {
+      if (isNew) { body.lessonKey = $('.f-key', item).value; await api('/api/dash/academy', { method: 'POST', body: JSON.stringify(body) }); }
+      else await api(`/api/dash/academy/${item.dataset.id}`, { method: 'PUT', body: JSON.stringify(body) });
+      navigate('academy');
+    } catch (err) { alert(err.message); }
+  });
+  $$('.delete-lesson').forEach(btn => btn.onclick = async () => {
+    if (!confirm('Zmazať lekciu?')) return;
+    const item = btn.closest('.lesson-item');
+    try { await api(`/api/dash/academy/${item.dataset.id}`, { method: 'DELETE' }); navigate('academy'); }
+    catch (err) { alert(err.message); }
+  });
+}
+
+// ─────────────────────────── KURZY ───────────────────────────
+function eur(cents) { return Number(cents) === 0 ? 'zadarmo' : (Number(cents || 0) / 100).toFixed(2).replace('.', ',') + ' €'; }
+
+async function renderCourses() {
+  const { courses } = await api('/api/dash/courses');
+  $('#main').innerHTML = `
+    <div class="pagehead"><h2>Video kurzy</h2><button class="btn" id="newCourseBtn">+ Nový kurz</button></div>
+    <p class="muted" style="margin-bottom:1.2rem">Kurz = jednorázová platba (default 57 €), zloženy z lekcií (video + PDF + kvíz A/B/C/D). Ďalšia lekcia sa odomkne až po správnej odpovedi.</p>
+    <div id="courseFormRoot"></div>
+    <div id="coursesList">${courses.map(c => `
+      <div class="card-item" data-id="${c.id}">
+        <h4>${(c.title||'').replace(/</g,'&lt;')} ${c.published ? '<span class="pill resolved">publikovaný</span>' : '<span class="pill pending">draft</span>'} ${!c.published && c.submitted_for_review ? '<span class="pill pending">čaká na schválenie</span>' : ''} ${c.access_mode === 'free' ? '<span class="pill">zadarmo</span>' : ''} ${c.access_mode === 'subscription' ? `<span class="pill">predplatné${c.included_in_premium ? ' · Premium' : ''}${c.included_in_elite ? ' · Elite' : ''}</span>` : ''}</h4>
+        <p class="muted">/kurzy/${c.slug} · ${eur(c.price_cents)} · ${c.lessonCount} lekcií · ${c.purchaseCount} nákupov${c.instructor ? ` · inštruktor: ${(c.instructor.name || c.instructor.email).replace(/</g,'&lt;')} (podiel platformy ${c.platform_cut_percent}%, cez referral ${c.referral_cut_percent}%)` : ''}</p>
+        <p style="margin:.5rem 0">${(c.description||'').replace(/</g,'&lt;')}</p>
+        <div style="display:flex;gap:.6rem;flex-wrap:wrap">
+          <button class="btn secondary open-lessons-btn">Lekcie (${c.lessonCount})</button>
+          <button class="btn secondary open-final-test-btn">Záverečný test</button>
+          <button class="btn secondary open-comments-btn">Otázky</button>
+          <button class="btn secondary edit-course-btn">Upraviť</button>
+          <button class="btn ${c.published ? 'secondary' : ''} toggle-publish-btn" data-published="${c.published}">${c.published ? 'Zrušiť publikovanie' : 'Publikovať'}</button>
+          <button class="btn danger delete-course-btn">Zmazať</button>
+        </div>
+        <div class="lessons-panel hidden" style="margin-top:1rem"></div>
+        <div class="final-test-panel hidden" style="margin-top:1rem"></div>
+        <div class="comments-panel hidden" style="margin-top:1rem"></div>
+      </div>`).join('') || '<p class="muted">Zatiaľ žiadne kurzy.</p>'}</div>`;
+
+  $('#newCourseBtn').onclick = () => {
+    $('#courseFormRoot').innerHTML = courseFormHtml();
+    bindCourseForm(null);
+  };
+  bindCourseListActions();
+}
+
+function courseFormHtml(c) {
+  const isEdit = !!c;
+  return `<div class="card" style="margin-bottom:1.4rem">
+    <h3>${isEdit ? 'Upraviť kurz' : 'Nový kurz'}</h3>
+    <div class="formrow">
+      <input class="cf-title" placeholder="Názov kurzu" value="${(c?.title||'').replace(/"/g,'&quot;')}" style="flex:1;min-width:220px">
+      <input class="cf-price" type="number" min="0" placeholder="Cena v centoch" value="${c?.price_cents ?? 5700}" style="width:160px">
+    </div>
+    <p class="muted" style="margin-top:-.4rem">0 = kurz zadarmo (prístup len za prihlásenie cez Google, bez platby).</p>
+    <h4 style="margin-top:1.2rem">Dostupnosť kurzu</h4>
+    <p class="muted" style="margin-top:-.4rem;margin-bottom:.5rem">Pri "Súčasť predplatného" je kurz zadarmo len počas aktívneho predplatného vo vybraných tieroch — mimo predplatného sa dá kúpiť aj priamo za cenu vyššie.</p>
+    <select class="cf-access-mode" style="width:100%;max-width:360px;padding:.6rem .8rem;background:var(--black3);border:1px solid var(--border2);border-radius:8px;font-size:.83rem;appearance:none;-webkit-appearance:none;background-image:url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 20 20%22 fill=%22%238a8aa3%22><path d=%22M5.5 7.5l4.5 5 4.5-5z%22/></svg>');background-repeat:no-repeat;background-position:right .7rem center;background-size:1.1rem">
+      <option value="paid" ${(!c || c.access_mode === 'paid' || !c.access_mode) ? 'selected' : ''}>Platený (bežný predaj)</option>
+      <option value="free" ${c?.access_mode === 'free' ? 'selected' : ''}>Zadarmo pre každého</option>
+      <option value="subscription" ${c?.access_mode === 'subscription' ? 'selected' : ''}>Súčasť predplatného appky</option>
+    </select>
+    <div class="cf-tier-row" style="display:${c?.access_mode === 'subscription' ? 'flex' : 'none'};gap:1.4rem;margin-top:.7rem;margin-bottom:.6rem;align-items:center">
+      <label style="display:flex;align-items:center;gap:.4rem;cursor:pointer"><input type="checkbox" class="cf-tier-premium" ${c?.included_in_premium ? 'checked' : ''} style="width:16px;height:16px;accent-color:var(--purple)"> Premium</label>
+      <label style="display:flex;align-items:center;gap:.4rem;cursor:pointer"><input type="checkbox" class="cf-tier-elite" ${c?.included_in_elite ? 'checked' : ''} style="width:16px;height:16px;accent-color:var(--purple)"> Elite</label>
+    </div>
+    ${coverFieldHtml('cf-cover', c?.cover_image_url)}
+    <input class="cf-intro-video" placeholder="URL úvodného videa (sales letter video, voliteľné)" value="${(c?.intro_video_url||'').replace(/"/g,'&quot;')}" style="width:100%;padding:.6rem .8rem;background:var(--black3);border:1px solid var(--border2);border-radius:8px;font-size:.83rem;margin-top:.6rem;box-sizing:border-box">
+    <textarea class="cf-desc" placeholder="Krátky popis (karta v zozname + meta description, cca 1-2 vety)" style="min-height:60px">${c?.description||''}</textarea>
+    <p class="muted" style="margin-top:.6rem">Sales letter — zobrazí sa medzi horným a dolným tlačidlom "Kúpiť kurz".</p>
+    ${richEditorHtml('cf-sales-editor', 'Napíš predajný text kurzu — nadpisy, tučné písmo, zoznamy...')}
+    <h4 style="margin-top:1.2rem">Karta lektora</h4>
+    <p class="muted" style="margin-top:-.4rem">Voliteľné — ak vyplníš meno, karta lektora sa zobrazí na stránke kurzu.</p>
+    <div class="formrow">
+      <input class="cf-instructor-name" placeholder="Meno lektora" value="${(c?.instructor_name||'').replace(/"/g,'&quot;')}" style="flex:1;min-width:220px">
+      <input class="cf-instructor-photo" placeholder="URL fotky lektora" value="${(c?.instructor_photo_url||'').replace(/"/g,'&quot;')}" style="flex:1;min-width:220px">
+    </div>
+    <textarea class="cf-instructor-bio" placeholder="Krátky bio text lektora" style="min-height:60px">${c?.instructor_bio||''}</textarea>
+    ${c?.instructor_id ? `
+    <h4 style="margin-top:1.2rem">Podiel platformy (kurz od inštruktora ${(c.instructor?.name || c.instructor?.email || '').replace(/</g,'&lt;')})</h4>
+    <p class="muted" style="margin-top:-.4rem">% z ceny, ktoré si necháva platforma — počíta sa až z ceny po odpočítaní poplatku Stripe (Ngroup, s. r. o. nie je platiteľom DPH, takže DPH sa tu nerieši). Zvyšok dostane inštruktor. Pri kúpe cez jeho vlastný referral odkaz platí nižšia sadzba (referral), lebo zákazníka priviedol sám.</p>
+    <div class="formrow">
+      <div style="flex:1;min-width:220px"><label class="muted" style="display:block;margin-bottom:.3rem">Bežná kúpa — podiel platformy (%)</label><input class="cf-platform-cut" type="number" min="0" max="100" value="${c?.platform_cut_percent ?? 50}"></div>
+      <div style="flex:1;min-width:220px"><label class="muted" style="display:block;margin-bottom:.3rem">Cez referral inštruktora — podiel platformy (%)</label><input class="cf-referral-cut" type="number" min="0" max="100" value="${c?.referral_cut_percent ?? 10}"></div>
+    </div>` : ''}
+    <div style="display:flex;gap:.6rem;margin-top:.6rem">
+      <button class="btn cf-save">Uložiť</button>
+      <button class="btn secondary cf-cancel">Zrušiť</button>
+    </div>
+  </div>`;
+}
+
+function bindCourseForm(course) {
+  const root = $('#courseFormRoot');
+  bindCoverField(root, 'cf-cover', 'courses');
+  const salesQuill = initRichEditor(root, 'cf-sales-editor', course?.sales_content);
+  const accessModeEl = $('.cf-access-mode', root);
+  const tierRow = $('.cf-tier-row', root);
+  accessModeEl.onchange = () => { tierRow.style.display = accessModeEl.value === 'subscription' ? 'flex' : 'none'; };
+  $('.cf-save', root).onclick = async () => {
+    const body = {
+      title: $('.cf-title', root).value, description: $('.cf-desc', root).value,
+      priceCents: $('.cf-price', root).value === '' ? 5700 : Math.max(0, Number($('.cf-price', root).value) || 0),
+      coverImageUrl: $('.cf-cover', root).value, introVideoUrl: $('.cf-intro-video', root).value.trim(),
+      salesContent: salesQuill.getText().trim() ? salesQuill.root.innerHTML : '',
+      instructorName: $('.cf-instructor-name', root).value.trim(), instructorPhotoUrl: $('.cf-instructor-photo', root).value.trim(),
+      instructorBio: $('.cf-instructor-bio', root).value.trim(),
+      accessMode: accessModeEl.value,
+      includedInPremium: $('.cf-tier-premium', root).checked, includedInElite: $('.cf-tier-elite', root).checked
+    };
+    const platformCutEl = $('.cf-platform-cut', root);
+    const referralCutEl = $('.cf-referral-cut', root);
+    if (platformCutEl) body.platformCutPercent = Number(platformCutEl.value);
+    if (referralCutEl) body.referralCutPercent = Number(referralCutEl.value);
+    try {
+      if (course) await api(`/api/dash/courses/${course.id}`, { method: 'PUT', body: JSON.stringify(body) });
+      else await api('/api/dash/courses', { method: 'POST', body: JSON.stringify(body) });
+      navigate('courses');
+    } catch (err) { alert(err.message); }
+  };
+  $('.cf-cancel', root).onclick = () => { root.innerHTML = ''; };
+}
+
+function bindCourseListActions() {
+  $$('.edit-course-btn').forEach(btn => btn.onclick = async () => {
+    const id = btn.closest('.card-item').dataset.id;
+    const { courses } = await api('/api/dash/courses');
+    const c = courses.find(x => x.id === id);
+    $('#courseFormRoot').innerHTML = courseFormHtml(c);
+    bindCourseForm(c);
+    $('#courseFormRoot').scrollIntoView({ behavior: 'smooth' });
+  });
+  $$('.toggle-publish-btn').forEach(btn => btn.onclick = async () => {
+    const id = btn.closest('.card-item').dataset.id;
+    const nowPublished = btn.dataset.published === 'true';
+    try { await api(`/api/dash/courses/${id}`, { method: 'PUT', body: JSON.stringify({ published: !nowPublished }) }); navigate('courses'); }
+    catch (err) { alert(err.message); }
+  });
+  $$('.delete-course-btn').forEach(btn => btn.onclick = async () => {
+    if (!confirm('Zmazať kurz aj so všetkými lekciami?')) return;
+    const id = btn.closest('.card-item').dataset.id;
+    try { await api(`/api/dash/courses/${id}`, { method: 'DELETE' }); navigate('courses'); }
+    catch (err) { alert(err.message); }
+  });
+  $$('.open-lessons-btn').forEach(btn => btn.onclick = async () => {
+    const item = btn.closest('.card-item');
+    const panel = $('.lessons-panel', item);
+    if (!panel.classList.contains('hidden')) { panel.classList.add('hidden'); panel.innerHTML = ''; return; }
+    panel.classList.remove('hidden');
+    await renderCourseLessons(item.dataset.id, panel);
+  });
+  $$('.open-final-test-btn').forEach(btn => btn.onclick = async () => {
+    const item = btn.closest('.card-item');
+    const panel = $('.final-test-panel', item);
+    if (!panel.classList.contains('hidden')) { panel.classList.add('hidden'); panel.innerHTML = ''; return; }
+    panel.classList.remove('hidden');
+    await renderCourseFinalTest(item.dataset.id, panel);
+  });
+  $$('.open-comments-btn').forEach(btn => btn.onclick = async () => {
+    const item = btn.closest('.card-item');
+    const panel = $('.comments-panel', item);
+    if (!panel.classList.contains('hidden')) { panel.classList.add('hidden'); panel.innerHTML = ''; return; }
+    panel.classList.remove('hidden');
+    await renderCourseComments(item.dataset.id, panel);
+  });
+}
+
+async function renderCourseComments(courseId, panel) {
+  panel.innerHTML = '<p class="muted">Načítavam otázky…</p>';
+  const [{ comments }, { lessons }] = await Promise.all([
+    api(`/api/dash/courses/${courseId}/comments`),
+    api(`/api/dash/courses/${courseId}/lessons`)
+  ]);
+  const byParent = {};
+  comments.forEach(c => { if (c.parentId) (byParent[c.parentId] = byParent[c.parentId] || []).push(c); });
+  const top = comments.filter(c => !c.parentId);
+  function row(c, isReply) {
+    return `<div class="card-item" style="margin-top:.6rem;${isReply ? 'margin-left:1.4rem;' : ''}${c.isInstructor ? 'background:rgba(124,92,255,.08)' : ''}">
+      <p class="muted" style="margin-bottom:.3rem">${c.isInstructor ? 'Lektor' : (c.email || '').replace(/</g, '&lt;')} · ${(c.lessonTitle || '').replace(/</g, '&lt;')} · ${new Date(c.createdAt).toLocaleString('sk-SK')}</p>
+      <p>${(c.body || '').replace(/</g, '&lt;')}</p>
+      ${!c.isInstructor && !isReply ? `<button class="btn secondary reply-comment-btn" data-comment-id="${c.id}" data-lesson-id="${c.lessonId}" style="margin-top:.5rem">Odpovedať</button><div class="reply-form-${c.id} hidden" style="margin-top:.6rem"></div>` : ''}
+    </div>`;
+  }
+  panel.innerHTML = `
+    <p class="muted" style="margin-bottom:.8rem">Otázky a komentáre študentov ku všetkým lekciám tohto kurzu. Poznámka nižšie sa pridá ako samostatný príspevok lektora k vybranej lekcii.</p>
+    <div class="formrow">
+      <select class="note-lesson-select">${(lessons || []).map(l => `<option value="${l.id}">${(l.title || '').replace(/</g, '&lt;')}</option>`).join('')}</select>
+    </div>
+    <textarea class="note-body-input" placeholder="Napíš poznámku k lekcii (viditeľná pre všetkých študentov s prístupom)" style="min-height:60px;margin-top:.5rem"></textarea>
+    <button class="btn add-note-btn" style="margin-top:.5rem">Pridať poznámku</button>
+    <div style="margin-top:1rem">
+      ${top.length ? top.map(c => row(c, false) + (byParent[c.id] || []).map(r => row(r, true)).join('')).join('') : '<p class="muted">Zatiaľ žiadne otázky.</p>'}
+    </div>`;
+  $('.add-note-btn', panel).onclick = async () => {
+    const lessonId = $('.note-lesson-select', panel).value;
+    const body = $('.note-body-input', panel).value.trim();
+    if (!lessonId || !body) return;
+    try { await api(`/api/dash/courses/${courseId}/comments`, { method: 'POST', body: JSON.stringify({ lessonId, body }) }); await renderCourseComments(courseId, panel); }
+    catch (err) { alert(err.message); }
+  };
+  $$('.reply-comment-btn', panel).forEach(btn => btn.onclick = () => {
+    const commentId = btn.dataset.commentId, lessonId = btn.dataset.lessonId;
+    const holder = panel.querySelector('.reply-form-' + commentId);
+    if (!holder.classList.contains('hidden')) { holder.classList.add('hidden'); holder.innerHTML = ''; return; }
+    holder.classList.remove('hidden');
+    holder.innerHTML = `<textarea class="reply-input" placeholder="Odpoveď…" style="min-height:50px"></textarea><button class="btn reply-send-btn" style="margin-top:.4rem">Odoslať</button>`;
+    holder.querySelector('.reply-send-btn').onclick = async () => {
+      const body = holder.querySelector('.reply-input').value.trim();
+      if (!body) return;
+      try { await api(`/api/dash/courses/${courseId}/comments`, { method: 'POST', body: JSON.stringify({ lessonId, parentId: commentId, body }) }); await renderCourseComments(courseId, panel); }
+      catch (err) { alert(err.message); }
+    };
+  });
+}
+
+async function renderCourseFinalTest(courseId, panel) {
+  panel.innerHTML = '<p class="muted">Načítavam záverečný test…</p>';
+  const data = await api(`/api/dash/courses/${courseId}/final-test`);
+  panel.innerHTML = `
+    <p class="muted" style="margin-bottom:.8rem">Záverečný test sa žiakovi odomkne až po dokončení všetkých lekcií. Ak nenastavíš časový limit, test sa nebude ponúkať.</p>
+    <div class="formrow">
+      <input class="ft-time-limit" type="number" min="1" placeholder="Časový limit (minúty)" value="${data.timeLimitMinutes ?? ''}" style="width:220px">
+      <button class="btn secondary add-final-question-btn" type="button">+ Otázka</button>
+    </div>
+    <div class="final-questions-list" style="margin-top:.6rem">${(data.questions || []).map(q => quizQuestionRowHtml(q)).join('')}</div>
+    <button class="btn save-final-test-btn" style="margin-top:.8rem">Uložiť záverečný test</button>`;
+  bindFinalTestForm(courseId, panel);
+}
+
+function bindFinalTestForm(courseId, panel) {
+  panel.onclick = async (e) => {
+    const addBtn = e.target.closest('.add-final-question-btn');
+    if (addBtn) {
+      $('.final-questions-list', panel).insertAdjacentHTML('beforeend', quizQuestionRowHtml());
+      return;
+    }
+    const rmBtn = e.target.closest('.qq-remove-btn');
+    if (rmBtn) { rmBtn.closest('.quiz-question-row').remove(); return; }
+
+    const saveBtn = e.target.closest('.save-final-test-btn');
+    if (saveBtn) {
+      const questions = $$('.quiz-question-row', panel).map(row => ({
+        question: $('.qq-question', row).value,
+        optionA: $('.qq-a', row).value, optionB: $('.qq-b', row).value,
+        optionC: $('.qq-c', row).value, optionD: $('.qq-d', row).value,
+        correct: $('.qq-correct', row).value
+      })).filter(q => q.question.trim());
+      const timeLimitMinutes = $('.ft-time-limit', panel).value;
+      try {
+        await api(`/api/dash/courses/${courseId}/final-test`, { method: 'PUT', body: JSON.stringify({ timeLimitMinutes: timeLimitMinutes || null, questions }) });
+        await renderCourseFinalTest(courseId, panel);
+      } catch (err) { alert(err.message); }
+      return;
+    }
+  };
+}
+
+async function renderCourseLessons(courseId, panel) {
+  panel.innerHTML = '<p class="muted">Načítavam lekcie…</p>';
+  const { lessons } = await api(`/api/dash/courses/${courseId}/lessons`);
+  panel.innerHTML = `
+    <button class="btn secondary new-lesson-btn" style="margin-bottom:.8rem">+ Nová lekcia</button>
+    <div class="lessons-inner">${lessons.map(l => lessonFormHtml(l)).join('')}</div>`;
+  $('.new-lesson-btn', panel).onclick = () => {
+    $('.lessons-inner', panel).insertAdjacentHTML('afterbegin', lessonFormHtml({ id: '', course_id: courseId, sort_order: lessons.length }, true));
+    bindLessonForms(courseId, panel);
+  };
+  bindLessonForms(courseId, panel);
+}
+
+function quizQuestionRowHtml(q) {
+  q = q || {};
+  return `<div class="quiz-question-row" style="background:var(--black3);border:1px solid var(--border2);border-radius:8px;padding:.7rem;margin-bottom:.6rem">
+    <input class="qq-question" placeholder="Otázka" value="${(q.question||'').replace(/"/g,'&quot;')}" style="width:100%;padding:.5rem .7rem;background:var(--black2);border:1px solid var(--border2);border-radius:6px;margin-bottom:.5rem">
+    <div class="formrow">
+      <input class="qq-a" placeholder="A" value="${(q.optionA||'').replace(/"/g,'&quot;')}" style="flex:1;min-width:100px">
+      <input class="qq-b" placeholder="B" value="${(q.optionB||'').replace(/"/g,'&quot;')}" style="flex:1;min-width:100px">
+      <input class="qq-c" placeholder="C" value="${(q.optionC||'').replace(/"/g,'&quot;')}" style="flex:1;min-width:100px">
+      <input class="qq-d" placeholder="D" value="${(q.optionD||'').replace(/"/g,'&quot;')}" style="flex:1;min-width:100px">
+      <select class="qq-correct" style="width:130px">
+        <option value="">správna: —</option>
+        ${['a','b','c','d'].map(o => `<option value="${o}" ${q.correct===o?'selected':''}>správna: ${o.toUpperCase()}</option>`).join('')}
+      </select>
+      <button class="btn danger qq-remove-btn" type="button" style="padding:.4rem .7rem">✕</button>
+    </div>
+  </div>`;
+}
+
+function lessonFormHtml(l, isNew) {
+  const questions = l.quizQuestions || [];
+  return `<div class="lesson-item" data-id="${l.id||''}" data-new="${!!isNew}">
+    <div class="formrow">
+      <input class="lf-title" placeholder="Názov lekcie" value="${(l.title||'').replace(/"/g,'&quot;')}" style="flex:1;min-width:200px">
+      <input class="lf-sort" type="number" placeholder="poradie" value="${l.sort_order ?? 0}" style="width:100px">
+    </div>
+    <div class="formrow">
+      <input class="lf-video" placeholder="URL videa (napr. https://cestak.online/video.mp4)" value="${(l.video_url||'').replace(/"/g,'&quot;')}" style="flex:1;min-width:280px">
+      <input class="lf-doc" placeholder="URL dokumentu / PDF (voliteľné)" value="${(l.doc_url||'').replace(/"/g,'&quot;')}" style="flex:1;min-width:220px">
+    </div>
+    <div style="margin:.8rem 0 .4rem;display:flex;align-items:center;justify-content:space-between">
+      <span class="muted" style="font-family:var(--mono);font-size:.72rem;text-transform:uppercase;letter-spacing:.05em">Otázky kvízu (voliteľné, môže byť aj viac)</span>
+      <button class="btn secondary add-question-btn" type="button" style="padding:.4rem .8rem">+ Otázka</button>
+    </div>
+    <div class="quiz-questions-list">${questions.map(q => quizQuestionRowHtml(q)).join('')}</div>
+    <label style="display:flex;align-items:center;gap:.5rem;margin:.8rem 0 .4rem;font-size:.85rem;cursor:pointer">
+      <input type="checkbox" class="lf-requires-upload" ${l.requires_upload ? 'checked' : ''}>
+      Vyžaduje nahratie materiálu od žiaka (AI ho vyhodnotí) — dá sa skombinovať aj s kvízom vyššie
+    </label>
+    <div class="upload-fields ${l.requires_upload ? '' : 'hidden'}">
+      <textarea class="lf-upload-instructions" placeholder="Pokyny pre žiaka — TOTO ŽIAK VIDÍ (napr. 'Nahraj foto vyriešeného cvičenia na str. 12.')" style="min-height:60px">${l.upload_instructions||''}</textarea>
+      <textarea class="lf-ai-criteria" placeholder="Skryté kritériá hodnotenia pre AI — ŽIAK TOTO NEVIDÍ (napr. presné správne výsledky, na čo si má AI dať pozor)" style="min-height:60px;margin-top:.5rem">${l.ai_grading_criteria||''}</textarea>
+    </div>
+    <div style="display:flex;gap:.6rem;margin-top:.8rem">
+      <button class="btn save-lesson-btn">Uložiť</button>
+      ${isNew ? '' : '<button class="btn danger delete-lesson-btn">Zmazať</button>'}
+    </div>
+  </div>`;
+}
+
+function bindLessonForms(courseId, panel) {
+  panel.onclick = async (e) => {
+    const addBtn = e.target.closest('.add-question-btn');
+    if (addBtn) {
+      const item = addBtn.closest('.lesson-item');
+      $('.quiz-questions-list', item).insertAdjacentHTML('beforeend', quizQuestionRowHtml());
+      return;
+    }
+    const rmBtn = e.target.closest('.qq-remove-btn');
+    if (rmBtn) { rmBtn.closest('.quiz-question-row').remove(); return; }
+
+    const saveBtn = e.target.closest('.save-lesson-btn');
+    if (saveBtn) {
+      const item = saveBtn.closest('.lesson-item');
+      const isNew = item.dataset.new === 'true';
+      const quizQuestions = $$('.quiz-question-row', item).map(row => ({
+        question: $('.qq-question', row).value,
+        optionA: $('.qq-a', row).value, optionB: $('.qq-b', row).value,
+        optionC: $('.qq-c', row).value, optionD: $('.qq-d', row).value,
+        correct: $('.qq-correct', row).value
+      })).filter(q => q.question.trim());
+      const body = {
+        title: $('.lf-title', item).value, videoUrl: $('.lf-video', item).value, docUrl: $('.lf-doc', item).value,
+        quizQuestions,
+        sortOrder: Number($('.lf-sort', item).value) || 0,
+        requiresUpload: $('.lf-requires-upload', item).checked,
+        uploadInstructions: $('.lf-upload-instructions', item).value,
+        aiGradingCriteria: $('.lf-ai-criteria', item).value
+      };
+      try {
+        if (isNew) await api(`/api/dash/courses/${courseId}/lessons`, { method: 'POST', body: JSON.stringify(body) });
+        else await api(`/api/dash/courses/${courseId}/lessons/${item.dataset.id}`, { method: 'PUT', body: JSON.stringify(body) });
+        await renderCourseLessons(courseId, panel);
+      } catch (err) { alert(err.message); }
+      return;
+    }
+
+    const delBtn = e.target.closest('.delete-lesson-btn');
+    if (delBtn) {
+      if (!confirm('Zmazať lekciu?')) return;
+      const item = delBtn.closest('.lesson-item');
+      try {
+        await api(`/api/dash/courses/${courseId}/lessons/${item.dataset.id}`, { method: 'DELETE' });
+        await renderCourseLessons(courseId, panel);
+      } catch (err) { alert(err.message); }
+      return;
+    }
+  };
+  panel.onchange = (e) => {
+    if (e.target.classList.contains('lf-requires-upload')) {
+      const item = e.target.closest('.lesson-item');
+      $('.upload-fields', item).classList.toggle('hidden', !e.target.checked);
+    }
+  };
+}
+
+// ─────────────────────────── BLOG ───────────────────────────
+async function renderBlog() {
+  const { posts } = await api('/api/dash/blog');
+  $('#main').innerHTML = `
+    <div class="pagehead"><h2>Blog</h2><button class="btn" id="newPostBtn">+ Nový článok</button></div>
+    <p class="muted" style="margin-bottom:1.2rem">Tu vidíš aj články, ktoré napísala AI sama (autonómny publisher) — vieš ich tu upraviť, publikovať/skryť alebo zmazať. Cover obrázok sa generuje automaticky podľa názvu, ak nezadáš vlastný.</p>
+    <div id="postFormRoot"></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Titulok</th><th>Tag</th><th>Jazyk</th><th>Stav</th><th></th></tr></thead>
+        <tbody>${posts.map(p => `<tr data-id="${p.id}">
+          <td>${(p.title||'').replace(/</g,'&lt;')}<br><span class="muted">/blog/${p.slug}</span></td>
+          <td class="muted">${p.tag||''}</td>
+          <td class="muted">${p.target_lang||'—'}</td>
+          <td><span class="pill ${p.published?'resolved':'pending'}">${p.published?'publikovaný':'draft'}</span></td>
+          <td style="white-space:nowrap">
+            <button class="btn secondary edit-post-btn">Upraviť</button>
+            <button class="btn secondary toggle-publish-post-btn" data-published="${p.published}">${p.published?'Skryť':'Publikovať'}</button>
+            <button class="btn danger delete-post-btn">Zmazať</button>
+          </td>
+        </tr>`).join('') || '<tr><td class="muted" colspan="5">Zatiaľ žiadne články.</td></tr>'}</tbody>
+      </table>
+    </div>`;
+
+  $('#newPostBtn').onclick = () => {
+    $('#postFormRoot').innerHTML = postFormHtml();
+    bindPostForm(null);
+  };
+
+  $$('.edit-post-btn').forEach(btn => btn.onclick = async () => {
+    const id = btn.closest('tr').dataset.id;
+    const { posts } = await api('/api/dash/blog');
+    const p = posts.find(x => x.id === id);
+    $('#postFormRoot').innerHTML = postFormHtml(p);
+    bindPostForm(p);
+    $('#postFormRoot').scrollIntoView({ behavior: 'smooth' });
+  });
+  $$('.toggle-publish-post-btn').forEach(btn => btn.onclick = async () => {
+    const id = btn.closest('tr').dataset.id;
+    const nowPublished = btn.dataset.published === 'true';
+    try { await api(`/api/dash/blog/${id}`, { method: 'PUT', body: JSON.stringify({ published: !nowPublished }) }); navigate('blog'); }
+    catch (err) { alert(err.message); }
+  });
+  $$('.delete-post-btn').forEach(btn => btn.onclick = async () => {
+    if (!confirm('Zmazať článok?')) return;
+    const id = btn.closest('tr').dataset.id;
+    try { await api(`/api/dash/blog/${id}`, { method: 'DELETE' }); navigate('blog'); }
+    catch (err) { alert(err.message); }
+  });
+}
+
+function postFormHtml(p) {
+  const isEdit = !!p;
+  return `<div class="card" style="margin-bottom:1.4rem">
+    <h3>${isEdit ? 'Upraviť článok' : 'Nový článok'}</h3>
+    <div class="formrow">
+      <input class="pf-title" placeholder="Titulok (max 55 znakov pre SEO)" value="${(p?.title||'').replace(/"/g,'&quot;')}" style="flex:1;min-width:220px">
+      <input class="pf-tag" placeholder="Tag" value="${(p?.tag||'').replace(/"/g,'&quot;')}" style="width:160px">
+      <input class="pf-readtime" placeholder="Čas čítania" value="${(p?.read_time||'').replace(/"/g,'&quot;')}" style="width:140px">
+      <select class="pf-lang" style="width:120px">
+        ${['sk','cz','both'].map(o => `<option value="${o}" ${(p?.target_lang||'sk')===o?'selected':''}>${o}</option>`).join('')}
+      </select>
+    </div>
+    <textarea class="pf-excerpt" placeholder="Excerpt / meta description (140-160 znakov)" style="min-height:60px">${p?.excerpt||''}</textarea>
+    ${coverFieldHtml('pf-image', p?.image_url)}
+    ${richEditorHtml('pf-content-editor', 'Napíš obsah článku — nadpisy, tučné písmo, zoznamy...')}
+    <div style="display:flex;gap:.6rem;margin-top:.6rem">
+      <button class="btn pf-save">Uložiť</button>
+      <button class="btn secondary pf-cancel">Zrušiť</button>
+    </div>
+  </div>`;
+}
+
+function bindPostForm(post) {
+  const root = $('#postFormRoot');
+  bindCoverField(root, 'pf-image', 'blog');
+  const contentQuill = initRichEditor(root, 'pf-content-editor', post?.content);
+  $('.pf-save', root).onclick = async () => {
+    const body = {
+      title: $('.pf-title', root).value, excerpt: $('.pf-excerpt', root).value,
+      content: contentQuill.getText().trim() ? contentQuill.root.innerHTML : '',
+      tag: $('.pf-tag', root).value, readTime: $('.pf-readtime', root).value,
+      imageUrl: $('.pf-image', root).value, targetLang: $('.pf-lang', root).value
+    };
+    try {
+      if (post) await api(`/api/dash/blog/${post.id}`, { method: 'PUT', body: JSON.stringify(body) });
+      else await api('/api/dash/blog', { method: 'POST', body: JSON.stringify(body) });
+      navigate('blog');
+    } catch (err) { alert(err.message); }
+  };
+  $('.pf-cancel', root).onclick = () => { root.innerHTML = ''; };
+}
+
+// ─────────────────────────── VLASTNÉ (HOUSE) REKLAMY ───────────────────────────
+async function renderHouseAds() {
+  $('#main').innerHTML = '<p class="muted">Načítavam…</p>';
+  try {
+    const { banners, videos } = await api('/api/dash/ads/house');
+    $('#main').innerHTML = `
+      <div class="pagehead"><h2>Vlastné reklamy</h2></div>
+      <p class="muted" style="margin-bottom:1.2rem">Zadarmo, bez Stripe. Vypĺňajú voľné miesta v rotácii (max 4 bannery, max 3 videá) — platiaci klient má vždy prednosť a automaticky vytlačí tvoju reklamu, keď si kúpi miesto.</p>
+
+      <div class="card" style="margin-bottom:1.4rem">
+        <h3>Nový banner</h3>
+        <div class="formrow">
+          <input type="file" class="ha-banner-file" accept="image/png,image/gif,video/mp4">
+          <input class="ha-banner-link" placeholder="Cieľová URL (https://...)" style="flex:1;min-width:220px">
+          <select class="ha-banner-lang" style="width:110px">
+            <option value="both">both</option><option value="sk">sk</option><option value="cz">cz</option>
+          </select>
+          <button class="btn" id="haBannerBtn">Nahrať banner</button>
+        </div>
+        <p class="muted">PNG, GIF alebo MP4, max 8 MB.</p>
+      </div>
+
+      <div class="card" style="margin-bottom:1.4rem">
+        <h3>Nové video</h3>
+        <div class="formrow">
+          <input type="file" class="ha-video-file" accept="video/mp4">
+          <input class="ha-video-link" placeholder="Cieľová URL (https://...)" style="flex:1;min-width:220px">
+          <input class="ha-video-duration" type="number" placeholder="Dĺžka v sekundách" style="width:160px">
+          <select class="ha-video-lang" style="width:110px">
+            <option value="both">both</option><option value="sk">sk</option><option value="cz">cz</option>
+          </select>
+          <button class="btn" id="haVideoBtn">Nahrať video</button>
+        </div>
+        <p class="muted">MP4, max 25 MB, 5–180 sekúnd.</p>
+      </div>
+
+      <h3 style="margin-bottom:.8rem">Bannery (${banners.length})</h3>
+      <div id="haBannersList">${banners.map(b => houseAdItemHtml('banner', b)).join('') || '<p class="muted">Žiadne.</p>'}</div>
+
+      <h3 style="margin:1.6rem 0 .8rem">Videá (${videos.length})</h3>
+      <div id="haVideosList">${videos.map(v => houseAdItemHtml('video', v)).join('') || '<p class="muted">Žiadne.</p>'}</div>
+    `;
+
+    $('#haBannerBtn').onclick = async () => {
+      const file = $('.ha-banner-file').files[0];
+      if (!file) { alert('Vyber súbor.'); return; }
+      const fd = new FormData();
+      fd.append('file', file);
+      fd.append('linkUrl', $('.ha-banner-link').value);
+      fd.append('targetLang', $('.ha-banner-lang').value);
+      try { await fetch('/api/dash/ads/house/banner', { method: 'POST', body: fd, credentials: 'same-origin' }).then(async r => { const d = await r.json(); if (!r.ok) throw new Error(d.error || 'Chyba.'); }); navigate('houseads'); }
+      catch (err) { alert(err.message); }
+    };
+
+    $('#haVideoBtn').onclick = async () => {
+      const file = $('.ha-video-file').files[0];
+      if (!file) { alert('Vyber súbor.'); return; }
+      const fd = new FormData();
+      fd.append('file', file);
+      fd.append('linkUrl', $('.ha-video-link').value);
+      fd.append('durationS', $('.ha-video-duration').value);
+      fd.append('targetLang', $('.ha-video-lang').value);
+      try { await fetch('/api/dash/ads/house/video', { method: 'POST', body: fd, credentials: 'same-origin' }).then(async r => { const d = await r.json(); if (!r.ok) throw new Error(d.error || 'Chyba.'); }); navigate('houseads'); }
+      catch (err) { alert(err.message); }
+    };
+
+    bindHouseAdActions();
+  } catch (err) {
+    $('#main').innerHTML = `<p style="color:var(--red)">${err.message}</p>`;
+  }
+}
+
+function houseAdItemHtml(type, item) {
+  const preview = type === 'banner'
+    ? (item.mime_type === 'video/mp4'
+        ? `<video src="${item.public_url}" style="width:160px;border-radius:8px" muted></video>`
+        : `<img src="${item.public_url}" style="width:160px;border-radius:8px">`)
+    : `<video src="${item.public_url}" style="width:160px;border-radius:8px" muted></video>`;
+  return `<div class="card-item" data-id="${item.id}" data-type="${type}" style="display:flex;gap:1rem;align-items:center">
+    ${preview}
+    <div style="flex:1">
+      <p class="muted">${item.link_url}</p>
+      <p class="muted">${item.target_lang}${type === 'video' ? ' · ' + item.duration_s + 's' : ''} · <span class="pill ${item.active ? 'resolved' : 'pending'}">${item.active ? 'aktívne' : 'vypnuté'}</span></p>
+    </div>
+    <button class="btn secondary ha-toggle-btn" data-active="${item.active}">${item.active ? 'Vypnúť' : 'Zapnúť'}</button>
+    <button class="btn danger ha-delete-btn">Zmazať</button>
+  </div>`;
+}
+
+function bindHouseAdActions() {
+  $$('.ha-toggle-btn').forEach(btn => btn.onclick = async () => {
+    const item = btn.closest('.card-item');
+    const nowActive = btn.dataset.active === '1' || btn.dataset.active === 'true';
+    try { await api(`/api/dash/ads/house/${item.dataset.type}/${item.dataset.id}`, { method: 'PATCH', body: JSON.stringify({ active: !nowActive }) }); navigate('houseads'); }
+    catch (err) { alert(err.message); }
+  });
+  $$('.ha-delete-btn').forEach(btn => btn.onclick = async () => {
+    if (!confirm('Zmazať túto reklamu?')) return;
+    const item = btn.closest('.card-item');
+    try { await api(`/api/dash/ads/house/${item.dataset.type}/${item.dataset.id}`, { method: 'DELETE' }); navigate('houseads'); }
+    catch (err) { alert(err.message); }
+  });
+}
+
+// ─────────────────────────── GIFT CARDS ───────────────────────────
+async function renderGiftcards() {
+  const { cards } = await api('/api/dash/giftcards');
+  $('#main').innerHTML = `
+    <div class="pagehead"><h2>Darčekové karty</h2></div>
+    <div class="card" style="margin-bottom:1.4rem">
+      <h3>Pridať novú kartu</h3>
+      <div class="formrow">
+        <input id="ncBrand" placeholder="Značka (napr. Alza)">
+        <input id="ncValue" type="number" placeholder="Hodnota €">
+        <input id="ncDesc" placeholder="Popis" style="flex:1">
+        <button class="btn" id="addCardBtn">Pridať kartu</button>
+      </div>
+    </div>
+    <div id="cardsList">${cards.map(c => `
+      <div class="card-item">
+        <h4>${c.brand} — ${c.value_eur}€ ${c.is_active ? '' : '<span class="muted">(neaktívna)</span>'}</h4>
+        <p class="muted">${c.description||''} · skladom kódov: ${c.stock_count}</p>
+        <div class="formrow">
+          <textarea class="codes-input" placeholder="Kódy, jeden na riadok (voliteľne code|redeemUrl)" style="min-height:70px"></textarea>
+        </div>
+        <button class="btn add-codes-btn" data-id="${c.id}">Pridať kódy</button>
+      </div>`).join('') || '<p class="muted">Zatiaľ žiadne karty.</p>'}</div>`;
+
+  $('#addCardBtn').onclick = async () => {
+    try {
+      await api('/api/dash/giftcards', { method: 'POST', body: JSON.stringify({
+        brand: $('#ncBrand').value, valueEur: Number($('#ncValue').value), description: $('#ncDesc').value
+      }) });
+      navigate('giftcards');
+    } catch (err) { alert(err.message); }
+  };
+
+  $$('.add-codes-btn').forEach(btn => btn.onclick = async () => {
+    const item = btn.closest('.card-item');
+    const raw = $('.codes-input', item).value.trim();
+    if (!raw) return;
+    const codes = raw.split('\n').filter(Boolean).map(line => {
+      const [code, redeemUrl] = line.split('|').map(s => s.trim());
+      return { code, redeemUrl: redeemUrl || undefined };
+    });
+    try { await api(`/api/dash/giftcards/${btn.dataset.id}/codes`, { method: 'POST', body: JSON.stringify({ codes }) }); navigate('giftcards'); }
+    catch (err) { alert(err.message); }
+  });
+}
+
+// ─────────────────────────── GIFT CARD SALES (sptrener.online/darcekova-karta) ───────────────────────────
+function gcEur(cents) { return (Number(cents || 0) / 100).toFixed(2).replace('.', ',') + ' €'; }
+
+async function renderGiftCardSales() {
+  const [{ options }, { cards }] = await Promise.all([
+    api('/api/dash/gift-card-options'),
+    api('/api/dash/gift-cards-sold')
+  ]);
+  $('#main').innerHTML = `
+    <div class="pagehead"><h2>Darčekové karty — predaj</h2></div>
+    <p class="muted" style="margin-bottom:1.2rem">Cenník, ktorý vidia kupujúci na /darcekova-karta. "Premium" udelí Premium prístup na X dní po uplatnení (rovnaký mechanizmus ako referral bonus dni), "kurz" umožní príjemcovi vybrať si ľubovoľný 1 publikovaný kurz.</p>
+    <div class="card" style="margin-bottom:1.4rem">
+      <h3>Nová možnosť</h3>
+      <div class="formrow">
+        <select id="gcKind" style="padding:.6rem .8rem;background:var(--black3);border:1px solid var(--border2);border-radius:8px">
+          <option value="premium">Premium (dni)</option>
+          <option value="course">Kurz podľa výberu</option>
+        </select>
+        <input id="gcLabel" placeholder="Popis (napr. Premium darček — 3 mesiace)" style="flex:1;min-width:220px">
+        <input id="gcDuration" type="number" placeholder="Dní (len pre Premium)" style="width:150px">
+        <input id="gcPrice" type="number" placeholder="Cena v centoch" style="width:150px">
+        <button class="btn" id="gcAddBtn">Pridať</button>
+      </div>
+    </div>
+    <div id="gcOptionsList">${options.map(o => `
+      <div class="card-item" data-id="${o.id}">
+        <h4>${(o.label||'').replace(/</g,'&lt;')} ${o.active ? '<span class="pill resolved">aktívna</span>' : '<span class="pill pending">vypnutá</span>'}</h4>
+        <p class="muted">${o.kind === 'premium' ? o.duration_days + ' dní' : '1 kurz podľa výberu'} · ${gcEur(o.price_cents)}</p>
+        <div style="display:flex;gap:.6rem">
+          <button class="btn secondary gc-toggle-btn" data-active="${o.active}">${o.active ? 'Vypnúť' : 'Zapnúť'}</button>
+          <button class="btn danger gc-delete-btn">Zmazať</button>
+        </div>
+      </div>`).join('') || '<p class="muted">Zatiaľ žiadne možnosti.</p>'}</div>
+
+    <h3 style="font-family:var(--serif);font-size:1.3rem;margin:2rem 0 1rem">Predané karty</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Kód</th><th>Typ</th><th>Suma</th><th>Kupujúci</th><th>Stav</th><th>Uplatnil</th></tr></thead>
+        <tbody>${cards.map(c => `<tr>
+          <td>${c.code}</td>
+          <td class="muted">${c.kind === 'premium' ? c.duration_days + ' dní premium' + (c.includes_course ? ' + kurz' : '') : 'kurz podľa výberu'}</td>
+          <td>${gcEur(c.amount_cents)}</td>
+          <td class="muted">${c.buyer_email}</td>
+          <td><span class="pill ${c.status === 'redeemed' ? 'resolved' : 'pending'}">${c.status === 'redeemed' ? 'uplatnená' : 'neuplatnená'}</span></td>
+          <td class="muted">${c.redeemed_by_email || '—'}</td>
+        </tr>`).join('') || '<tr><td class="muted" colspan="6">Zatiaľ žiadne predané karty.</td></tr>'}</tbody>
+      </table>
+    </div>`;
+
+  $('#gcAddBtn').onclick = async () => {
+    try {
+      await api('/api/dash/gift-card-options', { method: 'POST', body: JSON.stringify({
+        kind: $('#gcKind').value, label: $('#gcLabel').value,
+        durationDays: $('#gcDuration').value || undefined, priceCents: $('#gcPrice').value
+      }) });
+      navigate('giftcardsales');
+    } catch (err) { alert(err.message); }
+  };
+  $$('.gc-toggle-btn').forEach(btn => btn.onclick = async () => {
+    const item = btn.closest('.card-item');
+    const nowActive = btn.dataset.active === 'true';
+    try { await api(`/api/dash/gift-card-options/${item.dataset.id}`, { method: 'PUT', body: JSON.stringify({ active: !nowActive }) }); navigate('giftcardsales'); }
+    catch (err) { alert(err.message); }
+  });
+  $$('.gc-delete-btn').forEach(btn => btn.onclick = async () => {
+    if (!confirm('Zmazať túto možnosť?')) return;
+    const item = btn.closest('.card-item');
+    try { await api(`/api/dash/gift-card-options/${item.dataset.id}`, { method: 'DELETE' }); navigate('giftcardsales'); }
+    catch (err) { alert(err.message); }
+  });
+}
+
+// ─────────────────────────── WEBINÁR — KONTAKTY ───────────────────────────
+let _webinarContacts = [];
+let _webinarFilter = 'all';
+
+function webinarFilterContacts() {
+  return _webinarContacts.filter(c => {
+    if (_webinarFilter === 'confirmed') return c.confirmedAt && !c.unsubscribedAt;
+    if (_webinarFilter === 'unconfirmed') return !c.confirmedAt && !c.unsubscribedAt;
+    if (_webinarFilter === 'paid') return c.isPremium && !c.unsubscribedAt;
+    if (_webinarFilter === 'unpaid') return !c.isPremium && !c.unsubscribedAt;
+    if (_webinarFilter === 'unsubscribed') return !!c.unsubscribedAt;
+    return !c.unsubscribedAt;
+  });
+}
+
+async function renderWebinar() {
+  const { contacts } = await api('/api/dash/webinar/contacts');
+  _webinarContacts = contacts;
+  renderWebinarTable();
+}
+
+function renderWebinarTable() {
+  const visible = webinarFilterContacts();
+  $('#main').innerHTML = `
+    <div class="pagehead">
+      <h2>Webinár — kontakty</h2>
+      <span class="muted">${_webinarContacts.length} kontaktov spolu · vlastný email systém (bez Ecomailu)</span>
+      <a class="btn secondary" href="/api/dash/webinar/export.xml" style="margin-left:auto">Exportovať XML</a>
+    </div>
+
+    <div class="card" style="margin-bottom:1.4rem">
+      <h3>Napísať vybraným</h3>
+      <p class="muted" style="margin:.3rem 0 .8rem">V texte môžeš použiť <code>[MENO]</code> a <code>[UNSUBSCRIBE]</code> (odhlasovací odkaz sa doplní automaticky).</p>
+      <div class="formrow">
+        <input id="wSubject" placeholder="Predmet emailu" style="flex:1;min-width:220px">
+      </div>
+      <textarea id="wBody" rows="6" placeholder="Obsah emailu (HTML alebo obyčajný text)" style="width:100%;margin-top:.6rem;padding:.6rem .8rem;background:var(--black3);border:1px solid var(--border2);border-radius:8px;color:inherit;font-family:inherit"></textarea>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:.8rem">
+        <span class="muted" id="wSelectedCount">0 vybraných</span>
+        <button class="btn" id="wSendBtn">Odoslať vybraným</button>
+      </div>
+    </div>
+
+    <div class="formrow" style="margin-bottom:1rem">
+      <select id="wFilter" style="padding:.6rem .8rem;background:var(--black3);border:1px solid var(--border2);border-radius:8px">
+        <option value="all" ${_webinarFilter === 'all' ? 'selected' : ''}>Všetci (bez odhlásených)</option>
+        <option value="confirmed" ${_webinarFilter === 'confirmed' ? 'selected' : ''}>Potvrdení</option>
+        <option value="unconfirmed" ${_webinarFilter === 'unconfirmed' ? 'selected' : ''}>Nepotvrdení</option>
+        <option value="paid" ${_webinarFilter === 'paid' ? 'selected' : ''}>Platení zákazníci</option>
+        <option value="unpaid" ${_webinarFilter === 'unpaid' ? 'selected' : ''}>Neplatení</option>
+        <option value="unsubscribed" ${_webinarFilter === 'unsubscribed' ? 'selected' : ''}>Odhlásení</option>
+      </select>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th><input type="checkbox" id="wSelectAll"></th><th>Meno</th><th>Email</th><th>Termín</th><th>Stav</th><th>Platený</th><th></th></tr></thead>
+        <tbody>${visible.map(c => `<tr data-id="${c.id}">
+          <td><input type="checkbox" class="w-row-check" data-id="${c.id}"></td>
+          <td>${(c.name || '—').replace(/</g, '&lt;')}</td>
+          <td class="muted">${c.email}</td>
+          <td class="muted">${new Date(c.slotStartMs).toLocaleString('sk-SK')}</td>
+          <td>${c.unsubscribedAt ? '<span class="pill pending">odhlásený</span>' : (c.confirmedAt ? '<span class="pill resolved">potvrdený</span>' : '<span class="pill pending">nepotvrdený</span>')}</td>
+          <td>${c.isPremium ? `<span class="pill resolved">${c.plan || 'áno'}</span>` : '<span class="muted">nie</span>'}</td>
+          <td style="white-space:nowrap">
+            ${!c.unsubscribedAt ? `<button class="btn secondary w-unsub-btn" data-id="${c.id}">Odhlásiť</button>` : ''}
+            <button class="btn danger w-delete-btn" data-id="${c.id}">Zmazať</button>
+          </td>
+        </tr>`).join('') || '<tr><td class="muted" colspan="7">Žiadne kontakty v tomto filtri.</td></tr>'}</tbody>
+      </table>
+    </div>`;
+
+  $('#wFilter').onchange = () => { _webinarFilter = $('#wFilter').value; renderWebinarTable(); };
+
+  const updateSelectedCount = () => {
+    const n = $$('.w-row-check:checked').length;
+    $('#wSelectedCount').textContent = n + ' vybraných';
+  };
+  $('#wSelectAll').onchange = () => {
+    $$('.w-row-check').forEach(cb => cb.checked = $('#wSelectAll').checked);
+    updateSelectedCount();
+  };
+  $$('.w-row-check').forEach(cb => cb.onchange = updateSelectedCount);
+
+  $('#wSendBtn').onclick = async () => {
+    const targetIds = $$('.w-row-check:checked').map(cb => cb.dataset.id);
+    const subject = $('#wSubject').value.trim();
+    const html = $('#wBody').value.trim();
+    if (!targetIds.length) return alert('Vyber aspoň jeden kontakt.');
+    if (!subject || !html) return alert('Vyplň predmet aj obsah emailu.');
+    if (!confirm(`Odoslať email ${targetIds.length} kontaktom?`)) return;
+    try {
+      const result = await api('/api/dash/webinar/send', { method: 'POST', body: JSON.stringify({ targetIds, subject, html }) });
+      alert(`Odoslané: ${result.sent}, zlyhalo: ${result.failed}`);
+    } catch (err) { alert(err.message); }
+  };
+
+  $$('.w-unsub-btn').forEach(btn => btn.onclick = async () => {
+    try { await api(`/api/dash/webinar/contacts/${btn.dataset.id}/unsubscribe`, { method: 'POST', body: JSON.stringify({}) }); navigate('webinar'); }
+    catch (err) { alert(err.message); }
+  });
+  $$('.w-delete-btn').forEach(btn => btn.onclick = async () => {
+    if (!confirm('Natrvalo zmazať tento kontakt?')) return;
+    try { await api(`/api/dash/webinar/contacts/${btn.dataset.id}`, { method: 'DELETE' }); navigate('webinar'); }
+    catch (err) { alert(err.message); }
+  });
+}
+
+// ─────────────────────────── PAYOUTS ───────────────────────────
+async function renderPayouts() {
+  const { payouts } = await api('/api/dash/payouts?status=pending');
+  $('#main').innerHTML = `
+    <div class="pagehead"><h2>Výplaty affil partnerov</h2><span class="muted">PAY by square — QR vygeneruje odkaz, prevod potvrdzuješ ty sám vo svojej bankovej appke</span></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Partner</th><th>Suma</th><th>IBAN</th><th>Žiadané</th><th></th></tr></thead>
+        <tbody>${payouts.map(p => `<tr>
+          <td>${p.partners ? p.partners.first_name+' '+p.partners.last_name : '—'}<br><span class="muted">${p.partners?.email||''}</span></td>
+          <td>${p.amount}€</td><td class="muted">${p.iban || 'darčeková karta'}</td>
+          <td class="muted">${new Date(p.requested_at).toLocaleDateString('sk-SK')}</td>
+          <td>${p.iban ? `<button class="btn qr-btn" data-id="${p.id}">QR na výplatu</button>` : '<span class="muted">n/a</span>'}</td>
+        </tr>`).join('') || '<tr><td class="muted" colspan="5">Žiadne čakajúce výbery.</td></tr>'}</tbody>
+      </table>
+    </div>`;
+  $$('.qr-btn').forEach(btn => btn.onclick = () => openQrModal(btn.dataset.id));
+}
+
+async function openQrModal(payoutId) {
+  const root = $('#qrModalRoot');
+  root.innerHTML = `<div class="qr-modal-bg"><div class="qr-modal"><p class="muted">Generujem QR…</p></div></div>`;
+  try {
+    const data = await api(`/api/dash/payouts/${payoutId}/qr`);
+    root.innerHTML = `<div class="qr-modal-bg">
+      <div class="qr-modal">
+        <h3 style="font-family:var(--serif);font-size:1.3rem;margin:0">${data.amount}€ → ${data.partnerName}</h3>
+        <img src="${data.qrDataUrl}" alt="PAY by square QR">
+        <p class="muted" style="word-break:break-all;font-family:var(--mono);font-size:.7rem">${data.iban}</p>
+        <p class="muted">Naskenuj v bankovej appke a potvrď prevod. Až POTOM klikni nižšie.</p>
+        <div style="display:flex;gap:.6rem;margin-top:.8rem">
+          <button class="btn secondary" id="qrCloseBtn" style="flex:1">Zavrieť</button>
+          <button class="btn" id="qrPaidBtn" style="flex:1">Označiť ako vyplatené</button>
+        </div>
+      </div>
+    </div>`;
+    $('#qrCloseBtn').onclick = () => { root.innerHTML = ''; };
+    $('#qrPaidBtn').onclick = async () => {
+      if (!confirm('Naozaj si prevod už potvrdil vo svojej bankovej appke?')) return;
+      try { await api(`/api/dash/payouts/${payoutId}/mark-paid`, { method: 'POST', body: JSON.stringify({}) }); root.innerHTML = ''; navigate('payouts'); }
+      catch (err) { alert(err.message); }
+    };
+  } catch (err) {
+    root.innerHTML = `<div class="qr-modal-bg"><div class="qr-modal"><p style="color:var(--red)">${err.message}</p><button class="btn secondary" onclick="document.getElementById('qrModalRoot').innerHTML=''">Zavrieť</button></div></div>`;
+  }
+}
+
+// ─────────────────────────── VÝPLATY INŠTRUKTOROV ───────────────────────────
+async function renderInstructorPayouts() {
+  const { payouts } = await api('/api/dash/instructor-payouts?status=pending');
+  $('#main').innerHTML = `
+    <div class="pagehead"><h2>Výplaty inštruktorov</h2><span class="muted">Rovnaký princíp ako affil partneri — PAY by square QR, prevod potvrdzuješ ty sám vo svojej bankovej appke</span></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Inštruktor</th><th>Suma</th><th>IBAN</th><th>Žiadané</th><th></th></tr></thead>
+        <tbody>${payouts.map(p => `<tr>
+          <td>${p.instructors?.name || p.instructors?.email || '—'}<br><span class="muted">${p.instructors?.email||''}</span></td>
+          <td>${(p.amount_cents/100).toFixed(2)}€</td><td class="muted">${p.iban || '—'}</td>
+          <td class="muted">${new Date(p.requested_at).toLocaleDateString('sk-SK')}</td>
+          <td>${p.iban ? `<button class="btn instr-qr-btn" data-id="${p.id}">QR na výplatu</button>` : '<span class="muted">n/a</span>'}</td>
+        </tr>`).join('') || '<tr><td class="muted" colspan="5">Žiadne čakajúce výbery.</td></tr>'}</tbody>
+      </table>
+    </div>`;
+  $$('.instr-qr-btn').forEach(btn => btn.onclick = () => openInstructorQrModal(btn.dataset.id));
+}
+
+async function openInstructorQrModal(payoutId) {
+  const root = $('#qrModalRoot');
+  root.innerHTML = `<div class="qr-modal-bg"><div class="qr-modal"><p class="muted">Generujem QR…</p></div></div>`;
+  try {
+    const data = await api(`/api/dash/instructor-payouts/${payoutId}/qr`);
+    root.innerHTML = `<div class="qr-modal-bg">
+      <div class="qr-modal">
+        <h3 style="font-family:var(--serif);font-size:1.3rem;margin:0">${data.amount}€ → ${data.instructorName}</h3>
+        <img src="${data.qrDataUrl}" alt="PAY by square QR">
+        <p class="muted" style="word-break:break-all;font-family:var(--mono);font-size:.7rem">${data.iban}</p>
+        <p class="muted">Naskenuj v bankovej appke a potvrď prevod. Až POTOM klikni nižšie.</p>
+        <div style="display:flex;gap:.6rem;margin-top:.8rem">
+          <button class="btn secondary" id="instrQrCloseBtn" style="flex:1">Zavrieť</button>
+          <button class="btn" id="instrQrPaidBtn" style="flex:1">Označiť ako vyplatené</button>
+        </div>
+      </div>
+    </div>`;
+    $('#instrQrCloseBtn').onclick = () => { root.innerHTML = ''; };
+    $('#instrQrPaidBtn').onclick = async () => {
+      if (!confirm('Naozaj si prevod už potvrdil vo svojej bankovej appke?')) return;
+      try { await api(`/api/dash/instructor-payouts/${payoutId}/mark-paid`, { method: 'POST', body: JSON.stringify({}) }); root.innerHTML = ''; navigate('instructorpayouts'); }
+      catch (err) { alert(err.message); }
+    };
+  } catch (err) {
+    root.innerHTML = `<div class="qr-modal-bg"><div class="qr-modal"><p style="color:var(--red)">${err.message}</p><button class="btn secondary" onclick="document.getElementById('qrModalRoot').innerHTML=''">Zavrieť</button></div></div>`;
+  }
+}
+
+// ─────────────────────────── INŠTRUKTORI ───────────────────────────
+async function renderInstructors() {
+  const { instructors, latestTermsVersion } = await api('/api/dash/instructors');
+  $('#main').innerHTML = `
+    <div class="pagehead"><h2>Inštruktori</h2><span class="muted">${latestTermsVersion ? 'Aktuálna verzia štandardných podmienok: v' + latestTermsVersion : 'Zatiaľ nepublikované žiadne štandardné podmienky'}</span></div>
+    <div class="card" style="margin-bottom:1.4rem">
+      <h3 style="margin-bottom:.6rem">Štandardné zmluvné podmienky</h3>
+      <p class="muted" style="margin-bottom:.8rem">Publikovanie novej verzie donúti VŠETKÝCH inštruktorov znova potvrdiť podmienky (10-sekundové podržanie tlačidla), kým môžu ďalej vytvárať kurzy, zľavové kódy alebo žiadať o výplatu.</p>
+      ${richEditorHtml('it-terms-editor', 'Text štandardných zmluvných podmienok...')}
+      <button class="btn" id="publishTermsBtn" style="margin-top:.8rem">Publikovať novú verziu</button>
+      <div class="feedback" id="termsFeedback"></div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Inštruktor</th><th>Default cut</th><th>Podmienky</th><th>Individuálna dohoda</th><th></th></tr></thead>
+        <tbody>${instructors.map(i => `<tr data-id="${i.id}">
+          <td>${(i.name||'').replace(/</g,'&lt;')||'—'}<br><span class="muted">${i.email}</span></td>
+          <td><input class="cut-input" type="number" min="0" max="100" value="${i.defaultCutPercent}" style="width:70px"> %</td>
+          <td>${!i.termsAcceptedVersion ? '<span class="pill pending">nepotvrdil</span>' : (i.termsCurrent ? '<span class="pill resolved">v' + i.termsAcceptedVersion + ' (aktuálne)</span>' : '<span class="pill pending">v' + i.termsAcceptedVersion + ' (zastarané)</span>')}</td>
+          <td>${i.customAgreement ? `${(i.customAgreement.title||'').replace(/</g,'&lt;')} ${i.customAgreement.accepted_at ? '<span class="pill resolved">potvrdená</span>' : '<span class="pill pending">čaká na potvrdenie</span>'}` : '<span class="muted">žiadna</span>'}</td>
+          <td style="display:flex;gap:.4rem;flex-wrap:wrap">
+            <button class="btn secondary save-cut-btn">Uložiť cut</button>
+            <button class="btn secondary edit-agreement-btn">${i.customAgreement ? 'Upraviť dohodu' : '+ Individuálna dohoda'}</button>
+            <button class="btn secondary history-btn">História potvrdení</button>
+          </td>
+        </tr>`).join('') || '<tr><td class="muted" colspan="5">Zatiaľ žiadni inštruktori.</td></tr>'}</tbody>
+      </table>
+    </div>
+    <div id="agreementModalRoot"></div>`;
+
+  const termsQuill = initRichEditor($('#main'), 'it-terms-editor', '');
+  $('#publishTermsBtn').onclick = async () => {
+    const feedback = $('#termsFeedback');
+    const content = termsQuill.getText().trim() ? termsQuill.root.innerHTML : '';
+    if (!content) { feedback.textContent = 'Text nemôže byť prázdny.'; feedback.style.color = 'var(--red)'; return; }
+    if (!confirm('Naozaj publikovať novú verziu? Všetci inštruktori budú musieť znova potvrdiť, kým môžu ďalej pracovať.')) return;
+    try {
+      await api('/api/dash/instructor-terms', { method: 'POST', body: JSON.stringify({ content }) });
+      navigate('instructors');
+    } catch (err) { feedback.textContent = err.message; feedback.style.color = 'var(--red)'; }
+  };
+
+  $$('.save-cut-btn').forEach(btn => btn.onclick = async () => {
+    const tr = btn.closest('tr');
+    const id = tr.dataset.id;
+    const value = $('.cut-input', tr).value;
+    try { await api(`/api/dash/instructors/${id}`, { method: 'PUT', body: JSON.stringify({ defaultCutPercent: value }) }); btn.textContent = 'Uložené ✓'; setTimeout(() => btn.textContent = 'Uložiť cut', 1500); }
+    catch (err) { alert(err.message); }
+  });
+
+  $$('.edit-agreement-btn').forEach(btn => btn.onclick = () => {
+    const id = btn.closest('tr').dataset.id;
+    openAgreementModal(id);
+  });
+
+  $$('.history-btn').forEach(btn => btn.onclick = () => {
+    const id = btn.closest('tr').dataset.id;
+    openTermsHistoryModal(id);
+  });
+}
+
+async function openTermsHistoryModal(instructorId) {
+  const root = $('#agreementModalRoot');
+  root.innerHTML = `<div class="qr-modal-bg"><div class="qr-modal"><p class="muted">Načítavam…</p></div></div>`;
+  try {
+    const { history } = await api(`/api/dash/instructors/${instructorId}/terms-history`);
+    root.innerHTML = `<div class="qr-modal-bg">
+      <div class="qr-modal" style="max-width:560px;width:90vw">
+        <h3 style="font-family:var(--serif);font-size:1.3rem;margin:0 0 .8rem">História potvrdení podmienok</h3>
+        <p class="muted" style="margin-bottom:.8rem">Trvalý záznam — nová verzia ani opätovné potvrdenie nič nemažú ani neprepisujú.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Verzia</th><th>Potvrdené</th><th>IP</th><th>Prehliadač</th></tr></thead>
+            <tbody>${history.length ? history.map(h => `<tr>
+              <td>v${h.version}</td>
+              <td class="muted">${new Date(h.accepted_at).toLocaleString('sk-SK')}</td>
+              <td class="muted" style="font-family:var(--mono);font-size:.75rem">${h.ip || '—'}</td>
+              <td class="muted" style="font-size:.75rem;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${(h.user_agent||'—').replace(/</g,'&lt;')}</td>
+            </tr>`).join('') : '<tr><td class="muted" colspan="4">Zatiaľ žiadne potvrdenia.</td></tr>'}</tbody>
+          </table>
+        </div>
+        <button class="btn secondary" id="historyCloseBtn" style="margin-top:.9rem;width:100%">Zavrieť</button>
+      </div>
+    </div>`;
+    $('#historyCloseBtn').onclick = () => { root.innerHTML = ''; };
+  } catch (err) {
+    root.innerHTML = `<div class="qr-modal-bg"><div class="qr-modal"><p style="color:var(--red)">${err.message}</p><button class="btn secondary" onclick="document.getElementById('agreementModalRoot').innerHTML=''">Zavrieť</button></div></div>`;
+  }
+}
+
+async function openAgreementModal(instructorId) {
+  const root = $('#agreementModalRoot');
+  root.innerHTML = `<div class="qr-modal-bg"><div class="qr-modal"><p class="muted">Načítavam…</p></div></div>`;
+  let existing = null;
+  try { existing = (await api(`/api/dash/instructors/${instructorId}/custom-agreement`)).agreement; } catch (e) {}
+  root.innerHTML = `<div class="qr-modal-bg">
+    <div class="qr-modal" style="max-width:640px;width:90vw">
+      <h3 style="font-family:var(--serif);font-size:1.3rem;margin:0 0 .8rem">Individuálna dohoda</h3>
+      ${existing?.accepted_at ? `<p class="muted" style="margin-bottom:.6rem">Aktuálna dohoda potvrdená inštruktorom ${new Date(existing.accepted_at).toLocaleString('sk-SK')}. Nové znenie nižšie ju nahradí a bude čakať na nové potvrdenie.</p>` : (existing ? '<p class="muted" style="margin-bottom:.6rem">Táto dohoda ešte čaká na potvrdenie inštruktorom.</p>' : '')}
+      <input class="am-title" placeholder="Názov dohody (napr. Osobitné copyright podmienky)" value="${existing ? (existing.title||'').replace(/"/g,'&quot;') : ''}" style="margin-bottom:.7rem">
+      ${richEditorHtml('am-content-editor', 'Text individuálnej dohody...')}
+      <div style="display:flex;gap:.6rem;margin-top:.9rem">
+        <button class="btn secondary" id="amCloseBtn" style="flex:1">Zavrieť</button>
+        <button class="btn" id="amSaveBtn" style="flex:1">Publikovať dohodu</button>
+      </div>
+      <div class="feedback" id="amFeedback"></div>
+    </div>
+  </div>`;
+  const quill = initRichEditor(root, 'am-content-editor', existing?.content || '');
+  $('#amCloseBtn').onclick = () => { root.innerHTML = ''; };
+  $('#amSaveBtn').onclick = async () => {
+    const feedback = $('#amFeedback');
+    const title = $('.am-title', root).value.trim();
+    const content = quill.getText().trim() ? quill.root.innerHTML : '';
+    if (!title || !content) { feedback.textContent = 'Vyplň názov aj text dohody.'; feedback.style.color = 'var(--red)'; return; }
+    try {
+      await api(`/api/dash/instructors/${instructorId}/custom-agreement`, { method: 'POST', body: JSON.stringify({ title, content }) });
+      root.innerHTML = '';
+      navigate('instructors');
+    } catch (err) { feedback.textContent = err.message; feedback.style.color = 'var(--red)'; }
+  };
+}
+
+// ─────────────────────────── ZĽAVOVÉ KÓDY ───────────────────────────
+async function renderDiscountCodes() {
+  const [{ codes }, { courses }] = await Promise.all([api('/api/dash/discount-codes'), api('/api/dash/courses')]);
+  $('#main').innerHTML = `
+    <div class="pagehead"><h2>Zľavové kódy</h2></div>
+    <div class="card" style="margin-bottom:1.4rem">
+      <div class="formrow">
+        <input class="dc-code" placeholder="KÓD (napr. LETO2025)" style="flex:1;min-width:160px">
+        <input class="dc-percent" type="number" min="1" max="100" placeholder="% zľava" style="width:120px">
+      </div>
+      <div class="formrow" style="margin-top:.6rem">
+        <select class="dc-course" style="flex:1;min-width:220px">
+          <option value="">Platí na všetky kurzy</option>
+          ${courses.map(c => `<option value="${c.id}">${(c.title||'').replace(/</g,'&lt;')}</option>`).join('')}
+        </select>
+        <input class="dc-maxuses" type="number" min="1" placeholder="Max. počet použití (voliteľné)" style="width:200px">
+        <input class="dc-expires" type="date" style="width:160px">
+      </div>
+      <button class="btn dc-create" style="margin-top:.6rem">Vytvoriť kód</button>
+      <div class="feedback" id="dcFeedback"></div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Kód</th><th>Kurz</th><th>Zľava</th><th>Použité</th><th>Platnosť</th><th>Stav</th><th></th></tr></thead>
+        <tbody>${codes.map(c => `<tr data-id="${c.id}">
+          <td style="font-family:var(--mono)">${c.code}</td>
+          <td class="muted">${c.courses?.title || 'všetky kurzy'}</td>
+          <td>${c.percent_off}%</td>
+          <td class="muted">${c.used_count}${c.max_uses ? ' / ' + c.max_uses : ''}</td>
+          <td class="muted">${c.expires_at ? new Date(c.expires_at).toLocaleDateString('sk-SK') : '—'}</td>
+          <td>${c.active ? '<span class="pill resolved">aktívny</span>' : '<span class="pill pending">vypnutý</span>'}</td>
+          <td style="display:flex;gap:.4rem;flex-wrap:wrap">
+            <button class="btn secondary dc-toggle" data-active="${c.active}">${c.active ? 'Vypnúť' : 'Zapnúť'}</button>
+            <button class="btn danger dc-delete">Zmazať</button>
+          </td>
+        </tr>`).join('') || '<tr><td class="muted" colspan="7">Zatiaľ žiadne kódy.</td></tr>'}</tbody>
+      </table>
+    </div>`;
+  $('.dc-create').onclick = async () => {
+    const feedback = $('#dcFeedback');
+    feedback.textContent = ''; feedback.style.color = '';
+    try {
+      await api('/api/dash/discount-codes', { method: 'POST', body: JSON.stringify({
+        code: $('.dc-code').value, percentOff: $('.dc-percent').value,
+        courseId: $('.dc-course').value || null,
+        maxUses: $('.dc-maxuses').value || null,
+        expiresAt: $('.dc-expires').value || null
+      }) });
+      navigate('discountcodes');
+    } catch (err) { feedback.textContent = err.message; feedback.style.color = 'var(--red)'; }
+  };
+  $$('.dc-toggle').forEach(btn => btn.onclick = async () => {
+    const id = btn.closest('tr').dataset.id;
+    const nowActive = btn.dataset.active === 'true';
+    try { await api(`/api/dash/discount-codes/${id}`, { method: 'PUT', body: JSON.stringify({ active: !nowActive }) }); navigate('discountcodes'); }
+    catch (err) { alert(err.message); }
+  });
+  $$('.dc-delete').forEach(btn => btn.onclick = async () => {
+    if (!confirm('Zmazať tento kód?')) return;
+    const id = btn.closest('tr').dataset.id;
+    try { await api(`/api/dash/discount-codes/${id}`, { method: 'DELETE' }); navigate('discountcodes'); }
+    catch (err) { alert(err.message); }
+  });
+}
+
+// ─────────────────────────── BUGS ───────────────────────────
+async function renderBugs() {
+  const { bugs } = await api('/api/dash/bugs');
+  $('#main').innerHTML = `
+    <div class="pagehead"><h2>Nahlásené chyby</h2></div>
+    <div id="bugsList">${bugs.map(b => `
+      <div class="bug-item" data-id="${b.id}">
+        <div style="display:flex;justify-content:space-between;gap:.6rem;flex-wrap:wrap">
+          <span class="pill ${b.status}">${b.status}</span>
+          <span class="muted">${b.source} · ${new Date(b.created_at).toLocaleString('sk-SK')}</span>
+        </div>
+        <p style="margin:.6rem 0">${(b.description||'').replace(/</g,'&lt;')}</p>
+        <p class="muted">${b.page_url||''} ${b.reporter_email ? '· '+b.reporter_email : ''}</p>
+        <select class="status-select">
+          ${['open','in_progress','resolved','wont_fix'].map(s => `<option value="${s}" ${s===b.status?'selected':''}>${s}</option>`).join('')}
+        </select>
+      </div>`).join('') || '<p class="muted">Žiadne nahlásené chyby.</p>'}</div>`;
+  $$('.status-select').forEach(sel => sel.onchange = async () => {
+    const id = sel.closest('.bug-item').dataset.id;
+    try { await api(`/api/dash/bugs/${id}`, { method: 'PUT', body: JSON.stringify({ status: sel.value }) }); navigate('bugs'); }
+    catch (err) { alert(err.message); }
+  });
+}
+
+// ─────────────────────────── ADVISOR ───────────────────────────
+async function renderAdvisor() {
+  const { messages } = await api('/api/dash/advisor/history');
+  $('#main').innerHTML = `
+    <div class="pagehead"><h2>AI poradca</h2></div>
+    <div class="chat">
+      <div class="chat-msgs" id="chatMsgs">${messages.map(m => `<div class="msg ${m.role}">${(m.content||'').replace(/</g,'&lt;')}</div>`).join('')}</div>
+      <div class="chat-input">
+        <textarea id="chatInput" placeholder="Opýtaj sa na čísla, trendy, čo zlepšiť…"></textarea>
+        <button class="btn" id="chatSendBtn">Poslať</button>
+      </div>
+    </div>`;
+  const msgsEl = $('#chatMsgs');
+  msgsEl.scrollTop = msgsEl.scrollHeight;
+  $('#chatSendBtn').onclick = sendAdvisorMsg;
+  $('#chatInput').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendAdvisorMsg(); } });
+}
+
+async function sendAdvisorMsg() {
+  const input = $('#chatInput');
+  const message = input.value.trim();
+  if (!message) return;
+  input.value = '';
+  const msgsEl = $('#chatMsgs');
+  msgsEl.insertAdjacentHTML('beforeend', `<div class="msg user">${message.replace(/</g,'&lt;')}</div>`);
+  msgsEl.insertAdjacentHTML('beforeend', `<div class="msg assistant" id="pendingReply">…</div>`);
+  msgsEl.scrollTop = msgsEl.scrollHeight;
+  try {
+    if (!currentOverviewSnapshot) currentOverviewSnapshot = await api('/api/dash/overview');
+    const { reply } = await api('/api/dash/advisor/chat', { method: 'POST', body: JSON.stringify({ message, overviewSnapshot: currentOverviewSnapshot }) });
+    $('#pendingReply').textContent = reply;
+    $('#pendingReply').removeAttribute('id');
+  } catch (err) {
+    $('#pendingReply').textContent = 'Chyba: ' + err.message;
+  }
+  msgsEl.scrollTop = msgsEl.scrollHeight;
+}
+
+// ─────────────────────────── AI OPS ───────────────────────────
+async function renderAiops() {
+  const { actions } = await api('/api/dash/aiops/log');
+  $('#main').innerHTML = `
+    <div class="pagehead"><h2>AI ops log</h2><button class="btn" id="runAiopsBtn">Spustiť teraz</button></div>
+    <p class="muted" style="margin-bottom:1.2rem">AI tu autonómne rozhoduje naprieč appkami (blog, príprava výplat) — každá akcia sa loguje nižšie s dôvodom. Platby AI nikdy sama nevykonáva.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Čas</th><th>Akcia</th><th>Systém</th><th>Cieľ</th><th>Dôvod</th><th>Výsledok</th></tr></thead>
+        <tbody>${actions.map(a => `<tr>
+          <td class="muted">${new Date(a.created_at).toLocaleString('sk-SK')}</td>
+          <td>${a.action_type}</td><td>${a.target_system||''}</td><td class="muted">${a.target_id||''}</td>
+          <td class="muted">${a.reasoning||''}</td>
+          <td><span class="pill ${a.result==='success'?'resolved':'open'}">${a.result}</span></td>
+        </tr>`).join('') || '<tr><td class="muted" colspan="6">Zatiaľ žiadne akcie.</td></tr>'}</tbody>
+      </table>
+    </div>`;
+  $('#runAiopsBtn').onclick = async () => {
+    $('#runAiopsBtn').disabled = true; $('#runAiopsBtn').textContent = 'Beží…';
+    try { await api('/api/dash/aiops/run', { method: 'POST', body: JSON.stringify({}) }); navigate('aiops'); }
+    catch (err) { alert(err.message); $('#runAiopsBtn').disabled = false; $('#runAiopsBtn').textContent = 'Spustiť teraz'; }
+  };
+}
+
+checkAuth();
+</script>
+</body>
+</html>
