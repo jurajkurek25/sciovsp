@@ -81,7 +81,6 @@ async function generateUsername(email) {
 async function ensureProfile(email) {
   const { data: existing } = await supabase.from('community_profiles').select('*').eq('email', email).maybeSingle();
   if (existing && existing.username) return existing;
-  console.error('DEBUG ensureProfile: generating new username for', email, 'existing row was:', existing);
   const username = await generateUsername(email);
   if (existing) {
     const { data: updated } = await supabase.from('community_profiles').update({ username, updated_at: new Date().toISOString() }).eq('email', email).select().single();
@@ -297,7 +296,6 @@ module.exports = function registerCommunity(app) {
         for (const l of allLikes || []) likeCounts[l.post_id] = (likeCounts[l.post_id] || 0) + 1;
       }
       const profiles = await getProfilesMap((posts || []).map(p => p.author_email));
-      console.error('DEBUG posts feed profiles map:', profiles);
       res.json({
         posts: (posts || []).map(p => serializePost({ ...p, like_count: likeCounts[p.id] || 0 }, likedPostIds, commentCounts, profiles)),
         hasMore: (posts || []).length === PAGE_SIZE
@@ -458,7 +456,6 @@ module.exports = function registerCommunity(app) {
   app.get('/api/community/profile/me', requireCommunityAccess, async (req, res) => {
     try {
       const profileRow = await ensureProfile(req.communityEmail);
-      console.error('DEBUG profile GET /me row:', profileRow);
       res.json({
         profile: {
           email: req.communityEmail,
@@ -478,11 +475,9 @@ module.exports = function registerCommunity(app) {
 
   // PUT /api/community/profile — upraviť vlastné zobrazované meno, username a bio.
   app.put('/api/community/profile', requireCommunityAccess, async (req, res) => {
-    console.error('DEBUG profile PUT RAW:', { contentType: req.headers['content-type'], rawBody: JSON.stringify(req.body), bodyType: typeof req.body });
     const displayName = (req.body?.displayName || '').toString().trim().slice(0, DISPLAY_NAME_MAX) || null;
     const bio = (req.body?.bio || '').toString().trim().slice(0, BIO_MAX) || null;
     const usernameRaw = req.body?.username;
-    console.error('DEBUG profile PUT incoming:', { email: req.communityEmail, usernameRaw, displayName });
     try {
       const patch = { email: req.communityEmail, display_name: displayName, bio, updated_at: new Date().toISOString() };
       if (usernameRaw != null && usernameRaw !== '') {
@@ -492,13 +487,11 @@ module.exports = function registerCommunity(app) {
         if (taken) return res.status(400).json({ error: 'Toto používateľské meno je už obsadené.' });
         patch.username = username;
       }
-      console.error('DEBUG profile PUT patch:', patch);
-      const { data: saved, error } = await supabase.from('community_profiles').upsert(patch, { onConflict: 'email' }).select().single();
+      const { error } = await supabase.from('community_profiles').upsert(patch, { onConflict: 'email' });
       if (error) throw error;
-      console.error('DEBUG profile PUT saved row:', saved);
       res.json({ ok: true });
     } catch (e) {
-      console.error('community profile update error:', e.message, e);
+      console.error('community profile update error:', e.message);
       res.status(500).json({ error: 'Chyba pri ukladaní profilu.' });
     }
   });
