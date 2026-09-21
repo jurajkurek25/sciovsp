@@ -121,6 +121,11 @@ h1{font-family:var(--serif);font-weight:800;font-size:1.7rem;margin-bottom:.3rem
 .chat-form{display:flex;gap:.5rem}
 .chat-form input{flex:1;background:var(--ink2);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:.7rem .8rem;font-size:.88rem}
 .chat-form button{background:var(--ignite);color:var(--ink);border:none;border-radius:8px;padding:.7rem 1.1rem;font-family:var(--mono);font-weight:700;font-size:.82rem;cursor:pointer}
+
+.member-row{display:flex;align-items:center;gap:.7rem;background:var(--ink3);border:1px solid var(--border2);border-radius:10px;padding:.8rem 1rem;margin-bottom:.5rem;cursor:pointer;text-align:left;width:100%}
+.member-info{flex:1;min-width:0}
+.member-name{font-size:.9rem;font-weight:600}
+.member-bio{font-size:.78rem;color:var(--text3);margin-top:.15rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 </style>
 </head>
 <body>
@@ -137,6 +142,7 @@ h1{font-family:var(--serif);font-weight:800;font-size:1.7rem;margin-bottom:.3rem
       <button class="tab" data-tab="feed" onclick="location.hash='feed'">Feed</button>
       <button class="tab" data-tab="gallery" onclick="location.hash='gallery'">Fotky</button>
       <button class="tab" data-tab="leaderboard" onclick="location.hash='leaderboard'">Rebríček</button>
+      <button class="tab" data-tab="members" onclick="location.hash='members'">Členovia</button>
       <button class="tab" data-tab="messages" onclick="location.hash='messages'">Správy</button>
       <button class="tab" data-tab="myprofile" onclick="location.hash='myprofile'">Môj profil</button>
     </div>
@@ -173,6 +179,10 @@ h1{font-family:var(--serif);font-weight:800;font-size:1.7rem;margin-bottom:.3rem
       <div id="leaderboardList"></div>
     </div>
 
+    <div id="viewMembers" style="display:none">
+      <div id="membersList"></div>
+    </div>
+
     <div id="viewMessages" style="display:none">
       <div id="conversationsList"></div>
     </div>
@@ -202,7 +212,9 @@ h1{font-family:var(--serif);font-weight:800;font-size:1.7rem;margin-bottom:.3rem
             <button onclick="submitAvatar()">Zmeniť fotku</button>
           </div>
         </div>
-        <label for="myDisplayName">Zobrazované meno</label>
+        <label for="myUsername">Používateľské meno</label>
+        <input type="text" id="myUsername" maxlength="20" placeholder="napr. jano2006">
+        <label for="myDisplayName">Zobrazované meno (nepovinné)</label>
         <input type="text" id="myDisplayName" maxlength="60">
         <label for="myBio">O mne</label>
         <textarea id="myBio" maxlength="300"></textarea>
@@ -297,7 +309,7 @@ function signIn() {
 }
 
 // ─────────────────────── ROUTER (feed / gallery / profil / môj profil) ───────────────────────
-const VIEWS = { feed: 'viewFeed', gallery: 'viewGallery', leaderboard: 'viewLeaderboard', messages: 'viewMessages', chat: 'viewChat', profile: 'viewProfile', myprofile: 'viewMyProfile' };
+const VIEWS = { feed: 'viewFeed', gallery: 'viewGallery', leaderboard: 'viewLeaderboard', members: 'viewMembers', messages: 'viewMessages', chat: 'viewChat', profile: 'viewProfile', myprofile: 'viewMyProfile' };
 
 function parseHash() {
   const h = location.hash.replace(/^#/, '');
@@ -305,6 +317,7 @@ function parseHash() {
   if (h.indexOf('chat/') === 0) return { view: 'chat', email: decodeURIComponent(h.slice(5)) };
   if (h === 'gallery') return { view: 'gallery' };
   if (h === 'leaderboard') return { view: 'leaderboard' };
+  if (h === 'members') return { view: 'members' };
   if (h === 'messages') return { view: 'messages' };
   if (h === 'myprofile') return { view: 'myprofile' };
   return { view: 'feed' };
@@ -322,6 +335,7 @@ function route() {
   if (r.view === 'feed') { if (!feedLoadedOnce) { loadPosts(true); feedLoadedOnce = true; } }
   else if (r.view === 'gallery') loadGallery(true);
   else if (r.view === 'leaderboard') loadLeaderboard();
+  else if (r.view === 'members') loadMembers();
   else if (r.view === 'messages') loadConversations();
   else if (r.view === 'chat') loadChat(r.email);
   else if (r.view === 'profile') loadProfile(r.email);
@@ -560,6 +574,29 @@ function renderLeaderboardRow(row, rank) {
   </div>`;
 }
 
+// ─────────────────────────────────────── ČLENOVIA (adresár) ───────────────────────────────────────
+async function loadMembers() {
+  const list = document.getElementById('membersList');
+  list.innerHTML = '<div class="empty">načítavam…</div>';
+  try {
+    const data = await apiFetch('/api/community/members');
+    if (!data.members.length) { list.innerHTML = '<div class="empty">Zatiaľ tu nie je nikto iný.</div>'; return; }
+    list.innerHTML = data.members.map(renderMemberRow).join('');
+  } catch (e) {
+    list.innerHTML = '<div class="empty">Chyba načítania.</div>';
+  }
+}
+
+function renderMemberRow(m) {
+  return `<button class="member-row" data-email="${esc(m.email)}" onclick="openProfile(this.dataset.email)">
+    ${avatarHtml(m.avatarUrl, m.displayName, 40)}
+    <div class="member-info">
+      <div class="member-name">${esc(m.displayName)}</div>
+      ${m.bio ? `<div class="member-bio">${esc(m.bio)}</div>` : ''}
+    </div>
+  </button>`;
+}
+
 // ─────────────────────────────────────── SPRÁVY (zoznam konverzácií) ───────────────────────────────────────
 async function loadConversations() {
   const list = document.getElementById('conversationsList');
@@ -683,13 +720,15 @@ async function loadMyProfile() {
   try {
     const data = await apiFetch('/api/community/profile/me');
     const p = data.profile;
+    document.getElementById('myUsername').value = p.username || '';
     document.getElementById('myDisplayName').value = p.displayName || '';
     document.getElementById('myBio').value = p.bio || '';
-    document.getElementById('myAvatarPreview').innerHTML = avatarHtml(p.avatarUrl, p.displayName || p.email, 72);
+    document.getElementById('myAvatarPreview').innerHTML = avatarHtml(p.avatarUrl, p.displayName || p.username, 72);
   } catch (e) {}
 }
 
 async function saveProfile() {
+  const username = document.getElementById('myUsername').value.trim();
   const displayName = document.getElementById('myDisplayName').value.trim();
   const bio = document.getElementById('myBio').value.trim();
   const errEl = document.getElementById('myProfileErr');
@@ -697,7 +736,7 @@ async function saveProfile() {
   errEl.textContent = ''; okEl.textContent = '';
   try {
     await apiFetch('/api/community/profile', {
-      method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ displayName, bio })
+      method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username, displayName, bio })
     });
     okEl.textContent = 'Uložené.';
     setTimeout(() => { okEl.textContent = ''; }, 2500);

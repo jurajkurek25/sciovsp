@@ -62,6 +62,41 @@ async function getCommunityAccess(email) {
   return { hasAccess, banned, accessUntil: userRow?.community_access_until || null };
 }
 
+// Vygeneruje unikátne používateľské meno z lokálnej časti emailu (pred
+// zavináčom) — nikdy sa nezobrazuje surový email ako identita v komunite,
+// toto je fallback, kým si človek nenastaví vlastné meno.
+async function generateUsername(email) {
+  const base = (email.split('@')[0] || '').toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 16) || 'clen';
+  for (let attempt = 0; attempt < 6; attempt++) {
+    const candidate = attempt === 0 ? base : base + Math.floor(1000 + Math.random() * 9000);
+    const { data: taken } = await supabase.from('community_profiles').select('email').eq('username', candidate).maybeSingle();
+    if (!taken) return candidate;
+  }
+  return base + crypto.randomBytes(3).toString('hex');
+}
+
+// Zabezpečí, že daný email má profil s vygenerovaným username (vytvorí ho
+// pri prvom volaní) — volá sa pri každom prístupe do komunity aj pri
+// dávkovom dopĺňaní zoznamu členov, aby email nikdy neunikol ako fallback.
+async function ensureProfile(email) {
+  const { data: existing } = await supabase.from('community_profiles').select('*').eq('email', email).maybeSingle();
+  if (existing && existing.username) return existing;
+  const username = await generateUsername(email);
+  if (existing) {
+    const { data: updated } = await supabase.from('community_profiles').update({ username, updated_at: new Date().toISOString() }).eq('email', email).select().single();
+    return updated || existing;
+  }
+  const { data: created, error } = await supabase.from('community_profiles').insert({ email, username }).select().single();
+  if (error) {
+    // Race: iný súbežný request medzitým vytvoril profil pre ten istý
+    // email (napr. dvojklik) — načítaj ho namiesto zlyhania.
+    const { data: retry } = await supabase.from('community_profiles').select('*').eq('email', email).maybeSingle();
+    if (retry) return retry;
+    throw error;
+  }
+  return created;
+}
+
 async function requireCommunityAccess(req, res, next) {
   const user = await verifyToken(req);
   if (!user) return res.status(401).json({ error: 'Nie si prihlásený.' });
@@ -71,22 +106,29 @@ async function requireCommunityAccess(req, res, next) {
   if (!access.hasAccess) return res.status(403).json({ error: 'Komunita je dostupná len pre členov, ktorí si Premium/Elite kúpili cez ponuku po webinári.' });
   req.communityEmail = email;
   const googleName = user.user_metadata?.full_name || user.user_metadata?.name || null;
-  const { data: myProfile } = await supabase.from('community_profiles').select('display_name, avatar_url').eq('email', email).maybeSingle();
-  req.communityName = (myProfile && myProfile.display_name) || googleName;
-  req.communityAvatarUrl = myProfile?.avatar_url || null;
+  const myProfile = await ensureProfile(email);
+  req.communityName = myProfile.display_name || googleName;
+  req.communityAvatarUrl = myProfile.avatar_url || null;
+  req.communityUsername = myProfile.username;
   next();
 }
 
-// Dávkové načítanie profilov (meno/fotka) pre množinu emailov — používa sa
-// pri vypisovaní feedu/komentárov/galérie, aby sa vždy zobrazil aktuálny
-// profil, nie len snímka mena uložená pri vytvorení príspevku.
+// Dávkové načítanie profilov (meno/fotka/username) pre množinu emailov —
+// používa sa pri vypisovaní feedu/komentárov/galérie, aby sa vždy zobrazil
+// aktuálny profil, nie len snímka mena uložená pri vytvorení príspevku.
 async function getProfilesMap(emails) {
   const unique = [...new Set(emails)];
   if (!unique.length) return {};
-  const { data } = await supabase.from('community_profiles').select('email, display_name, avatar_url').in('email', unique);
+  const { data } = await supabase.from('community_profiles').select('email, display_name, avatar_url, username').in('email', unique);
   const map = {};
   for (const p of data || []) map[p.email] = p;
   return map;
+}
+
+// Meno na zobrazenie pre iného člena: vlastné meno > username > (nikdy)
+// email. Použi vždy namiesto priameho `|| email` fallbacku.
+function displayNameOf(profile, email) {
+  return (profile && profile.display_name) || (profile && profile.username) || email;
 }
 
 function serializePost(row, likedPostIds, commentCounts, profiles) {
@@ -413,13 +455,14 @@ module.exports = function registerCommunity(app) {
   // editačného formulára (surové dáta vrátane bio, bez cudzích príspevkov).
   app.get('/api/community/profile/me', requireCommunityAccess, async (req, res) => {
     try {
-      const { data: profileRow } = await supabase.from('community_profiles').select('*').eq('email', req.communityEmail).maybeSingle();
+      const profileRow = await ensureProfile(req.communityEmail);
       res.json({
         profile: {
           email: req.communityEmail,
-          displayName: (profileRow && profileRow.display_name) || req.communityName,
-          avatarUrl: profileRow?.avatar_url || null,
-          bio: profileRow?.bio || null
+          displayName: profileRow.display_name || req.communityName,
+          username: profileRow.username,
+          avatarUrl: profileRow.avatar_url || null,
+          bio: profileRow.bio || null
         }
       });
     } catch (e) {
@@ -428,13 +471,23 @@ module.exports = function registerCommunity(app) {
     }
   });
 
-  // PUT /api/community/profile — upraviť vlastné zobrazované meno a bio.
+  const USERNAME_RE = /^[a-z0-9_]{3,20}$/;
+
+  // PUT /api/community/profile — upraviť vlastné zobrazované meno, username a bio.
   app.put('/api/community/profile', requireCommunityAccess, async (req, res) => {
     const displayName = (req.body?.displayName || '').toString().trim().slice(0, DISPLAY_NAME_MAX) || null;
     const bio = (req.body?.bio || '').toString().trim().slice(0, BIO_MAX) || null;
+    const usernameRaw = req.body?.username;
     try {
-      const { error } = await supabase.from('community_profiles')
-        .upsert({ email: req.communityEmail, display_name: displayName, bio, updated_at: new Date().toISOString() }, { onConflict: 'email' });
+      const patch = { email: req.communityEmail, display_name: displayName, bio, updated_at: new Date().toISOString() };
+      if (usernameRaw != null && usernameRaw !== '') {
+        const username = usernameRaw.toString().trim().toLowerCase();
+        if (!USERNAME_RE.test(username)) return res.status(400).json({ error: 'Používateľské meno smie mať 3-20 znakov: malé písmená, čísla, podčiarknik.' });
+        const { data: taken } = await supabase.from('community_profiles').select('email').eq('username', username).neq('email', req.communityEmail).maybeSingle();
+        if (taken) return res.status(400).json({ error: 'Toto používateľské meno je už obsadené.' });
+        patch.username = username;
+      }
+      const { error } = await supabase.from('community_profiles').upsert(patch, { onConflict: 'email' });
       if (error) throw error;
       res.json({ ok: true });
     } catch (e) {
@@ -467,7 +520,9 @@ module.exports = function registerCommunity(app) {
   app.get('/api/community/profile/:email', requireCommunityAccess, async (req, res) => {
     try {
       const email = (req.params.email || '').toString().trim().toLowerCase();
-      const { data: profileRow } = await supabase.from('community_profiles').select('*').eq('email', email).maybeSingle();
+      const targetAccess = await getCommunityAccess(email);
+      if (!targetAccess.hasAccess) return res.status(404).json({ error: 'Tento používateľ nie je v komunite.' });
+      const profileRow = await ensureProfile(email);
       const { data: posts, error } = await supabase.from('community_posts').select('*').eq('author_email', email).is('deleted_at', null).order('created_at', { ascending: false }).limit(PAGE_SIZE);
       if (error) throw error;
       const postIds = (posts || []).map(p => p.id);
@@ -484,11 +539,11 @@ module.exports = function registerCommunity(app) {
         for (const c of comments || []) commentCounts[c.post_id] = (commentCounts[c.post_id] || 0) + 1;
         for (const l of allLikes || []) likeCounts[l.post_id] = (likeCounts[l.post_id] || 0) + 1;
       }
-      const profiles = profileRow ? { [email]: profileRow } : {};
+      const profiles = { [email]: profileRow };
       res.json({
         profile: {
           email,
-          displayName: profileRow?.display_name || null,
+          displayName: displayNameOf(profileRow, email),
           avatarUrl: profileRow?.avatar_url || null,
           bio: profileRow?.bio || null
         },
@@ -609,7 +664,7 @@ module.exports = function registerCommunity(app) {
         const profile = profileMap[email];
         return {
           email,
-          displayName: (profile && profile.display_name) || nameSeen[email] || email,
+          displayName: (profile && profile.display_name) || nameSeen[email] || (profile && profile.username) || email,
           avatarUrl: profile?.avatar_url || null,
           postCount: postN,
           commentCount: commentN,
@@ -651,7 +706,7 @@ module.exports = function registerCommunity(app) {
           const last = lastMessages[c.id];
           return {
             otherEmail,
-            otherName: (profile && profile.display_name) || otherEmail,
+            otherName: displayNameOf(profile, otherEmail),
             otherAvatarUrl: profile?.avatar_url || null,
             lastMessage: last ? last.body : null,
             lastMessageAt: c.last_message_at
@@ -675,10 +730,10 @@ module.exports = function registerCommunity(app) {
       const convo = await getOrCreateConversation(req.communityEmail, otherEmail);
       const { data: messages, error } = await supabase.from('community_messages').select('*').eq('conversation_id', convo.id).order('created_at', { ascending: true }).limit(200);
       if (error) throw error;
-      const { data: profileRow } = await supabase.from('community_profiles').select('display_name, avatar_url').eq('email', otherEmail).maybeSingle();
+      const profileRow = await ensureProfile(otherEmail);
       res.json({
         conversationId: convo.id,
-        other: { email: otherEmail, displayName: (profileRow && profileRow.display_name) || otherEmail, avatarUrl: profileRow?.avatar_url || null },
+        other: { email: otherEmail, displayName: displayNameOf(profileRow, otherEmail), avatarUrl: profileRow?.avatar_url || null },
         messages: (messages || []).map(m => ({ id: m.id, senderEmail: m.sender_email, body: m.body, createdAt: m.created_at }))
       });
     } catch (e) {
@@ -738,6 +793,43 @@ module.exports = function registerCommunity(app) {
     } catch (e) {
       console.error('community report error:', e.message);
       res.status(500).json({ error: 'Chyba pri spracovaní nahlásenia.' });
+    }
+  });
+
+  // GET /api/community/members — zoznam všetkých aktívnych členov komunity
+  // (adresár), abecedne podľa zobrazovaného mena.
+  app.get('/api/community/members', requireCommunityAccess, async (req, res) => {
+    try {
+      const { data: activeUsers, error } = await supabase.from('users')
+        .select('email, community_access_until')
+        .gt('community_access_until', new Date().toISOString())
+        .is('community_banned_at', null)
+        .limit(200);
+      if (error) throw error;
+      const emails = (activeUsers || []).map(u => u.email);
+      let profiles = await getProfilesMap(emails);
+      // Členovia, čo ešte nikdy neotvorili /komunita (napr. prístup im
+      // udelil admin manuálne), nemajú profil s username — doplň ho teraz,
+      // nech sa v adresári nikdy nezobrazí surový email.
+      const missing = emails.filter(e => !profiles[e] || !profiles[e].username);
+      if (missing.length) {
+        await Promise.all(missing.map(e => ensureProfile(e)));
+        profiles = await getProfilesMap(emails);
+      }
+      const members = (activeUsers || []).map(u => {
+        const profile = profiles[u.email];
+        return {
+          email: u.email,
+          displayName: displayNameOf(profile, u.email),
+          avatarUrl: profile?.avatar_url || null,
+          bio: profile?.bio || null
+        };
+      });
+      members.sort((a, b) => a.displayName.localeCompare(b.displayName, 'sk'));
+      res.json({ members });
+    } catch (e) {
+      console.error('community members list error:', e.message);
+      res.status(500).json({ error: 'Chyba servera.' });
     }
   });
 };
