@@ -10,6 +10,16 @@
 // nasadený (tento patch stavia presne na jeho výstupnom texte).
 const fs = require('fs');
 const FILE = 'server.js';
+
+const LOCK = FILE + '.118-lock';
+try {
+  fs.writeFileSync(LOCK, String(process.pid), { flag: 'wx' });
+} catch (e) {
+  console.error('Iny beh tohto patchu prave prebieha alebo neuprataný LOCK zo zlyhaneho behu (' + LOCK + ' existuje). Nic som nezmenil.');
+  process.exit(1);
+}
+process.on('exit', () => { try { fs.unlinkSync(LOCK); } catch (e) {} });
+
 const src = fs.readFileSync(FILE, 'utf8');
 
 if (src.includes("require('./routes/community')")) {
