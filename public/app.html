@@ -733,6 +733,7 @@ h1.title span{font-style:italic;color:var(--purple2)}
     <div class="mode-section-title" data-cat="progress" data-i18n="secProgress">Pokrok a komunita</div>
     <div class="mode-card" data-cat="progress" onclick="showHistory()"><span class="card-icon">📊</span><div class="card-title" data-i18n="modeHistoryTitle">Výsledky a história</div><div class="card-desc" data-i18n="modeHistoryDesc">Pokroky, analýza podľa okruhov, percentilový odhad.</div></div>
     <div class="mode-card" data-cat="progress" onclick="showClans()"><span class="card-badge" style="background:linear-gradient(135deg,var(--purple),var(--red));color:#fff;">NOVÉ</span><span class="card-icon">⚔️</span><div class="card-title" data-i18n="clansCardTitle">SP Klany</div><div class="card-desc" data-i18n="clansCardDesc">Súkromné skupiny · Leaderboard s kamarátmi</div></div>
+    <div class="mode-card" data-cat="progress" id="communityCard" style="display:none" onclick="location.href='/komunita'"><span class="card-icon">💬</span><div class="card-title" data-i18n="communityCardTitle">Komunita</div><div class="card-desc" data-i18n="communityCardDesc">Feed, fotky, rebríček a správy s ostatnými členmi.</div></div>
   </div>
   <!-- REFERRAL CARD — zobrazí sa Premium userom aj pri platbe -->
 <div class="ref-card hidden" id="refCard">
@@ -1192,6 +1193,7 @@ const TRANSLATIONS={
     histMinutes:'{c}/{t} správne | {m} min',
     loginGoogle:'Prihlásiť sa cez Google',getPremiumBtn:'✦ Získať Premium',logoutBtn:'Odhlásiť',
     clansCardTitle:'SP Klany',clansCardDesc:'Súkromné skupiny · Leaderboard s kamarátmi',
+    communityCardTitle:'Komunita',communityCardDesc:'Feed, fotky, rebríček a správy s ostatnými členmi.',
     clansPageTitle:'⚔️ SP Klany',clansPageSubtitle:'Súkromné skupiny · Leaderboard s kamarátmi',
     clansEmpty:'Zatiaľ nie si v žiadnom klane',clansEmptyDesc:'Vytvor klan a pošli kamarátom kód, alebo zadaj kód od kamaráta',
     clansCreateBtn:'+ Vytvoriť klan',clansJoinBtn:'🔑 Zadať kód',
@@ -1348,6 +1350,7 @@ const TRANSLATIONS={
     histMinutes:'{c}/{t} správně | {m} min',
     loginGoogle:'Přihlásit se přes Google',getPremiumBtn:'✦ Získat Premium',logoutBtn:'Odhlásit',
     clansCardTitle:'SP Klany',clansCardDesc:'Soukromé skupiny · Leaderboard s kamarády',
+    communityCardTitle:'Komunita',communityCardDesc:'Feed, fotky, žebříček a zprávy s ostatními členy.',
     clansPageTitle:'⚔️ SP Klany',clansPageSubtitle:'Soukromé skupiny · Leaderboard s kamarády',
     clansEmpty:'Zatím nejsi v žádném klanu',clansEmptyDesc:'Vytvoř klan a pošli kamarádům kód, nebo zadej kód od kamaráda',
     clansCreateBtn:'+ Vytvořit klan',clansJoinBtn:'🔑 Zadat kód',
@@ -4147,6 +4150,23 @@ async function getAuthHeader() {
   return { 'Authorization': 'Bearer ' + session.access_token };
 }
 
+// Komunitná karta v sekcii "Pokrok a komunita" sa zobrazí len tým, čo
+// aktuálne majú prístup do komunity (webinárová cesta nákupu Premium/
+// Elite) — rovnaký zdroj pravdy ako /komunita samotná.
+async function checkCommunityAccessForNav() {
+  const card = document.getElementById('communityCard');
+  if (!card) return;
+  try {
+    const headers = await getAuthHeader();
+    if (!headers.Authorization) { card.style.display = 'none'; return; }
+    const res = await fetch('/api/community/access-status', { headers });
+    const data = await res.json();
+    card.style.display = data.hasAccess ? '' : 'none';
+  } catch (e) {
+    card.style.display = 'none';
+  }
+}
+
 async function loadMyClans() {
   if (!currentUser) {
     document.getElementById('clansList').innerHTML = `
@@ -5446,6 +5466,7 @@ async function onUserLoggedIn(user,token){
   if(isPremium()){const ol=document.getElementById('paywall-overlay');if(ol)ol.remove();}
   loadScioDateFromCloud();
   attachPendingPartnerRef();
+  checkCommunityAccessForNav();
   const pendingUpgrade=localStorage.getItem('vsp_pending_upgrade');
   if(pendingUpgrade){localStorage.removeItem('vsp_pending_upgrade');if(pendingUpgrade==='elite')startEliteCheckout();else if(pendingUpgrade==='premium')startCheckout();}
 }
@@ -5461,6 +5482,8 @@ async function attachPendingPartnerRef(){
 function onUserLoggedOut(){
   currentUser=null;localStorage.removeItem('vsp_user_email');localStorage.removeItem('vsp_premium');
   renderAuthButton();updateHomeStats();renderCoursesSection();
+  const communityCard=document.getElementById('communityCard');
+  if(communityCard)communityCard.style.display='none';
 }
 async function loginWithGoogle(){
   const pendingUpgrade=localStorage.getItem('vsp_pending_upgrade');
