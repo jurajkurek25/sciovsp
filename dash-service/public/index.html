@@ -153,6 +153,7 @@ textarea{width:100%;min-height:110px;padding:.7rem;background:var(--black3);bord
     <a class="navlink" data-page="giftcards">Darčekové karty (partner shop)</a>
     <a class="navlink" data-page="giftcardsales">Darčekové karty (predaj)</a>
     <a class="navlink" data-page="webinar">Webinár — kontakty</a>
+    <a class="navlink" data-page="community">Komunita</a>
     <a class="navlink" data-page="payouts">Výplaty (PAY by square)</a>
     <a class="navlink" data-page="instructorpayouts">Výplaty inštruktorov</a>
     <a class="navlink" data-page="discountcodes">Zľavové kódy</a>
@@ -242,7 +243,7 @@ function showApp() {
 }
 
 // ─────────────────────────── ROUTER ───────────────────────────
-const PAGES = { overview: renderOverview, trends: renderTrends, academy: renderAcademy, courses: renderCourses, blog: renderBlog, houseads: renderHouseAds, giftcards: renderGiftcards, giftcardsales: renderGiftCardSales, payouts: renderPayouts, instructorpayouts: renderInstructorPayouts, discountcodes: renderDiscountCodes, instructors: renderInstructors, bugs: renderBugs, advisor: renderAdvisor, aiops: renderAiops, webinar: renderWebinar };
+const PAGES = { overview: renderOverview, trends: renderTrends, academy: renderAcademy, courses: renderCourses, blog: renderBlog, houseads: renderHouseAds, giftcards: renderGiftcards, giftcardsales: renderGiftCardSales, payouts: renderPayouts, instructorpayouts: renderInstructorPayouts, discountcodes: renderDiscountCodes, instructors: renderInstructors, bugs: renderBugs, advisor: renderAdvisor, aiops: renderAiops, webinar: renderWebinar, community: renderCommunity };
 
 $$('.navlink[data-page]').forEach(a => a.addEventListener('click', () => { navigate(a.dataset.page); closeMobileNav(); }));
 
@@ -1219,6 +1220,98 @@ function webinarFilterContacts() {
     if (_webinarFilter === 'unsubscribed') return !!c.unsubscribedAt;
     return !c.unsubscribedAt;
   });
+}
+
+async function renderCommunity() {
+  const html = `
+    <div class="pagehead"><h2>Komunita</h2><button class="btn secondary" onclick="navigate('community')">Obnoviť</button></div>
+    <div class="table-wrap" style="margin-bottom:1.25rem;padding:1rem">
+      <div class="pagehead" style="margin-bottom:.5rem"><h3 style="margin:0">Zablokovať / odblokovať používateľa</h3></div>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center">
+        <input id="communityBanEmail" type="email" placeholder="email@example.com" style="flex:1;min-width:220px">
+        <button class="btn" onclick="communityBan()">Zablokovať</button>
+        <button class="btn secondary" onclick="communityUnban()">Odblokovať</button>
+      </div>
+      <div id="communityBanMsg" class="muted" style="margin-top:.5rem"></div>
+    </div>
+    <div class="table-wrap" style="margin-bottom:1.25rem">
+      <div class="pagehead" style="margin-bottom:.5rem"><h3 style="margin:0">Príspevky</h3></div>
+      <table>
+        <thead><tr><th>Čas</th><th>Autor</th><th>Text</th><th>Obrázok</th><th></th></tr></thead>
+        <tbody id="communityPostsTbody"><tr><td class="muted" colspan="5">načítavam…</td></tr></tbody>
+      </table>
+    </div>
+    <div class="table-wrap">
+      <div class="pagehead" style="margin-bottom:.5rem"><h3 style="margin:0">Komentáre</h3></div>
+      <table>
+        <thead><tr><th>Čas</th><th>Autor</th><th>Text</th><th></th></tr></thead>
+        <tbody id="communityCommentsTbody"><tr><td class="muted" colspan="4">načítavam…</td></tr></tbody>
+      </table>
+    </div>`;
+  $('#main').innerHTML = html;
+  loadCommunityPosts();
+  loadCommunityComments();
+}
+
+async function loadCommunityPosts() {
+  const tbody = document.getElementById('communityPostsTbody');
+  if (!tbody) return;
+  try {
+    const d = await api('/api/dash/community/posts');
+    tbody.innerHTML = (d.posts || []).map(p => `<tr>
+      <td class="muted">${new Date(p.created_at).toLocaleString('sk-SK')}</td>
+      <td>${p.author_name ? p.author_name + ' — ' : ''}${p.author_email}</td>
+      <td>${(p.body || '').replace(/</g, '&lt;')}</td>
+      <td>${p.image_url ? `<a href="${p.image_url}" target="_blank">obrázok</a>` : '—'}</td>
+      <td><button class="btn secondary" data-post-id="${p.id}" onclick="communityDeletePost(this)">Zmazať</button></td>
+    </tr>`).join('') || '<tr><td class="muted" colspan="5">Zatiaľ žiadne príspevky.</td></tr>';
+  } catch (e) {
+    tbody.innerHTML = '<tr><td class="muted" colspan="5">Chyba načítania.</td></tr>';
+  }
+}
+
+async function loadCommunityComments() {
+  const tbody = document.getElementById('communityCommentsTbody');
+  if (!tbody) return;
+  try {
+    const d = await api('/api/dash/community/comments');
+    tbody.innerHTML = (d.comments || []).map(c => `<tr>
+      <td class="muted">${new Date(c.created_at).toLocaleString('sk-SK')}</td>
+      <td>${c.author_name ? c.author_name + ' — ' : ''}${c.author_email}</td>
+      <td>${(c.body || '').replace(/</g, '&lt;')}</td>
+      <td><button class="btn secondary" data-comment-id="${c.id}" onclick="communityDeleteComment(this)">Zmazať</button></td>
+    </tr>`).join('') || '<tr><td class="muted" colspan="4">Zatiaľ žiadne komentáre.</td></tr>';
+  } catch (e) {
+    tbody.innerHTML = '<tr><td class="muted" colspan="4">Chyba načítania.</td></tr>';
+  }
+}
+
+async function communityDeletePost(btn) {
+  if (!confirm('Zmazať tento príspevok?')) return;
+  try { await api(`/api/dash/community/posts/${btn.dataset.postId}`, { method: 'DELETE' }); loadCommunityPosts(); }
+  catch (e) { alert('Chyba pri mazaní.'); }
+}
+
+async function communityDeleteComment(btn) {
+  if (!confirm('Zmazať tento komentár?')) return;
+  try { await api(`/api/dash/community/comments/${btn.dataset.commentId}`, { method: 'DELETE' }); loadCommunityComments(); }
+  catch (e) { alert('Chyba pri mazaní.'); }
+}
+
+async function communityBan() {
+  const email = document.getElementById('communityBanEmail').value.trim();
+  const msg = document.getElementById('communityBanMsg');
+  if (!email) { msg.textContent = 'Zadaj email.'; return; }
+  try { await api(`/api/dash/community/users/${encodeURIComponent(email)}/ban`, { method: 'POST' }); msg.textContent = 'Zablokované: ' + email; }
+  catch (e) { msg.textContent = 'Chyba.'; }
+}
+
+async function communityUnban() {
+  const email = document.getElementById('communityBanEmail').value.trim();
+  const msg = document.getElementById('communityBanMsg');
+  if (!email) { msg.textContent = 'Zadaj email.'; return; }
+  try { await api(`/api/dash/community/users/${encodeURIComponent(email)}/unban`, { method: 'POST' }); msg.textContent = 'Odblokované: ' + email; }
+  catch (e) { msg.textContent = 'Chyba.'; }
 }
 
 async function renderWebinar() {
