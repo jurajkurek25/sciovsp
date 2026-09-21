@@ -340,6 +340,14 @@ footer{border-top:1px solid var(--border);margin-top:3rem;padding:2.2rem 0}
       </div>
     </div>
 
+    <div class="upsell" id="psychCourseUpsell" style="display:none">
+      <h3 id="tPsychCourseTitle">Ideš na psychológiu? Máme pre teba aj samostatný kurz</h3>
+      <p id="tPsychCourseDesc">Okrem prípravy na všeobecné študijné predpoklady ponúkame aj kurz zameraný priamo na psychológiu — filozofiu, dejiny odboru a to, čo sa reálne pýta pri prijímačkách.</p>
+      <div class="upsell-row">
+        <a class="btn-secondary" href="https://sptrener.online/kurzy/priprava-na-bakalarke-studium-psychologie" id="ctaPsychCourse">Pozrieť kurz →</a>
+      </div>
+    </div>
+
     <div class="retake"><button onclick="retakeQuiz()" id="tRetake">↺ Spraviť test znova</button></div>
   </div>
 
@@ -617,6 +625,9 @@ const T = {
     upsellTitle:'Priprav sa na prijímačky rovno teraz',
     upsellDesc:'SP Tréner ťa pripraví presne na testy, ktoré tvoj vysnívaný odbor vyžaduje — verbálne aj analytické myslenie, AI generátor úloh na mieru a viac.',
     ctaFree:'Skús zadarmo →', ctaPremium:'Pozrieť Premium/Elite', retake:'↺ Spraviť test znova',
+    psychCourseTitle:'Ideš na psychológiu? Máme pre teba aj samostatný kurz',
+    psychCourseDesc:'Okrem prípravy na všeobecné študijné predpoklady ponúkame aj kurz zameraný priamo na psychológiu — filozofiu, dejiny odboru a to, čo sa reálne pýta pri prijímačkách.',
+    ctaPsychCourse:'Pozrieť kurz →',
     faqTitle:'Časté otázky',
     faqQ1:'Je test naozaj zadarmo?', faqA1:'Áno, celý test aj výsledok sú úplne zadarmo. Jediné, čo potrebuješ, je bezplatná registrácia cez Google, aby sme ti výsledok mohli uložiť.',
     faqQ2:'Ako dlho test trvá?', faqA2:'Približne 7 minút — väčšina otázok je na jeden klik, plus pár otázok vlastnými slovami, aby bol výsledok presnejší.',
@@ -649,6 +660,9 @@ const T = {
     upsellTitle:'Připrav se na přijímačky rovnou teď',
     upsellDesc:'SP Tréner tě připraví přesně na testy, které tvůj vysněný obor vyžaduje — verbální i analytické myšlení, AI generátor úloh na míru a víc.',
     ctaFree:'Zkus zdarma →', ctaPremium:'Podívat se na Premium/Elite', retake:'↺ Udělat test znovu',
+    psychCourseTitle:'Jdeš na psychologii? Máme pro tebe i samostatný kurz',
+    psychCourseDesc:'Kromě přípravy na všeobecné studijní předpoklady nabízíme i kurz zaměřený přímo na psychologii — filozofii, dějiny oboru a to, co se reálně ptá u přijímaček.',
+    ctaPsychCourse:'Podívat se na kurz →',
     faqTitle:'Časté otázky',
     faqQ1:'Je test opravdu zdarma?', faqA1:'Ano, celý test i výsledek jsou úplně zdarma. Jediné, co potřebuješ, je bezplatná registrace přes Google, abychom ti výsledek mohli uložit.',
     faqQ2:'Jak dlouho test trvá?', faqA2:'Přibližně 7 minut — většina otázek je na jeden klik, plus pár otázek vlastními slovy, aby byl výsledek přesnější.',
@@ -697,6 +711,9 @@ function setLang(lang) {
   document.getElementById('tUpsellDesc').textContent = t.upsellDesc;
   document.getElementById('ctaFree').textContent = t.ctaFree;
   document.getElementById('ctaPremium').textContent = t.ctaPremium;
+  document.getElementById('tPsychCourseTitle').textContent = t.psychCourseTitle;
+  document.getElementById('tPsychCourseDesc').textContent = t.psychCourseDesc;
+  document.getElementById('ctaPsychCourse').textContent = t.ctaPsychCourse;
   document.getElementById('tRetake').textContent = t.retake;
   document.getElementById('tFaqTitle').textContent = t.faqTitle;
   document.getElementById('tFaqQ1').textContent = t.faqQ1; document.getElementById('tFaqA1').textContent = t.faqA1;
@@ -954,6 +971,10 @@ function renderResultUI(){
   const appCat = FIELD_META[topTag].appCat;
   document.getElementById('ctaFree').href = '/app?cat='+appCat+'&upgrade=free';
   document.getElementById('ctaPremium').href = '/app?cat='+appCat+'&upgrade=premium';
+
+  // Popri appke (ponúkanej vždy) pre psychológiu navyše ponúkni aj
+  // samostatný kurz priamo na tento odbor.
+  document.getElementById('psychCourseUpsell').style.display = topTag === 'psych' ? 'block' : 'none';
 
   return topTag;
 }
