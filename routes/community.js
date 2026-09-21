@@ -136,7 +136,7 @@ function serializePost(row, likedPostIds, commentCounts, profiles) {
   return {
     id: row.id,
     authorEmail: row.author_email,
-    authorName: (profile && profile.display_name) || row.author_name,
+    authorName: (profile && profile.display_name) || (profile && profile.username) || row.author_name,
     authorAvatarUrl: profile?.avatar_url || null,
     body: row.body,
     imageUrl: row.image_url,
@@ -152,7 +152,7 @@ function serializeComment(row, likedCommentIds, likeCounts, profiles) {
   return {
     id: row.id,
     authorEmail: row.author_email,
-    authorName: (profile && profile.display_name) || row.author_name,
+    authorName: (profile && profile.display_name) || (profile && profile.username) || row.author_name,
     authorAvatarUrl: profile?.avatar_url || null,
     body: row.body,
     createdAt: row.created_at,
@@ -166,7 +166,7 @@ function serializePhoto(row, profiles) {
   return {
     id: row.id,
     authorEmail: row.author_email,
-    authorName: (profile && profile.display_name) || row.author_name,
+    authorName: (profile && profile.display_name) || (profile && profile.username) || row.author_name,
     authorAvatarUrl: profile?.avatar_url || null,
     imageUrl: row.image_url,
     caption: row.caption,
