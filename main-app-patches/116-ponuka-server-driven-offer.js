@@ -11,6 +11,16 @@
 // zlyhá s jasnou chybou, nič nezmení.
 const fs = require('fs');
 const FILE = 'public/ponuka.html';
+
+const LOCK = FILE + '.116-lock';
+try {
+  fs.writeFileSync(LOCK, String(process.pid), { flag: 'wx' });
+} catch (e) {
+  console.error('Iny beh tohto patchu prave prebieha alebo neuprataný LOCK zo zlyhaneho behu (' + LOCK + ' existuje). Nic som nezmenil.');
+  process.exit(1);
+}
+process.on('exit', () => { try { fs.unlinkSync(LOCK); } catch (e) {} });
+
 const src = fs.readFileSync(FILE, 'utf8');
 
 if (src.includes('fetchWebinarOfferStatus')) {

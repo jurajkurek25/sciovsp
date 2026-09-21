@@ -5,6 +5,15 @@
 // tvrdia opak — opravuje sa na presnejšiu (a užitočnejšiu) informáciu.
 const fs = require('fs');
 
+const LOCK = 'main-app-patches/.117-lock';
+try {
+  fs.writeFileSync(LOCK, String(process.pid), { flag: 'wx' });
+} catch (e) {
+  console.error('Iny beh tohto patchu prave prebieha alebo neuprataný LOCK zo zlyhaneho behu (' + LOCK + ' existuje). Nic som nezmenil.');
+  process.exit(1);
+}
+process.on('exit', () => { try { fs.unlinkSync(LOCK); } catch (e) {} });
+
 function replaceOnce(s, oldStr, newStr, label) {
   const count = s.split(oldStr).length - 1;
   if (count !== 1) { console.error(label + ' kotva nie je jednoznacna (najdenych: ' + count + '). Nic som nezmenil.'); process.exit(1); }
