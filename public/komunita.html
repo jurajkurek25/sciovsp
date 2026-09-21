@@ -32,13 +32,23 @@ h1{font-family:var(--serif);font-weight:800;font-size:1.7rem;margin-bottom:.3rem
 .gate p{color:var(--text2);font-size:.92rem;margin-bottom:1.2rem}
 .gate a.cta,.gate button{display:inline-block;padding:.85rem 1.5rem;background:var(--ignite);color:var(--ink);border:none;border-radius:8px;text-decoration:none;font-family:var(--mono);font-weight:700;font-size:.88rem;cursor:pointer}
 
+.tabs{display:flex;gap:.5rem;margin-bottom:1.4rem;border-bottom:1px solid var(--border)}
+.tab{background:none;border:none;color:var(--text3);padding:.6rem .3rem;font-family:var(--mono);font-size:.82rem;cursor:pointer;border-bottom:2px solid transparent;margin-right:.8rem}
+.tab.active{color:var(--ignite);border-bottom-color:var(--ignite)}
+
+.avatar{border-radius:50%;object-fit:cover;flex-shrink:0;display:inline-block;vertical-align:middle}
+.avatar-fallback{background:var(--ink2);border:1px solid var(--border2);color:var(--text3);display:inline-flex;align-items:center;justify-content:center;font-family:var(--mono);font-weight:700}
+.author-link{display:inline-flex;align-items:center;gap:.5rem;cursor:pointer;background:none;border:none;color:inherit;padding:0;text-align:left}
+
 .composer{background:var(--ink3);border:1px solid var(--border2);border-radius:12px;padding:1.2rem;margin-bottom:1.6rem}
 .composer textarea{width:100%;min-height:80px;background:var(--ink2);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:.7rem .8rem;font-size:.9rem;resize:vertical}
-.composer-row{display:flex;justify-content:space-between;align-items:center;margin-top:.7rem;gap:.6rem}
+.composer-row{display:flex;justify-content:space-between;align-items:center;margin-top:.7rem;gap:.6rem;flex-wrap:wrap}
 .composer input[type=file]{font-size:.75rem;color:var(--text3);max-width:160px}
+.composer input[type=text]{width:100%;background:var(--ink2);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:.6rem .7rem;font-size:.85rem;margin-top:.6rem}
 .composer button{padding:.6rem 1.2rem;background:var(--ignite);color:var(--ink);border:none;border-radius:8px;font-family:var(--mono);font-weight:700;font-size:.82rem;cursor:pointer}
 .composer button:disabled{opacity:.5;cursor:default}
 .composer .err{color:#ff8a8a;font-size:.8rem;margin-top:.5rem}
+.composer .ok{color:var(--ignite);font-size:.8rem;margin-top:.5rem}
 
 .post{background:var(--ink3);border:1px solid var(--border2);border-radius:12px;padding:1.2rem;margin-bottom:1rem}
 .post .meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem}
@@ -53,15 +63,37 @@ h1{font-family:var(--serif);font-weight:800;font-size:1.7rem;margin-bottom:.3rem
 
 .comments{margin-top:.9rem;padding-top:.9rem;border-top:1px solid var(--border)}
 .comment{display:flex;justify-content:space-between;gap:.6rem;font-size:.85rem;margin-bottom:.6rem}
-.comment .cbody{flex:1}
-.comment .cauthor{font-family:var(--mono);font-size:.72rem;color:var(--ignite);display:block;margin-bottom:.15rem}
-.comment button{background:none;border:none;color:var(--text3);cursor:pointer;font-family:var(--mono);font-size:.72rem;flex-shrink:0}
+.comment .cbody{flex:1;display:flex;align-items:flex-start;gap:.5rem}
+.comment .ctext{flex:1}
+.comment .cauthor{font-family:var(--mono);font-size:.72rem;color:var(--ignite);display:block;margin-bottom:.15rem;cursor:pointer;background:none;border:none;padding:0}
+.comment button.del{background:none;border:none;color:var(--text3);cursor:pointer;font-family:var(--mono);font-size:.72rem;flex-shrink:0}
 .comment-form{display:flex;gap:.5rem;margin-top:.6rem}
 .comment-form input{flex:1;background:var(--ink2);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:.5rem .7rem;font-size:.82rem}
 .comment-form button{background:var(--signal);color:#fff;border:none;border-radius:8px;padding:.5rem .9rem;font-size:.78rem;cursor:pointer}
 
 .load-more{display:block;margin:1rem auto 0;background:var(--ink3);border:1px solid var(--border2);color:var(--text2);padding:.7rem 1.4rem;border-radius:8px;cursor:pointer;font-family:var(--mono);font-size:.82rem}
 .empty{color:var(--text3);text-align:center;padding:2rem 0;font-size:.9rem}
+
+.gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:.5rem}
+.gallery-item{position:relative;border-radius:8px;overflow:hidden;background:var(--ink3)}
+.gallery-item img{width:100%;aspect-ratio:1;object-fit:cover;display:block}
+.gallery-item .del{position:absolute;top:.3rem;right:.3rem;background:rgba(20,16,13,.75);border:none;color:#ff8a8a;border-radius:6px;width:22px;height:22px;cursor:pointer;font-size:.75rem;line-height:1}
+
+.profile-card{display:flex;gap:1rem;align-items:center;background:var(--ink3);border:1px solid var(--border2);border-radius:12px;padding:1.2rem;margin-bottom:1.4rem}
+.profile-info{flex:1;min-width:0}
+.profile-name{font-family:var(--serif);font-weight:700;font-size:1.2rem}
+.profile-bio{color:var(--text2);font-size:.85rem;margin-top:.3rem;white-space:pre-wrap;word-break:break-word}
+.profile-edit-btn{margin-top:.6rem;background:none;border:1px solid var(--border2);color:var(--text2);padding:.4rem .8rem;border-radius:8px;font-family:var(--mono);font-size:.76rem;cursor:pointer}
+
+.profile-edit-card{background:var(--ink3);border:1px solid var(--border2);border-radius:12px;padding:1.4rem}
+.profile-edit-card label{display:block;font-family:var(--mono);font-size:.74rem;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin:1rem 0 .4rem}
+.profile-edit-card label:first-of-type{margin-top:0}
+.profile-edit-card input[type=text],.profile-edit-card textarea{width:100%;background:var(--ink2);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:.7rem .8rem;font-size:.9rem}
+.profile-edit-card textarea{min-height:70px;resize:vertical}
+.avatar-upload{display:flex;align-items:center;gap:1rem}
+.avatar-upload input[type=file]{font-size:.75rem;color:var(--text3)}
+.avatar-upload button{padding:.5rem 1rem;background:var(--ink2);border:1px solid var(--border2);color:var(--text);border-radius:8px;font-family:var(--mono);font-size:.76rem;cursor:pointer}
+.profile-edit-card > button{margin-top:1.2rem;padding:.7rem 1.4rem;background:var(--ignite);color:var(--ink);border:none;border-radius:8px;font-family:var(--mono);font-weight:700;font-size:.85rem;cursor:pointer}
 </style>
 </head>
 <body>
@@ -74,16 +106,62 @@ h1{font-family:var(--serif);font-weight:800;font-size:1.7rem;margin-bottom:.3rem
 
   <div id="gateBox" class="gate" style="display:none"></div>
   <div id="feedBox" style="display:none">
-    <div class="composer">
-      <textarea id="postBody" placeholder="Napíš niečo pre komunitu…" maxlength="4000"></textarea>
-      <div class="composer-row">
-        <input type="file" id="postImage" accept="image/png,image/jpeg,image/webp,image/gif">
-        <button id="postSubmitBtn" onclick="submitPost()">Uverejniť</button>
-      </div>
-      <div class="err" id="postErr"></div>
+    <div class="tabs">
+      <button class="tab" data-tab="feed" onclick="location.hash='feed'">Feed</button>
+      <button class="tab" data-tab="gallery" onclick="location.hash='gallery'">Fotky</button>
+      <button class="tab" data-tab="myprofile" onclick="location.hash='myprofile'">Môj profil</button>
     </div>
-    <div id="postsList"></div>
-    <button class="load-more" id="loadMoreBtn" style="display:none" onclick="loadPosts(false)">Načítať staršie</button>
+
+    <div id="viewFeed">
+      <div class="composer">
+        <textarea id="postBody" placeholder="Napíš niečo pre komunitu…" maxlength="4000"></textarea>
+        <div class="composer-row">
+          <input type="file" id="postImage" accept="image/png,image/jpeg,image/webp,image/gif">
+          <button id="postSubmitBtn" onclick="submitPost()">Uverejniť</button>
+        </div>
+        <div class="err" id="postErr"></div>
+      </div>
+      <div id="postsList"></div>
+      <button class="load-more" id="loadMoreBtn" style="display:none" onclick="loadPosts(false)">Načítať staršie</button>
+    </div>
+
+    <div id="viewGallery" style="display:none">
+      <div class="composer">
+        <input type="file" id="photoImage" accept="image/png,image/jpeg,image/webp,image/gif">
+        <input type="text" id="photoCaption" placeholder="Popis (nepovinné)" maxlength="300">
+        <div class="composer-row">
+          <span></span>
+          <button id="photoSubmitBtn" onclick="submitPhoto()">Nahrať fotku</button>
+        </div>
+        <div class="err" id="photoErr"></div>
+      </div>
+      <div class="gallery-grid" id="galleryGrid"></div>
+      <button class="load-more" id="galleryLoadMoreBtn" style="display:none" onclick="loadGallery(false)">Načítať staršie</button>
+    </div>
+
+    <div id="viewProfile" style="display:none">
+      <div id="profileHeader"></div>
+      <div id="profilePostsList"></div>
+    </div>
+
+    <div id="viewMyProfile" style="display:none">
+      <div class="profile-edit-card">
+        <div class="avatar-upload">
+          <div id="myAvatarPreview"></div>
+          <div>
+            <input type="file" id="avatarFile" accept="image/png,image/jpeg,image/webp,image/gif"><br>
+            <button onclick="submitAvatar()">Zmeniť fotku</button>
+          </div>
+        </div>
+        <label for="myDisplayName">Zobrazované meno</label>
+        <input type="text" id="myDisplayName" maxlength="60">
+        <label for="myBio">O mne</label>
+        <textarea id="myBio" maxlength="300"></textarea>
+        <button onclick="saveProfile()">Uložiť</button>
+        <div class="err" id="myProfileErr"></div>
+        <div class="ok" id="myProfileOk"></div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -94,11 +172,20 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let currentUser = null;
 let authToken = null;
+let accessGranted = false;
 let lastPostId = null;
-let commentsOpen = {};
+let galleryLastId = null;
+let feedLoadedOnce = false;
 
 function esc(s) { return String(s == null ? '' : s).replace(/[<>&]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c])); }
 function fmtTime(iso) { return new Date(iso).toLocaleString('sk-SK'); }
+
+function avatarHtml(url, name, size) {
+  size = size || 32;
+  if (url) return `<img class="avatar" src="${url}" style="width:${size}px;height:${size}px">`;
+  const initial = (name || '?').trim().charAt(0).toUpperCase() || '?';
+  return `<span class="avatar avatar-fallback" style="width:${size}px;height:${size}px;font-size:${Math.round(size * 0.42)}px">${esc(initial)}</span>`;
+}
 
 async function apiFetch(url, opts) {
   opts = opts || {};
@@ -119,12 +206,14 @@ async function init() {
     authToken = session ? session.access_token : null;
     await checkAccess();
   });
+  window.addEventListener('hashchange', () => { if (accessGranted) route(); });
 }
 
 async function checkAccess() {
   const gate = document.getElementById('gateBox');
   const feed = document.getElementById('feedBox');
   if (!currentUser) {
+    accessGranted = false;
     gate.style.display = 'block';
     feed.style.display = 'none';
     gate.innerHTML = '<p>Prihlás sa cez Google, aby sme overili, či máš do komunity prístup.</p><button onclick="signIn()">Prihlásiť sa cez Google</button>';
@@ -133,10 +222,12 @@ async function checkAccess() {
   try {
     const status = await apiFetch('/api/community/access-status');
     if (status.hasAccess) {
+      accessGranted = true;
       gate.style.display = 'none';
       feed.style.display = 'block';
-      loadPosts(true);
+      route();
     } else {
+      accessGranted = false;
       gate.style.display = 'block';
       feed.style.display = 'none';
       const msg = status.banned
@@ -145,6 +236,7 @@ async function checkAccess() {
       gate.innerHTML = '<p>' + msg + '</p>' + (status.banned ? '' : '<a class="cta" href="/webinar">Zaregistrovať sa na webinár →</a>');
     }
   } catch (e) {
+    accessGranted = false;
     gate.style.display = 'block';
     feed.style.display = 'none';
     gate.innerHTML = '<p>Nepodarilo sa overiť prístup. Skús to znova neskôr.</p>';
@@ -155,6 +247,32 @@ function signIn() {
   _supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.href } });
 }
 
+// ─────────────────────── ROUTER (feed / gallery / profil / môj profil) ───────────────────────
+const VIEWS = { feed: 'viewFeed', gallery: 'viewGallery', profile: 'viewProfile', myprofile: 'viewMyProfile' };
+
+function parseHash() {
+  const h = location.hash.replace(/^#/, '');
+  if (h.indexOf('profile/') === 0) return { view: 'profile', email: decodeURIComponent(h.slice(8)) };
+  if (h === 'gallery') return { view: 'gallery' };
+  if (h === 'myprofile') return { view: 'myprofile' };
+  return { view: 'feed' };
+}
+
+function openProfile(email) {
+  location.hash = 'profile/' + encodeURIComponent(email);
+}
+
+function route() {
+  const r = parseHash();
+  Object.keys(VIEWS).forEach(v => { document.getElementById(VIEWS[v]).style.display = (v === r.view) ? 'block' : 'none'; });
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === r.view || (r.view === 'profile' && t.dataset.tab === 'feed' && false)));
+  if (r.view === 'feed') { if (!feedLoadedOnce) { loadPosts(true); feedLoadedOnce = true; } }
+  else if (r.view === 'gallery') loadGallery(true);
+  else if (r.view === 'profile') loadProfile(r.email);
+  else if (r.view === 'myprofile') loadMyProfile();
+}
+
+// ─────────────────────────────────────── FEED ───────────────────────────────────────
 async function loadPosts(reset) {
   if (reset) { lastPostId = null; document.getElementById('postsList').innerHTML = ''; }
   try {
@@ -174,7 +292,10 @@ async function loadPosts(reset) {
 function renderPost(p) {
   return `<div class="post" id="post-${p.id}">
     <div class="meta">
-      <span class="author">${esc(p.authorName || p.authorEmail)}</span>
+      <button class="author-link" data-email="${esc(p.authorEmail)}" onclick="openProfile(this.dataset.email)">
+        ${avatarHtml(p.authorAvatarUrl, p.authorName || p.authorEmail)}
+        <span class="author">${esc(p.authorName || p.authorEmail)}</span>
+      </button>
       <span class="time">${fmtTime(p.createdAt)}</span>
     </div>
     ${p.body ? `<div class="body">${esc(p.body)}</div>` : ''}
@@ -218,10 +339,14 @@ async function toggleComments(postId) {
 function renderComment(postId, c) {
   return `<div class="comment" id="comment-${c.id}">
     <div class="cbody">
-      <span class="cauthor">${esc(c.authorName || c.authorEmail)}</span>${esc(c.body)}
-      <button class="${c.liked ? 'liked' : ''}" style="margin-left:.5rem" onclick="toggleLike('comment', ${c.id}, this)">♥ <span class="like-count">${c.likeCount}</span></button>
+      ${avatarHtml(c.authorAvatarUrl, c.authorName || c.authorEmail, 24)}
+      <div class="ctext">
+        <button class="cauthor" data-email="${esc(c.authorEmail)}" onclick="openProfile(this.dataset.email)">${esc(c.authorName || c.authorEmail)}</button>
+        ${esc(c.body)}
+        <button class="${c.liked ? 'liked' : ''}" style="margin-left:.5rem;background:none;border:none;color:var(--text2);cursor:pointer;font-size:.78rem" onclick="toggleLike('comment', ${c.id}, this)">♥ <span class="like-count">${c.likeCount}</span></button>
+      </div>
     </div>
-    ${c.authorEmail === (currentUser && currentUser.email) ? '<button onclick="deleteComment(' + postId + ',' + c.id + ')">zmazať</button>' : ''}
+    ${c.authorEmail === (currentUser && currentUser.email) ? '<button class="del" onclick="deleteComment(' + postId + ',' + c.id + ')">zmazať</button>' : ''}
   </div>`;
 }
 
@@ -271,7 +396,8 @@ async function deletePost(id) {
   if (!confirm('Zmazať tento príspevok?')) return;
   try {
     await apiFetch('/api/community/posts/' + id, { method: 'DELETE' });
-    document.getElementById('post-' + id).remove();
+    const el = document.getElementById('post-' + id);
+    if (el) el.remove();
   } catch (e) {}
 }
 
@@ -284,6 +410,137 @@ async function deleteComment(postId, id) {
     const cc = post.querySelector('.comment-count');
     cc.textContent = Math.max(0, parseInt(cc.textContent, 10) - 1);
   } catch (e) {}
+}
+
+// ─────────────────────────────────────── GALÉRIA ───────────────────────────────────────
+async function loadGallery(reset) {
+  if (reset) { galleryLastId = null; document.getElementById('galleryGrid').innerHTML = ''; }
+  try {
+    const url = '/api/community/photos' + (galleryLastId ? '?before=' + galleryLastId : '');
+    const data = await apiFetch(url);
+    const grid = document.getElementById('galleryGrid');
+    if (!data.photos.length && reset) {
+      grid.innerHTML = '<div class="empty">Zatiaľ tu nie sú žiadne fotky.</div>';
+    } else {
+      data.photos.forEach(p => grid.insertAdjacentHTML('beforeend', renderGalleryPhoto(p)));
+      if (data.photos.length) galleryLastId = data.photos[data.photos.length - 1].id;
+    }
+    document.getElementById('galleryLoadMoreBtn').style.display = data.hasMore ? 'block' : 'none';
+  } catch (e) {}
+}
+
+function renderGalleryPhoto(p) {
+  return `<div class="gallery-item" id="photo-${p.id}">
+    <img src="${p.imageUrl}" loading="lazy" title="${esc(p.caption || p.authorName || p.authorEmail)}">
+    ${p.authorEmail === (currentUser && currentUser.email) ? `<button class="del" onclick="deletePhoto(${p.id})">✕</button>` : ''}
+  </div>`;
+}
+
+async function submitPhoto() {
+  const fileInput = document.getElementById('photoImage');
+  const caption = document.getElementById('photoCaption').value.trim();
+  const errEl = document.getElementById('photoErr');
+  const btn = document.getElementById('photoSubmitBtn');
+  errEl.textContent = '';
+  if (!fileInput.files.length) { errEl.textContent = 'Vyber fotku.'; return; }
+  btn.disabled = true;
+  try {
+    const fd = new FormData();
+    fd.append('image', fileInput.files[0]);
+    if (caption) fd.append('caption', caption);
+    const data = await apiFetch('/api/community/photos', { method: 'POST', body: fd });
+    fileInput.value = '';
+    document.getElementById('photoCaption').value = '';
+    const grid = document.getElementById('galleryGrid');
+    const emptyEl = grid.querySelector('.empty');
+    if (emptyEl) emptyEl.remove();
+    grid.insertAdjacentHTML('afterbegin', renderGalleryPhoto(data.photo));
+  } catch (e) {
+    errEl.textContent = e.message;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function deletePhoto(id) {
+  if (!confirm('Zmazať túto fotku?')) return;
+  try {
+    await apiFetch('/api/community/photos/' + id, { method: 'DELETE' });
+    const el = document.getElementById('photo-' + id);
+    if (el) el.remove();
+  } catch (e) {}
+}
+
+// ─────────────────────────────────────── PROFIL (cudzí) ───────────────────────────────────────
+async function loadProfile(email) {
+  const header = document.getElementById('profileHeader');
+  const list = document.getElementById('profilePostsList');
+  header.innerHTML = '<div class="empty">načítavam…</div>';
+  list.innerHTML = '';
+  try {
+    const data = await apiFetch('/api/community/profile/' + encodeURIComponent(email));
+    const p = data.profile;
+    const isMe = currentUser && (currentUser.email || '').toLowerCase() === email.toLowerCase();
+    header.innerHTML = `
+      <div class="profile-card">
+        ${avatarHtml(p.avatarUrl, p.displayName || p.email, 72)}
+        <div class="profile-info">
+          <div class="profile-name">${esc(p.displayName || p.email)}</div>
+          ${p.bio ? `<div class="profile-bio">${esc(p.bio)}</div>` : ''}
+          ${isMe ? '<button class="profile-edit-btn" onclick="location.hash=\'myprofile\'">Upraviť profil</button>' : ''}
+        </div>
+      </div>`;
+    list.innerHTML = data.posts.length ? data.posts.map(renderPost).join('') : '<div class="empty">Zatiaľ žiadne príspevky.</div>';
+  } catch (e) {
+    header.innerHTML = '<div class="empty">Chyba načítania profilu.</div>';
+  }
+}
+
+// ─────────────────────────────────────── MÔJ PROFIL (editácia) ───────────────────────────────────────
+async function loadMyProfile() {
+  try {
+    const data = await apiFetch('/api/community/profile/me');
+    const p = data.profile;
+    document.getElementById('myDisplayName').value = p.displayName || '';
+    document.getElementById('myBio').value = p.bio || '';
+    document.getElementById('myAvatarPreview').innerHTML = avatarHtml(p.avatarUrl, p.displayName || p.email, 72);
+  } catch (e) {}
+}
+
+async function saveProfile() {
+  const displayName = document.getElementById('myDisplayName').value.trim();
+  const bio = document.getElementById('myBio').value.trim();
+  const errEl = document.getElementById('myProfileErr');
+  const okEl = document.getElementById('myProfileOk');
+  errEl.textContent = ''; okEl.textContent = '';
+  try {
+    await apiFetch('/api/community/profile', {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ displayName, bio })
+    });
+    okEl.textContent = 'Uložené.';
+    setTimeout(() => { okEl.textContent = ''; }, 2500);
+  } catch (e) {
+    errEl.textContent = e.message;
+  }
+}
+
+async function submitAvatar() {
+  const fileInput = document.getElementById('avatarFile');
+  const errEl = document.getElementById('myProfileErr');
+  const okEl = document.getElementById('myProfileOk');
+  errEl.textContent = ''; okEl.textContent = '';
+  if (!fileInput.files.length) { errEl.textContent = 'Vyber fotku.'; return; }
+  try {
+    const fd = new FormData();
+    fd.append('avatar', fileInput.files[0]);
+    const data = await apiFetch('/api/community/profile/avatar', { method: 'POST', body: fd });
+    document.getElementById('myAvatarPreview').innerHTML = avatarHtml(data.avatarUrl, '', 72);
+    fileInput.value = '';
+    okEl.textContent = 'Fotka zmenená.';
+    setTimeout(() => { okEl.textContent = ''; }, 2500);
+  } catch (e) {
+    errEl.textContent = e.message;
+  }
 }
 
 init();

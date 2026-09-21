@@ -62,4 +62,16 @@ router.post('/api/dash/community/users/:email/revoke-access', requireDashAuth, a
   res.json({ ok: true });
 });
 
+router.get('/api/dash/community/photos', requireDashAuth, async (req, res) => {
+  const { data: photos, error } = await mainDb.from('community_photos').select('*').is('deleted_at', null).order('created_at', { ascending: false }).limit(200);
+  if (error) { console.error('community route error:', error); return res.status(500).json({ error: error.message }); }
+  res.json({ photos });
+});
+
+router.delete('/api/dash/community/photos/:id', requireDashAuth, async (req, res) => {
+  const { error } = await mainDb.from('community_photos').update({ deleted_at: new Date().toISOString() }).eq('id', req.params.id);
+  if (error) { console.error('community route error:', error); return res.status(500).json({ error: error.message }); }
+  res.json({ ok: true });
+});
+
 module.exports = router;

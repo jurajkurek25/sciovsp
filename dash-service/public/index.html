@@ -1252,16 +1252,24 @@ async function renderCommunity() {
         <tbody id="communityPostsTbody"><tr><td class="muted" colspan="5">načítavam…</td></tr></tbody>
       </table>
     </div>
-    <div class="table-wrap">
+    <div class="table-wrap" style="margin-bottom:1.25rem">
       <div class="pagehead" style="margin-bottom:.5rem"><h3 style="margin:0">Komentáre</h3></div>
       <table>
         <thead><tr><th>Čas</th><th>Autor</th><th>Text</th><th></th></tr></thead>
         <tbody id="communityCommentsTbody"><tr><td class="muted" colspan="4">načítavam…</td></tr></tbody>
       </table>
+    </div>
+    <div class="table-wrap">
+      <div class="pagehead" style="margin-bottom:.5rem"><h3 style="margin:0">Fotogaléria</h3></div>
+      <table>
+        <thead><tr><th>Čas</th><th>Autor</th><th>Fotka</th><th>Popis</th><th></th></tr></thead>
+        <tbody id="communityPhotosTbody"><tr><td class="muted" colspan="5">načítavam…</td></tr></tbody>
+      </table>
     </div>`;
   $('#main').innerHTML = html;
   loadCommunityPosts();
   loadCommunityComments();
+  loadCommunityPhotos();
 }
 
 async function loadCommunityPosts() {
@@ -1295,6 +1303,29 @@ async function loadCommunityComments() {
   } catch (e) {
     tbody.innerHTML = '<tr><td class="muted" colspan="4">Chyba načítania.</td></tr>';
   }
+}
+
+async function loadCommunityPhotos() {
+  const tbody = document.getElementById('communityPhotosTbody');
+  if (!tbody) return;
+  try {
+    const d = await api('/api/dash/community/photos');
+    tbody.innerHTML = (d.photos || []).map(p => `<tr>
+      <td class="muted">${new Date(p.created_at).toLocaleString('sk-SK')}</td>
+      <td>${p.author_name ? p.author_name + ' — ' : ''}${p.author_email}</td>
+      <td><a href="${p.image_url}" target="_blank">obrázok</a></td>
+      <td>${(p.caption || '').replace(/</g, '&lt;')}</td>
+      <td><button class="btn secondary" data-photo-id="${p.id}" onclick="communityDeletePhoto(this)">Zmazať</button></td>
+    </tr>`).join('') || '<tr><td class="muted" colspan="5">Zatiaľ žiadne fotky.</td></tr>';
+  } catch (e) {
+    tbody.innerHTML = '<tr><td class="muted" colspan="5">Chyba načítania.</td></tr>';
+  }
+}
+
+async function communityDeletePhoto(btn) {
+  if (!confirm('Zmazať túto fotku?')) return;
+  try { await api(`/api/dash/community/photos/${btn.dataset.photoId}`, { method: 'DELETE' }); loadCommunityPhotos(); }
+  catch (e) { alert('Chyba pri mazaní.'); }
 }
 
 async function communityDeletePost(btn) {

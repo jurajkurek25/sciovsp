@@ -1,10 +1,12 @@
-// Študentská komunita — feed príspevkov, komentáre, lajky. Prístup je
-// výhradne pre tých, čo majú users.community_access_until v budúcnosti
-// (nastavuje sa VÝHRADNE vo webhooku pri webinárovej ceste nákupu Premium/
-// Elite na /ponuka — pozri main-app-patches/118-community-backend.js).
-// Moderácia (mazanie cudzích príspevkov, blokovanie používateľov) žije v
-// dash-service, nie tu — tento súbor rieši len bežné používateľské akcie
-// (vlastný príspevok/komentár, lajky, čítanie feedu).
+// Študentská komunita — feed príspevkov, komentáre, lajky, profily
+// (vlastná fotka + bio) a samostatná fotogaléria. Prístup je výhradne pre
+// tých, čo majú users.community_access_until v budúcnosti (nastavuje sa
+// VÝHRADNE vo webhooku pri webinárovej ceste nákupu Premium/Elite na
+// /ponuka — pozri main-app-patches/118-community-backend.js).
+// Moderácia (mazanie cudzích príspevkov/fotiek, blokovanie používateľov,
+// manuálne udelenie prístupu) žije v dash-service, nie tu — tento súbor
+// rieši len bežné používateľské akcie (vlastný príspevok/komentár/fotka,
+// lajky, profil, čítanie feedu).
 //
 // module.exports je funkcia, ktorú voláš ako require('./routes/community')(app)
 // — rovnaký vzor ako routes/maintenanceMode.js a routes/autoseoWebhook.js
@@ -14,6 +16,7 @@
 
 const { createClient } = require('@supabase/supabase-js');
 const multer = require('multer');
+const crypto = require('crypto');
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
@@ -24,6 +27,9 @@ const IMAGE_MIME = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'];
 
 const POST_BODY_MAX = 4000;
 const COMMENT_BODY_MAX = 1000;
+const DISPLAY_NAME_MAX = 60;
+const BIO_MAX = 300;
+const CAPTION_MAX = 300;
 const PAGE_SIZE = 20;
 
 async function verifyToken(req) {
@@ -61,15 +67,32 @@ async function requireCommunityAccess(req, res, next) {
   if (access.banned) return res.status(403).json({ error: 'Prístup do komunity je zablokovaný.' });
   if (!access.hasAccess) return res.status(403).json({ error: 'Komunita je dostupná len pre členov, ktorí si Premium/Elite kúpili cez ponuku po webinári.' });
   req.communityEmail = email;
-  req.communityName = user.user_metadata?.full_name || user.user_metadata?.name || null;
+  const googleName = user.user_metadata?.full_name || user.user_metadata?.name || null;
+  const { data: myProfile } = await supabase.from('community_profiles').select('display_name, avatar_url').eq('email', email).maybeSingle();
+  req.communityName = (myProfile && myProfile.display_name) || googleName;
+  req.communityAvatarUrl = myProfile?.avatar_url || null;
   next();
 }
 
-function serializePost(row, likedPostIds, commentCounts) {
+// Dávkové načítanie profilov (meno/fotka) pre množinu emailov — používa sa
+// pri vypisovaní feedu/komentárov/galérie, aby sa vždy zobrazil aktuálny
+// profil, nie len snímka mena uložená pri vytvorení príspevku.
+async function getProfilesMap(emails) {
+  const unique = [...new Set(emails)];
+  if (!unique.length) return {};
+  const { data } = await supabase.from('community_profiles').select('email, display_name, avatar_url').in('email', unique);
+  const map = {};
+  for (const p of data || []) map[p.email] = p;
+  return map;
+}
+
+function serializePost(row, likedPostIds, commentCounts, profiles) {
+  const profile = profiles?.[row.author_email];
   return {
     id: row.id,
     authorEmail: row.author_email,
-    authorName: row.author_name,
+    authorName: (profile && profile.display_name) || row.author_name,
+    authorAvatarUrl: profile?.avatar_url || null,
     body: row.body,
     imageUrl: row.image_url,
     createdAt: row.created_at,
@@ -77,6 +100,41 @@ function serializePost(row, likedPostIds, commentCounts) {
     liked: likedPostIds.has(row.id),
     commentCount: commentCounts[row.id] || 0
   };
+}
+
+function serializeComment(row, likedCommentIds, likeCounts, profiles) {
+  const profile = profiles?.[row.author_email];
+  return {
+    id: row.id,
+    authorEmail: row.author_email,
+    authorName: (profile && profile.display_name) || row.author_name,
+    authorAvatarUrl: profile?.avatar_url || null,
+    body: row.body,
+    createdAt: row.created_at,
+    likeCount: likeCounts[row.id] || 0,
+    liked: likedCommentIds.has(row.id)
+  };
+}
+
+function serializePhoto(row, profiles) {
+  const profile = profiles?.[row.author_email];
+  return {
+    id: row.id,
+    authorEmail: row.author_email,
+    authorName: (profile && profile.display_name) || row.author_name,
+    authorAvatarUrl: profile?.avatar_url || null,
+    imageUrl: row.image_url,
+    caption: row.caption,
+    createdAt: row.created_at
+  };
+}
+
+async function uploadToCommunityBucket(prefix, email, file) {
+  const path = prefix + '/' + email.replace(/[^a-z0-9]/gi, '_') + '/' + Date.now() + '-' + crypto.randomBytes(4).toString('hex');
+  const { error } = await supabase.storage.from('community').upload(path, file.buffer, { contentType: file.mimetype });
+  if (error) throw error;
+  const { data: pub } = supabase.storage.from('community').getPublicUrl(path);
+  return pub.publicUrl;
 }
 
 module.exports = function registerCommunity(app) {
@@ -111,8 +169,9 @@ module.exports = function registerCommunity(app) {
         for (const c of comments || []) commentCounts[c.post_id] = (commentCounts[c.post_id] || 0) + 1;
         for (const l of allLikes || []) likeCounts[l.post_id] = (likeCounts[l.post_id] || 0) + 1;
       }
+      const profiles = await getProfilesMap((posts || []).map(p => p.author_email));
       res.json({
-        posts: (posts || []).map(p => serializePost({ ...p, like_count: likeCounts[p.id] || 0 }, likedPostIds, commentCounts)),
+        posts: (posts || []).map(p => serializePost({ ...p, like_count: likeCounts[p.id] || 0 }, likedPostIds, commentCounts, profiles)),
         hasMore: (posts || []).length === PAGE_SIZE
       });
     } catch (e) {
@@ -132,11 +191,7 @@ module.exports = function registerCommunity(app) {
         let imageUrl = null;
         if (req.file) {
           if (!IMAGE_MIME.includes(req.file.mimetype)) return res.status(400).json({ error: 'Povolené sú len PNG, JPG, WEBP alebo GIF.' });
-          const path = req.communityEmail.replace(/[^a-z0-9]/gi, '_') + '/' + Date.now() + '-' + require('crypto').randomBytes(4).toString('hex');
-          const { error: upErr } = await supabase.storage.from('community').upload(path, req.file.buffer, { contentType: req.file.mimetype });
-          if (upErr) throw upErr;
-          const { data: pub } = supabase.storage.from('community').getPublicUrl(path);
-          imageUrl = pub.publicUrl;
+          imageUrl = await uploadToCommunityBucket('posts', req.communityEmail, req.file);
         }
         const { data: post, error } = await supabase.from('community_posts').insert({
           author_email: req.communityEmail,
@@ -145,7 +200,8 @@ module.exports = function registerCommunity(app) {
           image_url: imageUrl
         }).select().single();
         if (error) throw error;
-        res.json({ post: serializePost({ ...post, like_count: 0 }, new Set(), {}) });
+        const profiles = { [req.communityEmail]: { display_name: req.communityName, avatar_url: req.communityAvatarUrl } };
+        res.json({ post: serializePost({ ...post, like_count: 0 }, new Set(), {}, profiles) });
       } catch (e) {
         console.error('community post create error:', e.message);
         res.status(500).json({ error: 'Chyba pri ukladaní príspevku.' });
@@ -184,12 +240,8 @@ module.exports = function registerCommunity(app) {
         likedCommentIds = new Set((myLikes || []).map(l => l.comment_id));
         for (const l of allLikes || []) likeCounts[l.comment_id] = (likeCounts[l.comment_id] || 0) + 1;
       }
-      res.json({
-        comments: (comments || []).map(c => ({
-          id: c.id, authorEmail: c.author_email, authorName: c.author_name, body: c.body, createdAt: c.created_at,
-          likeCount: likeCounts[c.id] || 0, liked: likedCommentIds.has(c.id)
-        }))
-      });
+      const profiles = await getProfilesMap((comments || []).map(c => c.author_email));
+      res.json({ comments: (comments || []).map(c => serializeComment(c, likedCommentIds, likeCounts, profiles)) });
     } catch (e) {
       console.error('community comments list error:', e.message);
       res.status(500).json({ error: 'Chyba servera.' });
@@ -209,7 +261,8 @@ module.exports = function registerCommunity(app) {
         post_id: postId, author_email: req.communityEmail, author_name: req.communityName, body
       }).select().single();
       if (error) throw error;
-      res.json({ comment: { id: comment.id, authorEmail: comment.author_email, authorName: comment.author_name, body: comment.body, createdAt: comment.created_at, likeCount: 0, liked: false } });
+      const profiles = { [req.communityEmail]: { display_name: req.communityName, avatar_url: req.communityAvatarUrl } };
+      res.json({ comment: serializeComment(comment, new Set(), {}, profiles) });
     } catch (e) {
       console.error('community comment create error:', e.message);
       res.status(500).json({ error: 'Chyba pri ukladaní komentára.' });
@@ -268,6 +321,154 @@ module.exports = function registerCommunity(app) {
       res.json({ ok: true });
     } catch (e) {
       console.error('community comment unlike error:', e.message);
+      res.status(500).json({ error: 'Chyba servera.' });
+    }
+  });
+
+  // GET /api/community/profile/me — vlastný profil, na predvyplnenie
+  // editačného formulára (surové dáta vrátane bio, bez cudzích príspevkov).
+  app.get('/api/community/profile/me', requireCommunityAccess, async (req, res) => {
+    try {
+      const { data: profileRow } = await supabase.from('community_profiles').select('*').eq('email', req.communityEmail).maybeSingle();
+      res.json({
+        profile: {
+          email: req.communityEmail,
+          displayName: (profileRow && profileRow.display_name) || req.communityName,
+          avatarUrl: profileRow?.avatar_url || null,
+          bio: profileRow?.bio || null
+        }
+      });
+    } catch (e) {
+      console.error('community profile me error:', e.message);
+      res.status(500).json({ error: 'Chyba servera.' });
+    }
+  });
+
+  // PUT /api/community/profile — upraviť vlastné zobrazované meno a bio.
+  app.put('/api/community/profile', requireCommunityAccess, async (req, res) => {
+    const displayName = (req.body?.displayName || '').toString().trim().slice(0, DISPLAY_NAME_MAX) || null;
+    const bio = (req.body?.bio || '').toString().trim().slice(0, BIO_MAX) || null;
+    try {
+      const { error } = await supabase.from('community_profiles')
+        .upsert({ email: req.communityEmail, display_name: displayName, bio, updated_at: new Date().toISOString() }, { onConflict: 'email' });
+      if (error) throw error;
+      res.json({ ok: true });
+    } catch (e) {
+      console.error('community profile update error:', e.message);
+      res.status(500).json({ error: 'Chyba pri ukladaní profilu.' });
+    }
+  });
+
+  // POST /api/community/profile/avatar — nahratie vlastnej profilovej fotky.
+  app.post('/api/community/profile/avatar', requireCommunityAccess, (req, res) => {
+    upload.single('avatar')(req, res, async (err) => {
+      if (err) return res.status(400).json({ error: 'Obrázok sa nepodarilo nahrať (max 5 MB).' });
+      if (!req.file) return res.status(400).json({ error: 'Chýba obrázok.' });
+      if (!IMAGE_MIME.includes(req.file.mimetype)) return res.status(400).json({ error: 'Povolené sú len PNG, JPG, WEBP alebo GIF.' });
+      try {
+        const avatarUrl = await uploadToCommunityBucket('avatars', req.communityEmail, req.file);
+        const { error } = await supabase.from('community_profiles')
+          .upsert({ email: req.communityEmail, avatar_url: avatarUrl, updated_at: new Date().toISOString() }, { onConflict: 'email' });
+        if (error) throw error;
+        res.json({ ok: true, avatarUrl });
+      } catch (e) {
+        console.error('community avatar upload error:', e.message);
+        res.status(500).json({ error: 'Chyba pri nahrávaní fotky.' });
+      }
+    });
+  });
+
+  // GET /api/community/profile/:email — profil niekoho iného v rámci
+  // komunity (fotka, bio) + jeho posledné príspevky.
+  app.get('/api/community/profile/:email', requireCommunityAccess, async (req, res) => {
+    try {
+      const email = (req.params.email || '').toString().trim().toLowerCase();
+      const { data: profileRow } = await supabase.from('community_profiles').select('*').eq('email', email).maybeSingle();
+      const { data: posts, error } = await supabase.from('community_posts').select('*').eq('author_email', email).is('deleted_at', null).order('created_at', { ascending: false }).limit(PAGE_SIZE);
+      if (error) throw error;
+      const postIds = (posts || []).map(p => p.id);
+      let likedPostIds = new Set();
+      let commentCounts = {};
+      let likeCounts = {};
+      if (postIds.length) {
+        const [{ data: myLikes }, { data: comments }, { data: allLikes }] = await Promise.all([
+          supabase.from('community_likes').select('post_id').eq('author_email', req.communityEmail).in('post_id', postIds),
+          supabase.from('community_comments').select('post_id').is('deleted_at', null).in('post_id', postIds),
+          supabase.from('community_likes').select('post_id').in('post_id', postIds)
+        ]);
+        likedPostIds = new Set((myLikes || []).map(l => l.post_id));
+        for (const c of comments || []) commentCounts[c.post_id] = (commentCounts[c.post_id] || 0) + 1;
+        for (const l of allLikes || []) likeCounts[l.post_id] = (likeCounts[l.post_id] || 0) + 1;
+      }
+      const profiles = profileRow ? { [email]: profileRow } : {};
+      res.json({
+        profile: {
+          email,
+          displayName: profileRow?.display_name || null,
+          avatarUrl: profileRow?.avatar_url || null,
+          bio: profileRow?.bio || null
+        },
+        posts: (posts || []).map(p => serializePost({ ...p, like_count: likeCounts[p.id] || 0 }, likedPostIds, commentCounts, profiles))
+      });
+    } catch (e) {
+      console.error('community profile view error:', e.message);
+      res.status(500).json({ error: 'Chyba servera.' });
+    }
+  });
+
+  // GET /api/community/photos?before=<id>&author=<email> — galéria,
+  // nezávislá od feedu príspevkov. Bez author= vracia celú komunitnú
+  // galériu, s author= len fotky danej osoby (profilová stránka).
+  app.get('/api/community/photos', requireCommunityAccess, async (req, res) => {
+    try {
+      let query = supabase.from('community_photos').select('*').is('deleted_at', null).order('created_at', { ascending: false }).limit(PAGE_SIZE);
+      const before = parseInt(req.query.before, 10);
+      if (before) query = query.lt('id', before);
+      const author = (req.query.author || '').toString().trim().toLowerCase();
+      if (author) query = query.eq('author_email', author);
+      const { data: photos, error } = await query;
+      if (error) throw error;
+      const profiles = await getProfilesMap((photos || []).map(p => p.author_email));
+      res.json({ photos: (photos || []).map(p => serializePhoto(p, profiles)), hasMore: (photos || []).length === PAGE_SIZE });
+    } catch (e) {
+      console.error('community photos list error:', e.message);
+      res.status(500).json({ error: 'Chyba servera.' });
+    }
+  });
+
+  // POST /api/community/photos — nahratie fotky do galérie (samostatnej
+  // od príspevkov vo feede), voliteľne s popisom.
+  app.post('/api/community/photos', requireCommunityAccess, (req, res) => {
+    upload.single('image')(req, res, async (err) => {
+      if (err) return res.status(400).json({ error: 'Obrázok sa nepodarilo nahrať (max 5 MB).' });
+      if (!req.file) return res.status(400).json({ error: 'Chýba obrázok.' });
+      if (!IMAGE_MIME.includes(req.file.mimetype)) return res.status(400).json({ error: 'Povolené sú len PNG, JPG, WEBP alebo GIF.' });
+      const caption = (req.body?.caption || '').toString().trim().slice(0, CAPTION_MAX) || null;
+      try {
+        const imageUrl = await uploadToCommunityBucket('gallery', req.communityEmail, req.file);
+        const { data: photo, error } = await supabase.from('community_photos').insert({
+          author_email: req.communityEmail, author_name: req.communityName, image_url: imageUrl, caption
+        }).select().single();
+        if (error) throw error;
+        const profiles = { [req.communityEmail]: { display_name: req.communityName, avatar_url: req.communityAvatarUrl } };
+        res.json({ photo: serializePhoto(photo, profiles) });
+      } catch (e) {
+        console.error('community photo upload error:', e.message);
+        res.status(500).json({ error: 'Chyba pri nahrávaní fotky.' });
+      }
+    });
+  });
+
+  // DELETE /api/community/photos/:id — len autor (moderácia je v dash-service).
+  app.delete('/api/community/photos/:id', requireCommunityAccess, async (req, res) => {
+    try {
+      const { data: photo } = await supabase.from('community_photos').select('author_email').eq('id', req.params.id).maybeSingle();
+      if (!photo) return res.status(404).json({ error: 'Fotka sa nenašla.' });
+      if (photo.author_email !== req.communityEmail) return res.status(403).json({ error: 'Môžeš zmazať len vlastnú fotku.' });
+      await supabase.from('community_photos').update({ deleted_at: new Date().toISOString() }).eq('id', req.params.id);
+      res.json({ ok: true });
+    } catch (e) {
+      console.error('community photo delete error:', e.message);
       res.status(500).json({ error: 'Chyba servera.' });
     }
   });
