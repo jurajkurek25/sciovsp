@@ -478,6 +478,7 @@ module.exports = function registerCommunity(app) {
 
   // PUT /api/community/profile — upraviť vlastné zobrazované meno, username a bio.
   app.put('/api/community/profile', requireCommunityAccess, async (req, res) => {
+    console.error('DEBUG profile PUT RAW:', { contentType: req.headers['content-type'], rawBody: JSON.stringify(req.body), bodyType: typeof req.body });
     const displayName = (req.body?.displayName || '').toString().trim().slice(0, DISPLAY_NAME_MAX) || null;
     const bio = (req.body?.bio || '').toString().trim().slice(0, BIO_MAX) || null;
     const usernameRaw = req.body?.username;
