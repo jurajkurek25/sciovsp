@@ -107,7 +107,7 @@ async function requireCommunityAccess(req, res, next) {
   req.communityEmail = email;
   const googleName = user.user_metadata?.full_name || user.user_metadata?.name || null;
   const myProfile = await ensureProfile(email);
-  req.communityName = myProfile.display_name || googleName;
+  req.communityName = myProfile.display_name || myProfile.username || googleName;
   req.communityAvatarUrl = myProfile.avatar_url || null;
   req.communityUsername = myProfile.username;
   next();
