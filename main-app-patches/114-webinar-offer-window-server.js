@@ -26,6 +26,20 @@
 //    vytvorenia checkout session, kedy sa pricingMode reálne vynútil).
 const fs = require('fs');
 const FILE = 'server.js';
+
+// Atomický lock proti dvojitému súbežnému behu tohto patchu (napr. pri
+// omylom dvakrát odoslanom deploy príkaze) — bez neho by dva procesy mohli
+// obidva prejsť idempotency kontrolou nižšie (žiadny z nich by ešte
+// nezapísal) a ich zápisy do server.js by sa mohli prekryť/poškodiť súbor.
+const LOCK = FILE + '.114-lock';
+try {
+  fs.writeFileSync(LOCK, String(process.pid), { flag: 'wx' });
+} catch (e) {
+  console.error('Iny beh tohto patchu prave prebieha alebo neuprataný LOCK zo zlyhaneho behu (' + LOCK + ' existuje). Zmaz LOCK subor rucne, ak si si isty ze nic nebezi, a skus znova. Nic som nezmenil.');
+  process.exit(1);
+}
+process.on('exit', () => { try { fs.unlinkSync(LOCK); } catch (e) {} });
+
 const src = fs.readFileSync(FILE, 'utf8');
 
 if (src.includes('getWebinarOfferStatus')) {
