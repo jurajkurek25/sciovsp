@@ -17,6 +17,7 @@
 const { createClient } = require('@supabase/supabase-js');
 const multer = require('multer');
 const crypto = require('crypto');
+const { pickStartingModel, markModelGood, getNewestUntriedModel, tierOf } = require('./lib/resolveModel');
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
@@ -30,6 +31,8 @@ const COMMENT_BODY_MAX = 1000;
 const DISPLAY_NAME_MAX = 60;
 const BIO_MAX = 300;
 const CAPTION_MAX = 300;
+const DM_BODY_MAX = 2000;
+const DM_REPORT_MAX_MESSAGES = 60;
 const PAGE_SIZE = 20;
 
 async function verifyToken(req) {
@@ -135,6 +138,87 @@ async function uploadToCommunityBucket(prefix, email, file) {
   if (error) throw error;
   const { data: pub } = supabase.storage.from('community').getPublicUrl(path);
   return pub.publicUrl;
+}
+
+// ── Súkromné 1:1 správy ──────────────────────────────────────────────────
+// Obsah konverzácie je úplne súkromný (žiadny dash-service endpoint ho
+// nevystavuje). Jediná moderácia je AI posúdenie pri nahlásení — pozri
+// callClaudeJudge nižšie a db/migrate_community_dm.sql.
+
+function conversationPair(a, b) { return a < b ? [a, b] : [b, a]; }
+
+async function getOrCreateConversation(emailA, emailB) {
+  const [userA, userB] = conversationPair(emailA, emailB);
+  const { data: existing } = await supabase.from('community_conversations').select('*').eq('user_a', userA).eq('user_b', userB).maybeSingle();
+  if (existing) return existing;
+  const { data: created, error } = await supabase.from('community_conversations').insert({ user_a: userA, user_b: userB }).select().single();
+  if (error) {
+    // Race: druhý paralelný request medzitým vytvoril tú istú konverzáciu
+    // (unique constraint na user_a/user_b) — skús ju načítať znova namiesto
+    // toho, aby sa celá požiadavka zbytočne zamietla chybou.
+    const { data: retry } = await supabase.from('community_conversations').select('*').eq('user_a', userA).eq('user_b', userB).maybeSingle();
+    if (retry) return retry;
+    throw error;
+  }
+  return created;
+}
+
+function buildReportPrompt(messages, reporterEmail, reportedEmail) {
+  const transcript = messages.map(m => `[${m.sender_email === reportedEmail ? 'NAHLÁSENÝ' : 'DRUHÁ STRANA'}] ${m.body}`).join('\n');
+  return `Si moderátor súkromných správ v komunite pre študentov, ktorí sa pripravujú na vysokoškolské prijímacie testy (typicky 17-20 rokov, blízko plnoletosti alebo už plnoletí). Účastník ${reporterEmail} nahlásil konverzáciu s účastníkom ${reportedEmail}. Tvoja jediná úloha: posúdiť, či správanie účastníka označeného v prepise ako "NAHLÁSENÝ" porušuje bežné pravidlá slušného správania — obťažovanie, vyhrážky, sexuálne obťažovanie, nenávistné prejavy, nátlak, spam/podvod, alebo inak jasne neprijateľné správanie.
+
+Bežná nezhoda, hádka bez urážok, alebo len nepríjemná no civilná konverzácia NIE JE dôvod na zablokovanie — ľudia majú právo sa nezhodnúť alebo si niekoho nevšímať. Ak si nie si istý/á a v prepise nie je jasný, konkrétny dôkaz porušenia, rozhodni v prospech "dismiss".
+
+Prepis konverzácie (chronologicky, najnovšie posledné):
+${transcript}
+
+Odpovedz VÝHRADNE validným JSON objektom, žiadny iný text:
+{"verdict": "block" alebo "dismiss", "reasoning": "jedna až dve vety po slovensky, prečo"}`;
+}
+
+async function callClaudeJudge(prompt) {
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return { verdict: 'dismiss', reasoning: 'AI kontrola nie je nakonfigurovaná (chýba ANTHROPIC_API_KEY) — nahlásenie nebolo možné automaticky posúdiť.' };
+  }
+  let response;
+  const triedModels = [];
+  let model = pickStartingModel();
+  try {
+    for (let attempt = 0; attempt < 4; attempt++) {
+      triedModels.push(model);
+      response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-api-key': process.env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
+        body: JSON.stringify({ model, max_tokens: 300, messages: [{ role: 'user', content: prompt }] })
+      });
+      if (response.ok) { markModelGood(model); break; }
+      const errText = await response.text();
+      const looksLikeModelIssue = response.status === 404 || /model/i.test(errText);
+      if (!looksLikeModelIssue) {
+        console.error('community report AI error:', errText);
+        return { verdict: 'dismiss', reasoning: 'AI kontrola zlyhala — nahlásenie nebolo možné automaticky posúdiť.' };
+      }
+      const next = await getNewestUntriedModel(triedModels, tierOf(model));
+      if (!next) {
+        console.error('community report AI error:', errText);
+        return { verdict: 'dismiss', reasoning: 'AI kontrola zlyhala — nahlásenie nebolo možné automaticky posúdiť.' };
+      }
+      model = next;
+    }
+  } catch (e) {
+    console.error('community report AI call error:', e.message);
+    return { verdict: 'dismiss', reasoning: 'AI kontrola zlyhala — nahlásenie nebolo možné automaticky posúdiť.' };
+  }
+  const data = await response.json();
+  const text = (data.content || []).map(b => b.text || '').join('').trim();
+  try {
+    const match = text.match(/\{[\s\S]*\}/);
+    const parsed = JSON.parse(match ? match[0] : text);
+    return { verdict: parsed.verdict === 'block' ? 'block' : 'dismiss', reasoning: (parsed.reasoning || '').toString().slice(0, 500) };
+  } catch (e) {
+    console.error('community report AI parse error:', text);
+    return { verdict: 'dismiss', reasoning: 'Odpoveď AI kontroly sa nepodarila spracovať.' };
+  }
 }
 
 module.exports = function registerCommunity(app) {
@@ -539,6 +623,121 @@ module.exports = function registerCommunity(app) {
     } catch (e) {
       console.error('community leaderboard error:', e.message);
       res.status(500).json({ error: 'Chyba servera.' });
+    }
+  });
+
+  // GET /api/community/conversations — zoznam mojich konverzácií, najnovšie
+  // hore, s náhľadom poslednej správy.
+  app.get('/api/community/conversations', requireCommunityAccess, async (req, res) => {
+    try {
+      const { data: convos, error } = await supabase.from('community_conversations')
+        .select('*')
+        .or(`user_a.eq.${req.communityEmail},user_b.eq.${req.communityEmail}`)
+        .order('last_message_at', { ascending: false })
+        .limit(50);
+      if (error) throw error;
+      const otherEmails = (convos || []).map(c => c.user_a === req.communityEmail ? c.user_b : c.user_a);
+      const profiles = await getProfilesMap(otherEmails);
+      const convoIds = (convos || []).map(c => c.id);
+      const lastMessages = {};
+      if (convoIds.length) {
+        const { data: msgs } = await supabase.from('community_messages').select('conversation_id, body, created_at').in('conversation_id', convoIds).order('created_at', { ascending: false });
+        for (const m of msgs || []) { if (!lastMessages[m.conversation_id]) lastMessages[m.conversation_id] = m; }
+      }
+      res.json({
+        conversations: (convos || []).map(c => {
+          const otherEmail = c.user_a === req.communityEmail ? c.user_b : c.user_a;
+          const profile = profiles[otherEmail];
+          const last = lastMessages[c.id];
+          return {
+            otherEmail,
+            otherName: (profile && profile.display_name) || otherEmail,
+            otherAvatarUrl: profile?.avatar_url || null,
+            lastMessage: last ? last.body : null,
+            lastMessageAt: c.last_message_at
+          };
+        })
+      });
+    } catch (e) {
+      console.error('community conversations list error:', e.message);
+      res.status(500).json({ error: 'Chyba servera.' });
+    }
+  });
+
+  // GET /api/community/conversations/:email — otvorí (alebo vytvorí)
+  // konverzáciu s daným účastníkom a vráti históriu správ.
+  app.get('/api/community/conversations/:email', requireCommunityAccess, async (req, res) => {
+    try {
+      const otherEmail = (req.params.email || '').toString().trim().toLowerCase();
+      if (!otherEmail || otherEmail === req.communityEmail) return res.status(400).json({ error: 'Neplatný príjemca.' });
+      const otherAccess = await getCommunityAccess(otherEmail);
+      if (!otherAccess.hasAccess) return res.status(404).json({ error: 'Tento používateľ nie je v komunite.' });
+      const convo = await getOrCreateConversation(req.communityEmail, otherEmail);
+      const { data: messages, error } = await supabase.from('community_messages').select('*').eq('conversation_id', convo.id).order('created_at', { ascending: true }).limit(200);
+      if (error) throw error;
+      const { data: profileRow } = await supabase.from('community_profiles').select('display_name, avatar_url').eq('email', otherEmail).maybeSingle();
+      res.json({
+        conversationId: convo.id,
+        other: { email: otherEmail, displayName: (profileRow && profileRow.display_name) || otherEmail, avatarUrl: profileRow?.avatar_url || null },
+        messages: (messages || []).map(m => ({ id: m.id, senderEmail: m.sender_email, body: m.body, createdAt: m.created_at }))
+      });
+    } catch (e) {
+      console.error('community conversation view error:', e.message);
+      res.status(500).json({ error: 'Chyba servera.' });
+    }
+  });
+
+  // POST /api/community/conversations/:email/messages — odoslanie správy.
+  app.post('/api/community/conversations/:email/messages', requireCommunityAccess, async (req, res) => {
+    const body = (req.body?.body || '').toString().trim();
+    if (!body) return res.status(400).json({ error: 'Správa nemôže byť prázdna.' });
+    if (body.length > DM_BODY_MAX) return res.status(400).json({ error: 'Správa je príliš dlhá.' });
+    try {
+      const otherEmail = (req.params.email || '').toString().trim().toLowerCase();
+      if (!otherEmail || otherEmail === req.communityEmail) return res.status(400).json({ error: 'Neplatný príjemca.' });
+      const otherAccess = await getCommunityAccess(otherEmail);
+      if (!otherAccess.hasAccess) return res.status(404).json({ error: 'Tento používateľ nie je v komunite.' });
+      const convo = await getOrCreateConversation(req.communityEmail, otherEmail);
+      const { data: message, error } = await supabase.from('community_messages').insert({
+        conversation_id: convo.id, sender_email: req.communityEmail, body
+      }).select().single();
+      if (error) throw error;
+      await supabase.from('community_conversations').update({ last_message_at: message.created_at }).eq('id', convo.id);
+      res.json({ message: { id: message.id, senderEmail: message.sender_email, body: message.body, createdAt: message.created_at } });
+    } catch (e) {
+      console.error('community message send error:', e.message);
+      res.status(500).json({ error: 'Chyba pri odosielaní správy.' });
+    }
+  });
+
+  // POST /api/community/conversations/:id/report — nahlásenie konverzácie.
+  // AI (Claude) posúdi poslednú históriu a buď nahláseného zablokuje
+  // (rovnaké pole ako manuálny ban v dash-service), alebo nahlásenie
+  // zamietne ako neopodstatnené. Obsah správ sa nikam mimo tejto funkcie
+  // nezobrazuje — do audit tabuľky ide len verdikt a krátke zdôvodnenie.
+  app.post('/api/community/conversations/:id/report', requireCommunityAccess, async (req, res) => {
+    try {
+      const convoId = parseInt(req.params.id, 10);
+      const { data: convo } = await supabase.from('community_conversations').select('*').eq('id', convoId).maybeSingle();
+      if (!convo) return res.status(404).json({ error: 'Konverzácia sa nenašla.' });
+      if (convo.user_a !== req.communityEmail && convo.user_b !== req.communityEmail) return res.status(403).json({ error: 'Nemáš prístup k tejto konverzácii.' });
+      const reportedEmail = convo.user_a === req.communityEmail ? convo.user_b : convo.user_a;
+      const { data: messages, error } = await supabase.from('community_messages').select('sender_email, body, created_at').eq('conversation_id', convoId).order('created_at', { ascending: false }).limit(DM_REPORT_MAX_MESSAGES);
+      if (error) throw error;
+      const ordered = (messages || []).slice().reverse();
+      if (!ordered.length) return res.status(400).json({ error: 'Konverzácia je prázdna, nie je čo nahlásiť.' });
+      const verdict = await callClaudeJudge(buildReportPrompt(ordered, req.communityEmail, reportedEmail));
+      await supabase.from('community_message_reports').insert({
+        conversation_id: convoId, reporter_email: req.communityEmail, reported_email: reportedEmail,
+        ai_verdict: verdict.verdict, ai_reasoning: verdict.reasoning
+      });
+      if (verdict.verdict === 'block') {
+        await supabase.from('users').update({ community_banned_at: new Date().toISOString() }).eq('email', reportedEmail);
+      }
+      res.json({ verdict: verdict.verdict, reasoning: verdict.reasoning });
+    } catch (e) {
+      console.error('community report error:', e.message);
+      res.status(500).json({ error: 'Chyba pri spracovaní nahlásenia.' });
     }
   });
 };
