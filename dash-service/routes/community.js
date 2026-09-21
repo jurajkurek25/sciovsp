@@ -9,37 +9,37 @@ const { supabase: mainDb } = require('../lib/db-main');
 
 router.get('/api/dash/community/posts', requireDashAuth, async (req, res) => {
   const { data: posts, error } = await mainDb.from('community_posts').select('*').is('deleted_at', null).order('created_at', { ascending: false }).limit(200);
-  if (error) return res.status(500).json({ error: error.message });
+  if (error) { console.error('community route error:', error); return res.status(500).json({ error: error.message }); }
   res.json({ posts });
 });
 
 router.delete('/api/dash/community/posts/:id', requireDashAuth, async (req, res) => {
   const { error } = await mainDb.from('community_posts').update({ deleted_at: new Date().toISOString() }).eq('id', req.params.id);
-  if (error) return res.status(500).json({ error: error.message });
+  if (error) { console.error('community route error:', error); return res.status(500).json({ error: error.message }); }
   res.json({ ok: true });
 });
 
 router.get('/api/dash/community/comments', requireDashAuth, async (req, res) => {
   const { data: comments, error } = await mainDb.from('community_comments').select('*').is('deleted_at', null).order('created_at', { ascending: false }).limit(200);
-  if (error) return res.status(500).json({ error: error.message });
+  if (error) { console.error('community route error:', error); return res.status(500).json({ error: error.message }); }
   res.json({ comments });
 });
 
 router.delete('/api/dash/community/comments/:id', requireDashAuth, async (req, res) => {
   const { error } = await mainDb.from('community_comments').update({ deleted_at: new Date().toISOString() }).eq('id', req.params.id);
-  if (error) return res.status(500).json({ error: error.message });
+  if (error) { console.error('community route error:', error); return res.status(500).json({ error: error.message }); }
   res.json({ ok: true });
 });
 
 router.post('/api/dash/community/users/:email/ban', requireDashAuth, async (req, res) => {
   const { error } = await mainDb.from('users').update({ community_banned_at: new Date().toISOString() }).eq('email', req.params.email);
-  if (error) return res.status(500).json({ error: error.message });
+  if (error) { console.error('community route error:', error); return res.status(500).json({ error: error.message }); }
   res.json({ ok: true });
 });
 
 router.post('/api/dash/community/users/:email/unban', requireDashAuth, async (req, res) => {
   const { error } = await mainDb.from('users').update({ community_banned_at: null }).eq('email', req.params.email);
-  if (error) return res.status(500).json({ error: error.message });
+  if (error) { console.error('community route error:', error); return res.status(500).json({ error: error.message }); }
   res.json({ ok: true });
 });
 
@@ -52,13 +52,13 @@ router.post('/api/dash/community/users/:email/grant-access', requireDashAuth, as
   if (!days || days < 1 || days > 3650) return res.status(400).json({ error: 'Neplatný počet dní (1-3650).' });
   const accessUntil = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
   const { error } = await mainDb.from('users').update({ community_access_until: accessUntil }).eq('email', req.params.email);
-  if (error) return res.status(500).json({ error: error.message });
+  if (error) { console.error('community route error:', error); return res.status(500).json({ error: error.message }); }
   res.json({ ok: true, accessUntil });
 });
 
 router.post('/api/dash/community/users/:email/revoke-access', requireDashAuth, async (req, res) => {
   const { error } = await mainDb.from('users').update({ community_access_until: null }).eq('email', req.params.email);
-  if (error) return res.status(500).json({ error: error.message });
+  if (error) { console.error('community route error:', error); return res.status(500).json({ error: error.message }); }
   res.json({ ok: true });
 });
 
