@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Komunita — SP Tréner</title>
+<meta name="description" content="Súkromná komunita pre členov, ktorí si Premium/Elite kúpili cez ponuku po webinári.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Manrope:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#14100D; --ink2:#1c1610; --ink3:#241c14;
+  --text:#F6F1E7; --text2:rgba(246,241,231,.66); --text3:rgba(246,241,231,.4);
+  --ignite:#c8ff00; --signal:#7c5cff;
+  --border:rgba(246,241,231,.14); --border2:rgba(246,241,231,.24);
+  --serif:'Bricolage Grotesque',Georgia,serif; --mono:'Space Mono',monospace; --sans:'Manrope',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--ink);color:var(--text);font-family:var(--sans);line-height:1.6;min-height:100vh}
+a{color:var(--signal)}
+button{font-family:inherit}
+textarea,input{font-family:inherit}
+
+.top{max-width:640px;margin:0 auto;padding:1.5rem 1.2rem 0;display:flex;justify-content:space-between;align-items:center}
+.top a.back{font-family:var(--mono);font-weight:500;font-size:.82rem;color:var(--ignite);text-decoration:none}
+.wrap{max-width:640px;margin:0 auto;padding:1.6rem 1.2rem 5rem}
+h1{font-family:var(--serif);font-weight:800;font-size:1.7rem;margin-bottom:.3rem}
+.sub{color:var(--text2);font-size:.92rem;margin-bottom:1.6rem}
+
+.gate{max-width:420px;margin:3rem auto;background:var(--ink3);border:1px solid var(--border2);border-radius:12px;padding:1.8rem;text-align:center}
+.gate p{color:var(--text2);font-size:.92rem;margin-bottom:1.2rem}
+.gate a.cta,.gate button{display:inline-block;padding:.85rem 1.5rem;background:var(--ignite);color:var(--ink);border:none;border-radius:8px;text-decoration:none;font-family:var(--mono);font-weight:700;font-size:.88rem;cursor:pointer}
+
+.composer{background:var(--ink3);border:1px solid var(--border2);border-radius:12px;padding:1.2rem;margin-bottom:1.6rem}
+.composer textarea{width:100%;min-height:80px;background:var(--ink2);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:.7rem .8rem;font-size:.9rem;resize:vertical}
+.composer-row{display:flex;justify-content:space-between;align-items:center;margin-top:.7rem;gap:.6rem}
+.composer input[type=file]{font-size:.75rem;color:var(--text3);max-width:160px}
+.composer button{padding:.6rem 1.2rem;background:var(--ignite);color:var(--ink);border:none;border-radius:8px;font-family:var(--mono);font-weight:700;font-size:.82rem;cursor:pointer}
+.composer button:disabled{opacity:.5;cursor:default}
+.composer .err{color:#ff8a8a;font-size:.8rem;margin-top:.5rem}
+
+.post{background:var(--ink3);border:1px solid var(--border2);border-radius:12px;padding:1.2rem;margin-bottom:1rem}
+.post .meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem}
+.post .author{font-family:var(--mono);font-size:.8rem;color:var(--ignite)}
+.post .time{font-family:var(--mono);font-size:.72rem;color:var(--text3)}
+.post .body{font-size:.92rem;white-space:pre-wrap;word-break:break-word}
+.post img.attach{max-width:100%;border-radius:8px;margin-top:.7rem;display:block}
+.post .actions{display:flex;gap:1rem;margin-top:.8rem;font-family:var(--mono);font-size:.78rem}
+.post .actions button{background:none;border:none;color:var(--text2);cursor:pointer;padding:0}
+.post .actions button.liked{color:var(--ignite)}
+.post .actions button.danger{color:#ff8a8a}
+
+.comments{margin-top:.9rem;padding-top:.9rem;border-top:1px solid var(--border)}
+.comment{display:flex;justify-content:space-between;gap:.6rem;font-size:.85rem;margin-bottom:.6rem}
+.comment .cbody{flex:1}
+.comment .cauthor{font-family:var(--mono);font-size:.72rem;color:var(--ignite);display:block;margin-bottom:.15rem}
+.comment button{background:none;border:none;color:var(--text3);cursor:pointer;font-family:var(--mono);font-size:.72rem;flex-shrink:0}
+.comment-form{display:flex;gap:.5rem;margin-top:.6rem}
+.comment-form input{flex:1;background:var(--ink2);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:.5rem .7rem;font-size:.82rem}
+.comment-form button{background:var(--signal);color:#fff;border:none;border-radius:8px;padding:.5rem .9rem;font-size:.78rem;cursor:pointer}
+
+.load-more{display:block;margin:1rem auto 0;background:var(--ink3);border:1px solid var(--border2);color:var(--text2);padding:.7rem 1.4rem;border-radius:8px;cursor:pointer;font-family:var(--mono);font-size:.82rem}
+.empty{color:var(--text3);text-align:center;padding:2rem 0;font-size:.9rem}
+</style>
+</head>
+<body>
+<div class="top">
+  <a class="back" href="/app.html">← SP Tréner</a>
+</div>
+<div class="wrap">
+  <h1>Komunita</h1>
+  <p class="sub">Súkromný priestor len pre členov, ktorí si Premium/Elite kúpili cez ponuku po webinári.</p>
+
+  <div id="gateBox" class="gate" style="display:none"></div>
+  <div id="feedBox" style="display:none">
+    <div class="composer">
+      <textarea id="postBody" placeholder="Napíš niečo pre komunitu…" maxlength="4000"></textarea>
+      <div class="composer-row">
+        <input type="file" id="postImage" accept="image/png,image/jpeg,image/webp,image/gif">
+        <button id="postSubmitBtn" onclick="submitPost()">Uverejniť</button>
+      </div>
+      <div class="err" id="postErr"></div>
+    </div>
+    <div id="postsList"></div>
+    <button class="load-more" id="loadMoreBtn" style="display:none" onclick="loadPosts(false)">Načítať staršie</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://zrnqiwareacqyndwchsv.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpybnFpd2FyZWFjcXluZHdjaHN2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMDA3NTAsImV4cCI6MjA4OTc3Njc1MH0.iUne23YDxp12Iwxdk9U8MfcV0NTBtrNf9OgsjQdiADk';
+const _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let currentUser = null;
+let authToken = null;
+let lastPostId = null;
+let commentsOpen = {};
+
+function esc(s) { return String(s == null ? '' : s).replace(/[<>&]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c])); }
+function fmtTime(iso) { return new Date(iso).toLocaleString('sk-SK'); }
+
+async function apiFetch(url, opts) {
+  opts = opts || {};
+  opts.headers = Object.assign({}, opts.headers, authToken ? { Authorization: 'Bearer ' + authToken } : {});
+  const res = await fetch(url, opts);
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Chyba servera.');
+  return data;
+}
+
+async function init() {
+  const { data: { session } } = await _supabase.auth.getSession();
+  currentUser = session ? session.user : null;
+  authToken = session ? session.access_token : null;
+  await checkAccess();
+  _supabase.auth.onAuthStateChange(async (event, session) => {
+    currentUser = session ? session.user : null;
+    authToken = session ? session.access_token : null;
+    await checkAccess();
+  });
+}
+
+async function checkAccess() {
+  const gate = document.getElementById('gateBox');
+  const feed = document.getElementById('feedBox');
+  if (!currentUser) {
+    gate.style.display = 'block';
+    feed.style.display = 'none';
+    gate.innerHTML = '<p>Prihlás sa cez Google, aby sme overili, či máš do komunity prístup.</p><button onclick="signIn()">Prihlásiť sa cez Google</button>';
+    return;
+  }
+  try {
+    const status = await apiFetch('/api/community/access-status');
+    if (status.hasAccess) {
+      gate.style.display = 'none';
+      feed.style.display = 'block';
+      loadPosts(true);
+    } else {
+      gate.style.display = 'block';
+      feed.style.display = 'none';
+      const msg = status.banned
+        ? 'Prístup do komunity ti bol zablokovaný.'
+        : 'Komunita je exkluzívny bonus pre členov, ktorí si Premium alebo Elite kúpili cez ponuku po webinári. Ak si to ešte nemáš, pozri si najbližší termín.';
+      gate.innerHTML = '<p>' + msg + '</p>' + (status.banned ? '' : '<a class="cta" href="/webinar">Zaregistrovať sa na webinár →</a>');
+    }
+  } catch (e) {
+    gate.style.display = 'block';
+    feed.style.display = 'none';
+    gate.innerHTML = '<p>Nepodarilo sa overiť prístup. Skús to znova neskôr.</p>';
+  }
+}
+
+function signIn() {
+  _supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.href } });
+}
+
+async function loadPosts(reset) {
+  if (reset) { lastPostId = null; document.getElementById('postsList').innerHTML = ''; }
+  try {
+    const url = '/api/community/posts' + (lastPostId ? '?before=' + lastPostId : '');
+    const data = await apiFetch(url);
+    const list = document.getElementById('postsList');
+    if (!data.posts.length && reset) {
+      list.innerHTML = '<div class="empty">Zatiaľ tu nikto nič nenapísal. Buď prvý/á →</div>';
+    } else {
+      data.posts.forEach(p => { list.insertAdjacentHTML('beforeend', renderPost(p)); });
+      if (data.posts.length) lastPostId = data.posts[data.posts.length - 1].id;
+    }
+    document.getElementById('loadMoreBtn').style.display = data.hasMore ? 'block' : 'none';
+  } catch (e) {}
+}
+
+function renderPost(p) {
+  return `<div class="post" id="post-${p.id}">
+    <div class="meta">
+      <span class="author">${esc(p.authorName || p.authorEmail)}</span>
+      <span class="time">${fmtTime(p.createdAt)}</span>
+    </div>
+    ${p.body ? `<div class="body">${esc(p.body)}</div>` : ''}
+    ${p.imageUrl ? `<img class="attach" src="${p.imageUrl}" loading="lazy">` : ''}
+    <div class="actions">
+      <button class="${p.liked ? 'liked' : ''}" onclick="toggleLike('post', ${p.id}, this)">♥ <span class="like-count">${p.likeCount}</span></button>
+      <button onclick="toggleComments(${p.id})">💬 <span class="comment-count">${p.commentCount}</span></button>
+      ${p.authorEmail === (currentUser && currentUser.email) ? '<button class="danger" onclick="deletePost(' + p.id + ')">Zmazať</button>' : ''}
+    </div>
+    <div class="comments" id="comments-${p.id}" style="display:none"></div>
+  </div>`;
+}
+
+async function toggleLike(kind, id, btn) {
+  const liked = btn.classList.contains('liked');
+  const countEl = btn.querySelector('.like-count');
+  try {
+    await apiFetch(`/api/community/${kind === 'post' ? 'posts' : 'comments'}/${id}/like`, { method: liked ? 'DELETE' : 'POST' });
+    btn.classList.toggle('liked', !liked);
+    if (countEl) countEl.textContent = Math.max(0, parseInt(countEl.textContent, 10) + (liked ? -1 : 1));
+  } catch (e) {}
+}
+
+async function toggleComments(postId) {
+  const box = document.getElementById('comments-' + postId);
+  if (box.style.display === 'block') { box.style.display = 'none'; return; }
+  box.style.display = 'block';
+  box.innerHTML = '<div class="empty">načítavam…</div>';
+  try {
+    const data = await apiFetch('/api/community/posts/' + postId + '/comments');
+    box.innerHTML = data.comments.map(c => renderComment(postId, c)).join('') + `
+      <div class="comment-form">
+        <input type="text" id="commentInput-${postId}" placeholder="Napíš komentár…" maxlength="1000">
+        <button onclick="submitComment(${postId})">Odoslať</button>
+      </div>`;
+  } catch (e) {
+    box.innerHTML = '<div class="empty">Chyba načítania.</div>';
+  }
+}
+
+function renderComment(postId, c) {
+  return `<div class="comment" id="comment-${c.id}">
+    <div class="cbody">
+      <span class="cauthor">${esc(c.authorName || c.authorEmail)}</span>${esc(c.body)}
+      <button class="${c.liked ? 'liked' : ''}" style="margin-left:.5rem" onclick="toggleLike('comment', ${c.id}, this)">♥ <span class="like-count">${c.likeCount}</span></button>
+    </div>
+    ${c.authorEmail === (currentUser && currentUser.email) ? '<button onclick="deleteComment(' + postId + ',' + c.id + ')">zmazať</button>' : ''}
+  </div>`;
+}
+
+async function submitPost() {
+  const body = document.getElementById('postBody').value.trim();
+  const fileInput = document.getElementById('postImage');
+  const errEl = document.getElementById('postErr');
+  const btn = document.getElementById('postSubmitBtn');
+  errEl.textContent = '';
+  if (!body && !fileInput.files.length) { errEl.textContent = 'Napíš niečo alebo pridaj obrázok.'; return; }
+  btn.disabled = true;
+  try {
+    const fd = new FormData();
+    fd.append('body', body);
+    if (fileInput.files.length) fd.append('image', fileInput.files[0]);
+    const data = await apiFetch('/api/community/posts', { method: 'POST', body: fd });
+    document.getElementById('postBody').value = '';
+    fileInput.value = '';
+    document.getElementById('postsList').insertAdjacentHTML('afterbegin', renderPost(data.post));
+  } catch (e) {
+    errEl.textContent = e.message;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function submitComment(postId) {
+  const input = document.getElementById('commentInput-' + postId);
+  const body = input.value.trim();
+  if (!body) return;
+  try {
+    const data = await apiFetch('/api/community/posts/' + postId + '/comments', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ body })
+    });
+    input.value = '';
+    const box = document.getElementById('comments-' + postId);
+    box.insertAdjacentHTML('beforeend', renderComment(postId, data.comment));
+    box.querySelector('.comment-form').remove();
+    box.insertAdjacentHTML('beforeend', `<div class="comment-form"><input type="text" id="commentInput-${postId}" placeholder="Napíš komentár…" maxlength="1000"><button onclick="submitComment(${postId})">Odoslať</button></div>`);
+    const post = document.getElementById('post-' + postId);
+    const cc = post.querySelector('.comment-count');
+    cc.textContent = parseInt(cc.textContent, 10) + 1;
+  } catch (e) {}
+}
+
+async function deletePost(id) {
+  if (!confirm('Zmazať tento príspevok?')) return;
+  try {
+    await apiFetch('/api/community/posts/' + id, { method: 'DELETE' });
+    document.getElementById('post-' + id).remove();
+  } catch (e) {}
+}
+
+async function deleteComment(postId, id) {
+  if (!confirm('Zmazať tento komentár?')) return;
+  try {
+    await apiFetch('/api/community/comments/' + id, { method: 'DELETE' });
+    document.getElementById('comment-' + id).remove();
+    const post = document.getElementById('post-' + postId);
+    const cc = post.querySelector('.comment-count');
+    cc.textContent = Math.max(0, parseInt(cc.textContent, 10) - 1);
+  } catch (e) {}
+}
+
+init();
+</script>
+</body>
+</html>
