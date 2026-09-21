@@ -1234,6 +1234,17 @@ async function renderCommunity() {
       </div>
       <div id="communityBanMsg" class="muted" style="margin-top:.5rem"></div>
     </div>
+    <div class="table-wrap" style="margin-bottom:1.25rem;padding:1rem">
+      <div class="pagehead" style="margin-bottom:.5rem"><h3 style="margin:0">Udeliť / odobrať prístup manuálne</h3></div>
+      <div class="muted" style="margin-bottom:.5rem">Mimo bežnej cesty (webinárový nákup Premium/Elite) — napr. pre partnera alebo testera.</div>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center">
+        <input id="communityAccessEmail" type="email" placeholder="email@example.com" style="flex:1;min-width:220px">
+        <input id="communityAccessDays" type="number" placeholder="dní" value="30" min="1" max="3650" style="width:90px">
+        <button class="btn" onclick="communityGrantAccess()">Udeliť prístup</button>
+        <button class="btn secondary" onclick="communityRevokeAccess()">Odobrať prístup</button>
+      </div>
+      <div id="communityAccessMsg" class="muted" style="margin-top:.5rem"></div>
+    </div>
     <div class="table-wrap" style="margin-bottom:1.25rem">
       <div class="pagehead" style="margin-bottom:.5rem"><h3 style="margin:0">Príspevky</h3></div>
       <table>
@@ -1311,6 +1322,25 @@ async function communityUnban() {
   const msg = document.getElementById('communityBanMsg');
   if (!email) { msg.textContent = 'Zadaj email.'; return; }
   try { await api(`/api/dash/community/users/${encodeURIComponent(email)}/unban`, { method: 'POST' }); msg.textContent = 'Odblokované: ' + email; }
+  catch (e) { msg.textContent = 'Chyba.'; }
+}
+
+async function communityGrantAccess() {
+  const email = document.getElementById('communityAccessEmail').value.trim();
+  const days = document.getElementById('communityAccessDays').value.trim();
+  const msg = document.getElementById('communityAccessMsg');
+  if (!email) { msg.textContent = 'Zadaj email.'; return; }
+  try {
+    const d = await api(`/api/dash/community/users/${encodeURIComponent(email)}/grant-access`, { method: 'POST', body: JSON.stringify({ days: parseInt(days, 10) }) });
+    msg.textContent = 'Prístup udelený do: ' + new Date(d.accessUntil).toLocaleString('sk-SK');
+  } catch (e) { msg.textContent = 'Chyba.'; }
+}
+
+async function communityRevokeAccess() {
+  const email = document.getElementById('communityAccessEmail').value.trim();
+  const msg = document.getElementById('communityAccessMsg');
+  if (!email) { msg.textContent = 'Zadaj email.'; return; }
+  try { await api(`/api/dash/community/users/${encodeURIComponent(email)}/revoke-access`, { method: 'POST' }); msg.textContent = 'Prístup odobraný: ' + email; }
   catch (e) { msg.textContent = 'Chyba.'; }
 }
 

@@ -43,4 +43,23 @@ router.post('/api/dash/community/users/:email/unban', requireDashAuth, async (re
   res.json({ ok: true });
 });
 
+// Manuálne udelenie prístupu do komunity mimo bežnej cesty (webinárový
+// nákup Premium/Elite) — napr. pre partnera, testera, alebo výnimku na
+// požiadanie. Rovnaké pole (users.community_access_until) ako automatická
+// cesta v main-app-patches/118, len nastavené priamo administrátorom.
+router.post('/api/dash/community/users/:email/grant-access', requireDashAuth, async (req, res) => {
+  const days = parseInt(req.body?.days, 10);
+  if (!days || days < 1 || days > 3650) return res.status(400).json({ error: 'Neplatný počet dní (1-3650).' });
+  const accessUntil = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
+  const { error } = await mainDb.from('users').update({ community_access_until: accessUntil }).eq('email', req.params.email);
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ ok: true, accessUntil });
+});
+
+router.post('/api/dash/community/users/:email/revoke-access', requireDashAuth, async (req, res) => {
+  const { error } = await mainDb.from('users').update({ community_access_until: null }).eq('email', req.params.email);
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ ok: true });
+});
+
 module.exports = router;
