@@ -94,6 +94,14 @@ h1{font-family:var(--serif);font-weight:800;font-size:1.7rem;margin-bottom:.3rem
 .avatar-upload input[type=file]{font-size:.75rem;color:var(--text3)}
 .avatar-upload button{padding:.5rem 1rem;background:var(--ink2);border:1px solid var(--border2);color:var(--text);border-radius:8px;font-family:var(--mono);font-size:.76rem;cursor:pointer}
 .profile-edit-card > button{margin-top:1.2rem;padding:.7rem 1.4rem;background:var(--ignite);color:var(--ink);border:none;border-radius:8px;font-family:var(--mono);font-weight:700;font-size:.85rem;cursor:pointer}
+
+.lb-row{display:flex;align-items:center;gap:.8rem;background:var(--ink3);border:1px solid var(--border2);border-radius:10px;padding:.8rem 1rem;margin-bottom:.5rem}
+.lb-rank{font-family:var(--mono);font-weight:700;font-size:.95rem;width:26px;flex-shrink:0;color:var(--text3)}
+.lb-rank.r1{color:#ffd700}.lb-rank.r2{color:#b0b8c1}.lb-rank.r3{color:#cd7f32}
+.lb-info{flex:1;min-width:0}
+.lb-name{font-size:.9rem;font-weight:600}
+.lb-stats{font-family:var(--mono);font-size:.72rem;color:var(--text3);margin-top:.15rem}
+.lb-score{font-family:var(--mono);font-weight:700;color:var(--ignite);font-size:.95rem;flex-shrink:0}
 </style>
 </head>
 <body>
@@ -109,6 +117,7 @@ h1{font-family:var(--serif);font-weight:800;font-size:1.7rem;margin-bottom:.3rem
     <div class="tabs">
       <button class="tab" data-tab="feed" onclick="location.hash='feed'">Feed</button>
       <button class="tab" data-tab="gallery" onclick="location.hash='gallery'">Fotky</button>
+      <button class="tab" data-tab="leaderboard" onclick="location.hash='leaderboard'">Rebríček</button>
       <button class="tab" data-tab="myprofile" onclick="location.hash='myprofile'">Môj profil</button>
     </div>
 
@@ -137,6 +146,11 @@ h1{font-family:var(--serif);font-weight:800;font-size:1.7rem;margin-bottom:.3rem
       </div>
       <div class="gallery-grid" id="galleryGrid"></div>
       <button class="load-more" id="galleryLoadMoreBtn" style="display:none" onclick="loadGallery(false)">Načítať staršie</button>
+    </div>
+
+    <div id="viewLeaderboard" style="display:none">
+      <p class="sub" style="margin-bottom:1rem">Kombinuje zapojenie v komunite (lajky, príspevky, komentáre) s najlepším dosiahnutým percentilom v SP Tréner testoch.</p>
+      <div id="leaderboardList"></div>
     </div>
 
     <div id="viewProfile" style="display:none">
@@ -248,12 +262,13 @@ function signIn() {
 }
 
 // ─────────────────────── ROUTER (feed / gallery / profil / môj profil) ───────────────────────
-const VIEWS = { feed: 'viewFeed', gallery: 'viewGallery', profile: 'viewProfile', myprofile: 'viewMyProfile' };
+const VIEWS = { feed: 'viewFeed', gallery: 'viewGallery', leaderboard: 'viewLeaderboard', profile: 'viewProfile', myprofile: 'viewMyProfile' };
 
 function parseHash() {
   const h = location.hash.replace(/^#/, '');
   if (h.indexOf('profile/') === 0) return { view: 'profile', email: decodeURIComponent(h.slice(8)) };
   if (h === 'gallery') return { view: 'gallery' };
+  if (h === 'leaderboard') return { view: 'leaderboard' };
   if (h === 'myprofile') return { view: 'myprofile' };
   return { view: 'feed' };
 }
@@ -268,6 +283,7 @@ function route() {
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === r.view || (r.view === 'profile' && t.dataset.tab === 'feed' && false)));
   if (r.view === 'feed') { if (!feedLoadedOnce) { loadPosts(true); feedLoadedOnce = true; } }
   else if (r.view === 'gallery') loadGallery(true);
+  else if (r.view === 'leaderboard') loadLeaderboard();
   else if (r.view === 'profile') loadProfile(r.email);
   else if (r.view === 'myprofile') loadMyProfile();
 }
@@ -469,6 +485,37 @@ async function deletePhoto(id) {
     const el = document.getElementById('photo-' + id);
     if (el) el.remove();
   } catch (e) {}
+}
+
+// ─────────────────────────────────────── REBRÍČEK ───────────────────────────────────────
+async function loadLeaderboard() {
+  const list = document.getElementById('leaderboardList');
+  list.innerHTML = '<div class="empty">načítavam…</div>';
+  try {
+    const data = await apiFetch('/api/community/leaderboard');
+    if (!data.leaderboard.length) { list.innerHTML = '<div class="empty">Zatiaľ nie je koho zoradiť.</div>'; return; }
+    list.innerHTML = data.leaderboard.map((row, i) => renderLeaderboardRow(row, i + 1)).join('');
+  } catch (e) {
+    list.innerHTML = '<div class="empty">Chyba načítania.</div>';
+  }
+}
+
+function renderLeaderboardRow(row, rank) {
+  const rankClass = rank === 1 ? 'r1' : rank === 2 ? 'r2' : rank === 3 ? 'r3' : '';
+  const percentileText = row.bestPercentile != null ? 'P' + Math.round(row.bestPercentile) : '—';
+  return `<div class="lb-row">
+    <span class="lb-rank ${rankClass}">${rank}.</span>
+    <button class="author-link" data-email="${esc(row.email)}" onclick="openProfile(this.dataset.email)">
+      ${avatarHtml(row.avatarUrl, row.displayName, 40)}
+    </button>
+    <div class="lb-info">
+      <button class="author-link" data-email="${esc(row.email)}" onclick="openProfile(this.dataset.email)" style="padding:0">
+        <span class="lb-name">${esc(row.displayName)}</span>
+      </button>
+      <div class="lb-stats">${row.postCount} príspevkov · ${row.commentCount} komentárov · ${row.likesReceived} lajkov · ${percentileText} v SP Tréner</div>
+    </div>
+    <span class="lb-score">${row.score}b</span>
+  </div>`;
 }
 
 // ─────────────────────────────────────── PROFIL (cudzí) ───────────────────────────────────────

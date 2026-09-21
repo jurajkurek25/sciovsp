@@ -472,4 +472,73 @@ module.exports = function registerCommunity(app) {
       res.status(500).json({ error: 'Chyba servera.' });
     }
   });
+
+  // GET /api/community/leaderboard — komunitný rebríček, kombinuje
+  // zapojenie v komunite (lajky získané na príspevkoch/komentároch +
+  // počet príspevkov/komentárov) s najlepším dosiahnutým percentilom v SP
+  // Tréner testoch (training_streaks.best_percentile, rovnaký zdroj ako
+  // percentilový tracker/streak v hlavnej appke). Váhy sú zámerne také,
+  // aby ani jeden faktor jednostranne neprevážil: lajky a príspevky sú
+  // hlavný pohon, percentil je bonus (max +20 bodov pri P100).
+  app.get('/api/community/leaderboard', requireCommunityAccess, async (req, res) => {
+    try {
+      const [{ data: posts }, { data: comments }, { data: likes }, { data: profiles }, { data: streaks }] = await Promise.all([
+        supabase.from('community_posts').select('id, author_email, author_name').is('deleted_at', null).limit(5000),
+        supabase.from('community_comments').select('id, author_email, author_name').is('deleted_at', null).limit(5000),
+        supabase.from('community_likes').select('post_id, comment_id').limit(20000),
+        supabase.from('community_profiles').select('email, display_name, avatar_url'),
+        supabase.from('training_streaks').select('email, best_percentile')
+      ]);
+
+      const postAuthor = {};
+      const postCount = {};
+      const nameSeen = {};
+      for (const p of posts || []) {
+        postAuthor[p.id] = p.author_email;
+        postCount[p.author_email] = (postCount[p.author_email] || 0) + 1;
+        if (p.author_name) nameSeen[p.author_email] = p.author_name;
+      }
+      const commentAuthor = {};
+      const commentCount = {};
+      for (const c of comments || []) {
+        commentAuthor[c.id] = c.author_email;
+        commentCount[c.author_email] = (commentCount[c.author_email] || 0) + 1;
+        if (c.author_name) nameSeen[c.author_email] = c.author_name;
+      }
+      const likesReceived = {};
+      for (const l of likes || []) {
+        const author = l.post_id != null ? postAuthor[l.post_id] : commentAuthor[l.comment_id];
+        if (author) likesReceived[author] = (likesReceived[author] || 0) + 1;
+      }
+      const profileMap = {};
+      for (const p of profiles || []) profileMap[p.email] = p;
+      const percentileMap = {};
+      for (const s of streaks || []) percentileMap[s.email] = s.best_percentile;
+
+      const authors = new Set([...Object.keys(postCount), ...Object.keys(commentCount)]);
+      const rows = [...authors].map(email => {
+        const postN = postCount[email] || 0;
+        const commentN = commentCount[email] || 0;
+        const likeN = likesReceived[email] || 0;
+        const percentile = percentileMap[email] != null ? Number(percentileMap[email]) : null;
+        const score = likeN * 2 + postN * 3 + commentN * 1 + (percentile != null ? Math.round(percentile / 5) : 0);
+        const profile = profileMap[email];
+        return {
+          email,
+          displayName: (profile && profile.display_name) || nameSeen[email] || email,
+          avatarUrl: profile?.avatar_url || null,
+          postCount: postN,
+          commentCount: commentN,
+          likesReceived: likeN,
+          bestPercentile: percentile,
+          score
+        };
+      });
+      rows.sort((a, b) => b.score - a.score);
+      res.json({ leaderboard: rows.slice(0, 20) });
+    } catch (e) {
+      console.error('community leaderboard error:', e.message);
+      res.status(500).json({ error: 'Chyba servera.' });
+    }
+  });
 };
