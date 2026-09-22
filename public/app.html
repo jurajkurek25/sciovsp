@@ -383,7 +383,6 @@ h1.title span{font-style:italic;color:var(--purple2)}
 .dash-bar-fill{height:100%;background:linear-gradient(90deg,var(--volt),var(--purple2));border-radius:4px;transition:width .8s}
 .dash-countdown{display:flex;align-items:center;gap:.5rem;font-family:var(--mono);font-size:.78rem;color:var(--text3);margin-top:.75rem;padding-top:.75rem;border-top:1px solid var(--border);flex-wrap:wrap}
 .dash-countdown strong{color:var(--yellow)}
-.dash-set-date{margin-left:auto;font-size:.7rem;color:var(--volt);cursor:pointer;text-decoration:underline}
 /* PART BREAK */
 #partBreak{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;text-align:center;gap:1.5rem}
 ::-webkit-scrollbar{width:5px}
@@ -1175,12 +1174,8 @@ const TRANSLATIONS={
     goalAchieved:'🎯 Cieľ dosiahnutý!',goalMissed:'Cieľ: 85. percentil',
     percentileLabel:'~{p}. percentil',testsRemaining:'⚡ {r} z {l} testov zostáva',
     progressLabel:'Progres k cieľu P85',testsLabel:'Testov',percentileStat:'Percentil',accuracyStat:'Úspešnosť',
-    scioDatePrompt:'Zadaj dátum tvojho testu (formát: RRRR-MM-DD):',
-    scioDateInvalid:'⚠️ Nesprávny formát. Použi RRRR-MM-DD',
-    scioDateSavedCloud:'📅 Dátum uložený naprieč všetkými zariadeniami!',
-    scioDateSavedLocal:'📅 Dátum uložený lokálne.',scioDateSet:'📅 Dátum testu nastavený.',
-    setDateBtn:'⚙ Nastaviť dátum',daysLeft:'{d} dní',today:'Dnes!',
-    toSCIO:'do tvojho testu',setDateCTA:'Nastav dátum testu',
+    daysLeft:'{d} dní',today:'Dnes!',
+    toSCIO:'do tvojho testu',setDateCTA:'Nastav termín testu hore ↑',
     coachLabel:'AI Coach',coachAnalyzing:'Analyzujem tvoje výsledky...',
     coachGenerating:'Generujem odporúčania',coachPersonalized:'Personalizovaná analýza',coachDefault:'Skvelý výkon! Pokračuj v tréningu.',
     promoPrompt:'Zadaj promo kód:',promoSuccess:'✅ Promo kód aktivovaný!',promoInvalid:'⚠️ Neplatný promo kód.',
@@ -1332,12 +1327,8 @@ const TRANSLATIONS={
     goalAchieved:'🎯 Cíl dosažen!',goalMissed:'Cíl: 85. percentil',
     percentileLabel:'~{p}. percentil',testsRemaining:'⚡ {r} z {l} testů zbývá',
     progressLabel:'Postup k cíli P85',testsLabel:'Testů',percentileStat:'Percentil',accuracyStat:'Úspěšnost',
-    scioDatePrompt:'Zadej datum tvého testu (formát: RRRR-MM-DD):',
-    scioDateInvalid:'⚠️ Nesprávný formát. Použij RRRR-MM-DD',
-    scioDateSavedCloud:'📅 Datum uloženo na všech zařízeních!',
-    scioDateSavedLocal:'📅 Datum uloženo lokálně.',scioDateSet:'📅 Datum testu nastaveno.',
-    setDateBtn:'⚙ Nastavit datum',daysLeft:'{d} dní',today:'Dnes!',
-    toSCIO:'do tvého testu',setDateCTA:'Nastav datum testu',
+    daysLeft:'{d} dní',today:'Dnes!',
+    toSCIO:'do tvého testu',setDateCTA:'Nastav termín testu nahoře ↑',
     coachLabel:'AI Coach',coachAnalyzing:'Analyzuji tvoje výsledky...',
     coachGenerating:'Generuji doporučení',coachPersonalized:'Personalizovaná analýza',coachDefault:'Skvělý výkon! Pokračuj v tréninku.',
     promoPrompt:'Zadej promo kód:',promoSuccess:'✅ Promo kód aktivován!',promoInvalid:'⚠️ Neplatný promo kód.',
@@ -3923,14 +3914,14 @@ async function loadAICoach(entry,topicStats){
 // ============================================================
 // DASHBOARD
 // ============================================================
-function renderDashboard(scioDateOverride){
+function renderDashboard(){
   const el=document.getElementById('scio-dashboard');if(!el)return;
   const stats=state.globalStats,history=state.history;
   const lastP=history[0]?.estimated||0,progress=Math.min(Math.round(lastP/85*100),100);
   const accuracy=stats.questions>0?Math.round(stats.correct/stats.questions*100):0;
-  const scioDate=scioDateOverride!==undefined?scioDateOverride:localStorage.getItem('vsp_scio_date');
+  const examDate=localStorage.getItem('vsp_exam_date');
   let countdownHtml='';
-  if(scioDate){const days=Math.ceil((new Date(scioDate)-new Date())/(1000*60*60*24));const urgency=days<=7?'var(--red)':days<=30?'var(--yellow)':'var(--green)';countdownHtml=`<strong style="color:${urgency}">${days>0?t('daysLeft',{d:days}):t('today')}</strong> ${t('toSCIO')}`;}
+  if(examDate){const days=Math.ceil((new Date(examDate)-new Date())/(1000*60*60*24));const urgency=days<=7?'var(--red)':days<=30?'var(--yellow)':'var(--green)';countdownHtml=`<strong style="color:${urgency}">${days>0?t('daysLeft',{d:days}):t('today')}</strong> ${t('toSCIO')}`;}
   else{countdownHtml=`<span>${t('setDateCTA')}</span>`;}
   el.innerHTML=`<div style="font-family:var(--mono);font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--text3);margin-bottom:1rem;">📊 ${t('progressLabel')}</div>
     <div class="dashboard-grid">
@@ -3940,16 +3931,7 @@ function renderDashboard(scioDateOverride){
     </div>
     <div class="dash-progress-label"><span>${t('progressLabel')}</span><span style="color:var(--volt);font-family:var(--mono);">${progress}%</span></div>
     <div class="dash-bar-bg"><div class="dash-bar-fill" style="width:${progress}%"></div></div>
-    <div class="dash-countdown">${countdownHtml}<span class="dash-set-date" onclick="setSCIODate()">${t('setDateBtn')}</span></div>`;
-}
-async function setSCIODate(){
-  const input=prompt(t('scioDatePrompt'));if(!input)return;
-  if(!/^\d{4}-\d{2}-\d{2}$/.test(input)){showToast(t('scioDateInvalid'));return;}
-  localStorage.setItem('vsp_scio_date',input);renderDashboard(input);
-  if(typeof _supabase!=='undefined'&&typeof currentUser!=='undefined'&&currentUser){
-    try{const{error}=await _supabase.from('user_profiles').upsert({user_id:currentUser.id,scio_date:input},{onConflict:'user_id'});if(error)throw error;showToast(t('scioDateSavedCloud'));}
-    catch(e){showToast(t('scioDateSavedLocal'));}
-  }else{showToast(t('scioDateSet'));}
+    <div class="dash-countdown">${countdownHtml}</div>`;
 }
 
 // ============================================================
@@ -4135,6 +4117,7 @@ async function saveExamDate(value){
     const res=await fetch('/api/profile/exam-date',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({examDate:value||null})});
     if(!res.ok)throw new Error();
     if(value)localStorage.setItem('vsp_exam_date',value);else localStorage.removeItem('vsp_exam_date');
+    renderDashboard();
     showToast(value?'✅ Termín testu uložený':'Termín testu zmazaný');
   }catch(e){showToast('⚠️ Termín sa nepodarilo uložiť.');}
 }
@@ -5503,7 +5486,7 @@ async function onUserLoggedIn(user,token){
   }catch(e){}
   renderAuthButton();updateHomeStats();loadRefCard();renderEliteHomeCards();initEliteFeatures();renderCoursesSection();
   if(isPremium()){const ol=document.getElementById('paywall-overlay');if(ol)ol.remove();}
-  loadScioDateFromCloud();
+  renderDashboard();
   attachPendingPartnerRef();
   checkCommunityAccessForNav();
   checkGeneralkaOfferPopup();
@@ -5531,15 +5514,6 @@ async function loginWithGoogle(){
   await _supabase.auth.signInWithOAuth({provider:'google',options:{redirectTo}});
 }
 async function logout(){await _supabase.auth.signOut();showToast(t('loggedOut'));}
-async function loadScioDateFromCloud(){
-  if(!currentUser)return;
-  try{
-    const{data,error}=await _supabase.from('user_profiles').select('scio_date').eq('user_id',currentUser.id).single();
-    if(error&&error.code!=='PGRST116')throw error;
-    const cloudDate=data?.scio_date||null;
-    if(cloudDate){localStorage.setItem('vsp_scio_date',cloudDate);renderDashboard(cloudDate);}
-  }catch(e){console.warn('loadScioDateFromCloud:',e.message);}
-}
 initAuth();
 </script>
 
