@@ -174,6 +174,7 @@ module.exports = function registerGeneralka(app) {
         line_items: [{ price_data: { currency: 'eur', unit_amount: PRICE_CENTS, product_data: { name: 'SP Generálka — kompletný AI test naostro' } }, quantity: 1 }],
         success_url: 'https://sptrener.online/generalka?paid=1',
         cancel_url: 'https://sptrener.online/generalka?cancelled=1',
+        allow_promotion_codes: true,
         locale: 'sk',
         metadata: { type: 'generalka_purchase', email }
       });
