@@ -405,12 +405,18 @@ function logEvent(event) {
 let gazeSamples = 0, gazeOffScreenCount = 0, webcamAvailable = false;
 async function startWebcamTracking() {
   try {
-    await webgazer.setRegression('ridge').setGazeListener((data) => {
+    // clmtrackr je čisto JS tracker zabudovaný priamo vo webgazer.min.js —
+    // na rozdiel od defaultného TFFacemesh (MediaPipe) si nedotahuje ďalšie
+    // WASM/JS súbory z vlastnej domény, čo na produkcii zlyhávalo (server
+    // vrátil SPA fallback index.html namiesto tých súborov -> MIME error).
+    const begun = webgazer.setRegression('ridge').setTracker('clmtrackr').setGazeListener((data) => {
       if (!data) return;
       gazeSamples++;
       const onScreen = data.x >= 0 && data.x <= window.innerWidth && data.y >= 0 && data.y <= window.innerHeight;
       if (!onScreen) gazeOffScreenCount++;
     }).begin();
+    const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('webgazer timeout')), 15000));
+    await Promise.race([begun, timeout]);
     webgazer.showVideoPreview(false).showPredictionPoints(false).showFaceOverlay(false).showFaceFeedbackBox(false);
     webcamAvailable = true;
   } catch (e) {
