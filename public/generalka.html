@@ -236,7 +236,11 @@ function renderNeedsLogin() {
 }
 
 function renderError(msg) {
-  document.getElementById('mainWrap').innerHTML = `<h1>Chyba</h1><div class="card"><p>${esc(msg)}</p></div>`;
+  document.getElementById('mainWrap').style.display = '';
+  document.getElementById('examTop').style.display = 'none';
+  document.getElementById('examBody').style.display = 'none';
+  document.getElementById('examBottom').style.display = 'none';
+  document.getElementById('mainWrap').innerHTML = `<h1>Chyba</h1><div class="card"><p>${esc(msg)}</p><button class="btn" onclick="location.reload()">Skúsiť znova →</button></div>`;
 }
 
 // ─────────────────────────── INSTRUCTIONS ───────────────────────────
