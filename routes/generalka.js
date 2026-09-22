@@ -76,6 +76,7 @@ PRAVIDLÁ:
 - Odpovede sú 4 možnosti (A,B,C,D), okrem antosynoným kde je 8 (A-D synonymum, E-H antonymum).
 - Analytické úlohy musia byť matematicky korektné — skontroluj výpočty.
 - Každá úloha musí byť úplne nová a jedinečná (toto je platený test naostro, nesmie sa opakovať).
+- Zámerne striedaj, na ktorej pozícii (0 až ${part === 'verbal' ? '3, resp. 7 pri antosynonymách' : '3'}) je správna odpoveď — nedávaj ju stále na rovnaké miesto (napr. stále na "0"/A).
 
 - "explanation" drž stručné, max 1-2 vety.
 
@@ -93,6 +94,21 @@ Pole "questions" musí mať presne ${count} prvkov.`;
 const CHUNK_SIZE = 11;
 const STARTER_CHUNK_SIZE = 4;
 
+// AI má sklon dávať správnu odpoveď stále na rovnakú pozíciu (zvyčajne
+// prvú) aj keď je o to v prompte požiadaná, aby to nerobila — namiesto
+// spoliehania sa len na prompt zamiešame poradie možností serverovo a
+// prepočítame index správnej odpovede, takže rozloženie je zaručene
+// náhodné bez ohľadu na to, čo AI vráti.
+function shuffleQuestionOptions(q) {
+  const opts = Array.isArray(q.options) ? q.options : [];
+  const order = opts.map((_, i) => i);
+  for (let i = order.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [order[i], order[j]] = [order[j], order[i]];
+  }
+  return { ...q, options: order.map(i => opts[i]), answer: order.indexOf(q.answer) };
+}
+
 async function generateChunkOnce(part, count) {
   const text = await callClaudeText(buildGenerationPrompt(part, count), 8000);
   const match = text.match(/\{[\s\S]*\}/);
@@ -106,7 +122,7 @@ async function generateChunkOnce(part, count) {
   if (!Array.isArray(parsed.questions) || parsed.questions.length !== count) {
     throw new Error('AI vrátilo nesprávny počet úloh (' + (parsed.questions && parsed.questions.length) + ' namiesto ' + count + ').');
   }
-  return parsed.questions.map(q => ({ ...q, part }));
+  return parsed.questions.map(q => shuffleQuestionOptions({ ...q, part }));
 }
 
 // Claude občas vráti nevalidný/neúplný JSON — pred vzdaním sa to raz
