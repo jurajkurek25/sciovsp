@@ -91,8 +91,9 @@ Pole "questions" musí mať presne ${count} prvkov.`;
 // orezanie je oveľa menej pravdepodobné, a aj keby jedna dávka zlyhala,
 // nestráca sa celých 33 úloh naraz.
 const CHUNK_SIZE = 11;
+const STARTER_CHUNK_SIZE = 4;
 
-async function generateChunk(part, count) {
+async function generateChunkOnce(part, count) {
   const text = await callClaudeText(buildGenerationPrompt(part, count), 8000);
   const match = text.match(/\{[\s\S]*\}/);
   let parsed;
@@ -108,6 +109,17 @@ async function generateChunk(part, count) {
   return parsed.questions.map(q => ({ ...q, part }));
 }
 
+// Claude občas vráti nevalidný/neúplný JSON — pred vzdaním sa to raz
+// zopakujeme (nový request, čistá šanca), až potom to hodíme ako chybu.
+async function generateChunk(part, count) {
+  try {
+    return await generateChunkOnce(part, count);
+  } catch (e) {
+    console.error('generalka generateChunk(' + part + ',' + count + ') zlyhalo, skusam znova:', e.message);
+    return await generateChunkOnce(part, count);
+  }
+}
+
 async function generateBatch(part, totalCount) {
   const chunkSizes = [];
   let remaining = totalCount;
@@ -120,12 +132,41 @@ async function generateBatch(part, totalCount) {
   return chunks.flat();
 }
 
-async function generateFullTest() {
-  const [verbal, analytical] = await Promise.all([
-    generateBatch('verbal', VERBAL_COUNT),
-    generateBatch('analytical', ANALYT_COUNT)
-  ]);
-  return [...verbal, ...analytical];
+// Postupné dopĺňanie zvyšných otázok na pozadí, kým študent už odpovedá na
+// tie prvé — po každej dávke sa priebežne uloží do DB, takže klient si ich
+// vie dotiahnuť cez GET .../questions.
+async function generateRemaining(token, part, remainingCount, questionsSoFar) {
+  let all = questionsSoFar;
+  let remaining = remainingCount;
+  while (remaining > 0) {
+    const size = Math.min(CHUNK_SIZE, remaining);
+    try {
+      const chunk = await generateChunk(part, size);
+      all = all.concat(chunk);
+      await supabase.from('generalka_attempts').update({ questions: all }).eq('attempt_token', token);
+    } catch (e) {
+      console.error('generalka generateRemaining(' + part + ') vzdavam sa dalsej davky:', e.message);
+      return all;
+    }
+    remaining -= size;
+  }
+  return all;
+}
+
+async function generateInBackground(token, questionsSoFar) {
+  try {
+    let all = questionsSoFar;
+    const verbalCount = all.filter(q => q.part === 'verbal').length;
+    if (verbalCount < VERBAL_COUNT) {
+      all = await generateRemaining(token, 'verbal', VERBAL_COUNT - verbalCount, all);
+    }
+    const analytCount = all.filter(q => q.part === 'analytical').length;
+    if (analytCount < ANALYT_COUNT) {
+      all = await generateRemaining(token, 'analytical', ANALYT_COUNT - analytCount, all);
+    }
+  } catch (e) {
+    console.error('generalka generateInBackground fatal error:', e.message);
+  }
 }
 
 // Pred odovzdaním nesmie klient dostať správne odpovede ani vysvetlenia —
@@ -251,15 +292,34 @@ module.exports = function registerGeneralka(app) {
       if (!attempt) return res.status(404).json({ error: 'Pokus sa nenašiel.' });
       if (attempt.email !== (user.email || '').toString().trim().toLowerCase()) return res.status(403).json({ error: 'Tento pokus nepatrí tvojmu účtu.' });
       if (attempt.status !== 'paid') {
-        if (attempt.questions) return res.json({ status: attempt.status, questions: stripAnswers(attempt.questions) });
+        if (attempt.questions) return res.json({ status: attempt.status, questions: stripAnswers(attempt.questions), totalExpected: VERBAL_COUNT + ANALYT_COUNT });
         return res.status(400).json({ error: 'Tento pokus už bol spustený alebo dokončený.' });
       }
-      const questions = await generateFullTest();
-      await supabase.from('generalka_attempts').update({ status: 'in_progress', questions, started_at: new Date().toISOString() }).eq('attempt_token', req.params.token);
-      res.json({ status: 'in_progress', questions: stripAnswers(questions) });
+      const starter = await generateChunk('verbal', STARTER_CHUNK_SIZE);
+      await supabase.from('generalka_attempts').update({ status: 'in_progress', questions: starter, started_at: new Date().toISOString() }).eq('attempt_token', req.params.token);
+      res.json({ status: 'in_progress', questions: stripAnswers(starter), totalExpected: VERBAL_COUNT + ANALYT_COUNT });
+      // Fire-and-forget: zvyšné otázky sa dopĺňajú na pozadí, kým študent už
+      // odpovedá na tie prvé — klient si ich priebežne dotiahne cez polling.
+      generateInBackground(req.params.token, starter);
     } catch (e) {
       console.error('generalka start error:', e.message);
       res.status(500).json({ error: e.message || 'Chyba pri generovaní testu.' });
+    }
+  });
+
+  // GET /api/generalka/attempt/:token/questions — polling na dotiahnutie
+  // otázok, ktoré medzitým dogenerovalo pozadie po /start.
+  app.get('/api/generalka/attempt/:token/questions', async (req, res) => {
+    const user = await verifyToken(req);
+    if (!user) return res.status(401).json({ error: 'Musíš byť prihlásený.' });
+    try {
+      const { data: attempt } = await supabase.from('generalka_attempts').select('email, questions').eq('attempt_token', req.params.token).maybeSingle();
+      if (!attempt) return res.status(404).json({ error: 'Pokus sa nenašiel.' });
+      if (attempt.email !== (user.email || '').toString().trim().toLowerCase()) return res.status(403).json({ error: 'Tento pokus nepatrí tvojmu účtu.' });
+      res.json({ questions: stripAnswers(attempt.questions || []), totalExpected: VERBAL_COUNT + ANALYT_COUNT });
+    } catch (e) {
+      console.error('generalka questions poll error:', e.message);
+      res.status(500).json({ error: 'Chyba servera.' });
     }
   });
 

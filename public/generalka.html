@@ -274,6 +274,32 @@ function renderResumePrompt() {
 
 // ─────────────────────────── EXAM STATE ───────────────────────────
 let questions = [];
+let totalExpected = 66;
+let questionsPollTimer = null;
+
+// Zvyšné otázky sa po /start dopĺňajú na pozadí (server generuje po
+// dávkach) — priebežne kontrolujeme, či nepribudli nové.
+function startQuestionsPolling() {
+  if (questionsPollTimer) return;
+  questionsPollTimer = setInterval(async () => {
+    if (!examActive || questions.length >= totalExpected) { stopQuestionsPolling(); return; }
+    try {
+      const data = await apiFetch('/api/generalka/attempt/' + encodeURIComponent(token) + '/questions');
+      if (data.questions && data.questions.length > questions.length) {
+        questions = data.questions;
+        totalExpected = data.totalExpected || totalExpected;
+        if (phase === 'analytical' && (!questions[currentIdx] || questions[currentIdx].part !== 'analytical')) {
+          const idx = questions.findIndex(q => q.part === 'analytical');
+          if (idx >= 0) currentIdx = idx;
+        }
+        renderQuestion();
+      }
+    } catch (e) { /* prechodná chyba pollingu, skúsime znova o chvíľu */ }
+  }, 4000);
+}
+function stopQuestionsPolling() {
+  if (questionsPollTimer) { clearInterval(questionsPollTimer); questionsPollTimer = null; }
+}
 let answers = {};
 let currentIdx = 0;
 let phase = 'verbal'; // 'verbal' | 'analytical'
@@ -340,12 +366,13 @@ function onCalibDotClick() {
 async function startExamAfterCalibration() {
   document.getElementById('mainWrap').innerHTML = `
     <div class="eyebrow">Príprava</div>
-    <h1>Generujeme tvoj test…</h1>
-    <p>AI vytvára 66 nových úloh len pre tento pokus — môže to trvať aj minútu. Nezatváraj ani neobnovuj stránku.</p>
+    <h1>Pripravujeme prvé otázky…</h1>
+    <p>Zvyšok testu AI dopĺňa na pozadí, kým budeš odpovedať. Nezatváraj ani neobnovuj stránku.</p>
   `;
   try {
     const data = await apiFetch('/api/generalka/attempt/' + encodeURIComponent(token) + '/start', { method: 'POST' });
     questions = data.questions;
+    totalExpected = data.totalExpected || 66;
     if (!document.fullscreenElement) { await document.documentElement.requestFullscreen().catch(() => {}); }
     document.getElementById('mainWrap').style.display = 'none';
     document.getElementById('examTop').style.display = 'flex';
@@ -358,6 +385,7 @@ async function startExamAfterCalibration() {
     phaseEndsAt = Date.now() + VERBAL_TIME_S * 1000;
     setupAnticheatListeners();
     startTimer();
+    startQuestionsPolling();
     renderQuestion();
   } catch (e) {
     renderError(e.message + ' Skús obnoviť stránku a spustiť test znova.');
@@ -464,9 +492,10 @@ function updateTimerDisplay() {
 function switchToAnalyticalPhase() {
   phase = 'analytical';
   phaseEndsAt = Date.now() + ANALYT_TIME_S * 1000;
-  currentIdx = questions.findIndex(q => q.part === 'analytical');
-  if (currentIdx < 0) currentIdx = 0;
+  const idx = questions.findIndex(q => q.part === 'analytical');
+  currentIdx = idx >= 0 ? idx : questions.length;
   logEvent({ type: 'phase_switch', phase: 'analytical' });
+  startQuestionsPolling();
   renderQuestion();
 }
 
@@ -474,7 +503,12 @@ function switchToAnalyticalPhase() {
 function renderQuestion() {
   const q = questions[currentIdx];
   const answered = Object.keys(answers).length;
-  document.getElementById('examProgress').textContent = 'Otázka ' + (currentIdx + 1) + ' / ' + questions.length + ' · Zodpovedané: ' + answered;
+  document.getElementById('examProgress').textContent = 'Otázka ' + (currentIdx + 1) + ' / ' + totalExpected + ' · Zodpovedané: ' + answered;
+  if (!q) {
+    document.getElementById('examBody').innerHTML = `<div class="q-text">AI ešte pripravuje túto časť testu, chvíľku strpenia…</div>`;
+    document.getElementById('examBottom').innerHTML = `<button onclick="prevQuestion()" ${currentIdx === 0 ? 'disabled' : ''}>← Predchádzajúca</button><button class="primary" disabled>Načítavam…</button>`;
+    return;
+  }
   const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
   document.getElementById('examBody').innerHTML = `
     <div class="q-part">${q.part === 'verbal' ? 'Verbálna časť' : 'Analytická časť'} — ${esc(q.topic || '')}</div>
@@ -487,11 +521,15 @@ function renderQuestion() {
         </button>`).join('')}
     </div>
   `;
+  const isLastExpected = currentIdx === totalExpected - 1;
+  const nextLoaded = currentIdx + 1 < questions.length;
   document.getElementById('examBottom').innerHTML = `
     <button onclick="prevQuestion()" ${currentIdx === 0 ? 'disabled' : ''}>← Predchádzajúca</button>
-    ${currentIdx === questions.length - 1
+    ${isLastExpected
       ? '<button class="primary" onclick="confirmSubmit()">Odovzdať test →</button>'
-      : '<button class="primary" onclick="nextQuestion()">Ďalšia →</button>'}
+      : (nextLoaded
+          ? '<button class="primary" onclick="nextQuestion()">Ďalšia →</button>'
+          : '<button class="primary" disabled>Načítavam ďalšiu otázku…</button>')}
   `;
 }
 
@@ -518,6 +556,7 @@ function confirmSubmit() {
 async function submitExam() {
   examActive = false;
   clearInterval(timerInterval);
+  stopQuestionsPolling();
   stopWebcamTracking();
   window.removeEventListener('beforeunload', beforeUnloadHandler);
   const durationS = Math.round((Date.now() - examStartedAt) / 1000);
