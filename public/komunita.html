@@ -24,6 +24,9 @@ textarea,input{font-family:inherit}
 
 .top{max-width:640px;margin:0 auto;padding:1.5rem 1.2rem 0;display:flex;justify-content:space-between;align-items:center}
 .top a.back{font-family:var(--mono);font-weight:500;font-size:.82rem;color:var(--ignite);text-decoration:none}
+.lang-switch{display:flex;gap:.35rem}
+.lang-switch button{font-family:var(--mono);font-weight:700;font-size:.7rem;padding:.3rem .6rem;background:var(--ink3);border:1px solid var(--border2);border-radius:6px;color:var(--text3);cursor:pointer}
+.lang-switch button.active{background:var(--ignite);color:var(--ink);border-color:var(--ignite)}
 .wrap{max-width:640px;margin:0 auto;padding:1.6rem 1.2rem 5rem}
 h1{font-family:var(--serif);font-weight:800;font-size:1.7rem;margin-bottom:.3rem}
 .sub{color:var(--text2);font-size:.92rem;margin-bottom:1.6rem}
@@ -130,52 +133,56 @@ h1{font-family:var(--serif);font-weight:800;font-size:1.7rem;margin-bottom:.3rem
 </head>
 <body>
 <div class="top">
-  <a class="back" href="/app.html">← SP Tréner</a>
+  <a class="back" href="/app.html" data-i18n="backLink"></a>
+  <div class="lang-switch">
+    <button id="langSK" onclick="setLang('sk')">SK</button>
+    <button id="langCZ" onclick="setLang('cz')">CZ</button>
+  </div>
 </div>
 <div class="wrap">
-  <h1>Komunita</h1>
-  <p class="sub">Súkromný priestor len pre členov, ktorí si Premium/Elite kúpili cez ponuku po webinári.</p>
+  <h1 data-i18n="pageTitle"></h1>
+  <p class="sub" data-i18n="pageSub"></p>
 
   <div id="gateBox" class="gate" style="display:none"></div>
   <div id="feedBox" style="display:none">
     <div class="tabs">
-      <button class="tab" data-tab="feed" onclick="location.hash='feed'">Feed</button>
-      <button class="tab" data-tab="gallery" onclick="location.hash='gallery'">Fotky</button>
-      <button class="tab" data-tab="leaderboard" onclick="location.hash='leaderboard'">Rebríček</button>
-      <button class="tab" data-tab="members" onclick="location.hash='members'">Členovia</button>
-      <button class="tab" data-tab="messages" onclick="location.hash='messages'">Správy</button>
-      <button class="tab" data-tab="myprofile" onclick="location.hash='myprofile'">Môj profil</button>
+      <button class="tab" data-tab="feed" onclick="location.hash='feed'" data-i18n="tabFeed"></button>
+      <button class="tab" data-tab="gallery" onclick="location.hash='gallery'" data-i18n="tabGallery"></button>
+      <button class="tab" data-tab="leaderboard" onclick="location.hash='leaderboard'" data-i18n="tabLeaderboard"></button>
+      <button class="tab" data-tab="members" onclick="location.hash='members'" data-i18n="tabMembers"></button>
+      <button class="tab" data-tab="messages" onclick="location.hash='messages'" data-i18n="tabMessages"></button>
+      <button class="tab" data-tab="myprofile" onclick="location.hash='myprofile'" data-i18n="tabMyProfile"></button>
     </div>
 
     <div id="viewFeed">
       <div class="composer">
-        <textarea id="postBody" placeholder="Napíš niečo pre komunitu…" maxlength="4000"></textarea>
+        <textarea id="postBody" maxlength="4000" data-i18n-placeholder="postPlaceholder"></textarea>
         <div class="composer-row">
           <input type="file" id="postImage" accept="image/png,image/jpeg,image/webp,image/gif">
-          <button id="postSubmitBtn" onclick="submitPost()">Uverejniť</button>
+          <button id="postSubmitBtn" onclick="submitPost()" data-i18n="publishBtn"></button>
         </div>
         <div class="err" id="postErr"></div>
       </div>
       <div id="postsList"></div>
-      <button class="load-more" id="loadMoreBtn" style="display:none" onclick="loadPosts(false)">Načítať staršie</button>
+      <button class="load-more" id="loadMoreBtn" style="display:none" onclick="loadPosts(false)" data-i18n="loadOlderBtn"></button>
     </div>
 
     <div id="viewGallery" style="display:none">
       <div class="composer">
         <input type="file" id="photoImage" accept="image/png,image/jpeg,image/webp,image/gif">
-        <input type="text" id="photoCaption" placeholder="Popis (nepovinné)" maxlength="300">
+        <input type="text" id="photoCaption" maxlength="300" data-i18n-placeholder="captionPlaceholder">
         <div class="composer-row">
           <span></span>
-          <button id="photoSubmitBtn" onclick="submitPhoto()">Nahrať fotku</button>
+          <button id="photoSubmitBtn" onclick="submitPhoto()" data-i18n="uploadPhotoBtn"></button>
         </div>
         <div class="err" id="photoErr"></div>
       </div>
       <div class="gallery-grid" id="galleryGrid"></div>
-      <button class="load-more" id="galleryLoadMoreBtn" style="display:none" onclick="loadGallery(false)">Načítať staršie</button>
+      <button class="load-more" id="galleryLoadMoreBtn" style="display:none" onclick="loadGallery(false)" data-i18n="loadOlderBtn"></button>
     </div>
 
     <div id="viewLeaderboard" style="display:none">
-      <p class="sub" style="margin-bottom:1rem">Kombinuje zapojenie v komunite (lajky, príspevky, komentáre) s najlepším dosiahnutým percentilom v SP Tréner testoch.</p>
+      <p class="sub" style="margin-bottom:1rem" data-i18n="leaderboardSub"></p>
       <div id="leaderboardList"></div>
     </div>
 
@@ -188,12 +195,12 @@ h1{font-family:var(--serif);font-weight:800;font-size:1.7rem;margin-bottom:.3rem
     </div>
 
     <div id="viewChat" style="display:none">
-      <button class="chat-back" onclick="location.hash='messages'">← Späť na správy</button>
+      <button class="chat-back" onclick="location.hash='messages'" data-i18n="backToMessages"></button>
       <div class="chat-header" id="chatHeader"></div>
       <div class="chat-messages" id="chatMessages"></div>
       <div class="chat-form">
-        <input type="text" id="chatInput" placeholder="Napíš správu…" maxlength="2000">
-        <button onclick="sendChatMessage()">Odoslať</button>
+        <input type="text" id="chatInput" maxlength="2000" data-i18n-placeholder="chatPlaceholder">
+        <button onclick="sendChatMessage()" data-i18n="sendBtn"></button>
       </div>
       <div class="err" id="chatErr"></div>
     </div>
@@ -209,16 +216,16 @@ h1{font-family:var(--serif);font-weight:800;font-size:1.7rem;margin-bottom:.3rem
           <div id="myAvatarPreview"></div>
           <div>
             <input type="file" id="avatarFile" accept="image/png,image/jpeg,image/webp,image/gif"><br>
-            <button onclick="submitAvatar()">Zmeniť fotku</button>
+            <button onclick="submitAvatar()" data-i18n="changePhotoBtn"></button>
           </div>
         </div>
-        <label for="myUsername">Používateľské meno</label>
-        <input type="text" id="myUsername" maxlength="20" placeholder="napr. jano2006">
-        <label for="myDisplayName">Zobrazované meno (nepovinné)</label>
+        <label for="myUsername" data-i18n="usernameLabel"></label>
+        <input type="text" id="myUsername" maxlength="20" data-i18n-placeholder="usernamePlaceholder">
+        <label for="myDisplayName" data-i18n="displayNameLabel"></label>
         <input type="text" id="myDisplayName" maxlength="60">
-        <label for="myBio">O mne</label>
+        <label for="myBio" data-i18n="bioLabel"></label>
         <textarea id="myBio" maxlength="300"></textarea>
-        <button onclick="saveProfile()">Uložiť</button>
+        <button onclick="saveProfile()" data-i18n="saveBtn"></button>
         <div class="err" id="myProfileErr"></div>
         <div class="ok" id="myProfileOk"></div>
       </div>
@@ -228,6 +235,144 @@ h1{font-family:var(--serif);font-weight:800;font-size:1.7rem;margin-bottom:.3rem
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+// ─────────────────────────── I18N ───────────────────────────
+const TRANSLATIONS = {
+  sk: {
+    backLink: '← SP Tréner',
+    pageTitle: 'Komunita',
+    pageSub: 'Súkromný priestor len pre členov, ktorí si Premium/Elite kúpili cez ponuku po webinári.',
+    tabFeed: 'Feed', tabGallery: 'Fotky', tabLeaderboard: 'Rebríček', tabMembers: 'Členovia', tabMessages: 'Správy', tabMyProfile: 'Môj profil',
+    postPlaceholder: 'Napíš niečo pre komunitu…',
+    publishBtn: 'Uverejniť',
+    loadOlderBtn: 'Načítať staršie',
+    captionPlaceholder: 'Popis (nepovinné)',
+    uploadPhotoBtn: 'Nahrať fotku',
+    leaderboardSub: 'Kombinuje zapojenie v komunite (lajky, príspevky, komentáre) s najlepším dosiahnutým percentilom v SP Tréner testoch.',
+    backToMessages: '← Späť na správy',
+    chatPlaceholder: 'Napíš správu…',
+    sendBtn: 'Odoslať',
+    changePhotoBtn: 'Zmeniť fotku',
+    usernameLabel: 'Používateľské meno',
+    usernamePlaceholder: 'napr. jano2006',
+    displayNameLabel: 'Zobrazované meno (nepovinné)',
+    bioLabel: 'O mne',
+    saveBtn: 'Uložiť',
+    loading: 'načítavam…',
+    genericServerError: 'Chyba servera.',
+    loadError: 'Chyba načítania.',
+    loginPrompt: 'Prihlás sa cez Google, aby sme overili, či máš do komunity prístup.',
+    loginBtn: 'Prihlásiť sa cez Google',
+    bannedMsg: 'Prístup do komunity ti bol zablokovaný.',
+    noAccessMsg: 'Komunita je exkluzívny bonus pre členov, ktorí si Premium alebo Elite kúpili cez ponuku po webinári. Ak si to ešte nemáš, pozri si najbližší termín.',
+    registerWebinarLink: 'Zaregistrovať sa na webinár →',
+    accessCheckFailed: 'Nepodarilo sa overiť prístup. Skús to znova neskôr.',
+    emptyFeed: 'Zatiaľ tu nikto nič nenapísal. Buď prvý/á →',
+    deleteBtn: 'Zmazať',
+    deleteBtnLower: 'zmazať',
+    commentPlaceholder: 'Napíš komentár…',
+    postNeedsContent: 'Napíš niečo alebo pridaj obrázok.',
+    confirmDeletePost: 'Zmazať tento príspevok?',
+    confirmDeleteComment: 'Zmazať tento komentár?',
+    emptyGallery: 'Zatiaľ tu nie sú žiadne fotky.',
+    pickPhoto: 'Vyber fotku.',
+    confirmDeletePhoto: 'Zmazať túto fotku?',
+    emptyLeaderboard: 'Zatiaľ nie je koho zoradiť.',
+    leaderboardStats: '{posts} príspevkov · {comments} komentárov · {likes} lajkov · {percentile} v SP Tréner',
+    emptyMembers: 'Zatiaľ tu nie je nikto iný.',
+    emptyConversations: 'Zatiaľ žiadne správy. Napíš niekomu z profilu →',
+    chatLoadError: 'Chyba načítania konverzácie.',
+    reportBtn: 'Nahlásiť',
+    emptyChat: 'Zatiaľ žiadne správy. Napíš prvú →',
+    confirmReport: 'Nahlásiť túto konverzáciu? AI posúdi históriu správ a rozhodne, či druhú stranu zablokovať. Obsah konverzácie ostáva súkromný — nevidí ho žiadny administrátor, len AI kontrola.',
+    reportInProgress: 'Posudzujem…',
+    reportBlocked: 'Nahlásenie vyhodnotené: osoba bola zablokovaná. ({reason})',
+    reportDismissed: 'Nahlásenie vyhodnotené ako neopodstatnené. ({reason})',
+    editProfileBtn: 'Upraviť profil',
+    sendMessageBtn: '✉ Napísať správu',
+    emptyProfilePosts: 'Zatiaľ žiadne príspevky.',
+    profileLoadError: 'Chyba načítania profilu.',
+    savedMsg: 'Uložené.',
+    photoChangedMsg: 'Fotka zmenená.',
+    locale: 'sk-SK'
+  },
+  cz: {
+    backLink: '← SP Tréner',
+    pageTitle: 'Komunita',
+    pageSub: 'Soukromý prostor jen pro členy, kteří si Premium/Elite koupili přes nabídku po webináři.',
+    tabFeed: 'Feed', tabGallery: 'Fotky', tabLeaderboard: 'Žebříček', tabMembers: 'Členové', tabMessages: 'Zprávy', tabMyProfile: 'Můj profil',
+    postPlaceholder: 'Napiš něco pro komunitu…',
+    publishBtn: 'Zveřejnit',
+    loadOlderBtn: 'Načíst starší',
+    captionPlaceholder: 'Popis (nepovinné)',
+    uploadPhotoBtn: 'Nahrát fotku',
+    leaderboardSub: 'Kombinuje zapojení v komunitě (lajky, příspěvky, komentáře) s nejlepším dosaženým percentilem v testech SP Tréner.',
+    backToMessages: '← Zpět na zprávy',
+    chatPlaceholder: 'Napiš zprávu…',
+    sendBtn: 'Odeslat',
+    changePhotoBtn: 'Změnit fotku',
+    usernameLabel: 'Uživatelské jméno',
+    usernamePlaceholder: 'např. jano2006',
+    displayNameLabel: 'Zobrazované jméno (nepovinné)',
+    bioLabel: 'O mně',
+    saveBtn: 'Uložit',
+    loading: 'načítám…',
+    genericServerError: 'Chyba serveru.',
+    loadError: 'Chyba načítání.',
+    loginPrompt: 'Přihlas se přes Google, abychom ověřili, jestli máš do komunity přístup.',
+    loginBtn: 'Přihlásit se přes Google',
+    bannedMsg: 'Přístup do komunity ti byl zablokován.',
+    noAccessMsg: 'Komunita je exkluzivní bonus pro členy, kteří si Premium nebo Elite koupili přes nabídku po webináři. Pokud to ještě nemáš, podívej se na nejbližší termín.',
+    registerWebinarLink: 'Zaregistrovat se na webinář →',
+    accessCheckFailed: 'Nepodařilo se ověřit přístup. Zkus to znovu později.',
+    emptyFeed: 'Zatím tu nikdo nic nenapsal. Buď první →',
+    deleteBtn: 'Smazat',
+    deleteBtnLower: 'smazat',
+    commentPlaceholder: 'Napiš komentář…',
+    postNeedsContent: 'Napiš něco nebo přidej obrázek.',
+    confirmDeletePost: 'Smazat tento příspěvek?',
+    confirmDeleteComment: 'Smazat tento komentář?',
+    emptyGallery: 'Zatím tu nejsou žádné fotky.',
+    pickPhoto: 'Vyber fotku.',
+    confirmDeletePhoto: 'Smazat tuto fotku?',
+    emptyLeaderboard: 'Zatím není koho seřadit.',
+    leaderboardStats: '{posts} příspěvků · {comments} komentářů · {likes} lajků · {percentile} v SP Tréner',
+    emptyMembers: 'Zatím tu není nikdo jiný.',
+    emptyConversations: 'Zatím žádné zprávy. Napiš někomu z profilu →',
+    chatLoadError: 'Chyba načítání konverzace.',
+    reportBtn: 'Nahlásit',
+    emptyChat: 'Zatím žádné zprávy. Napiš první →',
+    confirmReport: 'Nahlásit tuto konverzaci? AI posoudí historii zpráv a rozhodne, jestli druhou stranu zablokovat. Obsah konverzace zůstává soukromý — nevidí ho žádný administrátor, jen AI kontrola.',
+    reportInProgress: 'Posuzuji…',
+    reportBlocked: 'Nahlášení vyhodnoceno: osoba byla zablokována. ({reason})',
+    reportDismissed: 'Nahlášení vyhodnoceno jako neopodstatněné. ({reason})',
+    editProfileBtn: 'Upravit profil',
+    sendMessageBtn: '✉ Napsat zprávu',
+    emptyProfilePosts: 'Zatím žádné příspěvky.',
+    profileLoadError: 'Chyba načítání profilu.',
+    savedMsg: 'Uloženo.',
+    photoChangedMsg: 'Fotka změněna.',
+    locale: 'cs-CZ'
+  }
+};
+let currentLang = localStorage.getItem('vsp_lang') || 'sk';
+function t(key, vars) {
+  let str = TRANSLATIONS[currentLang]?.[key] ?? TRANSLATIONS.sk?.[key] ?? key;
+  if (vars) Object.entries(vars).forEach(([k, v]) => { str = str.replace(new RegExp('{' + k + '}', 'g'), v); });
+  return str;
+}
+function applyStaticTranslations() {
+  document.querySelectorAll('[data-i18n]').forEach(el => { el.innerHTML = t(el.dataset.i18n); });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { el.placeholder = t(el.dataset.i18nPlaceholder); });
+}
+function setLang(lang) {
+  currentLang = lang;
+  localStorage.setItem('vsp_lang', lang);
+  document.getElementById('langSK').classList.toggle('active', lang === 'sk');
+  document.getElementById('langCZ').classList.toggle('active', lang === 'cz');
+  applyStaticTranslations();
+  if (accessGranted) route();
+}
+
 const SUPABASE_URL = 'https://zrnqiwareacqyndwchsv.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpybnFpd2FyZWFjcXluZHdjaHN2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMDA3NTAsImV4cCI6MjA4OTc3Njc1MH0.iUne23YDxp12Iwxdk9U8MfcV0NTBtrNf9OgsjQdiADk';
 const _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -239,7 +384,7 @@ let galleryLastId = null;
 let feedLoadedOnce = false;
 
 function esc(s) { return String(s == null ? '' : s).replace(/[<>&]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c])); }
-function fmtTime(iso) { return new Date(iso).toLocaleString('sk-SK'); }
+function fmtTime(iso) { return new Date(iso).toLocaleString(t('locale')); }
 
 function avatarHtml(url, name, size) {
   size = size || 32;
@@ -253,11 +398,14 @@ async function apiFetch(url, opts) {
   opts.headers = Object.assign({}, opts.headers, authToken ? { Authorization: 'Bearer ' + authToken } : {});
   const res = await fetch(url, opts);
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || 'Chyba servera.');
+  if (!res.ok) throw new Error(data.error || t('genericServerError'));
   return data;
 }
 
 async function init() {
+  document.getElementById('langSK').classList.toggle('active', currentLang === 'sk');
+  document.getElementById('langCZ').classList.toggle('active', currentLang === 'cz');
+  applyStaticTranslations();
   const { data: { session } } = await _supabase.auth.getSession();
   currentUser = session ? session.user : null;
   authToken = session ? session.access_token : null;
@@ -277,7 +425,7 @@ async function checkAccess() {
     accessGranted = false;
     gate.style.display = 'block';
     feed.style.display = 'none';
-    gate.innerHTML = '<p>Prihlás sa cez Google, aby sme overili, či máš do komunity prístup.</p><button onclick="signIn()">Prihlásiť sa cez Google</button>';
+    gate.innerHTML = `<p>${t('loginPrompt')}</p><button onclick="signIn()">${t('loginBtn')}</button>`;
     return;
   }
   try {
@@ -291,16 +439,14 @@ async function checkAccess() {
       accessGranted = false;
       gate.style.display = 'block';
       feed.style.display = 'none';
-      const msg = status.banned
-        ? 'Prístup do komunity ti bol zablokovaný.'
-        : 'Komunita je exkluzívny bonus pre členov, ktorí si Premium alebo Elite kúpili cez ponuku po webinári. Ak si to ešte nemáš, pozri si najbližší termín.';
-      gate.innerHTML = '<p>' + msg + '</p>' + (status.banned ? '' : '<a class="cta" href="/webinar">Zaregistrovať sa na webinár →</a>');
+      const msg = status.banned ? t('bannedMsg') : t('noAccessMsg');
+      gate.innerHTML = '<p>' + msg + '</p>' + (status.banned ? '' : `<a class="cta" href="/webinar">${t('registerWebinarLink')}</a>`);
     }
   } catch (e) {
     accessGranted = false;
     gate.style.display = 'block';
     feed.style.display = 'none';
-    gate.innerHTML = '<p>Nepodarilo sa overiť prístup. Skús to znova neskôr.</p>';
+    gate.innerHTML = `<p>${t('accessCheckFailed')}</p>`;
   }
 }
 
@@ -331,7 +477,7 @@ function route() {
   const r = parseHash();
   Object.keys(VIEWS).forEach(v => { document.getElementById(VIEWS[v]).style.display = (v === r.view) ? 'block' : 'none'; });
   const activeTab = r.view === 'chat' ? 'messages' : r.view;
-  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === activeTab));
+  document.querySelectorAll('.tab').forEach(tb => tb.classList.toggle('active', tb.dataset.tab === activeTab));
   if (r.view === 'feed') { if (!feedLoadedOnce) { loadPosts(true); feedLoadedOnce = true; } }
   else if (r.view === 'gallery') loadGallery(true);
   else if (r.view === 'leaderboard') loadLeaderboard();
@@ -352,7 +498,7 @@ async function loadPosts(reset) {
     const data = await apiFetch(url);
     const list = document.getElementById('postsList');
     if (!data.posts.length && reset) {
-      list.innerHTML = '<div class="empty">Zatiaľ tu nikto nič nenapísal. Buď prvý/á →</div>';
+      list.innerHTML = `<div class="empty">${t('emptyFeed')}</div>`;
     } else {
       data.posts.forEach(p => { list.insertAdjacentHTML('beforeend', renderPost(p)); });
       if (data.posts.length) lastPostId = data.posts[data.posts.length - 1].id;
@@ -375,7 +521,7 @@ function renderPost(p) {
     <div class="actions">
       <button class="${p.liked ? 'liked' : ''}" onclick="toggleLike('post', ${p.id}, this)">♥ <span class="like-count">${p.likeCount}</span></button>
       <button onclick="toggleComments(${p.id})">💬 <span class="comment-count">${p.commentCount}</span></button>
-      ${p.authorEmail === (currentUser && currentUser.email) ? '<button class="danger" onclick="deletePost(' + p.id + ')">Zmazať</button>' : ''}
+      ${p.authorEmail === (currentUser && currentUser.email) ? `<button class="danger" onclick="deletePost(${p.id})">${t('deleteBtn')}</button>` : ''}
     </div>
     <div class="comments" id="comments-${p.id}" style="display:none"></div>
   </div>`;
@@ -395,16 +541,16 @@ async function toggleComments(postId) {
   const box = document.getElementById('comments-' + postId);
   if (box.style.display === 'block') { box.style.display = 'none'; return; }
   box.style.display = 'block';
-  box.innerHTML = '<div class="empty">načítavam…</div>';
+  box.innerHTML = `<div class="empty">${t('loading')}</div>`;
   try {
     const data = await apiFetch('/api/community/posts/' + postId + '/comments');
     box.innerHTML = data.comments.map(c => renderComment(postId, c)).join('') + `
       <div class="comment-form">
-        <input type="text" id="commentInput-${postId}" placeholder="Napíš komentár…" maxlength="1000">
-        <button onclick="submitComment(${postId})">Odoslať</button>
+        <input type="text" id="commentInput-${postId}" placeholder="${esc(t('commentPlaceholder'))}" maxlength="1000">
+        <button onclick="submitComment(${postId})">${t('sendBtn')}</button>
       </div>`;
   } catch (e) {
-    box.innerHTML = '<div class="empty">Chyba načítania.</div>';
+    box.innerHTML = `<div class="empty">${t('loadError')}</div>`;
   }
 }
 
@@ -418,7 +564,7 @@ function renderComment(postId, c) {
         <button class="${c.liked ? 'liked' : ''}" style="margin-left:.5rem;background:none;border:none;color:var(--text2);cursor:pointer;font-size:.78rem" onclick="toggleLike('comment', ${c.id}, this)">♥ <span class="like-count">${c.likeCount}</span></button>
       </div>
     </div>
-    ${c.authorEmail === (currentUser && currentUser.email) ? '<button class="del" onclick="deleteComment(' + postId + ',' + c.id + ')">zmazať</button>' : ''}
+    ${c.authorEmail === (currentUser && currentUser.email) ? `<button class="del" onclick="deleteComment(${postId},${c.id})">${t('deleteBtnLower')}</button>` : ''}
   </div>`;
 }
 
@@ -428,7 +574,7 @@ async function submitPost() {
   const errEl = document.getElementById('postErr');
   const btn = document.getElementById('postSubmitBtn');
   errEl.textContent = '';
-  if (!body && !fileInput.files.length) { errEl.textContent = 'Napíš niečo alebo pridaj obrázok.'; return; }
+  if (!body && !fileInput.files.length) { errEl.textContent = t('postNeedsContent'); return; }
   btn.disabled = true;
   try {
     const fd = new FormData();
@@ -457,7 +603,7 @@ async function submitComment(postId) {
     const box = document.getElementById('comments-' + postId);
     box.insertAdjacentHTML('beforeend', renderComment(postId, data.comment));
     box.querySelector('.comment-form').remove();
-    box.insertAdjacentHTML('beforeend', `<div class="comment-form"><input type="text" id="commentInput-${postId}" placeholder="Napíš komentár…" maxlength="1000"><button onclick="submitComment(${postId})">Odoslať</button></div>`);
+    box.insertAdjacentHTML('beforeend', `<div class="comment-form"><input type="text" id="commentInput-${postId}" placeholder="${esc(t('commentPlaceholder'))}" maxlength="1000"><button onclick="submitComment(${postId})">${t('sendBtn')}</button></div>`);
     const post = document.getElementById('post-' + postId);
     const cc = post.querySelector('.comment-count');
     cc.textContent = parseInt(cc.textContent, 10) + 1;
@@ -465,7 +611,7 @@ async function submitComment(postId) {
 }
 
 async function deletePost(id) {
-  if (!confirm('Zmazať tento príspevok?')) return;
+  if (!confirm(t('confirmDeletePost'))) return;
   try {
     await apiFetch('/api/community/posts/' + id, { method: 'DELETE' });
     const el = document.getElementById('post-' + id);
@@ -474,7 +620,7 @@ async function deletePost(id) {
 }
 
 async function deleteComment(postId, id) {
-  if (!confirm('Zmazať tento komentár?')) return;
+  if (!confirm(t('confirmDeleteComment'))) return;
   try {
     await apiFetch('/api/community/comments/' + id, { method: 'DELETE' });
     document.getElementById('comment-' + id).remove();
@@ -492,7 +638,7 @@ async function loadGallery(reset) {
     const data = await apiFetch(url);
     const grid = document.getElementById('galleryGrid');
     if (!data.photos.length && reset) {
-      grid.innerHTML = '<div class="empty">Zatiaľ tu nie sú žiadne fotky.</div>';
+      grid.innerHTML = `<div class="empty">${t('emptyGallery')}</div>`;
     } else {
       data.photos.forEach(p => grid.insertAdjacentHTML('beforeend', renderGalleryPhoto(p)));
       if (data.photos.length) galleryLastId = data.photos[data.photos.length - 1].id;
@@ -514,7 +660,7 @@ async function submitPhoto() {
   const errEl = document.getElementById('photoErr');
   const btn = document.getElementById('photoSubmitBtn');
   errEl.textContent = '';
-  if (!fileInput.files.length) { errEl.textContent = 'Vyber fotku.'; return; }
+  if (!fileInput.files.length) { errEl.textContent = t('pickPhoto'); return; }
   btn.disabled = true;
   try {
     const fd = new FormData();
@@ -535,7 +681,7 @@ async function submitPhoto() {
 }
 
 async function deletePhoto(id) {
-  if (!confirm('Zmazať túto fotku?')) return;
+  if (!confirm(t('confirmDeletePhoto'))) return;
   try {
     await apiFetch('/api/community/photos/' + id, { method: 'DELETE' });
     const el = document.getElementById('photo-' + id);
@@ -546,13 +692,13 @@ async function deletePhoto(id) {
 // ─────────────────────────────────────── REBRÍČEK ───────────────────────────────────────
 async function loadLeaderboard() {
   const list = document.getElementById('leaderboardList');
-  list.innerHTML = '<div class="empty">načítavam…</div>';
+  list.innerHTML = `<div class="empty">${t('loading')}</div>`;
   try {
     const data = await apiFetch('/api/community/leaderboard');
-    if (!data.leaderboard.length) { list.innerHTML = '<div class="empty">Zatiaľ nie je koho zoradiť.</div>'; return; }
+    if (!data.leaderboard.length) { list.innerHTML = `<div class="empty">${t('emptyLeaderboard')}</div>`; return; }
     list.innerHTML = data.leaderboard.map((row, i) => renderLeaderboardRow(row, i + 1)).join('');
   } catch (e) {
-    list.innerHTML = '<div class="empty">Chyba načítania.</div>';
+    list.innerHTML = `<div class="empty">${t('loadError')}</div>`;
   }
 }
 
@@ -568,7 +714,7 @@ function renderLeaderboardRow(row, rank) {
       <button class="author-link" data-email="${esc(row.email)}" onclick="openProfile(this.dataset.email)" style="padding:0">
         <span class="lb-name">${esc(row.displayName)}</span>
       </button>
-      <div class="lb-stats">${row.postCount} príspevkov · ${row.commentCount} komentárov · ${row.likesReceived} lajkov · ${percentileText} v SP Tréner</div>
+      <div class="lb-stats">${t('leaderboardStats', { posts: row.postCount, comments: row.commentCount, likes: row.likesReceived, percentile: percentileText })}</div>
     </div>
     <span class="lb-score">${row.score}b</span>
   </div>`;
@@ -577,13 +723,13 @@ function renderLeaderboardRow(row, rank) {
 // ─────────────────────────────────────── ČLENOVIA (adresár) ───────────────────────────────────────
 async function loadMembers() {
   const list = document.getElementById('membersList');
-  list.innerHTML = '<div class="empty">načítavam…</div>';
+  list.innerHTML = `<div class="empty">${t('loading')}</div>`;
   try {
     const data = await apiFetch('/api/community/members');
-    if (!data.members.length) { list.innerHTML = '<div class="empty">Zatiaľ tu nie je nikto iný.</div>'; return; }
+    if (!data.members.length) { list.innerHTML = `<div class="empty">${t('emptyMembers')}</div>`; return; }
     list.innerHTML = data.members.map(renderMemberRow).join('');
   } catch (e) {
-    list.innerHTML = '<div class="empty">Chyba načítania.</div>';
+    list.innerHTML = `<div class="empty">${t('loadError')}</div>`;
   }
 }
 
@@ -600,13 +746,13 @@ function renderMemberRow(m) {
 // ─────────────────────────────────────── SPRÁVY (zoznam konverzácií) ───────────────────────────────────────
 async function loadConversations() {
   const list = document.getElementById('conversationsList');
-  list.innerHTML = '<div class="empty">načítavam…</div>';
+  list.innerHTML = `<div class="empty">${t('loading')}</div>`;
   try {
     const data = await apiFetch('/api/community/conversations');
-    if (!data.conversations.length) { list.innerHTML = '<div class="empty">Zatiaľ žiadne správy. Napíš niekomu z profilu →</div>'; return; }
+    if (!data.conversations.length) { list.innerHTML = `<div class="empty">${t('emptyConversations')}</div>`; return; }
     list.innerHTML = data.conversations.map(renderConvoRow).join('');
   } catch (e) {
-    list.innerHTML = '<div class="empty">Chyba načítania.</div>';
+    list.innerHTML = `<div class="empty">${t('loadError')}</div>`;
   }
 }
 
@@ -628,7 +774,7 @@ async function loadChat(email) {
   const header = document.getElementById('chatHeader');
   const box = document.getElementById('chatMessages');
   document.getElementById('chatErr').textContent = '';
-  header.innerHTML = '<div class="empty">načítavam…</div>';
+  header.innerHTML = `<div class="empty">${t('loading')}</div>`;
   box.innerHTML = '';
   try {
     const data = await apiFetch('/api/community/conversations/' + encodeURIComponent(email));
@@ -640,13 +786,13 @@ async function loadChat(email) {
       <div class="lb-info">
         <button class="author-link" data-email="${esc(o.email)}" onclick="openProfile(this.dataset.email)" style="padding:0"><span class="lb-name">${esc(o.displayName)}</span></button>
       </div>
-      <button class="chat-report" onclick="reportConversation(${data.conversationId})">Nahlásiť</button>`;
+      <button class="chat-report" onclick="reportConversation(${data.conversationId})">${t('reportBtn')}</button>`;
     box.innerHTML = data.messages.length
       ? data.messages.map(renderChatMessage).join('')
-      : '<div class="empty">Zatiaľ žiadne správy. Napíš prvú →</div>';
+      : `<div class="empty">${t('emptyChat')}</div>`;
     box.scrollTop = box.scrollHeight;
   } catch (e) {
-    header.innerHTML = '<div class="empty">Chyba načítania konverzácie.</div>';
+    header.innerHTML = `<div class="empty">${t('chatLoadError')}</div>`;
   }
 }
 
@@ -677,14 +823,14 @@ async function sendChatMessage() {
 }
 
 async function reportConversation(conversationId) {
-  if (!confirm('Nahlásiť túto konverzáciu? AI posúdi históriu správ a rozhodne, či druhú stranu zablokovať. Obsah konverzácie ostáva súkromný — nevidí ho žiadny administrátor, len AI kontrola.')) return;
+  if (!confirm(t('confirmReport'))) return;
   const errEl = document.getElementById('chatErr');
-  errEl.textContent = 'Posudzujem…';
+  errEl.textContent = t('reportInProgress');
   try {
     const data = await apiFetch('/api/community/conversations/' + conversationId + '/report', { method: 'POST' });
     errEl.textContent = data.verdict === 'block'
-      ? 'Nahlásenie vyhodnotené: osoba bola zablokovaná. (' + data.reasoning + ')'
-      : 'Nahlásenie vyhodnotené ako neopodstatnené. (' + data.reasoning + ')';
+      ? t('reportBlocked', { reason: data.reasoning })
+      : t('reportDismissed', { reason: data.reasoning });
   } catch (e) {
     errEl.textContent = e.message;
   }
@@ -694,7 +840,7 @@ async function reportConversation(conversationId) {
 async function loadProfile(email) {
   const header = document.getElementById('profileHeader');
   const list = document.getElementById('profilePostsList');
-  header.innerHTML = '<div class="empty">načítavam…</div>';
+  header.innerHTML = `<div class="empty">${t('loading')}</div>`;
   list.innerHTML = '';
   try {
     const data = await apiFetch('/api/community/profile/' + encodeURIComponent(email));
@@ -706,12 +852,12 @@ async function loadProfile(email) {
         <div class="profile-info">
           <div class="profile-name">${esc(p.displayName || p.email)}</div>
           ${p.bio ? `<div class="profile-bio">${esc(p.bio)}</div>` : ''}
-          ${isMe ? '<button class="profile-edit-btn" onclick="location.hash=\'myprofile\'">Upraviť profil</button>' : `<button class="dm-btn" data-email="${esc(email)}" onclick="openChat(this.dataset.email)">✉ Napísať správu</button>`}
+          ${isMe ? `<button class="profile-edit-btn" onclick="location.hash='myprofile'">${t('editProfileBtn')}</button>` : `<button class="dm-btn" data-email="${esc(email)}" onclick="openChat(this.dataset.email)">${t('sendMessageBtn')}</button>`}
         </div>
       </div>`;
-    list.innerHTML = data.posts.length ? data.posts.map(renderPost).join('') : '<div class="empty">Zatiaľ žiadne príspevky.</div>';
+    list.innerHTML = data.posts.length ? data.posts.map(renderPost).join('') : `<div class="empty">${t('emptyProfilePosts')}</div>`;
   } catch (e) {
-    header.innerHTML = '<div class="empty">Chyba načítania profilu.</div>';
+    header.innerHTML = `<div class="empty">${t('profileLoadError')}</div>`;
   }
 }
 
@@ -738,7 +884,7 @@ async function saveProfile() {
     await apiFetch('/api/community/profile', {
       method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username, displayName, bio })
     });
-    okEl.textContent = 'Uložené.';
+    okEl.textContent = t('savedMsg');
     setTimeout(() => { okEl.textContent = ''; }, 2500);
   } catch (e) {
     errEl.textContent = e.message;
@@ -750,14 +896,14 @@ async function submitAvatar() {
   const errEl = document.getElementById('myProfileErr');
   const okEl = document.getElementById('myProfileOk');
   errEl.textContent = ''; okEl.textContent = '';
-  if (!fileInput.files.length) { errEl.textContent = 'Vyber fotku.'; return; }
+  if (!fileInput.files.length) { errEl.textContent = t('pickPhoto'); return; }
   try {
     const fd = new FormData();
     fd.append('avatar', fileInput.files[0]);
     const data = await apiFetch('/api/community/profile/avatar', { method: 'POST', body: fd });
     document.getElementById('myAvatarPreview').innerHTML = avatarHtml(data.avatarUrl, '', 72);
     fileInput.value = '';
-    okEl.textContent = 'Fotka zmenená.';
+    okEl.textContent = t('photoChangedMsg');
     setTimeout(() => { okEl.textContent = ''; }, 2500);
   } catch (e) {
     errEl.textContent = e.message;
