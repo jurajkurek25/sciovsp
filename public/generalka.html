@@ -45,6 +45,11 @@ p{color:var(--text2)}
 .warn-box b{color:var(--danger)}
 .err{color:var(--danger);font-size:.85rem;margin-top:.8rem}
 
+/* LANG SWITCH */
+.lang-switch{position:fixed;top:1rem;right:1rem;z-index:9990;display:flex;gap:.35rem}
+.lang-switch button{font-family:var(--mono);font-weight:700;font-size:.7rem;padding:.3rem .6rem;background:var(--ink3);border:1px solid var(--border2);border-radius:6px;color:var(--text3);cursor:pointer}
+.lang-switch button.active{background:var(--ignite);color:var(--ink);border-color:var(--ignite)}
+
 /* EXAM UI */
 .exam-top{position:fixed;top:0;left:0;right:0;background:var(--ink2);border-bottom:1px solid var(--border2);padding:.9rem 1.2rem;display:flex;justify-content:space-between;align-items:center;z-index:100;font-family:var(--mono);font-size:.82rem}
 .exam-timer{color:var(--ignite);font-weight:700;font-size:1rem}
@@ -154,6 +159,10 @@ p{color:var(--text2)}
 </style>
 </head>
 <body>
+<div class="lang-switch" id="langSwitch">
+  <button id="langSK" onclick="setLang('sk')">SK</button>
+  <button id="langCZ" onclick="setLang('cz')">CZ</button>
+</div>
 <div class="wrap" id="mainWrap"></div>
 
 <div class="exam-top" id="examTop" style="display:none">
@@ -165,15 +174,275 @@ p{color:var(--text2)}
 
 <div class="fs-warning-overlay" id="fsWarning">
   <div class="box">
-    <h2>Opustil/a si celoobrazovkový režim</h2>
-    <p>SP Generálka sleduje odchody z celej obrazovky ako súčasť anti-cheat kontroly — táto udalosť bola zaznamenaná. Pokračuj kliknutím nižšie.</p>
-    <button class="btn" style="margin-top:1.2rem" onclick="resumeFullscreen()">Späť na celú obrazovku →</button>
+    <h2 data-i18n="fsWarningTitle"></h2>
+    <p data-i18n="fsWarningBody"></p>
+    <button class="btn" style="margin-top:1.2rem" onclick="resumeFullscreen()" data-i18n="fsWarningBtn"></button>
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/webgazer@3/dist/webgazer.min.js"></script>
 <script>
+// ─────────────────────────── I18N ───────────────────────────
+const TRANSLATIONS = {
+  sk: {
+    fsWarningTitle: 'Opustil/a si celoobrazovkový režim',
+    fsWarningBody: 'SP Generálka sleduje odchody z celej obrazovky ako súčasť anti-cheat kontroly — táto udalosť bola zaznamenaná. Pokračuj kliknutím nižšie.',
+    fsWarningBtn: 'Späť na celú obrazovku →',
+    paidEyebrow: 'Platba prijatá',
+    paidPreparingTitle: 'Pripravujeme tvoj pokus…',
+    paidPreparingSub: 'Chvíľku strpenia, len čo sa spracuje platba.',
+    paidSlowTitle: 'Spracovanie trvá dlhšie',
+    paidSlowSub: 'Odkaz na spustenie testu ti príde aj emailom (skontroluj aj spam), alebo skús <a href="javascript:location.reload()">obnoviť stránku</a> o chvíľu.',
+    heroEyebrow: 'Jednorázová generálka pred ostrým testom',
+    heroTitle: 'Zisti presne,<br>ako to <em>zajtra dopadne.</em>',
+    heroSub: 'Kompletný AI-generovaný VŠP test v reálnych podmienkach — časomiera, celoobrazovkový režim, sledovanie pozornosti kamerou. Jeden nákup, jeden pokus, hĺbková AI analýza výsledku.',
+    buyBtn: 'Kúpiť za 5,90 € →',
+    heroNote: 'Jednorázová platba · žiadne predplatné',
+    statTasks: 'nových úloh',
+    statMinutes: 'minút naostro',
+    statAttempt: 'pokus, bez druhej šance',
+    howEyebrow: 'Ako to funguje',
+    howTitle: 'Štyri kroky k presnému obrazu, ako na tom si',
+    step1Title: 'Zaplatíš a spustíš, keď si pripravený',
+    step1Body: 'Kúpiš jeden pokus, dostaneš odkaz na email a spustíš test presne vtedy, keď máš súvislý nerušený čas.',
+    step2Title: 'AI vygeneruje úplne nový test',
+    step2Body: '66 úloh vytvorených špeciálne pre tvoj pokus — nikdy sa neopakujú, žiadne memorovanie odpovedí.',
+    step3Title: 'Beží presne ako naostro',
+    step3Body: 'Celá obrazovka, časomiera po fázach (35 + 45 minút), kamera sleduje pozornosť — bez druhej šance.',
+    step4Title: 'Dostaneš hĺbkovú AI analýzu',
+    step4Body: 'Odhad percentilu, konkrétne slabé a silné okruhy, rozbor tvojho správania a odporúčania na posledné dni.',
+    whyEyebrow: 'Prečo nie je to len ďalší test',
+    whyTitle: 'Čo najvernejšia simulácia skutočného dňa',
+    feat1Title: '66 úplne nových úloh',
+    feat1Body: '33 verbálnych + 33 analytických, generovaných AI naostro pre tvoj pokus — presne podľa reálnej VŠP štruktúry okruhov.',
+    feat2Title: 'Reálna časomiera po fázach',
+    feat2Body: '35 minút na verbálnu časť, 45 na analytickú — presne ako na ostrom teste. Do ďalšej fázy sa nedá prejsť skôr, než vyprší čas.',
+    feat3Title: 'Anti-cheat kontrola',
+    feat3Body: 'Celoobrazovkový režim, sledovanie opustenia fullscreenu aj prepínania okien — čo najbližšie k podmienkam skutočnej skúšky.',
+    feat4Title: 'Sledovanie pozornosti kamerou',
+    feat4Body: 'Lokálne v prehliadači, nič sa neukladá ani neposiela — len odhad, ako veľmi si sledoval/a obrazovku.',
+    feat5Title: 'Hĺbková AI analýza',
+    feat5Body: 'Nie len skóre — rozpad podľa okruhov, či ti zmeny odpovedí pomohli alebo škodili, a konkrétne odporúčania.',
+    feat6Title: 'Jeden pokus, ako naostro',
+    feat6Body: 'Žiadne opakovanie, žiadna druhá šanca — presne taký tlak, aký zažiješ na skutočných prijímačkách.',
+    outputEyebrow: 'Výstup',
+    outputTitle: 'Čo presne sa dozvieš po odovzdaní',
+    reveal1: 'Odhad pravdepodobného percentilu na ostrom teste — zvlášť pre verbálnu aj analytickú časť',
+    reveal2: 'Konkrétne najslabšie a najsilnejšie okruhy podľa mena (nie len "analytická časť" všeobecne)',
+    reveal3: 'Rozbor zmien odpovedí — či ti preverovanie pomohlo, alebo bol lepší prvý inštinkt',
+    reveal4: 'Tempo a preskakovanie úloh pod tlakom času',
+    reveal5: 'Faktory pozornosti — prerušenia fullscreenu, prepínanie okien, sledovanosť obrazovky',
+    reveal6: 'Presne 3 konkrétne odporúčania, na čo sa zamerať v posledných dňoch pred ostrým testom',
+    faqEyebrow: 'Časté otázky',
+    faqTitle: 'Ešte váhaš?',
+    finalTitle: 'Pripravený/á zistiť, na čom naozaj si?',
+    finalSub: 'Jeden kompletný test, reálne podmienky, hĺbková AI analýza. Jednorázová platba, žiadne predplatné.',
+    footerLogo: 'SP TRÉNER — AI príprava na prijímačky © 2026',
+    footerApp: 'Aplikácia',
+    footerContact: 'Kontakt',
+    footerVop: 'VOP',
+    footerPrivacy: 'Súkromie',
+    stickyLabel: 'SP Generálka — 5,90 €',
+    stickySub: 'Jeden pokus, reálne podmienky',
+    stickyBtn: 'Kúpiť →',
+    loginBtn: 'Prihlásiť sa cez Google →',
+    needsLoginTitle: 'Prihlás sa',
+    needsLoginSub: 'Tvoj pokus SP Generálky je viazaný na tvoj Google účet.',
+    errorTitle: 'Chyba',
+    retryBtn: 'Skúsiť znova →',
+    readyEyebrow: 'Pripravené',
+    readyTitle: 'Tvoj pokus čaká',
+    readySub: 'Než spustíš test, prečítaj si toto — máš na neho <b>jeden jediný pokus</b>.',
+    instructionsWarnBox: '<b>Pred spustením:</b><br>• Vyhraď si súvislý nerušený čas (cca 90 minút)<br>• Uisti sa, že máš funkčné pripojenie na internet<br>• Test beží v celoobrazovkovom režime — opustenie sa zaznamenáva<br>• Test vyžaduje prístup ku kamere kvôli sledovaniu pozornosti — obraz sa nikam neukladá ani neposiela, spracováva sa len v prehliadači<br>• Test sa nedá pozastaviť ani reštartovať',
+    startBtn: 'Spustiť test →',
+    resumeTitle: 'Pokus je rozbehnutý',
+    resumeSub: 'Tvoj test už bol spustený. Pokračuj tam, kde si skončil/a — otázky ostávajú rovnaké.',
+    resumeBtn: 'Pokračovať v teste →',
+    calibEyebrow: 'Kalibrácia kamery',
+    calibTitle: 'Bodka {n} / {total}',
+    calibSub: 'Pozeraj sa priamo na bodku a klikni na ňu {clicks}×. Zlepší to presnosť sledovania pozornosti počas testu.',
+    prepEyebrow: 'Príprava',
+    prepTitle: 'Pripravujeme prvé otázky…',
+    prepSub: 'Zvyšok testu AI dopĺňa na pozadí, kým budeš odpovedať. Nezatváraj ani neobnovuj stránku.',
+    examErrorSuffix: ' Skús obnoviť stránku a spustiť test znova.',
+    verbalPhase: 'Verbálna časť',
+    analyticalPhase: 'Analytická časť',
+    examProgress: 'Otázka {n} / {total} · Zodpovedané: {answered}',
+    aiPreparingPart: 'AI ešte pripravuje túto časť testu, chvíľku strpenia…',
+    prevBtn: '← Predchádzajúca',
+    loadingBtn: 'Načítavam…',
+    submitBtn: 'Odovzdať test →',
+    waitPhaseBtn: 'Čakaj na koniec časového limitu tejto časti…',
+    nextBtn: 'Ďalšia →',
+    loadingNextBtn: 'Načítavam ďalšiu otázku…',
+    confirmUnanswered: 'Máš {n} nezodpovedaných úloh. Naozaj chceš odovzdať test? Toto je tvoj jediný pokus.',
+    confirmAllAnswered: 'Naozaj chceš odovzdať test? Toto je tvoj jediný pokus, po odovzdaní sa už nedá zmeniť.',
+    evaluatingMsg: 'Vyhodnocujem a generujem analýzu…',
+    loadingReport: 'Načítavam report…',
+    resultEyebrow: 'Výsledok',
+    resultTitle: 'Tvoja SP Generálka',
+    correctAnswersLabel: 'správnych odpovedí',
+    verbalLabel: 'Verbálna',
+    analyticalLabel: 'Analytická',
+    estimateLabel: 'Odhad celkovo',
+    aiAnalysisTitle: 'AI analýza',
+    analysisFailed: 'Analýza sa nepodarila vygenerovať.',
+    durationLabel: 'Trvanie',
+    fullscreenExitsLabel: 'Opustenie celej obrazovky',
+    tabSwitchesLabel: 'Prepnutie okna',
+    attentionLabel: 'Pozornosť (kamera)',
+    attentionUnavailable: 'nedostupné',
+    genericServerError: 'Chyba servera.'
+  },
+  cz: {
+    fsWarningTitle: 'Opustil/a jsi celoobrazovkový režim',
+    fsWarningBody: 'SP Generálka sleduje odchody z celé obrazovky jako součást anti-cheat kontroly — tato událost byla zaznamenána. Pokračuj kliknutím níže.',
+    fsWarningBtn: 'Zpět na celou obrazovku →',
+    paidEyebrow: 'Platba přijata',
+    paidPreparingTitle: 'Připravujeme tvůj pokus…',
+    paidPreparingSub: 'Chvilku strpení, než se zpracuje platba.',
+    paidSlowTitle: 'Zpracování trvá déle',
+    paidSlowSub: 'Odkaz na spuštění testu ti přijde i e-mailem (zkontroluj i spam), nebo zkus <a href="javascript:location.reload()">obnovit stránku</a> za chvíli.',
+    heroEyebrow: 'Jednorázová generálka před ostrým testem',
+    heroTitle: 'Zjisti přesně,<br>jak to <em>zítra dopadne.</em>',
+    heroSub: 'Kompletní AI-generovaný VŠP test v reálných podmínkách — časomíra, celoobrazovkový režim, sledování pozornosti kamerou. Jeden nákup, jeden pokus, hloubková AI analýza výsledku.',
+    buyBtn: 'Koupit za 5,90 € →',
+    heroNote: 'Jednorázová platba · žádné předplatné',
+    statTasks: 'nových úloh',
+    statMinutes: 'minut naostro',
+    statAttempt: 'pokus, bez druhé šance',
+    howEyebrow: 'Jak to funguje',
+    howTitle: 'Čtyři kroky k přesnému obrazu, jak na tom jsi',
+    step1Title: 'Zaplatíš a spustíš, když jsi připraven/a',
+    step1Body: 'Koupíš jeden pokus, dostaneš odkaz na e-mail a spustíš test přesně tehdy, když máš souvislý nerušený čas.',
+    step2Title: 'AI vygeneruje úplně nový test',
+    step2Body: '66 úloh vytvořených speciálně pro tvůj pokus — nikdy se neopakují, žádné memorování odpovědí.',
+    step3Title: 'Běží přesně jako naostro',
+    step3Body: 'Celá obrazovka, časomíra po fázích (35 + 45 minut), kamera sleduje pozornost — bez druhé šance.',
+    step4Title: 'Dostaneš hloubkovou AI analýzu',
+    step4Body: 'Odhad percentilu, konkrétní slabé a silné okruhy, rozbor tvého chování a doporučení na poslední dny.',
+    whyEyebrow: 'Proč to není jen další test',
+    whyTitle: 'Co nejvěrnější simulace skutečného dne',
+    feat1Title: '66 úplně nových úloh',
+    feat1Body: '33 verbálních + 33 analytických, generovaných AI naostro pro tvůj pokus — přesně podle reálné VŠP struktury okruhů.',
+    feat2Title: 'Reálná časomíra po fázích',
+    feat2Body: '35 minut na verbální část, 45 na analytickou — přesně jako na ostrém testu. Do další fáze se nedá přejít dříve, než vyprší čas.',
+    feat3Title: 'Anti-cheat kontrola',
+    feat3Body: 'Celoobrazovkový režim, sledování opuštění fullscreenu i přepínání oken — co nejblíže podmínkám skutečné zkoušky.',
+    feat4Title: 'Sledování pozornosti kamerou',
+    feat4Body: 'Lokálně v prohlížeči, nic se neukládá ani neposílá — jen odhad, jak moc jsi sledoval/a obrazovku.',
+    feat5Title: 'Hloubková AI analýza',
+    feat5Body: 'Nejen skóre — rozpad podle okruhů, jestli ti změny odpovědí pomohly nebo škodily, a konkrétní doporučení.',
+    feat6Title: 'Jeden pokus, jako naostro',
+    feat6Body: 'Žádné opakování, žádná druhá šance — přesně takový tlak, jaký zažiješ na skutečných přijímačkách.',
+    outputEyebrow: 'Výstup',
+    outputTitle: 'Co přesně se dozvíš po odevzdání',
+    reveal1: 'Odhad pravděpodobného percentilu na ostrém testu — zvlášť pro verbální i analytickou část',
+    reveal2: 'Konkrétní nejslabší a nejsilnější okruhy podle jména (ne jen "analytická část" obecně)',
+    reveal3: 'Rozbor změn odpovědí — jestli ti přehodnocení pomohlo, nebo byl lepší první instinkt',
+    reveal4: 'Tempo a přeskakování úloh pod tlakem času',
+    reveal5: 'Faktory pozornosti — přerušení fullscreenu, přepínání oken, sledovanost obrazovky',
+    reveal6: 'Přesně 3 konkrétní doporučení, na co se zaměřit v posledních dnech před ostrým testem',
+    faqEyebrow: 'Časté otázky',
+    faqTitle: 'Ještě váháš?',
+    finalTitle: 'Připraven/a zjistit, na čem opravdu jsi?',
+    finalSub: 'Jeden kompletní test, reálné podmínky, hloubková AI analýza. Jednorázová platba, žádné předplatné.',
+    footerLogo: 'SP TRÉNER — AI příprava na přijímačky © 2026',
+    footerApp: 'Aplikace',
+    footerContact: 'Kontakt',
+    footerVop: 'VOP',
+    footerPrivacy: 'Soukromí',
+    stickyLabel: 'SP Generálka — 5,90 €',
+    stickySub: 'Jeden pokus, reálné podmínky',
+    stickyBtn: 'Koupit →',
+    loginBtn: 'Přihlásit se přes Google →',
+    needsLoginTitle: 'Přihlas se',
+    needsLoginSub: 'Tvůj pokus SP Generálky je vázaný na tvůj Google účet.',
+    errorTitle: 'Chyba',
+    retryBtn: 'Zkusit znovu →',
+    readyEyebrow: 'Připraveno',
+    readyTitle: 'Tvůj pokus čeká',
+    readySub: 'Než spustíš test, přečti si tohle — máš na něj <b>jediný pokus</b>.',
+    instructionsWarnBox: '<b>Před spuštěním:</b><br>• Vyhraď si souvislý nerušený čas (cca 90 minut)<br>• Ujisti se, že máš funkční připojení k internetu<br>• Test běží v celoobrazovkovém režimu — opuštění se zaznamenává<br>• Test vyžaduje přístup ke kameře kvůli sledování pozornosti — obraz se nikam neukládá ani neposílá, zpracovává se jen v prohlížeči<br>• Test se nedá pozastavit ani restartovat',
+    startBtn: 'Spustit test →',
+    resumeTitle: 'Pokus je rozběhnutý',
+    resumeSub: 'Tvůj test už byl spuštěn. Pokračuj tam, kde jsi skončil/a — otázky zůstávají stejné.',
+    resumeBtn: 'Pokračovat v testu →',
+    calibEyebrow: 'Kalibrace kamery',
+    calibTitle: 'Tečka {n} / {total}',
+    calibSub: 'Dívej se přímo na tečku a klikni na ni {clicks}×. Zlepší to přesnost sledování pozornosti během testu.',
+    prepEyebrow: 'Příprava',
+    prepTitle: 'Připravujeme první otázky…',
+    prepSub: 'Zbytek testu AI doplňuje na pozadí, zatímco budeš odpovídat. Nezavírej ani neobnovuj stránku.',
+    examErrorSuffix: ' Zkus obnovit stránku a spustit test znovu.',
+    verbalPhase: 'Verbální část',
+    analyticalPhase: 'Analytická část',
+    examProgress: 'Otázka {n} / {total} · Zodpovězeno: {answered}',
+    aiPreparingPart: 'AI ještě připravuje tuto část testu, chvilku strpení…',
+    prevBtn: '← Předchozí',
+    loadingBtn: 'Načítám…',
+    submitBtn: 'Odevzdat test →',
+    waitPhaseBtn: 'Čekej na konec časového limitu této části…',
+    nextBtn: 'Další →',
+    loadingNextBtn: 'Načítám další otázku…',
+    confirmUnanswered: 'Máš {n} nezodpovězených úloh. Opravdu chceš odevzdat test? Toto je tvůj jediný pokus.',
+    confirmAllAnswered: 'Opravdu chceš odevzdat test? Toto je tvůj jediný pokus, po odevzdání se už nedá změnit.',
+    evaluatingMsg: 'Vyhodnocuji a generuji analýzu…',
+    loadingReport: 'Načítám report…',
+    resultEyebrow: 'Výsledek',
+    resultTitle: 'Tvoje SP Generálka',
+    correctAnswersLabel: 'správných odpovědí',
+    verbalLabel: 'Verbální',
+    analyticalLabel: 'Analytická',
+    estimateLabel: 'Odhad celkově',
+    aiAnalysisTitle: 'AI analýza',
+    analysisFailed: 'Analýzu se nepodařilo vygenerovat.',
+    durationLabel: 'Trvání',
+    fullscreenExitsLabel: 'Opuštění celé obrazovky',
+    tabSwitchesLabel: 'Přepnutí okna',
+    attentionLabel: 'Pozornost (kamera)',
+    attentionUnavailable: 'nedostupné',
+    genericServerError: 'Chyba serveru.'
+  }
+};
+let currentLang = localStorage.getItem('vsp_lang') || 'sk';
+function t(key, vars) {
+  let str = TRANSLATIONS[currentLang]?.[key] ?? TRANSLATIONS.sk?.[key] ?? key;
+  if (vars) Object.entries(vars).forEach(([k, v]) => { str = str.replace(new RegExp('{' + k + '}', 'g'), v); });
+  return str;
+}
+function applyStaticTranslations() {
+  document.querySelectorAll('[data-i18n]').forEach(el => { el.innerHTML = t(el.dataset.i18n); });
+}
+function setLang(lang) {
+  currentLang = lang;
+  localStorage.setItem('vsp_lang', lang);
+  document.getElementById('langSK').classList.toggle('active', lang === 'sk');
+  document.getElementById('langCZ').classList.toggle('active', lang === 'cz');
+  applyStaticTranslations();
+  if (examActive) { renderQuestion(); } else { route(); }
+}
+
+const FAQ_ITEMS = {
+  sk: [
+    ['Čo presne dostanem za 5,90 €?', 'Jeden kompletný test — 66 úplne nových úloh (33 verbálnych + 33 analytických), vygenerovaných AI špeciálne pre tvoj pokus. Beží v reálnych podmienkach: celoobrazovkový režim, presná časomiera po fázach (35 + 45 minút), sledovanie pozornosti kamerou. Po odovzdaní dostaneš hĺbkovú AI analýzu — odhad percentilu, konkrétne slabé a silné okruhy, rozbor tvojho správania počas testu.'],
+    ['Prečo je to len na jeden pokus?', 'Lebo cieľom nie je tréning — na to slúži bežný SP Tréner s neobmedzenými AI úlohami. SP Generálka má overiť, ako to zvládneš naozaj naostro, pod tlakom, s jedným pokusom bez druhej šance. Presne tak, ako to bude na skutočných prijímačkách.'],
+    ['Ako funguje sledovanie kamerou? Ukladá sa niekam obraz?', 'Nie. Obraz z kamery sa spracováva výhradne lokálne v tvojom prehliadači (technológia WebGazer) — nikam sa neposiela ani neukladá. Slúži len na odhad, ako veľmi si počas testu sledoval/a obrazovku, čo je súčasť finálnej analýzy.'],
+    ['Čo ak mi vypadne internet alebo zavriem prehliadač?', 'Pokus zostane rozbehnutý. Vrátiš sa cez ten istý odkaz, prihlásiš sa a pokračuješ presne tam, kde si skončil/a — otázky aj tvoje doterajšie odpovede ostávajú zachované.'],
+    ['Čím sa to líši od bežného tréningu v SP Tréner?', 'Bežný tréning je na neobmedzené precvičovanie jednotlivých okruhov, kedykoľvek, bez tlaku. SP Generálka je presný opak — jednorázová, plná simulácia s reálnymi podmienkami (čas, anti-cheat, jeden pokus), určená tesne pred ostrým testom, aby si vedel/a presne, na čom si.'],
+    ['Môžem si kúpiť viac pokusov?', 'Áno — každý nákup je samostatný, nový pokus s úplne novým, AI vygenerovaným testom. Nič sa neopakuje.']
+  ],
+  cz: [
+    ['Co přesně dostanu za 5,90 €?', 'Jeden kompletní test — 66 úplně nových úloh (33 verbálních + 33 analytických), vygenerovaných AI speciálně pro tvůj pokus. Běží v reálných podmínkách: celoobrazovkový režim, přesná časomíra po fázích (35 + 45 minut), sledování pozornosti kamerou. Po odevzdání dostaneš hloubkovou AI analýzu — odhad percentilu, konkrétní slabé a silné okruhy, rozbor tvého chování během testu.'],
+    ['Proč je to jen na jeden pokus?', 'Protože cílem není trénink — na to slouží běžný SP Tréner s neomezenými AI úlohami. SP Generálka má ověřit, jak to zvládneš opravdu naostro, pod tlakem, s jedním pokusem bez druhé šance. Přesně tak, jak to bude na skutečných přijímačkách.'],
+    ['Jak funguje sledování kamerou? Ukládá se někam obraz?', 'Ne. Obraz z kamery se zpracovává výhradně lokálně v tvém prohlížeči (technologie WebGazer) — nikam se neposílá ani neukládá. Slouží jen k odhadu, jak moc jsi během testu sledoval/a obrazovku, což je součást finální analýzy.'],
+    ['Co když mi vypadne internet nebo zavřu prohlížeč?', 'Pokus zůstane rozběhnutý. Vrátíš se přes stejný odkaz, přihlásíš se a pokračuješ přesně tam, kde jsi skončil/a — otázky i tvé dosavadní odpovědi zůstávají zachovány.'],
+    ['Čím se to liší od běžného tréninku v SP Tréner?', 'Běžný trénink je na neomezené procvičování jednotlivých okruhů, kdykoliv, bez tlaku. SP Generálka je přesný opak — jednorázová, plná simulace s reálnými podmínkami (čas, anti-cheat, jeden pokus), určená těsně před ostrým testem, abys věděl/a přesně, na čem jsi.'],
+    ['Můžu si koupit víc pokusů?', 'Ano — každý nákup je samostatný, nový pokus s úplně novým, AI vygenerovaným testem. Nic se neopakuje.']
+  ]
+};
+
 const SUPABASE_URL = 'https://zrnqiwareacqyndwchsv.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpybnFpd2FyZWFjcXluZHdjaHN2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMDA3NTAsImV4cCI6MjA4OTc3Njc1MH0.iUne23YDxp12Iwxdk9U8MfcV0NTBtrNf9OgsjQdiADk';
 const _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -192,7 +461,7 @@ async function apiFetch(url, opts) {
   opts.headers = Object.assign({}, opts.headers, authToken ? { Authorization: 'Bearer ' + authToken } : {});
   const res = await fetch(url, opts);
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || 'Chyba servera.');
+  if (!res.ok) throw new Error(data.error || t('genericServerError'));
   return data;
 }
 
@@ -203,6 +472,9 @@ function signIn() {
 let paidFlag = false;
 
 async function init() {
+  document.getElementById('langSK').classList.toggle('active', currentLang === 'sk');
+  document.getElementById('langCZ').classList.toggle('active', currentLang === 'cz');
+  applyStaticTranslations();
   const params = new URLSearchParams(location.search);
   token = params.get('token');
   paidFlag = params.get('paid') === '1';
@@ -239,9 +511,9 @@ async function route() {
 async function resolveAfterPayment(attemptsLeft) {
   if (attemptsLeft === undefined) attemptsLeft = 8;
   document.getElementById('mainWrap').innerHTML = `
-    <div class="eyebrow">Platba prijatá</div>
-    <h1>Pripravujeme tvoj pokus…</h1>
-    <p>Chvíľku strpenia, len čo sa spracuje platba.</p>
+    <div class="eyebrow">${t('paidEyebrow')}</div>
+    <h1>${t('paidPreparingTitle')}</h1>
+    <p>${t('paidPreparingSub')}</p>
   `;
   try {
     const data = await apiFetch('/api/generalka/my-latest-attempt');
@@ -257,53 +529,45 @@ async function resolveAfterPayment(attemptsLeft) {
       setTimeout(() => resolveAfterPayment(attemptsLeft - 1), 2000);
     } else {
       document.getElementById('mainWrap').innerHTML = `
-        <div class="eyebrow">Platba prijatá</div>
-        <h1>Spracovanie trvá dlhšie</h1>
-        <p>Odkaz na spustenie testu ti príde aj emailom (skontroluj aj spam), alebo skús <a href="javascript:location.reload()">obnoviť stránku</a> o chvíľu.</p>
+        <div class="eyebrow">${t('paidEyebrow')}</div>
+        <h1>${t('paidSlowTitle')}</h1>
+        <p>${t('paidSlowSub')}</p>
       `;
     }
   }
 }
 
 // ─────────────────────────── LANDING / CHECKOUT ───────────────────────────
-const FAQ_ITEMS = [
-  ['Čo presne dostanem za 5,90 €?', 'Jeden kompletný test — 66 úplne nových úloh (33 verbálnych + 33 analytických), vygenerovaných AI špeciálne pre tvoj pokus. Beží v reálnych podmienkach: celoobrazovkový režim, presná časomiera po fázach (35 + 45 minút), sledovanie pozornosti kamerou. Po odovzdaní dostaneš hĺbkovú AI analýzu — odhad percentilu, konkrétne slabé a silné okruhy, rozbor tvojho správania počas testu.'],
-  ['Prečo je to len na jeden pokus?', 'Lebo cieľom nie je tréning — na to slúži bežný SP Tréner s neobmedzenými AI úlohami. SP Generálka má overiť, ako to zvládneš naozaj naostro, pod tlakom, s jedným pokusom bez druhej šance. Presne tak, ako to bude na skutočných prijímačkách.'],
-  ['Ako funguje sledovanie kamerou? Ukladá sa niekam obraz?', 'Nie. Obraz z kamery sa spracováva výhradne lokálne v tvojom prehliadači (technológia WebGazer) — nikam sa neposiela ani neukladá. Slúži len na odhad, ako veľmi si počas testu sledoval/a obrazovku, čo je súčasť finálnej analýzy.'],
-  ['Čo ak mi vypadne internet alebo zavriem prehliadač?', 'Pokus zostane rozbehnutý. Vrátiš sa cez ten istý odkaz, prihlásiš sa a pokračuješ presne tam, kde si skončil/a — otázky aj tvoje doterajšie odpovede ostávajú zachované.'],
-  ['Čím sa to líši od bežného tréningu v SP Tréner?', 'Bežný tréning je na neobmedzené precvičovanie jednotlivých okruhov, kedykoľvek, bez tlaku. SP Generálka je presný opak — jednorázová, plná simulácia s reálnymi podmienkami (čas, anti-cheat, jeden pokus), určená tesne pred ostrým testom, aby si vedel/a presne, na čom si.'],
-  ['Môžem si kúpiť viac pokusov?', 'Áno — každý nákup je samostatný, nový pokus s úplne novým, AI vygenerovaným testom. Nič sa neopakuje.'],
-];
-
 function renderLanding() {
+  const faqItems = FAQ_ITEMS[currentLang] || FAQ_ITEMS.sk;
   document.getElementById('mainWrap').innerHTML = `
     <section class="gk-hero">
-      <div class="gk-hero-eyebrow">Jednorázová generálka pred ostrým testom</div>
-      <h1>Zisti presne,<br>ako to <em>zajtra dopadne.</em></h1>
-      <p class="gk-hero-sub">Kompletný AI-generovaný VŠP test v reálnych podmienkach — časomiera, celoobrazovkový režim, sledovanie pozornosti kamerou. Jeden nákup, jeden pokus, hĺbková AI analýza výsledku.</p>
+      <div class="gk-hero-eyebrow">${t('heroEyebrow')}</div>
+      <h1>${t('heroTitle')}</h1>
+      <p class="gk-hero-sub">${t('heroSub')}</p>
       <div class="gk-hero-cta">
-        <button class="btn" id="buyBtnHero" onclick="startCheckout()">Kúpiť za 5,90 € →</button>
+        <button class="btn" id="buyBtnHero" onclick="startCheckout()">${t('buyBtn')}</button>
         <div class="err" id="landingErr"></div>
-        <div class="gk-hero-note">Jednorázová platba · žiadne predplatné</div>
+        <div class="gk-hero-note">${t('heroNote')}</div>
       </div>
       <div class="gk-stats">
-        <div class="gk-stat"><span class="gk-stat-val">66</span><span class="gk-stat-label">nových úloh</span></div>
-        <div class="gk-stat"><span class="gk-stat-val">80</span><span class="gk-stat-label">minút naostro</span></div>
-        <div class="gk-stat"><span class="gk-stat-val">1</span><span class="gk-stat-label">pokus, bez druhej šance</span></div>
+        <div class="gk-stat"><span class="gk-stat-val">66</span><span class="gk-stat-label">${t('statTasks')}</span></div>
+        <div class="gk-stat"><span class="gk-stat-val">80</span><span class="gk-stat-label">${t('statMinutes')}</span></div>
+        <div class="gk-stat"><span class="gk-stat-val">1</span><span class="gk-stat-label">${t('statAttempt')}</span></div>
       </div>
     </section>
 
     <section class="gk-section gk-fullbleed">
       <div class="gk-section-inner">
         <div class="gk-section-head">
-          <div class="gk-section-eyebrow">Ako to funguje</div>
-          <h2>Štyri kroky k presnému obrazu, ako na tom si</h2>
+          <div class="gk-section-eyebrow">${t('howEyebrow')}</div>
+          <h2>${t('howTitle')}</h2>
         </div>
         <div class="gk-steps">
-          <div class="gk-step"><div class="gk-step-num">01</div><h3>Zaplatíš a spustíš, keď si pripravený</h3><p>Kúpiš jeden pokus, dostaneš odkaz na email a spustíš test presne vtedy, keď máš súvislý nerušený čas.</p></div>
-          <div class="gk-step"><div class="gk-step-num">02</div><h3>AI vygeneruje úplne nový test</h3><p>66 úloh vytvorených špeciálne pre tvoj pokus — nikdy sa neopakujú, žiadne memorovanie odpovedí.</p></div>
-          <div class="gk-step"><div class="gk-step-num">03</div><h3>Beží presne ako naostro</h3><p>Celá obrazovka, časomiera po fázach (35 + 45 minút), kamera sleduje pozornosť — bez druhej šance.</p></div>
-          <div class="gk-step"><div class="gk-step-num">04</div><h3>Dostaneš hĺbkovú AI analýzu</h3><p>Odhad percentilu, konkrétne slabé a silné okruhy, rozbor tvojho správania a odporúčania na posledné dni.</p></div>
+          <div class="gk-step"><div class="gk-step-num">01</div><h3>${t('step1Title')}</h3><p>${t('step1Body')}</p></div>
+          <div class="gk-step"><div class="gk-step-num">02</div><h3>${t('step2Title')}</h3><p>${t('step2Body')}</p></div>
+          <div class="gk-step"><div class="gk-step-num">03</div><h3>${t('step3Title')}</h3><p>${t('step3Body')}</p></div>
+          <div class="gk-step"><div class="gk-step-num">04</div><h3>${t('step4Title')}</h3><p>${t('step4Body')}</p></div>
         </div>
       </div>
     </section>
@@ -311,16 +575,16 @@ function renderLanding() {
     <section class="gk-section gk-fullbleed">
       <div class="gk-section-inner">
         <div class="gk-section-head">
-          <div class="gk-section-eyebrow">Prečo nie je to len ďalší test</div>
-          <h2>Čo najvernejšia simulácia skutočného dňa</h2>
+          <div class="gk-section-eyebrow">${t('whyEyebrow')}</div>
+          <h2>${t('whyTitle')}</h2>
         </div>
         <div class="gk-features">
-          <div class="gk-feature"><div class="gk-feature-icon">🧠</div><h3>66 úplne nových úloh</h3><p>33 verbálnych + 33 analytických, generovaných AI naostro pre tvoj pokus — presne podľa reálnej VŠP štruktúry okruhov.</p></div>
-          <div class="gk-feature"><div class="gk-feature-icon">⏱️</div><h3>Reálna časomiera po fázach</h3><p>35 minút na verbálnu časť, 45 na analytickú — presne ako na ostrom teste. Do ďalšej fázy sa nedá prejsť skôr, než vyprší čas.</p></div>
-          <div class="gk-feature"><div class="gk-feature-icon">🔒</div><h3>Anti-cheat kontrola</h3><p>Celoobrazovkový režim, sledovanie opustenia fullscreenu aj prepínania okien — čo najbližšie k podmienkam skutočnej skúšky.</p></div>
-          <div class="gk-feature"><div class="gk-feature-icon">📷</div><h3>Sledovanie pozornosti kamerou</h3><p>Lokálne v prehliadači, nič sa neukladá ani neposiela — len odhad, ako veľmi si sledoval/a obrazovku.</p></div>
-          <div class="gk-feature"><div class="gk-feature-icon">📊</div><h3>Hĺbková AI analýza</h3><p>Nie len skóre — rozpad podľa okruhov, či ti zmeny odpovedí pomohli alebo škodili, a konkrétne odporúčania.</p></div>
-          <div class="gk-feature"><div class="gk-feature-icon">🎯</div><h3>Jeden pokus, ako naostro</h3><p>Žiadne opakovanie, žiadna druhá šanca — presne taký tlak, aký zažiješ na skutočných prijímačkách.</p></div>
+          <div class="gk-feature"><div class="gk-feature-icon">🧠</div><h3>${t('feat1Title')}</h3><p>${t('feat1Body')}</p></div>
+          <div class="gk-feature"><div class="gk-feature-icon">⏱️</div><h3>${t('feat2Title')}</h3><p>${t('feat2Body')}</p></div>
+          <div class="gk-feature"><div class="gk-feature-icon">🔒</div><h3>${t('feat3Title')}</h3><p>${t('feat3Body')}</p></div>
+          <div class="gk-feature"><div class="gk-feature-icon">📷</div><h3>${t('feat4Title')}</h3><p>${t('feat4Body')}</p></div>
+          <div class="gk-feature"><div class="gk-feature-icon">📊</div><h3>${t('feat5Title')}</h3><p>${t('feat5Body')}</p></div>
+          <div class="gk-feature"><div class="gk-feature-icon">🎯</div><h3>${t('feat6Title')}</h3><p>${t('feat6Body')}</p></div>
         </div>
       </div>
     </section>
@@ -328,17 +592,17 @@ function renderLanding() {
     <section class="gk-section gk-fullbleed">
       <div class="gk-section-inner">
         <div class="gk-section-head">
-          <div class="gk-section-eyebrow">Výstup</div>
-          <h2>Čo presne sa dozvieš po odovzdaní</h2>
+          <div class="gk-section-eyebrow">${t('outputEyebrow')}</div>
+          <h2>${t('outputTitle')}</h2>
         </div>
         <div class="gk-reveal">
           <ul>
-            <li>Odhad pravdepodobného percentilu na ostrom teste — zvlášť pre verbálnu aj analytickú časť</li>
-            <li>Konkrétne najslabšie a najsilnejšie okruhy podľa mena (nie len "analytická časť" všeobecne)</li>
-            <li>Rozbor zmien odpovedí — či ti preverovanie pomohlo, alebo bol lepší prvý inštinkt</li>
-            <li>Tempo a preskakovanie úloh pod tlakom času</li>
-            <li>Faktory pozornosti — prerušenia fullscreenu, prepínanie okien, sledovanosť obrazovky</li>
-            <li>Presne 3 konkrétne odporúčania, na čo sa zamerať v posledných dňoch pred ostrým testom</li>
+            <li>${t('reveal1')}</li>
+            <li>${t('reveal2')}</li>
+            <li>${t('reveal3')}</li>
+            <li>${t('reveal4')}</li>
+            <li>${t('reveal5')}</li>
+            <li>${t('reveal6')}</li>
           </ul>
         </div>
       </div>
@@ -347,11 +611,11 @@ function renderLanding() {
     <section class="gk-section gk-fullbleed">
       <div class="gk-section-inner" style="max-width:720px">
         <div class="gk-section-head">
-          <div class="gk-section-eyebrow">Časté otázky</div>
-          <h2>Ešte váhaš?</h2>
+          <div class="gk-section-eyebrow">${t('faqEyebrow')}</div>
+          <h2>${t('faqTitle')}</h2>
         </div>
         <div id="gkFaqList">
-          ${FAQ_ITEMS.map((item, i) => `
+          ${faqItems.map((item, i) => `
             <div class="gk-faq-item" id="gkFaq${i}">
               <button class="gk-faq-q" onclick="toggleFaq(${i})">${esc(item[0])}<span class="gk-faq-arrow">+</span></button>
               <div class="gk-faq-a" id="gkFaqA${i}"><div class="gk-faq-a-inner">${esc(item[1])}</div></div>
@@ -362,32 +626,32 @@ function renderLanding() {
     </section>
 
     <section class="gk-final gk-fullbleed">
-      <h2>Pripravený/á zistiť, na čom naozaj si?</h2>
-      <p>Jeden kompletný test, reálne podmienky, hĺbková AI analýza. Jednorázová platba, žiadne predplatné.</p>
+      <h2>${t('finalTitle')}</h2>
+      <p>${t('finalSub')}</p>
       <div class="gk-final-cta">
-        <button class="btn" id="buyBtnFinal" onclick="startCheckout()">Kúpiť za 5,90 € →</button>
+        <button class="btn" id="buyBtnFinal" onclick="startCheckout()">${t('buyBtn')}</button>
       </div>
     </section>
 
     <footer class="gk-footer">
-      <div class="gk-footer-logo">SP TRÉNER — AI príprava na prijímačky © 2026</div>
+      <div class="gk-footer-logo">${t('footerLogo')}</div>
       <div class="gk-footer-links">
-        <a href="https://sptrener.online/app">Aplikácia</a>
-        <a href="mailto:juraj@jurajkurek.com">Kontakt</a>
-        <a href="/legal.html#vop">VOP</a>
-        <a href="/legal.html#privacy">Súkromie</a>
+        <a href="https://sptrener.online/app">${t('footerApp')}</a>
+        <a href="mailto:juraj@jurajkurek.com">${t('footerContact')}</a>
+        <a href="/legal.html#vop">${t('footerVop')}</a>
+        <a href="/legal.html#privacy">${t('footerPrivacy')}</a>
       </div>
     </footer>
 
     <div class="gk-sticky" id="gkSticky">
-      <div class="gk-sticky-text"><b>SP Generálka — 5,90 €</b>Jeden pokus, reálne podmienky</div>
-      <button class="gk-sticky-btn" onclick="startCheckout()">Kúpiť →</button>
+      <div class="gk-sticky-text"><b>${t('stickyLabel')}</b>${t('stickySub')}</div>
+      <button class="gk-sticky-btn" onclick="startCheckout()">${t('stickyBtn')}</button>
     </div>
   `;
   if (!currentUser) {
     ['buyBtnHero', 'buyBtnFinal'].forEach(id => {
       const btn = document.getElementById(id);
-      btn.textContent = 'Prihlásiť sa cez Google →';
+      btn.textContent = t('loginBtn');
       btn.onclick = signIn;
     });
   }
@@ -417,9 +681,9 @@ async function startCheckout() {
 
 function renderNeedsLogin() {
   document.getElementById('mainWrap').innerHTML = `
-    <h1>Prihlás sa</h1>
-    <p>Tvoj pokus SP Generálky je viazaný na tvoj Google účet.</p>
-    <div class="card"><button class="btn" onclick="signIn()">Prihlásiť sa cez Google →</button></div>
+    <h1>${t('needsLoginTitle')}</h1>
+    <p>${t('needsLoginSub')}</p>
+    <div class="card"><button class="btn" onclick="signIn()">${t('loginBtn')}</button></div>
   `;
 }
 
@@ -428,25 +692,18 @@ function renderError(msg) {
   document.getElementById('examTop').style.display = 'none';
   document.getElementById('examBody').style.display = 'none';
   document.getElementById('examBottom').style.display = 'none';
-  document.getElementById('mainWrap').innerHTML = `<h1>Chyba</h1><div class="card"><p>${esc(msg)}</p><button class="btn" onclick="location.reload()">Skúsiť znova →</button></div>`;
+  document.getElementById('mainWrap').innerHTML = `<h1>${t('errorTitle')}</h1><div class="card"><p>${esc(msg)}</p><button class="btn" onclick="location.reload()">${t('retryBtn')}</button></div>`;
 }
 
 // ─────────────────────────── INSTRUCTIONS ───────────────────────────
 function renderInstructions() {
   document.getElementById('mainWrap').innerHTML = `
-    <div class="eyebrow">Pripravené</div>
-    <h1>Tvoj pokus čaká</h1>
-    <p>Než spustíš test, prečítaj si toto — máš na neho <b>jeden jediný pokus</b>.</p>
-    <div class="warn-box">
-      <b>Pred spustením:</b><br>
-      • Vyhraď si súvislý nerušený čas (cca 90 minút)<br>
-      • Uisti sa, že máš funkčné pripojenie na internet<br>
-      • Test beží v celoobrazovkovom režime — opustenie sa zaznamenáva<br>
-      • Test vyžaduje prístup ku kamere kvôli sledovaniu pozornosti — obraz sa nikam neukladá ani neposiela, spracováva sa len v prehliadači<br>
-      • Test sa nedá pozastaviť ani reštartovať
-    </div>
+    <div class="eyebrow">${t('readyEyebrow')}</div>
+    <h1>${t('readyTitle')}</h1>
+    <p>${t('readySub')}</p>
+    <div class="warn-box">${t('instructionsWarnBox')}</div>
     <div class="card">
-      <button class="btn" id="startBtn" onclick="startCalibration()">Spustiť test →</button>
+      <button class="btn" id="startBtn" onclick="startCalibration()">${t('startBtn')}</button>
       <div class="err" id="startErr"></div>
     </div>
   `;
@@ -454,9 +711,9 @@ function renderInstructions() {
 
 function renderResumePrompt() {
   document.getElementById('mainWrap').innerHTML = `
-    <h1>Pokus je rozbehnutý</h1>
-    <p>Tvoj test už bol spustený. Pokračuj tam, kde si skončil/a — otázky ostávajú rovnaké.</p>
-    <div class="card"><button class="btn" onclick="startCalibration()">Pokračovať v teste →</button></div>
+    <h1>${t('resumeTitle')}</h1>
+    <p>${t('resumeSub')}</p>
+    <div class="card"><button class="btn" onclick="startCalibration()">${t('resumeBtn')}</button></div>
   `;
 }
 
@@ -526,9 +783,9 @@ async function startCalibration() {
 
 function renderCalibrationStep() {
   document.getElementById('mainWrap').innerHTML = `
-    <div class="eyebrow">Kalibrácia kamery</div>
-    <h1>Bodka ${calibIdx + 1} / ${CALIB_POINTS.length}</h1>
-    <p>Pozeraj sa priamo na bodku a klikni na ňu ${CALIB_CLICKS_PER_POINT}×. Zlepší to presnosť sledovania pozornosti počas testu.</p>
+    <div class="eyebrow">${t('calibEyebrow')}</div>
+    <h1>${t('calibTitle', { n: calibIdx + 1, total: CALIB_POINTS.length })}</h1>
+    <p>${t('calibSub', { clicks: CALIB_CLICKS_PER_POINT })}</p>
   `;
   const [x, y] = CALIB_POINTS[calibIdx];
   const dot = document.createElement('div');
@@ -553,9 +810,9 @@ function onCalibDotClick() {
 
 async function startExamAfterCalibration() {
   document.getElementById('mainWrap').innerHTML = `
-    <div class="eyebrow">Príprava</div>
-    <h1>Pripravujeme prvé otázky…</h1>
-    <p>Zvyšok testu AI dopĺňa na pozadí, kým budeš odpovedať. Nezatváraj ani neobnovuj stránku.</p>
+    <div class="eyebrow">${t('prepEyebrow')}</div>
+    <h1>${t('prepTitle')}</h1>
+    <p>${t('prepSub')}</p>
   `;
   try {
     const data = await apiFetch('/api/generalka/attempt/' + encodeURIComponent(token) + '/start', { method: 'POST' });
@@ -576,7 +833,7 @@ async function startExamAfterCalibration() {
     startQuestionsPolling();
     renderQuestion();
   } catch (e) {
-    renderError(e.message + ' Skús obnoviť stránku a spustiť test znova.');
+    renderError(e.message + t('examErrorSuffix'));
   }
 }
 
@@ -674,7 +931,7 @@ function updateTimerDisplay() {
   const m = Math.floor(remaining / 60), s = remaining % 60;
   const el = document.getElementById('examTimer');
   if (!el) return;
-  el.textContent = (phase === 'verbal' ? 'Verbálna časť · ' : 'Analytická časť · ') + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+  el.textContent = (phase === 'verbal' ? t('verbalPhase') : t('analyticalPhase')) + ' · ' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
   el.classList.toggle('low', remaining < 60);
 }
 function switchToAnalyticalPhase() {
@@ -691,15 +948,15 @@ function switchToAnalyticalPhase() {
 function renderQuestion() {
   const q = questions[currentIdx];
   const answered = Object.keys(answers).length;
-  document.getElementById('examProgress').textContent = 'Otázka ' + (currentIdx + 1) + ' / ' + totalExpected + ' · Zodpovedané: ' + answered;
+  document.getElementById('examProgress').textContent = t('examProgress', { n: currentIdx + 1, total: totalExpected, answered });
   if (!q) {
-    document.getElementById('examBody').innerHTML = `<div class="q-text">AI ešte pripravuje túto časť testu, chvíľku strpenia…</div>`;
-    document.getElementById('examBottom').innerHTML = `<button onclick="prevQuestion()" ${currentIdx === 0 ? 'disabled' : ''}>← Predchádzajúca</button><button class="primary" disabled>Načítavam…</button>`;
+    document.getElementById('examBody').innerHTML = `<div class="q-text">${t('aiPreparingPart')}</div>`;
+    document.getElementById('examBottom').innerHTML = `<button onclick="prevQuestion()" ${currentIdx === 0 ? 'disabled' : ''}>${t('prevBtn')}</button><button class="primary" disabled>${t('loadingBtn')}</button>`;
     return;
   }
   const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
   document.getElementById('examBody').innerHTML = `
-    <div class="q-part">${q.part === 'verbal' ? 'Verbálna časť' : 'Analytická časť'} — ${esc(q.topic || '')}</div>
+    <div class="q-part">${q.part === 'verbal' ? t('verbalPhase') : t('analyticalPhase')} — ${esc(q.topic || '')}</div>
     ${q.context ? `<div class="q-context">${esc(q.context)}</div>` : ''}
     <div class="q-text">${esc(q.text)}</div>
     <div class="q-options">
@@ -716,14 +973,14 @@ function renderQuestion() {
   // vygenerovaná na pozadí — fáza sa mení výhradne cez switchToAnalyticalPhase().
   const nextBlockedByPhase = nextQ && nextQ.part !== phase;
   document.getElementById('examBottom').innerHTML = `
-    <button onclick="prevQuestion()" ${currentIdx === 0 ? 'disabled' : ''}>← Predchádzajúca</button>
+    <button onclick="prevQuestion()" ${currentIdx === 0 ? 'disabled' : ''}>${t('prevBtn')}</button>
     ${isLastExpected
-      ? '<button class="primary" onclick="confirmSubmit()">Odovzdať test →</button>'
+      ? `<button class="primary" onclick="confirmSubmit()">${t('submitBtn')}</button>`
       : (nextBlockedByPhase
-          ? '<button class="primary" disabled>Čakaj na koniec časového limitu tejto časti…</button>'
+          ? `<button class="primary" disabled>${t('waitPhaseBtn')}</button>`
           : (nextQ
-              ? '<button class="primary" onclick="nextQuestion()">Ďalšia →</button>'
-              : '<button class="primary" disabled>Načítavam ďalšiu otázku…</button>'))}
+              ? `<button class="primary" onclick="nextQuestion()">${t('nextBtn')}</button>`
+              : `<button class="primary" disabled>${t('loadingNextBtn')}</button>`))}
   `;
 }
 
@@ -741,9 +998,7 @@ function prevQuestion() {
 }
 function confirmSubmit() {
   const unanswered = questions.length - Object.keys(answers).length;
-  const msg = unanswered > 0
-    ? `Máš ${unanswered} nezodpovedaných úloh. Naozaj chceš odovzdať test? Toto je tvoj jediný pokus.`
-    : 'Naozaj chceš odovzdať test? Toto je tvoj jediný pokus, po odovzdaní sa už nedá zmeniť.';
+  const msg = unanswered > 0 ? t('confirmUnanswered', { n: unanswered }) : t('confirmAllAnswered');
   if (confirm(msg)) submitExam();
 }
 
@@ -754,7 +1009,7 @@ async function submitExam() {
   stopWebcamTracking();
   window.removeEventListener('beforeunload', beforeUnloadHandler);
   const durationS = Math.round((Date.now() - examStartedAt) / 1000);
-  document.getElementById('examBody').innerHTML = '<p style="text-align:center;margin-top:3rem">Vyhodnocujem a generujem analýzu…</p>';
+  document.getElementById('examBody').innerHTML = `<p style="text-align:center;margin-top:3rem">${t('evaluatingMsg')}</p>`;
   document.getElementById('examBottom').style.display = 'none';
   document.getElementById('examTop').style.display = 'none';
   try {
@@ -773,30 +1028,30 @@ async function submitExam() {
 
 // ─────────────────────────── REPORT ───────────────────────────
 async function renderReport() {
-  document.getElementById('mainWrap').innerHTML = '<p style="text-align:center;margin-top:3rem">Načítavam report…</p>';
+  document.getElementById('mainWrap').innerHTML = `<p style="text-align:center;margin-top:3rem">${t('loadingReport')}</p>`;
   try {
     const data = await apiFetch('/api/generalka/attempt/' + encodeURIComponent(token) + '/report');
     document.getElementById('mainWrap').innerHTML = `
-      <div class="eyebrow">Výsledok</div>
-      <h1>Tvoja SP Generálka</h1>
+      <div class="eyebrow">${t('resultEyebrow')}</div>
+      <h1>${t('resultTitle')}</h1>
       <div class="score-hero">
         <div class="score-num">${data.correct}/${(data.questions || []).length}</div>
-        <div class="score-sub">správnych odpovedí</div>
+        <div class="score-sub">${t('correctAnswersLabel')}</div>
       </div>
       <div class="pct-row">
-        <div class="pct-box"><div class="val">P${data.verbalPct ?? '—'}</div><div class="label">Verbálna</div></div>
-        <div class="pct-box"><div class="val">P${data.analytPct ?? '—'}</div><div class="label">Analytická</div></div>
-        <div class="pct-box"><div class="val">P${data.estPct ?? '—'}</div><div class="label">Odhad celkovo</div></div>
+        <div class="pct-box"><div class="val">P${data.verbalPct ?? '—'}</div><div class="label">${t('verbalLabel')}</div></div>
+        <div class="pct-box"><div class="val">P${data.analytPct ?? '—'}</div><div class="label">${t('analyticalLabel')}</div></div>
+        <div class="pct-box"><div class="val">P${data.estPct ?? '—'}</div><div class="label">${t('estimateLabel')}</div></div>
       </div>
       <div class="card">
-        <h2>AI analýza</h2>
-        <div class="analysis-text">${esc(data.aiAnalysis || 'Analýza sa nepodarila vygenerovať.')}</div>
+        <h2>${t('aiAnalysisTitle')}</h2>
+        <div class="analysis-text">${esc(data.aiAnalysis || t('analysisFailed'))}</div>
       </div>
       <div class="anticheat-summary">
-        Trvanie: ${data.durationS ? Math.round(data.durationS / 60) + ' min' : '—'} ·
-        Opustenie celej obrazovky: ${(data.anticheatFlags && data.anticheatFlags.fullscreenExits) || 0}× ·
-        Prepnutie okna: ${(data.anticheatFlags && data.anticheatFlags.tabSwitches) || 0}× ·
-        Pozornosť (kamera): ${(data.webcamSummary && data.webcamSummary.attentionPct != null) ? data.webcamSummary.attentionPct + '%' : 'nedostupné'}
+        ${t('durationLabel')}: ${data.durationS ? Math.round(data.durationS / 60) + ' min' : '—'} ·
+        ${t('fullscreenExitsLabel')}: ${(data.anticheatFlags && data.anticheatFlags.fullscreenExits) || 0}× ·
+        ${t('tabSwitchesLabel')}: ${(data.anticheatFlags && data.anticheatFlags.tabSwitches) || 0}× ·
+        ${t('attentionLabel')}: ${(data.webcamSummary && data.webcamSummary.attentionPct != null) ? data.webcamSummary.attentionPct + '%' : t('attentionUnavailable')}
       </div>
     `;
   } catch (e) {
