@@ -58,6 +58,9 @@ async function callClaudeText(prompt, maxTokens) {
     model = next;
   }
   const data = await response.json();
+  if (data.stop_reason === 'max_tokens') {
+    console.error('generalka callClaudeText: odpoveď orezaná na max_tokens=' + maxTokens);
+  }
   return (data.content || []).map(b => b.text || '').join('').trim();
 }
 
@@ -80,12 +83,13 @@ Pole "questions" musí mať presne ${count} prvkov.`;
 }
 
 async function generateBatch(part, count) {
-  const text = await callClaudeText(buildGenerationPrompt(part, count), 8000);
+  const text = await callClaudeText(buildGenerationPrompt(part, count), 16000);
   const match = text.match(/\{[\s\S]*\}/);
   let parsed;
   try {
     parsed = JSON.parse(match ? match[0] : text);
   } catch (e) {
+    console.error('generalka generateBatch(' + part + ') neplatny JSON, koniec odpovede:', text.slice(-300));
     throw new Error('AI vrátilo neplatný JSON pri generovaní testu.');
   }
   if (!Array.isArray(parsed.questions) || parsed.questions.length !== count) {
