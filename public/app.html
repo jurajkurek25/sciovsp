@@ -846,11 +846,11 @@ h1.title span{font-style:italic;color:var(--purple2)}
 <div class="generalka-offer-overlay" id="generalkaOfferModal" style="display:none;" onclick="if(event.target===this)closeGeneralkaOfferPopup()">
   <div class="generalka-offer-box">
     <button class="elite-modal-close" onclick="closeGeneralkaOfferPopup()">✕</button>
-    <div style="font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--volt);margin-bottom:.6rem">Tvoj test sa blíži</div>
+    <div style="font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--volt);margin-bottom:.6rem" data-i18n="genOfferEyebrow"></div>
     <div id="generalkaOfferDays" style="font-family:var(--serif);font-size:1.35rem;font-weight:400;margin-bottom:.5rem"></div>
-    <p style="color:var(--text2);font-size:.9rem;line-height:1.6;margin-bottom:1.2rem">Vyskúšaj si <b style="color:var(--text)">SP Generálku</b> — kompletný 66-úlohový AI test v reálnych podmienkach (časomiera, anti-cheat, sledovanie pozornosti) a hĺbkovú AI analýzu, presne pred ostrým dňom.</p>
-    <button class="elite-plan-btn upgrade" style="width:100%" onclick="goToGeneralka()">Vyskúšať za 5,90 € →</button>
-    <button style="width:100%;margin-top:.5rem;background:transparent;border:none;color:var(--text3);font-family:var(--mono);font-size:.75rem;cursor:pointer;padding:.5rem" onclick="closeGeneralkaOfferPopup()">Možno neskôr</button>
+    <p style="color:var(--text2);font-size:.9rem;line-height:1.6;margin-bottom:1.2rem" data-i18n="genOfferBody"></p>
+    <button class="elite-plan-btn upgrade" style="width:100%" onclick="goToGeneralka()" data-i18n="genOfferCta"></button>
+    <button style="width:100%;margin-top:.5rem;background:transparent;border:none;color:var(--text3);font-family:var(--mono);font-size:.75rem;cursor:pointer;padding:.5rem" onclick="closeGeneralkaOfferPopup()" data-i18n="genOfferLater"></button>
   </div>
 </div>
 
@@ -1183,6 +1183,10 @@ const TRANSLATIONS={
     checkoutError:'⚠️ Chyba platby.',networkError:'⚠️ Chyba siete.',
     premiumActivated:'✅ Predplatné aktivované!',paymentCancelled:'Platba zrušená.',
     manageSub:'⚙ Spravovať predplatné',loggedOut:'Odhlásený.',
+    genOfferEyebrow:'Tvoj test sa blíži',
+    genOfferBody:'Vyskúšaj si <b style="color:var(--text)">SP Generálku</b> — kompletný 66-úlohový AI test v reálnych podmienkach (časomiera, anti-cheat, sledovanie pozornosti) a hĺbkovú AI analýzu, presne pred ostrým dňom.',
+    genOfferCta:'Vyskúšať za 5,90 € →',genOfferLater:'Možno neskôr',
+    genOfferTomorrow:'Test máš už zajtra.',genOfferDays:'Test máš už o {d} dni.',
     anonLimitMsg:'⚠️ Pre ďalší test sa prihlás cez Google.',registeredLimitMsg:'⚠️ Dosiahol si limit testov.',
     generateFirst:'Najprv vygeneruj nejaké úlohy!',
     aiFullGenerating:'🤖 Generujem celý AI test...',aiFullDesc:'Verbálna + Analytická časť',
@@ -1336,6 +1340,10 @@ const TRANSLATIONS={
     checkoutError:'⚠️ Chyba platby.',networkError:'⚠️ Chyba sítě.',
     premiumActivated:'✅ Předplatné aktivováno!',paymentCancelled:'Platba zrušena.',
     manageSub:'⚙ Spravovat předplatné',loggedOut:'Odhlášen.',
+    genOfferEyebrow:'Tvůj test se blíží',
+    genOfferBody:'Vyzkoušej si <b style="color:var(--text)">SP Generálku</b> — kompletní 66-úlohový AI test v reálných podmínkách (časomíra, anti-cheat, sledování pozornosti) a hloubkovou AI analýzu, přesně před ostrým dnem.',
+    genOfferCta:'Vyzkoušet za 5,90 € →',genOfferLater:'Možná později',
+    genOfferTomorrow:'Test máš už zítra.',genOfferDays:'Test máš už za {d} dny.',
     anonLimitMsg:'⚠️ Pro další test se přihlas přes Google.',registeredLimitMsg:'⚠️ Dosáhl jsi limitu testů.',
     generateFirst:'Nejprve vygeneruj nějaké úkoly!',
     aiFullGenerating:'🤖 Generuji celý AI test...',aiFullDesc:'Verbální + Analytická část',
@@ -4827,7 +4835,7 @@ function openGeneralkaOfferPopup(daysUntil){
   const el=document.getElementById('generalkaOfferModal');
   if(!el)return;
   const sub=document.getElementById('generalkaOfferDays');
-  if(sub)sub.textContent=daysUntil===1?'Test máš už zajtra.':('Test máš už o '+daysUntil+' dni.');
+  if(sub)sub.textContent=daysUntil===1?t('genOfferTomorrow'):t('genOfferDays',{d:daysUntil});
   el.style.display='flex';
 }
 function closeGeneralkaOfferPopup(){
