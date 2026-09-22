@@ -241,21 +241,68 @@ function scoreAttempt(questions, answers) {
   return { correct, wrong, skipped, verbalPct, analytPct, estPct, score };
 }
 
-async function generateAnalysis({ questions, events, correct, wrong, skipped, durationS, verbalPct, analytPct, estPct, anticheatFlags }) {
-  const answerChanges = (events || []).filter(e => e.type === 'answer_change').length;
+// Rozpad úspešnosti podľa konkrétneho okruhu (nie len verbál/analytika ako
+// celok) — dáva AI analýze reálne konkrétne fakty namiesto všeobecných fráz.
+function buildTopicBreakdown(questions, answers) {
+  const byTopic = {};
+  (questions || []).forEach((q, idx) => {
+    const topic = q.topic || (q.part === 'verbal' ? 'Verbálna časť' : 'Analytická časť');
+    if (!byTopic[topic]) byTopic[topic] = { correct: 0, total: 0 };
+    byTopic[topic].total++;
+    if (answers[idx] === q.answer) byTopic[topic].correct++;
+  });
+  return Object.entries(byTopic).map(([topic, s]) => ({ topic, correct: s.correct, total: s.total, pct: s.total ? Math.round((s.correct / s.total) * 100) : 0 }));
+}
+
+// Zmena odpovede môže byť "preverenie pomohlo" (zo zlej na správnu) alebo
+// "prvý inštinkt bol lepší" (zo správnej na zlú) — toto rozlíšenie je oveľa
+// užitočnejšie než len počet zmien.
+function buildAnswerChangeStats(questions, events) {
+  let toCorrect = 0, toWrong = 0, total = 0;
+  (events || []).forEach(e => {
+    if (e.type !== 'answer_change') return;
+    total++;
+    const q = questions[e.questionIdx];
+    if (!q) return;
+    if (e.to === q.answer) toCorrect++;
+    else if (e.from === q.answer) toWrong++;
+  });
+  return { total, toCorrect, toWrong };
+}
+
+async function generateAnalysis({ questions, answers, events, correct, wrong, skipped, durationS, verbalPct, analytPct, estPct, anticheatFlags, webcamSummary }) {
+  const topics = buildTopicBreakdown(questions, answers || {});
+  const sorted = [...topics].filter(t => t.total >= 2).sort((a, b) => a.pct - b.pct);
+  const weakest = sorted.slice(0, 3).map(t => `${t.topic} (${t.correct}/${t.total} = ${t.pct}%)`).join('; ') || 'nedostatok dát pre rozlíšenie';
+  const strongest = sorted.slice(-3).reverse().map(t => `${t.topic} (${t.correct}/${t.total} = ${t.pct}%)`).join('; ') || 'nedostatok dát pre rozlíšenie';
+  const changes = buildAnswerChangeStats(questions, events);
   const fullscreenExits = (anticheatFlags && anticheatFlags.fullscreenExits) || 0;
   const tabSwitches = (anticheatFlags && anticheatFlags.tabSwitches) || 0;
+  const windowBlurs = (anticheatFlags && anticheatFlags.windowBlurs) || 0;
+  const attentionPct = webcamSummary && webcamSummary.available && webcamSummary.attentionPct != null ? webcamSummary.attentionPct : null;
   const total = (questions || []).length || 66;
-  const prompt = `Si skúsený konzultant pre prípravu na VŠP prijímacie testy. Analyzuj priebeh testu SP Generálka pre jedného študenta a napíš stručnú, konkrétnu, ľudskú analýzu v slovenčine (max 300 slov):
-1. Zhodnoť pravdepodobný výsledok na ostrom teste (percentil, silné/slabé okruhy — verbálny odhad ${verbalPct}%, analytický odhad ${analytPct}%, celkový odhad ${estPct}%).
-2. Upozorni na vzorce správania — ${answerChanges} zmien odpovede počas testu, celkový čas ${durationS ? Math.round(durationS / 60) + ' minút' : 'neznámy'}, či boli úlohy preskočené pod tlakom času (${skipped} preskočených z ${total}).
-3. Ak boli zaznamenané prerušenia pozornosti (opustenie fullscreen ${fullscreenExits}×, prepnutie okna/aplikácie ${tabSwitches}×), stručne to spomeň ako možný faktor výkonu — bez moralizovania.
-4. Daj 2-3 konkrétne odporúčania, na čo sa zamerať pred ostrým testom.
 
-Skóre: ${correct} správne, ${wrong} nesprávne, ${skipped} preskočené (z ${total} úloh).
+  const prompt = `Si skúsený konzultant pre prípravu na VŠP/SCIO prijímacie testy. Dostaneš podrobné dáta z priebehu testu SP Generálka jedného študenta. Napíš hodnotnú, konkrétnu, dátami podloženú analýzu v slovenčine (400-600 slov) — nie všeobecné frázy, ktoré by sedeli na kohokoľvek, ale postrehy šité presne na tieto dáta.
 
-Píš priamo študentovi, v druhej osobe, povzbudivo ale úprimne. Obyčajný text, žiadny JSON, žiadne nadpisy s #.`;
-  return await callClaudeText(prompt, 1000);
+DÁTA:
+- Skóre: ${correct} správne, ${wrong} nesprávne, ${skipped} preskočené z ${total} úloh.
+- Odhad: verbálna časť ${verbalPct}%, analytická časť ${analytPct}%, celkový odhad percentilu ${estPct}%.
+- Najslabšie okruhy (podľa presnosti): ${weakest}.
+- Najsilnejšie okruhy: ${strongest}.
+- Zmeny odpovedí: ${changes.total} celkom — ${changes.toCorrect}× zo zlej na správnu (preverenie pomohlo), ${changes.toWrong}× zo správnej na zlú (prvý inštinkt bol lepší).
+- Celkový čas: ${durationS ? Math.round(durationS / 60) + ' minút' : 'neznámy'}.
+- Prerušenia pozornosti: opustenie celoobrazovkového režimu ${fullscreenExits}×, prepnutie okna/aplikácie ${tabSwitches}×, strata fokusu okna ${windowBlurs}×.
+${attentionPct != null ? `- Kamera odhaduje, že študent sledoval obrazovku počas ${attentionPct}% zaznamenaného času.` : '- Dáta z kamery nie sú k dispozícii.'}
+
+ŠTRUKTÚRA (plynulý text na odseky, žiadne nadpisy s #, žiadny markdown):
+1. Odhad výsledku na ostrom teste a čo to reálne znamená pre prijímačky.
+2. Konkrétne slabé a silné okruhy podľa mien (nie len "analytická časť" všeobecne) — na čo sa zamerať.
+3. Vzorce správania — či zmeny odpovedí pomohli alebo škodili, tempo, preskakovanie pod tlakom.
+4. Faktory pozornosti, ak boli zaznamenané prerušenia alebo nízka sledovanosť obrazovky — vecne, bez moralizovania.
+5. Presne 3 konkrétne, akčné odporúčania na posledné dni pred ostrým testom, šité na tohto študenta.
+
+Píš priamo študentovi, v druhej osobe, povzbudivo ale úprimne.`;
+  return await callClaudeText(prompt, 2000);
 }
 
 module.exports = function registerGeneralka(app) {
@@ -402,7 +449,7 @@ module.exports = function registerGeneralka(app) {
       const { correct, wrong, skipped, verbalPct, analytPct, estPct, score } = scoreAttempt(attempt.questions, answers);
       let aiAnalysis = null;
       try {
-        aiAnalysis = await generateAnalysis({ questions: attempt.questions, events: attempt.events, correct, wrong, skipped, durationS, verbalPct, analytPct, estPct, anticheatFlags });
+        aiAnalysis = await generateAnalysis({ questions: attempt.questions, answers, events: attempt.events, correct, wrong, skipped, durationS, verbalPct, analytPct, estPct, anticheatFlags, webcamSummary });
       } catch (e) {
         console.error('generalka analysis error:', e.message);
       }
