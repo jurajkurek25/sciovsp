@@ -132,24 +132,28 @@ async function generateBatch(part, totalCount) {
   return chunks.flat();
 }
 
-// Postupné dopĺňanie zvyšných otázok na pozadí, kým študent už odpovedá na
-// tie prvé — po každej dávke sa priebežne uloží do DB, takže klient si ich
-// vie dotiahnuť cez GET .../questions.
+// Dopĺňanie zvyšných otázok na pozadí, kým študent už odpovedá na tie prvé.
+// Všetky dávky danej časti bežia PARALELNE (nie za sebou) — po dokončení
+// každej sa priebežne uloží do DB, takže klient si ich vie dotiahnuť cez
+// GET .../questions čo najskôr.
 async function generateRemaining(token, part, remainingCount, questionsSoFar) {
-  let all = questionsSoFar;
+  const chunkSizes = [];
   let remaining = remainingCount;
   while (remaining > 0) {
     const size = Math.min(CHUNK_SIZE, remaining);
+    chunkSizes.push(size);
+    remaining -= size;
+  }
+  let all = questionsSoFar;
+  await Promise.all(chunkSizes.map(async (size) => {
     try {
       const chunk = await generateChunk(part, size);
       all = all.concat(chunk);
       await supabase.from('generalka_attempts').update({ questions: all }).eq('attempt_token', token);
     } catch (e) {
-      console.error('generalka generateRemaining(' + part + ') vzdavam sa dalsej davky:', e.message);
-      return all;
+      console.error('generalka generateRemaining(' + part + ') davka zlyhala:', e.message);
     }
-    remaining -= size;
-  }
+  }));
   return all;
 }
 
