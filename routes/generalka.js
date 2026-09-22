@@ -132,42 +132,62 @@ async function generateBatch(part, totalCount) {
   return chunks.flat();
 }
 
-// Dopĺňanie zvyšných otázok na pozadí, kým študent už odpovedá na tie prvé.
-// Všetky dávky danej časti bežia PARALELNE (nie za sebou) — po dokončení
-// každej sa priebežne uloží do DB, takže klient si ich vie dotiahnuť cez
-// GET .../questions čo najskôr.
-async function generateRemaining(token, part, remainingCount, questionsSoFar) {
-  const chunkSizes = [];
-  let remaining = remainingCount;
+function chunkSizesFor(count) {
+  const sizes = [];
+  let remaining = count;
   while (remaining > 0) {
     const size = Math.min(CHUNK_SIZE, remaining);
-    chunkSizes.push(size);
+    sizes.push(size);
     remaining -= size;
   }
-  let all = questionsSoFar;
-  await Promise.all(chunkSizes.map(async (size) => {
-    try {
-      const chunk = await generateChunk(part, size);
-      all = all.concat(chunk);
-      await supabase.from('generalka_attempts').update({ questions: all }).eq('attempt_token', token);
-    } catch (e) {
-      console.error('generalka generateRemaining(' + part + ') davka zlyhala:', e.message);
-    }
-  }));
-  return all;
+  return sizes;
 }
 
+// Dopĺňanie zvyšných otázok na pozadí, kým študent už odpovedá na tie prvé.
+// VŠETKY dávky OBOCH častí (verbálna aj analytická) bežia naraz paralelne
+// hneď od začiatku — predošlá verzia čakala, kým celá verbálna časť
+// dobehne, až potom začala analytickú, čo takmer zdvojnásobovalo celkový
+// čakací čas. Poradie v poli questions (verbálne pred analytickými) sa aj
+// tak zachová, lebo sa vždy zapisuje verbalArr.concat(analytArr), nie
+// poradie podľa toho, ktorá dávka dobehla prvá. Zápisy do DB idú cez
+// jednoduchý front (writeQueue), aby sa navzájom nepredbehli v sieti a
+// neprepísal sa novší stav starším.
 async function generateInBackground(token, questionsSoFar) {
+  let verbalArr = questionsSoFar.filter(q => q.part === 'verbal');
+  let analytArr = questionsSoFar.filter(q => q.part === 'analytical');
+  let writeQueue = Promise.resolve();
+  const persist = () => {
+    const snapshot = verbalArr.concat(analytArr);
+    writeQueue = writeQueue.then(() => supabase.from('generalka_attempts').update({ questions: snapshot }).eq('attempt_token', token));
+    return writeQueue;
+  };
+
+  const tasks = [];
+  chunkSizesFor(Math.max(0, VERBAL_COUNT - verbalArr.length)).forEach(size => {
+    tasks.push((async () => {
+      try {
+        const chunk = await generateChunk('verbal', size);
+        verbalArr = verbalArr.concat(chunk);
+        await persist();
+      } catch (e) {
+        console.error('generalka generateInBackground(verbal) davka zlyhala:', e.message);
+      }
+    })());
+  });
+  chunkSizesFor(Math.max(0, ANALYT_COUNT - analytArr.length)).forEach(size => {
+    tasks.push((async () => {
+      try {
+        const chunk = await generateChunk('analytical', size);
+        analytArr = analytArr.concat(chunk);
+        await persist();
+      } catch (e) {
+        console.error('generalka generateInBackground(analytical) davka zlyhala:', e.message);
+      }
+    })());
+  });
+
   try {
-    let all = questionsSoFar;
-    const verbalCount = all.filter(q => q.part === 'verbal').length;
-    if (verbalCount < VERBAL_COUNT) {
-      all = await generateRemaining(token, 'verbal', VERBAL_COUNT - verbalCount, all);
-    }
-    const analytCount = all.filter(q => q.part === 'analytical').length;
-    if (analytCount < ANALYT_COUNT) {
-      all = await generateRemaining(token, 'analytical', ANALYT_COUNT - analytCount, all);
-    }
+    await Promise.all(tasks);
   } catch (e) {
     console.error('generalka generateInBackground fatal error:', e.message);
   }
