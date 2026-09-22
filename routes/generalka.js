@@ -67,9 +67,11 @@ async function callClaudeText(prompt, maxTokens) {
 const VERBAL_TOPICS = ['Doplňovanie do viet', 'Vzťahy medzi slovami (analógie)', 'Antosynonymá', 'Koherencia textov', 'Vyvodzovanie z krátkych textov', 'Porozumenie textu', 'Porovnávacie čítanie'];
 const ANALYT_TOPICS = ['Grafy a tabuľky', 'Porovnávanie hodnôt', 'Postačujúce podmienky', 'Slovné úlohy', 'Verbalizácia/matematizácia', 'Operácie a tajné operácie', 'Zebry (logické úlohy)'];
 
-function buildGenerationPrompt(part, count) {
+function buildGenerationPrompt(part, count, lang) {
   const topics = part === 'verbal' ? VERBAL_TOPICS : ANALYT_TOPICS;
+  const langLabel = lang === 'cz' ? 'češtine' : 'slovenčine';
   return `Si odborník na tvorbu úloh pre slovenské SCIO Všeobecné študijné predpoklady (VŠP) testy. Vygeneruj presne ${count} ${part === 'verbal' ? 'VERBÁLNYCH' : 'ANALYTICKÝCH'} úloh, rovnomerne rozložených medzi tieto typy: ${topics.join(', ')}.
+Píš výhradne v ${langLabel} — vrátane názvu okruhu ("topic"), zadania, možností aj vysvetlenia.
 
 PRAVIDLÁ:
 - Úlohy musia byť jednoznačné, s presne jednou správnou odpoveďou.
@@ -109,8 +111,8 @@ function shuffleQuestionOptions(q) {
   return { ...q, options: order.map(i => opts[i]), answer: order.indexOf(q.answer) };
 }
 
-async function generateChunkOnce(part, count) {
-  const text = await callClaudeText(buildGenerationPrompt(part, count), 8000);
+async function generateChunkOnce(part, count, lang) {
+  const text = await callClaudeText(buildGenerationPrompt(part, count, lang), 8000);
   const match = text.match(/\{[\s\S]*\}/);
   let parsed;
   try {
@@ -127,25 +129,13 @@ async function generateChunkOnce(part, count) {
 
 // Claude občas vráti nevalidný/neúplný JSON — pred vzdaním sa to raz
 // zopakujeme (nový request, čistá šanca), až potom to hodíme ako chybu.
-async function generateChunk(part, count) {
+async function generateChunk(part, count, lang) {
   try {
-    return await generateChunkOnce(part, count);
+    return await generateChunkOnce(part, count, lang);
   } catch (e) {
     console.error('generalka generateChunk(' + part + ',' + count + ') zlyhalo, skusam znova:', e.message);
-    return await generateChunkOnce(part, count);
+    return await generateChunkOnce(part, count, lang);
   }
-}
-
-async function generateBatch(part, totalCount) {
-  const chunkSizes = [];
-  let remaining = totalCount;
-  while (remaining > 0) {
-    const size = Math.min(CHUNK_SIZE, remaining);
-    chunkSizes.push(size);
-    remaining -= size;
-  }
-  const chunks = await Promise.all(chunkSizes.map(size => generateChunk(part, size)));
-  return chunks.flat();
 }
 
 function chunkSizesFor(count) {
@@ -168,7 +158,7 @@ function chunkSizesFor(count) {
 // poradie podľa toho, ktorá dávka dobehla prvá. Zápisy do DB idú cez
 // jednoduchý front (writeQueue), aby sa navzájom nepredbehli v sieti a
 // neprepísal sa novší stav starším.
-async function generateInBackground(token, questionsSoFar) {
+async function generateInBackground(token, questionsSoFar, lang) {
   let verbalArr = questionsSoFar.filter(q => q.part === 'verbal');
   let analytArr = questionsSoFar.filter(q => q.part === 'analytical');
   let writeQueue = Promise.resolve();
@@ -182,7 +172,7 @@ async function generateInBackground(token, questionsSoFar) {
   chunkSizesFor(Math.max(0, VERBAL_COUNT - verbalArr.length)).forEach(size => {
     tasks.push((async () => {
       try {
-        const chunk = await generateChunk('verbal', size);
+        const chunk = await generateChunk('verbal', size, lang);
         verbalArr = verbalArr.concat(chunk);
         await persist();
       } catch (e) {
@@ -193,7 +183,7 @@ async function generateInBackground(token, questionsSoFar) {
   chunkSizesFor(Math.max(0, ANALYT_COUNT - analytArr.length)).forEach(size => {
     tasks.push((async () => {
       try {
-        const chunk = await generateChunk('analytical', size);
+        const chunk = await generateChunk('analytical', size, lang);
         analytArr = analytArr.concat(chunk);
         await persist();
       } catch (e) {
@@ -270,7 +260,8 @@ function buildAnswerChangeStats(questions, events) {
   return { total, toCorrect, toWrong };
 }
 
-async function generateAnalysis({ questions, answers, events, correct, wrong, skipped, durationS, verbalPct, analytPct, estPct, anticheatFlags, webcamSummary }) {
+async function generateAnalysis({ questions, answers, events, correct, wrong, skipped, durationS, verbalPct, analytPct, estPct, anticheatFlags, webcamSummary, lang }) {
+  const langLabel = lang === 'cz' ? 'češtine' : 'slovenčine';
   const topics = buildTopicBreakdown(questions, answers || {});
   const sorted = [...topics].filter(t => t.total >= 2).sort((a, b) => a.pct - b.pct);
   const weakest = sorted.slice(0, 3).map(t => `${t.topic} (${t.correct}/${t.total} = ${t.pct}%)`).join('; ') || 'nedostatok dát pre rozlíšenie';
@@ -282,7 +273,7 @@ async function generateAnalysis({ questions, answers, events, correct, wrong, sk
   const attentionPct = webcamSummary && webcamSummary.available && webcamSummary.attentionPct != null ? webcamSummary.attentionPct : null;
   const total = (questions || []).length || 66;
 
-  const prompt = `Si skúsený konzultant pre prípravu na VŠP/SCIO prijímacie testy. Dostaneš podrobné dáta z priebehu testu SP Generálka jedného študenta. Napíš hodnotnú, konkrétnu, dátami podloženú analýzu v slovenčine (400-600 slov) — nie všeobecné frázy, ktoré by sedeli na kohokoľvek, ale postrehy šité presne na tieto dáta.
+  const prompt = `Si skúsený konzultant pre prípravu na VŠP/SCIO prijímacie testy. Dostaneš podrobné dáta z priebehu testu SP Generálka jedného študenta. Napíš hodnotnú, konkrétnu, dátami podloženú analýzu v ${langLabel} (400-600 slov) — nie všeobecné frázy, ktoré by sedeli na kohokoľvek, ale postrehy šité presne na tieto dáta.
 
 DÁTA:
 - Skóre: ${correct} správne, ${wrong} nesprávne, ${skipped} preskočené z ${total} úloh.
@@ -382,12 +373,13 @@ module.exports = function registerGeneralka(app) {
         if (attempt.questions) return res.json({ status: attempt.status, questions: stripAnswers(attempt.questions), totalExpected: VERBAL_COUNT + ANALYT_COUNT });
         return res.status(400).json({ error: 'Tento pokus už bol spustený alebo dokončený.' });
       }
-      const starter = await generateChunk('verbal', STARTER_CHUNK_SIZE);
-      await supabase.from('generalka_attempts').update({ status: 'in_progress', questions: starter, started_at: new Date().toISOString() }).eq('attempt_token', req.params.token);
+      const lang = req.body?.lang === 'cz' ? 'cz' : 'sk';
+      const starter = await generateChunk('verbal', STARTER_CHUNK_SIZE, lang);
+      await supabase.from('generalka_attempts').update({ status: 'in_progress', questions: starter, lang, started_at: new Date().toISOString() }).eq('attempt_token', req.params.token);
       res.json({ status: 'in_progress', questions: stripAnswers(starter), totalExpected: VERBAL_COUNT + ANALYT_COUNT });
       // Fire-and-forget: zvyšné otázky sa dopĺňajú na pozadí, kým študent už
       // odpovedá na tie prvé — klient si ich priebežne dotiahne cez polling.
-      generateInBackground(req.params.token, starter);
+      generateInBackground(req.params.token, starter, lang);
     } catch (e) {
       console.error('generalka start error:', e.message);
       res.status(500).json({ error: e.message || 'Chyba pri generovaní testu.' });
@@ -449,7 +441,7 @@ module.exports = function registerGeneralka(app) {
       const { correct, wrong, skipped, verbalPct, analytPct, estPct, score } = scoreAttempt(attempt.questions, answers);
       let aiAnalysis = null;
       try {
-        aiAnalysis = await generateAnalysis({ questions: attempt.questions, answers, events: attempt.events, correct, wrong, skipped, durationS, verbalPct, analytPct, estPct, anticheatFlags, webcamSummary });
+        aiAnalysis = await generateAnalysis({ questions: attempt.questions, answers, events: attempt.events, correct, wrong, skipped, durationS, verbalPct, analytPct, estPct, anticheatFlags, webcamSummary, lang: attempt.lang });
       } catch (e) {
         console.error('generalka analysis error:', e.message);
       }

@@ -815,7 +815,7 @@ async function startExamAfterCalibration() {
     <p>${t('prepSub')}</p>
   `;
   try {
-    const data = await apiFetch('/api/generalka/attempt/' + encodeURIComponent(token) + '/start', { method: 'POST' });
+    const data = await apiFetch('/api/generalka/attempt/' + encodeURIComponent(token) + '/start', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ lang: currentLang }) });
     questions = data.questions;
     totalExpected = data.totalExpected || 66;
     if (!document.fullscreenElement) { await document.documentElement.requestFullscreen().catch(() => {}); }
