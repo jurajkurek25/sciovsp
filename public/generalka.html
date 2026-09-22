@@ -131,6 +131,13 @@ p{color:var(--text2)}
 .gk-final p{color:var(--text2);max-width:480px;margin:0 auto 1.8rem}
 .gk-final-cta{max-width:340px;margin:0 auto}
 
+.gk-footer{border-top:1px solid var(--border);padding:2rem 1.2rem 6rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+.gk-footer-logo{font-family:var(--mono);font-size:11px;letter-spacing:.13em;color:var(--text3)}
+.gk-footer-links{display:flex;gap:1.3rem;flex-wrap:wrap}
+.gk-footer-links a{font-size:.76rem;color:var(--text3);text-decoration:none;font-family:var(--mono);letter-spacing:.04em}
+.gk-footer-links a:hover{color:var(--text2)}
+@media(max-width:600px){.gk-footer{flex-direction:column;text-align:center;padding-bottom:6.5rem}}
+
 .gk-sticky{position:fixed;left:0;right:0;bottom:0;z-index:998;background:rgba(20,16,13,.95);backdrop-filter:blur(12px);border-top:1px solid var(--border2);padding:.75rem 1rem;display:none;align-items:center;gap:.75rem}
 .gk-sticky-text{flex:1;font-family:var(--mono);font-size:.72rem;color:var(--text2)}
 .gk-sticky-text b{color:var(--ignite);display:block;font-size:.82rem}
@@ -361,6 +368,16 @@ function renderLanding() {
         <button class="btn" id="buyBtnFinal" onclick="startCheckout()">Kúpiť za 5,90 € →</button>
       </div>
     </section>
+
+    <footer class="gk-footer gk-fullbleed">
+      <div class="gk-footer-logo">SP TRÉNER — AI príprava na prijímačky © 2026</div>
+      <div class="gk-footer-links">
+        <a href="https://sptrener.online/app">Aplikácia</a>
+        <a href="mailto:juraj@jurajkurek.com">Kontakt</a>
+        <a href="/legal.html#vop">VOP</a>
+        <a href="/legal.html#privacy">Súkromie</a>
+      </div>
+    </footer>
 
     <div class="gk-sticky" id="gkSticky">
       <div class="gk-sticky-text"><b>SP Generálka — 5,90 €</b>Jeden pokus, reálne podmienky</div>
