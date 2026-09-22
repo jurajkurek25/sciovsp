@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SP Generálka — kompletný AI test naostro</title>
+<meta name="description" content="Jeden AI-generovaný VŠP test naostro s pokročilou analýzou výsledku. Jeden nákup, jeden pokus.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Manrope:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#14100D; --ink2:#1c1610; --ink3:#241c14;
+  --text:#F6F1E7; --text2:rgba(246,241,231,.66); --text3:rgba(246,241,231,.4);
+  --ignite:#c8ff00; --signal:#7c5cff; --danger:#ff5a5a;
+  --border:rgba(246,241,231,.14); --border2:rgba(246,241,231,.24);
+  --serif:'Bricolage Grotesque',Georgia,serif; --mono:'Space Mono',monospace; --sans:'Manrope',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--ink);color:var(--text);font-family:var(--sans);line-height:1.6;min-height:100vh}
+button{font-family:inherit;color:inherit}
+.wrap{max-width:720px;margin:0 auto;padding:2.5rem 1.2rem 5rem}
+h1{font-family:var(--serif);font-weight:800;font-size:2rem;margin-bottom:.5rem}
+h2{font-family:var(--serif);font-weight:700;font-size:1.3rem;margin-bottom:.6rem}
+p{color:var(--text2)}
+.eyebrow{font-family:var(--mono);font-size:.75rem;letter-spacing:.15em;color:var(--ignite);text-transform:uppercase;margin-bottom:.8rem}
+.card{background:var(--ink3);border:1px solid var(--border2);border-radius:14px;padding:1.6rem;margin-top:1.5rem}
+.price{font-family:var(--mono);font-size:2.5rem;font-weight:700;color:var(--ignite);margin:.8rem 0}
+.price span{font-size:1rem;color:var(--text3)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:1rem 1.8rem;background:var(--ignite);color:var(--ink);border:none;border-radius:10px;font-family:var(--mono);font-weight:700;font-size:.92rem;cursor:pointer;width:100%}
+.btn:disabled{opacity:.5;cursor:default}
+.btn.secondary{background:transparent;border:1px solid var(--border2);color:var(--text)}
+.btn.danger{background:var(--danger);color:#fff}
+.feature-list{list-style:none;margin-top:1rem}
+.feature-list li{display:flex;gap:.6rem;padding:.5rem 0;font-size:.9rem;color:var(--text2)}
+.feature-list li::before{content:'✓';color:var(--ignite);font-weight:700}
+.warn-box{background:rgba(255,90,90,.08);border:1px solid rgba(255,90,90,.3);border-radius:10px;padding:1rem;margin-top:1rem;font-size:.85rem;color:var(--text2)}
+.warn-box b{color:var(--danger)}
+.err{color:var(--danger);font-size:.85rem;margin-top:.8rem}
+
+/* EXAM UI */
+.exam-top{position:fixed;top:0;left:0;right:0;background:var(--ink2);border-bottom:1px solid var(--border2);padding:.9rem 1.2rem;display:flex;justify-content:space-between;align-items:center;z-index:100;font-family:var(--mono);font-size:.82rem}
+.exam-timer{color:var(--ignite);font-weight:700;font-size:1rem}
+.exam-timer.low{color:var(--danger)}
+.exam-progress{color:var(--text3)}
+.exam-body{max-width:720px;margin:0 auto;padding:5.5rem 1.2rem 8rem}
+.q-part{font-family:var(--mono);font-size:.72rem;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem}
+.q-context{background:var(--ink3);border:1px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:1rem;font-size:.88rem;color:var(--text2);white-space:pre-wrap}
+.q-text{font-size:1.05rem;margin-bottom:1.2rem;white-space:pre-wrap}
+.q-options{display:flex;flex-direction:column;gap:.6rem}
+.q-option{display:flex;align-items:center;gap:.8rem;padding:.9rem 1.1rem;background:var(--ink3);border:1px solid var(--border2);border-radius:10px;cursor:pointer;text-align:left;font-size:.92rem}
+.q-option:hover{border-color:var(--signal)}
+.q-option.selected{border-color:var(--ignite);background:rgba(200,255,0,.06)}
+.q-option .letter{font-family:var(--mono);font-weight:700;color:var(--text3);flex-shrink:0}
+.q-option.selected .letter{color:var(--ignite)}
+.exam-bottom{position:fixed;bottom:0;left:0;right:0;background:var(--ink2);border-top:1px solid var(--border2);padding:.9rem 1.2rem;display:flex;justify-content:space-between;gap:.8rem;z-index:100}
+.exam-bottom button{padding:.75rem 1.3rem;border-radius:8px;font-family:var(--mono);font-size:.82rem;cursor:pointer;border:1px solid var(--border2);background:var(--ink3);color:var(--text)}
+.exam-bottom button.primary{background:var(--ignite);color:var(--ink);border:none;font-weight:700}
+.fs-warning-overlay{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9999;display:none;align-items:center;justify-content:center;padding:1.5rem;text-align:center}
+.fs-warning-overlay.active{display:flex}
+.fs-warning-overlay .box{max-width:420px}
+.fs-warning-overlay h2{color:var(--danger)}
+
+/* REPORT */
+.score-hero{text-align:center;padding:2rem 0}
+.score-num{font-family:var(--mono);font-size:4rem;font-weight:700;color:var(--ignite)}
+.score-sub{color:var(--text3);font-family:var(--mono);font-size:.8rem;text-transform:uppercase;letter-spacing:.08em}
+.pct-row{display:flex;gap:1rem;margin-top:1.5rem}
+.pct-box{flex:1;background:var(--ink3);border:1px solid var(--border2);border-radius:10px;padding:1rem;text-align:center}
+.pct-box .val{font-family:var(--mono);font-size:1.4rem;font-weight:700;color:var(--text)}
+.pct-box .label{font-family:var(--mono);font-size:.68rem;color:var(--text3);text-transform:uppercase;margin-top:.2rem}
+.analysis-text{white-space:pre-wrap;font-size:.94rem;line-height:1.75;margin-top:.5rem}
+.anticheat-summary{font-family:var(--mono);font-size:.78rem;color:var(--text3);margin-top:1rem}
+
+.calib-dot{position:fixed;width:22px;height:22px;border-radius:50%;background:var(--ignite);transform:translate(-50%,-50%);z-index:9998;cursor:pointer;box-shadow:0 0 0 8px rgba(200,255,0,.15)}
+</style>
+</head>
+<body>
+<div class="wrap" id="mainWrap"></div>
+
+<div class="exam-top" id="examTop" style="display:none">
+  <span class="exam-progress" id="examProgress"></span>
+  <span class="exam-timer" id="examTimer"></span>
+</div>
+<div class="exam-body" id="examBody" style="display:none"></div>
+<div class="exam-bottom" id="examBottom" style="display:none"></div>
+
+<div class="fs-warning-overlay" id="fsWarning">
+  <div class="box">
+    <h2>Opustil/a si celoobrazovkový režim</h2>
+    <p>SP Generálka sleduje odchody z celej obrazovky ako súčasť anti-cheat kontroly — táto udalosť bola zaznamenaná. Pokračuj kliknutím nižšie.</p>
+    <button class="btn" style="margin-top:1.2rem" onclick="resumeFullscreen()">Späť na celú obrazovku →</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/webgazer@3/dist/webgazer.min.js"></script>
+<script>
+const SUPABASE_URL = 'https://zrnqiwareacqyndwchsv.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpybnFpd2FyZWFjcXluZHdjaHN2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMDA3NTAsImV4cCI6MjA4OTc3Njc1MH0.iUne23YDxp12Iwxdk9U8MfcV0NTBtrNf9OgsjQdiADk';
+const _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const VERBAL_TIME_S = 35 * 60;
+const ANALYT_TIME_S = 45 * 60;
+
+let currentUser = null;
+let authToken = null;
+let token = null;
+
+function esc(s) { return String(s == null ? '' : s).replace(/[<>&]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c])); }
+
+async function apiFetch(url, opts) {
+  opts = opts || {};
+  opts.headers = Object.assign({}, opts.headers, authToken ? { Authorization: 'Bearer ' + authToken } : {});
+  const res = await fetch(url, opts);
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Chyba servera.');
+  return data;
+}
+
+function signIn() {
+  _supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.href } });
+}
+
+async function init() {
+  const params = new URLSearchParams(location.search);
+  token = params.get('token');
+  const { data: { session } } = await _supabase.auth.getSession();
+  currentUser = session ? session.user : null;
+  authToken = session ? session.access_token : null;
+  _supabase.auth.onAuthStateChange(async (event, s) => {
+    currentUser = s ? s.user : null;
+    authToken = s ? s.access_token : null;
+    route();
+  });
+  route();
+}
+
+async function route() {
+  if (!token) return renderLanding();
+  if (!currentUser) return renderNeedsLogin();
+  try {
+    const data = await apiFetch('/api/generalka/attempt/' + encodeURIComponent(token));
+    if (data.status === 'paid') return renderInstructions();
+    if (data.status === 'in_progress') return renderResumePrompt();
+    if (data.status === 'completed') return renderReport();
+  } catch (e) {
+    renderError(e.message);
+  }
+}
+
+// ─────────────────────────── LANDING / CHECKOUT ───────────────────────────
+function renderLanding() {
+  document.getElementById('mainWrap').innerHTML = `
+    <div class="eyebrow">Nový produkt</div>
+    <h1>SP Generálka</h1>
+    <p>Jeden kompletný AI-generovaný VŠP test naostro — presne tak, ako to bude na skutočných prijímačkách. Jeden nákup, jeden pokus, pokročilá analýza výsledku.</p>
+    <div class="card">
+      <div class="price">5,90 € <span>/ jeden pokus</span></div>
+      <ul class="feature-list">
+        <li>66 úplne nových úloh vygenerovaných AI špeciálne pre tvoj pokus (33 verbálnych + 33 analytických)</li>
+        <li>Presná časomiera ako na ostrom teste (35 + 45 minút)</li>
+        <li>Pokročilá AI analýza — odhad výsledku, vzorce správania, zmeny odpovedí</li>
+        <li>Anti-cheat kontrola (celá obrazovka, prepínanie okien, webkamera) — čo najvernejšia simulácia skutočných podmienok</li>
+      </ul>
+      <div style="margin-top:1.3rem">
+        <button class="btn" id="buyBtn" onclick="startCheckout()">Kúpiť za 5,90 € →</button>
+      </div>
+      <div class="err" id="landingErr"></div>
+    </div>
+  `;
+  if (!currentUser) {
+    document.getElementById('buyBtn').textContent = 'Prihlásiť sa cez Google →';
+    document.getElementById('buyBtn').onclick = signIn;
+  }
+}
+
+async function startCheckout() {
+  const btn = document.getElementById('buyBtn');
+  const errEl = document.getElementById('landingErr');
+  errEl.textContent = '';
+  btn.disabled = true;
+  try {
+    const data = await apiFetch('/api/generalka/checkout', { method: 'POST' });
+    location.href = data.url;
+  } catch (e) {
+    errEl.textContent = e.message;
+    btn.disabled = false;
+  }
+}
+
+function renderNeedsLogin() {
+  document.getElementById('mainWrap').innerHTML = `
+    <h1>Prihlás sa</h1>
+    <p>Tvoj pokus SP Generálky je viazaný na tvoj Google účet.</p>
+    <div class="card"><button class="btn" onclick="signIn()">Prihlásiť sa cez Google →</button></div>
+  `;
+}
+
+function renderError(msg) {
+  document.getElementById('mainWrap').innerHTML = `<h1>Chyba</h1><div class="card"><p>${esc(msg)}</p></div>`;
+}
+
+// ─────────────────────────── INSTRUCTIONS ───────────────────────────
+function renderInstructions() {
+  document.getElementById('mainWrap').innerHTML = `
+    <div class="eyebrow">Pripravené</div>
+    <h1>Tvoj pokus čaká</h1>
+    <p>Než spustíš test, prečítaj si toto — máš na neho <b>jeden jediný pokus</b>.</p>
+    <div class="warn-box">
+      <b>Pred spustením:</b><br>
+      • Vyhraď si súvislý nerušený čas (cca 90 minút)<br>
+      • Uisti sa, že máš funkčné pripojenie na internet<br>
+      • Test beží v celoobrazovkovom režime — opustenie sa zaznamenáva<br>
+      • Test vyžaduje prístup ku kamere kvôli sledovaniu pozornosti — obraz sa nikam neukladá ani neposiela, spracováva sa len v prehliadači<br>
+      • Test sa nedá pozastaviť ani reštartovať
+    </div>
+    <div class="card">
+      <button class="btn" id="startBtn" onclick="startCalibration()">Spustiť test →</button>
+      <div class="err" id="startErr"></div>
+    </div>
+  `;
+}
+
+function renderResumePrompt() {
+  document.getElementById('mainWrap').innerHTML = `
+    <h1>Pokus je rozbehnutý</h1>
+    <p>Tvoj test už bol spustený. Pokračuj tam, kde si skončil/a — otázky ostávajú rovnaké.</p>
+    <div class="card"><button class="btn" onclick="startCalibration()">Pokračovať v teste →</button></div>
+  `;
+}
+
+// ─────────────────────────── EXAM STATE ───────────────────────────
+let questions = [];
+let answers = {};
+let currentIdx = 0;
+let phase = 'verbal'; // 'verbal' | 'analytical'
+let phaseEndsAt = 0;
+let timerInterval = null;
+let examStartedAt = 0;
+let examActive = false;
+const anticheatFlags = { fullscreenExits: 0, tabSwitches: 0, windowBlurs: 0 };
+
+// ─────────────────────────── CAMERA CALIBRATION ───────────────────────────
+const CALIB_POINTS = [
+  [10, 10], [50, 10], [90, 10],
+  [10, 50], [50, 50], [90, 50],
+  [10, 90], [50, 90], [90, 90]
+];
+const CALIB_CLICKS_PER_POINT = 5;
+let calibIdx = 0;
+let calibClicks = 0;
+
+async function startCalibration() {
+  const btn = document.getElementById('startBtn');
+  const errEl = document.getElementById('startErr');
+  if (btn) { btn.disabled = true; }
+  try {
+    await document.documentElement.requestFullscreen().catch(() => {});
+    await startWebcamTracking();
+    if (!webcamAvailable) { startExamAfterCalibration(); return; }
+    calibIdx = 0;
+    calibClicks = 0;
+    renderCalibrationStep();
+  } catch (e) {
+    if (errEl) errEl.textContent = e.message;
+    if (btn) btn.disabled = false;
+  }
+}
+
+function renderCalibrationStep() {
+  document.getElementById('mainWrap').innerHTML = `
+    <div class="eyebrow">Kalibrácia kamery</div>
+    <h1>Bodka ${calibIdx + 1} / ${CALIB_POINTS.length}</h1>
+    <p>Pozeraj sa priamo na bodku a klikni na ňu ${CALIB_CLICKS_PER_POINT}×. Zlepší to presnosť sledovania pozornosti počas testu.</p>
+  `;
+  const [x, y] = CALIB_POINTS[calibIdx];
+  const dot = document.createElement('div');
+  dot.className = 'calib-dot';
+  dot.id = 'calibDot';
+  dot.style.left = x + 'vw';
+  dot.style.top = y + 'vh';
+  dot.onclick = onCalibDotClick;
+  document.body.appendChild(dot);
+}
+
+function onCalibDotClick() {
+  calibClicks++;
+  if (calibClicks < CALIB_CLICKS_PER_POINT) return;
+  calibClicks = 0;
+  calibIdx++;
+  const dotEl = document.getElementById('calibDot');
+  if (dotEl) dotEl.remove();
+  if (calibIdx >= CALIB_POINTS.length) { startExamAfterCalibration(); return; }
+  renderCalibrationStep();
+}
+
+async function startExamAfterCalibration() {
+  try {
+    const data = await apiFetch('/api/generalka/attempt/' + encodeURIComponent(token) + '/start', { method: 'POST' });
+    questions = data.questions;
+    if (!document.fullscreenElement) { await document.documentElement.requestFullscreen().catch(() => {}); }
+    document.getElementById('mainWrap').style.display = 'none';
+    document.getElementById('examTop').style.display = 'flex';
+    document.getElementById('examBody').style.display = 'block';
+    document.getElementById('examBottom').style.display = 'flex';
+    examActive = true;
+    examStartedAt = Date.now();
+    currentIdx = 0;
+    phase = 'verbal';
+    phaseEndsAt = Date.now() + VERBAL_TIME_S * 1000;
+    setupAnticheatListeners();
+    startTimer();
+    renderQuestion();
+  } catch (e) {
+    renderError(e.message + ' Skús obnoviť stránku a spustiť test znova.');
+  }
+}
+
+function setupAnticheatListeners() {
+  document.addEventListener('fullscreenchange', onFullscreenChange);
+  document.addEventListener('visibilitychange', onVisibilityChange);
+  window.addEventListener('blur', onWindowBlur);
+  window.addEventListener('beforeunload', beforeUnloadHandler);
+}
+
+function beforeUnloadHandler(e) {
+  if (examActive) { e.preventDefault(); e.returnValue = ''; }
+}
+
+function onFullscreenChange() {
+  if (!document.fullscreenElement && examActive) {
+    anticheatFlags.fullscreenExits++;
+    logEvent({ type: 'fullscreen_exit' });
+    document.getElementById('fsWarning').classList.add('active');
+  } else if (document.fullscreenElement) {
+    document.getElementById('fsWarning').classList.remove('active');
+  }
+}
+function resumeFullscreen() {
+  document.documentElement.requestFullscreen().catch(() => {});
+}
+function onVisibilityChange() {
+  if (document.hidden && examActive) {
+    anticheatFlags.tabSwitches++;
+    logEvent({ type: 'tab_switch' });
+  }
+}
+function onWindowBlur() {
+  if (examActive) {
+    anticheatFlags.windowBlurs++;
+    logEvent({ type: 'window_blur' });
+  }
+}
+
+function logEvent(event) {
+  apiFetch('/api/generalka/attempt/' + encodeURIComponent(token) + '/event', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ event })
+  }).catch(() => {});
+}
+
+// ─────────────────────────── WEBCAM / GAZE TRACKING ───────────────────────────
+let gazeSamples = 0, gazeOffScreenCount = 0, webcamAvailable = false;
+async function startWebcamTracking() {
+  try {
+    await webgazer.setRegression('ridge').setGazeListener((data) => {
+      if (!data) return;
+      gazeSamples++;
+      const onScreen = data.x >= 0 && data.x <= window.innerWidth && data.y >= 0 && data.y <= window.innerHeight;
+      if (!onScreen) gazeOffScreenCount++;
+    }).begin();
+    webgazer.showVideoPreview(false).showPredictionPoints(false).showFaceOverlay(false).showFaceFeedbackBox(false);
+    webcamAvailable = true;
+  } catch (e) {
+    webcamAvailable = false;
+  }
+}
+function stopWebcamTracking() {
+  try { webgazer.end(); } catch (e) {}
+}
+function getWebcamSummary() {
+  return {
+    available: webcamAvailable,
+    gazeSamples,
+    gazeOffScreenCount,
+    attentionPct: gazeSamples ? Math.round(100 * (gazeSamples - gazeOffScreenCount) / gazeSamples) : null
+  };
+}
+
+// ─────────────────────────── TIMER ───────────────────────────
+function startTimer() {
+  updateTimerDisplay();
+  timerInterval = setInterval(() => {
+    const remaining = Math.max(0, Math.round((phaseEndsAt - Date.now()) / 1000));
+    if (remaining <= 0) {
+      if (phase === 'verbal') { switchToAnalyticalPhase(); }
+      else { submitExam(); }
+      return;
+    }
+    updateTimerDisplay();
+  }, 1000);
+}
+function updateTimerDisplay() {
+  const remaining = Math.max(0, Math.round((phaseEndsAt - Date.now()) / 1000));
+  const m = Math.floor(remaining / 60), s = remaining % 60;
+  const el = document.getElementById('examTimer');
+  if (!el) return;
+  el.textContent = (phase === 'verbal' ? 'Verbálna časť · ' : 'Analytická časť · ') + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+  el.classList.toggle('low', remaining < 60);
+}
+function switchToAnalyticalPhase() {
+  phase = 'analytical';
+  phaseEndsAt = Date.now() + ANALYT_TIME_S * 1000;
+  currentIdx = questions.findIndex(q => q.part === 'analytical');
+  if (currentIdx < 0) currentIdx = 0;
+  logEvent({ type: 'phase_switch', phase: 'analytical' });
+  renderQuestion();
+}
+
+// ─────────────────────────── QUESTION RENDER ───────────────────────────
+function renderQuestion() {
+  const q = questions[currentIdx];
+  const answered = Object.keys(answers).length;
+  document.getElementById('examProgress').textContent = 'Otázka ' + (currentIdx + 1) + ' / ' + questions.length + ' · Zodpovedané: ' + answered;
+  const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+  document.getElementById('examBody').innerHTML = `
+    <div class="q-part">${q.part === 'verbal' ? 'Verbálna časť' : 'Analytická časť'} — ${esc(q.topic || '')}</div>
+    ${q.context ? `<div class="q-context">${esc(q.context)}</div>` : ''}
+    <div class="q-text">${esc(q.text)}</div>
+    <div class="q-options">
+      ${(q.options || []).map((opt, i) => `
+        <button class="q-option ${answers[currentIdx] === i ? 'selected' : ''}" onclick="selectAnswer(${i})">
+          <span class="letter">${letters[i]}</span><span>${esc(opt)}</span>
+        </button>`).join('')}
+    </div>
+  `;
+  document.getElementById('examBottom').innerHTML = `
+    <button onclick="prevQuestion()" ${currentIdx === 0 ? 'disabled' : ''}>← Predchádzajúca</button>
+    ${currentIdx === questions.length - 1
+      ? '<button class="primary" onclick="confirmSubmit()">Odovzdať test →</button>'
+      : '<button class="primary" onclick="nextQuestion()">Ďalšia →</button>'}
+  `;
+}
+
+function selectAnswer(optIdx) {
+  const prev = answers[currentIdx];
+  answers[currentIdx] = optIdx;
+  logEvent({ type: prev == null ? 'answer_select' : 'answer_change', questionIdx: currentIdx, from: prev == null ? null : prev, to: optIdx });
+  renderQuestion();
+}
+function nextQuestion() {
+  if (currentIdx < questions.length - 1) { currentIdx++; renderQuestion(); }
+}
+function prevQuestion() {
+  if (currentIdx > 0) { currentIdx--; renderQuestion(); }
+}
+function confirmSubmit() {
+  const unanswered = questions.length - Object.keys(answers).length;
+  const msg = unanswered > 0
+    ? `Máš ${unanswered} nezodpovedaných úloh. Naozaj chceš odovzdať test? Toto je tvoj jediný pokus.`
+    : 'Naozaj chceš odovzdať test? Toto je tvoj jediný pokus, po odovzdaní sa už nedá zmeniť.';
+  if (confirm(msg)) submitExam();
+}
+
+async function submitExam() {
+  examActive = false;
+  clearInterval(timerInterval);
+  stopWebcamTracking();
+  window.removeEventListener('beforeunload', beforeUnloadHandler);
+  const durationS = Math.round((Date.now() - examStartedAt) / 1000);
+  document.getElementById('examBody').innerHTML = '<p style="text-align:center;margin-top:3rem">Vyhodnocujem a generujem analýzu…</p>';
+  document.getElementById('examBottom').style.display = 'none';
+  document.getElementById('examTop').style.display = 'none';
+  try {
+    await apiFetch('/api/generalka/attempt/' + encodeURIComponent(token) + '/submit', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ answers, durationS, webcamSummary: getWebcamSummary(), anticheatFlags })
+    });
+    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+    document.getElementById('examBody').style.display = 'none';
+    document.getElementById('mainWrap').style.display = 'block';
+    renderReport();
+  } catch (e) {
+    document.getElementById('examBody').innerHTML = `<p style="text-align:center;margin-top:3rem;color:var(--danger)">${esc(e.message)}</p>`;
+  }
+}
+
+// ─────────────────────────── REPORT ───────────────────────────
+async function renderReport() {
+  document.getElementById('mainWrap').innerHTML = '<p style="text-align:center;margin-top:3rem">Načítavam report…</p>';
+  try {
+    const data = await apiFetch('/api/generalka/attempt/' + encodeURIComponent(token) + '/report');
+    document.getElementById('mainWrap').innerHTML = `
+      <div class="eyebrow">Výsledok</div>
+      <h1>Tvoja SP Generálka</h1>
+      <div class="score-hero">
+        <div class="score-num">${data.correct}/${(data.questions || []).length}</div>
+        <div class="score-sub">správnych odpovedí</div>
+      </div>
+      <div class="pct-row">
+        <div class="pct-box"><div class="val">P${data.verbalPct ?? '—'}</div><div class="label">Verbálna</div></div>
+        <div class="pct-box"><div class="val">P${data.analytPct ?? '—'}</div><div class="label">Analytická</div></div>
+        <div class="pct-box"><div class="val">P${data.estPct ?? '—'}</div><div class="label">Odhad celkovo</div></div>
+      </div>
+      <div class="card">
+        <h2>AI analýza</h2>
+        <div class="analysis-text">${esc(data.aiAnalysis || 'Analýza sa nepodarila vygenerovať.')}</div>
+      </div>
+      <div class="anticheat-summary">
+        Trvanie: ${data.durationS ? Math.round(data.durationS / 60) + ' min' : '—'} ·
+        Opustenie celej obrazovky: ${(data.anticheatFlags && data.anticheatFlags.fullscreenExits) || 0}× ·
+        Prepnutie okna: ${(data.anticheatFlags && data.anticheatFlags.tabSwitches) || 0}× ·
+        Pozornosť (kamera): ${(data.webcamSummary && data.webcamSummary.attentionPct != null) ? data.webcamSummary.attentionPct + '%' : 'nedostupné'}
+      </div>
+    `;
+  } catch (e) {
+    renderError(e.message);
+  }
+}
+
+init();
+</script>
+</body>
+</html>
