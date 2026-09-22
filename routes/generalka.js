@@ -185,6 +185,22 @@ module.exports = function registerGeneralka(app) {
     }
   });
 
+  // GET /api/generalka/my-latest-attempt — pre návrat zo Stripe checkoutu
+  // (success_url nemá token, ten vzniká až vo webhooku asynchrónne).
+  app.get('/api/generalka/my-latest-attempt', async (req, res) => {
+    const user = await verifyToken(req);
+    if (!user) return res.status(401).json({ error: 'Musíš byť prihlásený.' });
+    try {
+      const email = (user.email || '').toString().trim().toLowerCase();
+      const { data: attempt } = await supabase.from('generalka_attempts').select('attempt_token').eq('email', email).order('paid_at', { ascending: false }).limit(1).maybeSingle();
+      if (!attempt) return res.status(404).json({ error: 'Zatiaľ žiadny pokus.' });
+      res.json({ token: attempt.attempt_token });
+    } catch (e) {
+      console.error('generalka my-latest-attempt error:', e.message);
+      res.status(500).json({ error: 'Chyba servera.' });
+    }
+  });
+
   // GET /api/generalka/attempt/:token — stav pokusu.
   app.get('/api/generalka/attempt/:token', async (req, res) => {
     const user = await verifyToken(req);

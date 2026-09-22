@@ -122,9 +122,12 @@ function signIn() {
   _supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.href } });
 }
 
+let paidFlag = false;
+
 async function init() {
   const params = new URLSearchParams(location.search);
   token = params.get('token');
+  paidFlag = params.get('paid') === '1';
   const { data: { session } } = await _supabase.auth.getSession();
   currentUser = session ? session.user : null;
   authToken = session ? session.access_token : null;
@@ -137,6 +140,10 @@ async function init() {
 }
 
 async function route() {
+  if (!token && paidFlag) {
+    if (!currentUser) return renderNeedsLogin();
+    return resolveAfterPayment();
+  }
   if (!token) return renderLanding();
   if (!currentUser) return renderNeedsLogin();
   try {
@@ -146,6 +153,37 @@ async function route() {
     if (data.status === 'completed') return renderReport();
   } catch (e) {
     renderError(e.message);
+  }
+}
+
+// Success_url po Stripe checkoute nemá token — ten vzniká až vo webhooku
+// asynchrónne, môže mať pár sekúnd oneskorenie. Skúšame ho dotiahnuť.
+async function resolveAfterPayment(attemptsLeft) {
+  if (attemptsLeft === undefined) attemptsLeft = 8;
+  document.getElementById('mainWrap').innerHTML = `
+    <div class="eyebrow">Platba prijatá</div>
+    <h1>Pripravujeme tvoj pokus…</h1>
+    <p>Chvíľku strpenia, len čo sa spracuje platba.</p>
+  `;
+  try {
+    const data = await apiFetch('/api/generalka/my-latest-attempt');
+    token = data.token;
+    paidFlag = false;
+    const url = new URL(location.href);
+    url.searchParams.delete('paid');
+    url.searchParams.set('token', token);
+    history.replaceState(null, '', url);
+    return route();
+  } catch (e) {
+    if (attemptsLeft > 0) {
+      setTimeout(() => resolveAfterPayment(attemptsLeft - 1), 2000);
+    } else {
+      document.getElementById('mainWrap').innerHTML = `
+        <div class="eyebrow">Platba prijatá</div>
+        <h1>Spracovanie trvá dlhšie</h1>
+        <p>Odkaz na spustenie testu ti príde aj emailom (skontroluj aj spam), alebo skús <a href="javascript:location.reload()">obnoviť stránku</a> o chvíľu.</p>
+      `;
+    }
   }
 }
 
