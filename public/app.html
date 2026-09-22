@@ -568,6 +568,8 @@ h1.title span{font-style:italic;color:var(--purple2)}
 .elite-modal-header{padding:1.75rem 1.75rem 0}
 .elite-modal-close{position:absolute;top:1rem;right:1rem;width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--text3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.9rem;transition:all .2s}
 .elite-modal-close:hover{background:rgba(255,255,255,.1);color:var(--text)}
+.generalka-offer-overlay{position:fixed;inset:0;background:rgba(8,8,13,.92);display:flex;align-items:center;justify-content:center;z-index:9989;padding:1.5rem}
+.generalka-offer-box{background:var(--black2);border:1px solid rgba(200,255,0,.25);border-radius:20px;max-width:400px;width:100%;padding:2rem 1.75rem;position:relative}
 .q-chart-wrap{background:var(--black3);border:1px solid var(--border);border-radius:12px;padding:1rem;margin-bottom:.75rem;position:relative}.q-chart-wrap canvas{display:block;width:100%!important;max-height:280px}
 /* ── SOLUTION STEPS ── */
 .solution-wrap{margin-top:.75rem;border-top:1px solid var(--border);padding-top:.75rem}
@@ -839,6 +841,17 @@ h1.title span{font-style:italic;color:var(--purple2)}
       </div>
     </div>
     <div style="text-align:center;padding:.75rem 1.75rem 1.5rem;font-family:var(--mono);font-size:.7rem;color:var(--text3)">Mesačná platba · Zruš kedykoľvek · Stripe</div>
+  </div>
+</div>
+
+<div class="generalka-offer-overlay" id="generalkaOfferModal" style="display:none;" onclick="if(event.target===this)closeGeneralkaOfferPopup()">
+  <div class="generalka-offer-box">
+    <button class="elite-modal-close" onclick="closeGeneralkaOfferPopup()">✕</button>
+    <div style="font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--volt);margin-bottom:.6rem">Tvoj test sa blíži</div>
+    <div id="generalkaOfferDays" style="font-family:var(--serif);font-size:1.35rem;font-weight:400;margin-bottom:.5rem"></div>
+    <p style="color:var(--text2);font-size:.9rem;line-height:1.6;margin-bottom:1.2rem">Vyskúšaj si <b style="color:var(--text)">SP Generálku</b> — kompletný 66-úlohový AI test v reálnych podmienkach (časomiera, anti-cheat, sledovanie pozornosti) a hĺbkovú AI analýzu, presne pred ostrým dňom.</p>
+    <button class="elite-plan-btn upgrade" style="width:100%" onclick="goToGeneralka()">Vyskúšať za 5,90 € →</button>
+    <button style="width:100%;margin-top:.5rem;background:transparent;border:none;color:var(--text3);font-family:var(--mono);font-size:.75rem;cursor:pointer;padding:.5rem" onclick="closeGeneralkaOfferPopup()">Možno neskôr</button>
   </div>
 </div>
 
@@ -4817,6 +4830,35 @@ function closeEliteModal(){
   document.getElementById('eliteModal').style.display='none';
 }
 
+// ── SP Generálka: popup ponuka 3-5 dní pred termínom testu ──────
+function checkGeneralkaOfferPopup(){
+  const examDate=localStorage.getItem('vsp_exam_date');
+  if(!examDate)return;
+  if(localStorage.getItem('vsp_has_generalka')==='1')return;
+  const today=new Date();today.setHours(0,0,0,0);
+  const exam=new Date(examDate+'T00:00:00');
+  const daysUntil=Math.round((exam-today)/86400000);
+  if(daysUntil<3||daysUntil>5)return;
+  const todayStr=today.toISOString().split('T')[0];
+  if(localStorage.getItem('vsp_generalka_popup_shown')===todayStr)return;
+  localStorage.setItem('vsp_generalka_popup_shown',todayStr);
+  openGeneralkaOfferPopup(daysUntil);
+}
+function openGeneralkaOfferPopup(daysUntil){
+  const el=document.getElementById('generalkaOfferModal');
+  if(!el)return;
+  const sub=document.getElementById('generalkaOfferDays');
+  if(sub)sub.textContent=daysUntil===1?'Test máš už zajtra.':('Test máš už o '+daysUntil+' dni.');
+  el.style.display='flex';
+}
+function closeGeneralkaOfferPopup(){
+  const el=document.getElementById('generalkaOfferModal');
+  if(el)el.style.display='none';
+}
+function goToGeneralka(){
+  window.location.href='/generalka';
+}
+
 async function startEliteCheckout(){
   if(!currentUser){showToast(t('loginRequired'));if(typeof loginWithGoogle==='function')await loginWithGoogle();return;}
   const btn=document.getElementById('eliteCheckoutBtn');
@@ -5461,12 +5503,14 @@ async function onUserLoggedIn(user,token){
     if(data.premiumExpiresAt)localStorage.setItem('vsp_premium_expires',data.premiumExpiresAt);
     if(typeof data.usedTests==='number')localStorage.setItem('vsp_trial_count',String(data.usedTests));
     if(data.examDate)localStorage.setItem('vsp_exam_date',data.examDate);else localStorage.removeItem('vsp_exam_date');
+    localStorage.setItem('vsp_has_generalka',data.hasGeneralka?'1':'0');
   }catch(e){}
   renderAuthButton();updateHomeStats();loadRefCard();renderEliteHomeCards();initEliteFeatures();renderCoursesSection();
   if(isPremium()){const ol=document.getElementById('paywall-overlay');if(ol)ol.remove();}
   loadScioDateFromCloud();
   attachPendingPartnerRef();
   checkCommunityAccessForNav();
+  checkGeneralkaOfferPopup();
   const pendingUpgrade=localStorage.getItem('vsp_pending_upgrade');
   if(pendingUpgrade){localStorage.removeItem('vsp_pending_upgrade');if(pendingUpgrade==='elite')startEliteCheckout();else if(pendingUpgrade==='premium')startCheckout();}
 }
