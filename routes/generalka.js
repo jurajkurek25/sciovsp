@@ -77,25 +77,47 @@ PRAVIDLÁ:
 - Analytické úlohy musia byť matematicky korektné — skontroluj výpočty.
 - Každá úloha musí byť úplne nová a jedinečná (toto je platený test naostro, nesmie sa opakovať).
 
+- "explanation" drž stručné, max 1-2 vety.
+
 Odpovedaj VÝHRADNE validným JSON, žiadny iný text:
-{"questions":[{"topic":"názov okruhu","text":"text úlohy","context":"voliteľný dlhší text pred otázkou alebo null","options":["A","B","C","D"],"answer":0,"explanation":"vysvetlenie prečo je táto odpoveď správna"}]}
+{"questions":[{"topic":"názov okruhu","text":"text úlohy","context":"voliteľný dlhší text pred otázkou alebo null","options":["A","B","C","D"],"answer":0,"explanation":"stručné vysvetlenie prečo je táto odpoveď správna"}]}
 Pole "questions" musí mať presne ${count} prvkov.`;
 }
 
-async function generateBatch(part, count) {
-  const text = await callClaudeText(buildGenerationPrompt(part, count), 16000);
+// Jeden veľký request na 33 úloh sa aj pri max_tokens=16000 opakovane
+// orezával uprostred JSONu (viď main-app-patches história) — namiesto
+// naháňania limitu radšej rozdelíme na menšie dávky po CHUNK_SIZE úloh,
+// bežiace paralelne. Každá dávka potrebuje výrazne menej tokenov, takže
+// orezanie je oveľa menej pravdepodobné, a aj keby jedna dávka zlyhala,
+// nestráca sa celých 33 úloh naraz.
+const CHUNK_SIZE = 11;
+
+async function generateChunk(part, count) {
+  const text = await callClaudeText(buildGenerationPrompt(part, count), 8000);
   const match = text.match(/\{[\s\S]*\}/);
   let parsed;
   try {
     parsed = JSON.parse(match ? match[0] : text);
   } catch (e) {
-    console.error('generalka generateBatch(' + part + ') neplatny JSON, koniec odpovede:', text.slice(-300));
+    console.error('generalka generateChunk(' + part + ',' + count + ') neplatny JSON, koniec odpovede:', text.slice(-300));
     throw new Error('AI vrátilo neplatný JSON pri generovaní testu.');
   }
   if (!Array.isArray(parsed.questions) || parsed.questions.length !== count) {
     throw new Error('AI vrátilo nesprávny počet úloh (' + (parsed.questions && parsed.questions.length) + ' namiesto ' + count + ').');
   }
   return parsed.questions.map(q => ({ ...q, part }));
+}
+
+async function generateBatch(part, totalCount) {
+  const chunkSizes = [];
+  let remaining = totalCount;
+  while (remaining > 0) {
+    const size = Math.min(CHUNK_SIZE, remaining);
+    chunkSizes.push(size);
+    remaining -= size;
+  }
+  const chunks = await Promise.all(chunkSizes.map(size => generateChunk(part, size)));
+  return chunks.flat();
 }
 
 async function generateFullTest() {
