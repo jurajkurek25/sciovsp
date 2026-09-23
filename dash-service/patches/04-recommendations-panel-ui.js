@@ -25,7 +25,11 @@ if (src.includes('renderRecommendations')) {
 function replaceOnce(s, oldStr, newStr, label) {
   const count = s.split(oldStr).length - 1;
   if (count !== 1) { console.error(label + ' kotva nie je jednoznacna (najdenych: ' + count + '). Nic som nezmenil.'); process.exit(1); }
-  return s.replace(oldStr, newStr);
+  // Pouzivame funkciu ako replacement, nie retazec priamo -- ak by newStr
+  // obsahoval "$$", String.replace by to interpretoval ako specialny escape
+  // pre literal "$" a stratil by jeden znak (presne tato chyba sposobila
+  // $('.rc-toggle').forEach namiesto $$('.rc-toggle').forEach v tomto patchi).
+  return s.replace(oldStr, () => newStr);
 }
 
 let patched = src;

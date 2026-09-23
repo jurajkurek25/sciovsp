@@ -25,7 +25,7 @@ if (src.includes('affiliate_products')) {
 function replaceOnce(s, oldStr, newStr, label) {
   const count = s.split(oldStr).length - 1;
   if (count !== 1) { console.error(label + ' kotva nie je jednoznacna (najdenych: ' + count + '). Nic som nezmenil.'); process.exit(1); }
-  return s.replace(oldStr, newStr);
+  return s.replace(oldStr, () => newStr);
 }
 
 const OLD_ROUTE = `app.get('/odporucame', (req, res) => {
