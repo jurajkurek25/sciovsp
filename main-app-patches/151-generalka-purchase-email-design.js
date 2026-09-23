@@ -24,8 +24,8 @@ if (src.includes("generalka-purchased.html")) {
   process.exit(1);
 }
 
-if (!fs.existsSync(require('path').join(__dirname, 'emails', 'generalka-purchased.html'))) {
-  console.error('emails/generalka-purchased.html chyba — najprv ho treba nahrat. Nic som nezmenil.');
+if (!fs.existsSync('emails/generalka-purchased.html')) {
+  console.error('emails/generalka-purchased.html chyba — najprv ho treba nahrat (spustaj z korena appky). Nic som nezmenil.');
   process.exit(1);
 }
 
