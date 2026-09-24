@@ -45,6 +45,13 @@ async function main() {
   let sent = 0, failed = 0;
   for (const u of (users || [])) {
     try {
+      // Najprv vypnut (opt_out=true) — ak clovek email ignoruje, ostava
+      // vypnuty. Az klik na odkaz v emaile (marketing-optin routa) ho
+      // vrati na false. Nastavuje sa PRED odoslanim, nie po — ak by skript
+      // zlyhal medzi odoslanim a oznacenim remarketing_consent_email_sent_at,
+      // bezpecnejsie je nechat cloveka vypnuteho (skript ho pri dalsom
+      // behu skusi znova) nez ho omylom nechat zapnuteho bez suhlasu.
+      await supabase.from('users').update({ marketing_emails_opt_out: true }).eq('email', u.email);
       const token = await getOrCreateUnsubscribeToken(u.email);
       const optinUrl = EXAM_APP_URL + '/api/account/marketing-optin?token=' + token;
       const html = fillTemplate(loadTemplate('marketing-reconsent.html'), { OPTIN_URL: optinUrl });
