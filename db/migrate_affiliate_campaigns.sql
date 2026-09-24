@@ -17,6 +17,7 @@ create table if not exists public.affiliate_campaigns (
   subject_hint text,
   generated_subject text,
   generated_body_html text,
+  generated_cta_text text,
   generated_at timestamptz,
   active boolean not null default true,
   created_at timestamptz not null default now()
