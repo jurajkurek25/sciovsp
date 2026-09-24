@@ -28,7 +28,7 @@ router.get('/api/dash/affiliate-campaigns/courses', requireDashAuth, async (req,
 });
 
 router.post('/api/dash/affiliate-campaigns', requireDashAuth, async (req, res) => {
-  const { partnerName, productDescription, ctaUrl, targetSignal, targetCourseId, examDaysBefore, lookbackDays, subjectHint } = req.body || {};
+  const { partnerName, productDescription, ctaUrl, targetSignal, targetCourseId, examDaysBefore, lookbackDays, subjectHint, minAccountAgeDays } = req.body || {};
   if (!partnerName || !partnerName.trim()) return res.status(400).json({ error: 'Chýba meno partnera.' });
   if (!productDescription || !productDescription.trim()) return res.status(400).json({ error: 'Chýba popis produktu (kontext pre AI).' });
   if (!ctaUrl || !ctaUrl.trim()) return res.status(400).json({ error: 'Chýba affiliate odkaz.' });
@@ -44,6 +44,7 @@ router.post('/api/dash/affiliate-campaigns', requireDashAuth, async (req, res) =
     target_course_id: targetSignal === 'course' ? targetCourseId : null,
     exam_days_before: targetSignal === 'exam_soon' ? Number(examDaysBefore) : null,
     lookback_days: lookbackDays ? Number(lookbackDays) : 30,
+    min_account_age_days: minAccountAgeDays !== undefined && minAccountAgeDays !== '' ? Number(minAccountAgeDays) : 14,
     subject_hint: (subjectHint || '').trim() || null,
     active: true
   }).select().single();
@@ -52,13 +53,14 @@ router.post('/api/dash/affiliate-campaigns', requireDashAuth, async (req, res) =
 });
 
 router.put('/api/dash/affiliate-campaigns/:id', requireDashAuth, async (req, res) => {
-  const { active, partnerName, productDescription, ctaUrl, subjectHint } = req.body || {};
+  const { active, partnerName, productDescription, ctaUrl, subjectHint, minAccountAgeDays } = req.body || {};
   const update = {};
   if (active !== undefined) update.active = !!active;
   if (partnerName !== undefined) update.partner_name = partnerName;
   if (productDescription !== undefined) update.product_description = productDescription;
   if (ctaUrl !== undefined) update.cta_url = ctaUrl;
   if (subjectHint !== undefined) update.subject_hint = subjectHint;
+  if (minAccountAgeDays !== undefined) update.min_account_age_days = Number(minAccountAgeDays);
   const { data, error } = await mainDb.from('affiliate_campaigns').update(update).eq('id', req.params.id).select().single();
   if (error) return res.status(500).json({ error: error.message });
   res.json({ ok: true, campaign: data });
