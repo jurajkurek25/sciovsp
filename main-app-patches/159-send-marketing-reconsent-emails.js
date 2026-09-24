@@ -15,7 +15,7 @@ require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
 const { createClient } = require('@supabase/supabase-js');
-const { sendMail } = require('./mailer');
+const { sendMail } = require('../mailer');
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 const APP_URL = process.env.APP_URL || 'https://sptrener.online/app';
