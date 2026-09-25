@@ -188,8 +188,16 @@
     if (pct !== null && pct !== '') ctx.pct = pct;
 
     var appCat = ctx.appCat || 'vsp';
-    var appHref = '/app?cat=' + encodeURIComponent(appCat) + '&upgrade=free';
-    var appLabel = ctx.lang === 'cs' ? 'Začít se připravovat zdarma →' : 'Začni sa pripravovať zadarmo →';
+    var pctNum = Number(pct) || 0;
+    var GOOD_FIT_THRESHOLD = 55;
+    var appHref, appLabel;
+    if (pctNum >= GOOD_FIT_THRESHOLD) {
+      appHref = '/app?cat=' + encodeURIComponent(appCat) + '&upgrade=free';
+      appLabel = ctx.lang === 'cs' ? 'Začít se připravovat zdarma →' : 'Začni sa pripravovať zadarmo →';
+    } else {
+      appHref = '/kam-na-vysoku' + (ctx.lang === 'cs' ? '?lang=cs' : '');
+      appLabel = ctx.lang === 'cs' ? 'Tohle ti asi nesedí — zjisti, co ti sedí nejvíc →' : 'Toto ti asi nesedí — zisti, čo ti sedí najviac →';
+    }
 
     if (box) {
       box.innerHTML = '';
