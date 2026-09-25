@@ -37,6 +37,33 @@
     if (btn) btn.style.display = 'none';
   }
 
+  var VERDICT_TEXT = {
+    sk: { high: 'Vyzerá to, že by ti to mohlo sedieť!', mid: 'Čiastočná zhoda — oplatí sa preskúmať aj iné odbory.', low: 'Asi to nie je presne pre teba — skús si spraviť aj plný test.' },
+    cs: { high: 'Vypadá to, že by ti to mohlo sedět!', mid: 'Částečná shoda — stojí za to prozkoumat i jiné obory.', low: 'Asi to není přesně pro tebe — zkus si udělat i plný test.' }
+  };
+  var DIM_LABEL = {
+    sk: { interest: 'Záujem', aptitude: 'Predpoklady', reality: 'Realita povolania' },
+    cs: { interest: 'Zájem', aptitude: 'Předpoklady', reality: 'Realita povolání' }
+  };
+  var GAP_WARNING = {
+    sk: 'Zaujíma ťa to viac, než koľko si zatiaľ vieš predstaviť realitu tohto povolania — oplatí sa to preskúmať hlbšie (napr. porozprávať sa s niekým, kto to už robí).',
+    cs: 'Zajímá tě to víc, než kolik si zatím umíš představit realitu tohoto povolání — vyplatí se to prozkoumat hlouběji (např. promluvit si s někým, kdo to už dělá).'
+  };
+
+  function renderResultHtml(pct, scores) {
+    var lang = ctx.lang === 'cs' ? 'cs' : 'sk';
+    var v = VERDICT_TEXT[lang];
+    var verdict = pct >= 70 ? v.high : (pct >= 40 ? v.mid : v.low);
+    var dl = DIM_LABEL[lang];
+    function row(key) {
+      var val = (scores && typeof scores[key] === 'number') ? scores[key] : 0;
+      return '<div class="fq-dim-row"><span class="fq-dim-name">' + dl[key] + '</span><div class="fq-dim-track"><div class="fq-dim-fill" style="width:' + val + '%"></div></div><span class="fq-dim-pct">' + val + '%</span></div>';
+    }
+    var barsHtml = '<div class="fq-dim-bars">' + row('interest') + row('aptitude') + row('reality') + '</div>';
+    var gapHtml = (scores && (scores.interest - scores.reality >= 25)) ? ('<div class="fq-gap-warning">💡 ' + GAP_WARNING[lang] + '</div>') : '';
+    return '<div class="fq-pct">' + pct + '%</div>' + barsHtml + '<p>' + verdict + '</p>' + gapHtml;
+  }
+
   function drawQr(c, text, x, y, size) {
     var qr = qrcode(0, 'M');
     qr.addData(text);
@@ -130,6 +157,11 @@
   }
 
   function finishReveal() {
+    var qEl = el('fqQuestions');
+    if (qEl) qEl.style.display = 'none';
+    var submitEl = el('fqSubmit');
+    if (submitEl) submitEl.style.display = 'none';
+
     var section = el('fqRegisterSection');
     if (section) section.style.display = 'block';
     hideRegisterForm();
@@ -140,6 +172,12 @@
     var scores = {};
     try { scores = JSON.parse(sessionStorage.getItem('fq_scores') || '{}'); } catch (e) {}
     var userName = (currentUser.user_metadata && (currentUser.user_metadata.full_name || currentUser.user_metadata.name)) || '';
+
+    var resultEl = el('fqResult');
+    if (resultEl) {
+      resultEl.style.display = 'block';
+      resultEl.innerHTML = renderResultHtml(Number(pct) || 0, scores);
+    }
 
     _supabase.from('career_quiz_results').insert({
       user_id: currentUser.id, email: currentUser.email,
