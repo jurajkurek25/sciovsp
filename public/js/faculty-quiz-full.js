@@ -21,7 +21,20 @@
     sessionStorage.setItem('fq_marketing', (marketing && marketing.checked) ? '1' : '0');
     sessionStorage.setItem('fq_pct', String(ctx.pct || ''));
     sessionStorage.setItem('fq_scores', JSON.stringify(ctx.scores || {}));
+    if (currentUser) {
+      finishReveal();
+      return;
+    }
     _supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.href } });
+  }
+
+  function hideRegisterForm() {
+    var vop = el('fqVopCheckbox');
+    if (vop && vop.closest) { var vopRow = vop.closest('.fq-consent-row'); if (vopRow) vopRow.style.display = 'none'; }
+    var mkt = el('fqMarketingCheckbox');
+    if (mkt && mkt.closest) { var mktRow = mkt.closest('.fq-consent-row'); if (mktRow) mktRow.style.display = 'none'; }
+    var btn = el('fqRegisterBtn');
+    if (btn) btn.style.display = 'none';
   }
 
   function drawQr(c, text, x, y, size) {
@@ -117,6 +130,9 @@
   }
 
   function finishReveal() {
+    var section = el('fqRegisterSection');
+    if (section) section.style.display = 'block';
+    hideRegisterForm();
     var box = el('fqRegisterBox');
     if (box) box.textContent = ctx.lang === 'cs' ? 'Připravuji obrázek…' : 'Pripravujem obrázok…';
     var marketing = sessionStorage.getItem('fq_marketing') === '1';
