@@ -166,7 +166,6 @@
     if (section) section.style.display = 'block';
     hideRegisterForm();
     var box = el('fqRegisterBox');
-    if (box) box.textContent = ctx.lang === 'cs' ? 'Připravuji obrázek…' : 'Pripravujem obrázok…';
     var marketing = sessionStorage.getItem('fq_marketing') === '1';
     var pct = sessionStorage.getItem('fq_pct');
     var scores = {};
@@ -188,26 +187,46 @@
 
     if (pct !== null && pct !== '') ctx.pct = pct;
 
+    var appCat = ctx.appCat || 'vsp';
+    var appHref = '/app?cat=' + encodeURIComponent(appCat) + '&upgrade=free';
+    var appLabel = ctx.lang === 'cs' ? 'Začít se připravovat zdarma →' : 'Začni sa pripravovať zadarmo →';
+
+    if (box) {
+      box.innerHTML = '';
+      var appBtn = document.createElement('a');
+      appBtn.href = appHref;
+      appBtn.className = 'fq-cta';
+      appBtn.style.display = 'inline-block';
+      appBtn.textContent = appLabel;
+      box.appendChild(appBtn);
+      var status = document.createElement('div');
+      status.id = 'fqImgStatus';
+      status.style.marginTop = '1rem';
+      status.textContent = ctx.lang === 'cs' ? 'Připravuji obrázek ke sdílení…' : 'Pripravujem obrázok na zdieľanie…';
+      box.appendChild(status);
+    }
+
     generateResultImage(userName).then(function(blob) {
       var url = URL.createObjectURL(blob);
-      if (!box) return;
-      box.innerHTML = '';
+      var status = el('fqImgStatus');
+      if (!status) return;
+      status.innerHTML = '';
       var img = document.createElement('img');
       img.src = url;
       img.style.maxWidth = '100%';
       img.style.borderRadius = '12px';
-      img.style.marginBottom = '.8rem';
+      img.style.marginBottom = '.6rem';
       var dl = document.createElement('a');
       dl.href = url;
       dl.download = 'sp-trener-vysledok.png';
-      dl.className = 'fq-cta';
-      dl.style.display = 'inline-block';
-      dl.textContent = ctx.lang === 'cs' ? 'Stáhnout obrázek →' : 'Stiahnuť obrázok →';
-      box.appendChild(img);
-      box.appendChild(document.createElement('br'));
-      box.appendChild(dl);
+      dl.className = 'fq-cta-secondary';
+      dl.style.display = 'block';
+      dl.textContent = ctx.lang === 'cs' ? 'Stáhnout obrázek ke sdílení →' : 'Stiahnuť obrázok na zdieľanie →';
+      status.appendChild(img);
+      status.appendChild(dl);
     }, function() {
-      if (box) box.textContent = ctx.lang === 'cs' ? 'Registrace hotová! (obrázek se nepovedlo vygenerovat)' : 'Registrácia hotová! (obrázok sa nepodarilo vygenerovať)';
+      var status = el('fqImgStatus');
+      if (status) status.textContent = '';
     });
 
     sessionStorage.removeItem('fq_pending');
