@@ -3,24 +3,24 @@
 // LF UPJŠ Košice, teraz aj SZU Bratislava a UVLF Košice) -- doteraz
 // medzi nimi neexistoval žiadny prepoj žiadnym smerom.
 //
-// OPRAVA (druhý pokus): prvá verzia tohto patchu zlyhala, lebo predpokladala,
-// že main-app-patches/184-faculty-uni-facts.js (sekcia "O univerzite") je
-// na produkcii aplikovaný -- potvrdené cez main-app-patches/205 diagnostiku,
-// že NIE JE (žiadne uniFactsHtml/UNI_FACTS/.fac-uni-facts v reálnom kóde).
-// Kotvy nižšie sú overené priamo z JSON-escapovaného výpisu produkcie
-// (main-app-patches/205), nie z rekonštrukcie.
+// OPRAVA #2: prvý pokus zlyhal, lebo main-app-patches/184 (UNI_FACTS)
+// nie je na produkcii aplikovaný. Druhý pokus zlyhal, lebo kotva
+// `const langQS = isCs ? '?lang=cs' : '';` sa v server.js vyskytuje
+// 2x (nie len v /skola/:uSlug/:fSlug -- rovnaký idióm používa aj iná
+// routa). Tento (tretí) pokus sa preto úplne vyhýba akejkoľvek kotve,
+// ktorá nebola priamo overená ako jedinečná v CELOM súbore -- namiesto
+// samostatnej deklarácie premenných + samostatnej úpravy zdieľaného
+// <style> bloku je VŠETKO (vyhľadávacia tabuľka aj CSS) zabalené do
+// jedného self-contained IIFE vloženého na JEDINÉ miesto, ktoré bolo
+// priamo potvrdené (cez main-app-patches/205, JSON-escapovaný výpis
+// z produkcie) ako jedinečné: presne tento 4-riadkový blok končiaci
+// `facultyQuizWidget(lang, statements)`. Používa len premenné (rec,
+// isCs, langQS), ktoré sú na tomto mieste už v scope (langQS je
+// deklarovaná skôr v tej istej funkcii -- IIFE ju len číta, nie
+// deklaruje nanovo, takže jej neunikátnosť v súbore už nevadí).
 //
-// Pridáva malý CTA box hneď po hero sekcii, pred kvízovým widgetom, LEN
-// na tých 4 konkrétnych fakultných stránkach, ktoré majú zodpovedajúci
-// /vsp-test/ formát:
-//   univerzita-komenskeho-v-bratislave/lekarska-fakulta     -> /vsp-test/lf-uk-bratislava
-//   univerzita-pavla-jozefa-safarika/lekarska-fakulta       -> /vsp-test/lf-upjs-kosice
-//   slovenska-zdravotnicka-univerzita/zdravotnicke-odbory   -> /vsp-test/lf-szu-bratislava
-//   univerzita-veterinarskeho-lekarstva-a-farmacie/veterinarska-fakulta -> /vsp-test/uvlf-kosice
-// Kľúče sú presné uSlug/fSlug hodnoty overené priamym výpočtom cez
-// rovnakú slugify() funkciu, akú používa server.js (nie odhadnuté).
-// Na ostatných ~146 fakultných stránkach sa nič nezobrazí (vspTestTarget
-// je undefined -> vspTestLinkHtml je prázdny reťazec).
+// Na ostatných ~146 fakultných stránkach sa nič nezobrazí (lookup
+// vráti undefined -> IIFE vráti '').
 //
 // VYŽADUJE: main-app-patches/197 a main-app-patches/195/196 (aby cieľové
 // /vsp-test/ URL už reálne fungovali) už aplikované. NEVYŽADUJE 184.
@@ -58,48 +58,35 @@ function replaceOnce(src, oldStr, newStr, label) {
 
 let server = fs.readFileSync(SERVER_PATH, 'utf8');
 
-if (server.includes('vspTestLinkHtml')) {
+if (server.includes('fac-vsp-test-cta')) {
   console.error('❌ server.js: už je aplikované, nič som nezmenil.');
   process.exit(1);
 }
 
-// ── 1) Výpočet vspTestLinkHtml -- hneď za deklaráciou langQS (aby bol
-//        langQS už dostupný pre CTA odkaz) ──
-server = replaceOnce(server,
-  `  const langQS = isCs ? '?lang=cs' : '';`,
-  `  const langQS = isCs ? '?lang=cs' : '';
-  const VSP_TEST_LINK_TARGETS = {
-    'univerzita-komenskeho-v-bratislave/lekarska-fakulta': '/vsp-test/lf-uk-bratislava',
-    'univerzita-pavla-jozefa-safarika/lekarska-fakulta': '/vsp-test/lf-upjs-kosice',
-    'slovenska-zdravotnicka-univerzita/zdravotnicke-odbory': '/vsp-test/lf-szu-bratislava',
-    'univerzita-veterinarskeho-lekarstva-a-farmacie/veterinarska-fakulta': '/vsp-test/uvlf-kosice'
-  };
-  const vspTestTarget = VSP_TEST_LINK_TARGETS[rec.uSlug + '/' + rec.fSlug];
-  const vspTestLinkHtml = vspTestTarget ? (
-    '<section class="fac-vsp-test-cta">'
-    + '<p>' + (isCs ? 'Tato fakulta má vlastní přijímací test — jiný formát než klasický VŠP/SCIO test.' : 'Táto fakulta má vlastný prijímací test — iný formát než klasický VŠP/SCIO test.') + '</p>'
-    + '<a href="' + vspTestTarget + langQS + '">' + (isCs ? 'Zobrazit přesný formát testu →' : 'Zobraziť presný formát testu →') + '</a>'
-    + '</section>'
-  ) : '';`,
-  '1: výpočet vspTestLinkHtml');
-
-// ── 2) Vloženie do body, hneď pred kvízovým widgetom ──
+// Jediná kotva -- priamo overená ako jedinečná v CELOM súbore cez
+// main-app-patches/205 diagnostiku (JSON-escapovaný výpis z produkcie).
 server = replaceOnce(server,
   `    + '<p class="fac-intro">' + heroIntro + '</p>'
     + '</section>'
     + facultyQuizWidget(lang, statements)`,
   `    + '<p class="fac-intro">' + heroIntro + '</p>'
     + '</section>'
-    + vspTestLinkHtml
+    + (function() {
+        var t = ({
+          'univerzita-komenskeho-v-bratislave/lekarska-fakulta': '/vsp-test/lf-uk-bratislava',
+          'univerzita-pavla-jozefa-safarika/lekarska-fakulta': '/vsp-test/lf-upjs-kosice',
+          'slovenska-zdravotnicka-univerzita/zdravotnicke-odbory': '/vsp-test/lf-szu-bratislava',
+          'univerzita-veterinarskeho-lekarstva-a-farmacie/veterinarska-fakulta': '/vsp-test/uvlf-kosice'
+        })[rec.uSlug + '/' + rec.fSlug];
+        if (!t) return '';
+        return '<section class="fac-vsp-test-cta">'
+          + '<style>.fac-vsp-test-cta{margin-bottom:1.5rem;padding:1.25rem 1.5rem;background:rgba(200,255,0,.06);border:1px solid rgba(200,255,0,.25);border-radius:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem}.fac-vsp-test-cta p{color:var(--text2);font-size:.86rem;margin:0;max-width:70%}.fac-vsp-test-cta a{color:var(--volt);text-decoration:none;font-family:var(--mono);font-size:.82rem;font-weight:700;white-space:nowrap}.fac-vsp-test-cta a:hover{text-decoration:underline}</style>'
+          + '<p>' + (isCs ? 'Tato fakulta má vlastní přijímací test — jiný formát než klasický VŠP/SCIO test.' : 'Táto fakulta má vlastný prijímací test — iný formát než klasický VŠP/SCIO test.') + '</p>'
+          + '<a href="' + t + langQS + '">' + (isCs ? 'Zobrazit přesný formát testu →' : 'Zobraziť presný formát testu →') + '</a>'
+          + '</section>';
+      })()
     + facultyQuizWidget(lang, statements)`,
-  '2: vloženie vspTestLinkHtml do body');
-
-// ── 3) CSS pre .fac-vsp-test-cta -- pripojené za posledné reálne
-//        existujúce pravidlo (.fac-related-list a:hover) ──
-server = replaceOnce(server,
-  `.fac-related-list a{color:var(--text2);text-decoration:none;font-size:.86rem}.fac-related-list a:hover{color:var(--volt)}</style>';`,
-  `.fac-related-list a{color:var(--text2);text-decoration:none;font-size:.86rem}.fac-related-list a:hover{color:var(--volt)}.fac-vsp-test-cta{margin-bottom:1.5rem;padding:1.25rem 1.5rem;background:rgba(200,255,0,.06);border:1px solid rgba(200,255,0,.25);border-radius:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem}.fac-vsp-test-cta p{color:var(--text2);font-size:.86rem;margin:0;max-width:70%}.fac-vsp-test-cta a{color:var(--volt);text-decoration:none;font-family:var(--mono);font-size:.82rem;font-weight:700;white-space:nowrap}.fac-vsp-test-cta a:hover{text-decoration:underline}</style>';`,
-  '3: CSS pre .fac-vsp-test-cta');
+  '1: vloženie vspTestLinkHtml IIFE do body (self-contained, jediná kotva)');
 
 const backup = SERVER_PATH + '.pre-skola-vsp-test-internal-links-' + Date.now();
 fs.copyFileSync(SERVER_PATH, backup);
