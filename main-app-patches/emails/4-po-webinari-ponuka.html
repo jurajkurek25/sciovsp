@@ -1,0 +1,120 @@
+<!--
+  EMAIL 4/4 — Po webinári: špeciálna ponuka (/ponuka)
+  Kedy poslať: štvrtok tesne po skončení vysielania (napr. 20:35–21:00),
+  všetkým registrovaným na daný termín bez ohľadu na to, či reálne prišli
+  (rovnaký princíp ako end-screen na /webinar/live — nevieme spoľahlivo
+  odlíšiť, kto sledoval, takže kopírovanie je zámerne neutrálne k obom).
+  Návrh predmetu: Tvoja špeciálna ponuka je tu (časovo obmedzené) ⏳
+
+  DÔLEŽITÉ: akciová cena na /ponuka je viazaná na to, že návštevník má vo
+  svojom prehliadači sp_webinar_session (localStorage) z /webinar — link
+  nižšie musí viesť priamo na https://sptrener.online/ponuka a klikať naň
+  z ROVNAKÉHO zariadenia/prehliadača, kde sa človek registroval, inak uvidí
+  rovno klasickú (nezvýhodnenú) cenu. Stojí za zváženie spomenúť to v texte
+  (nižšie už je jedna veta o tom pridaná).
+
+  PLACEHOLDERY: [MENO], [UNSUBSCRIBE] — pozri poznámku v emaile 1.
+-->
+<!DOCTYPE html>
+<html lang="sk" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>Tvoja špeciálna ponuka</title>
+<!--[if mso]>
+<noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript>
+<![endif]-->
+<style>
+  body,table,td,a{-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%}
+  table,td{mso-table-lspace:0pt;mso-table-rspace:0pt}
+  img{-ms-interpolation-mode:bicubic;border:0;height:auto;line-height:100%;outline:none;text-decoration:none}
+  body{margin:0;padding:0;width:100%!important;height:100%!important;background:#F1ECE0}
+  @media screen and (max-width:600px){
+    .wrap{width:100%!important}
+    .px{padding-left:20px!important;padding-right:20px!important}
+    .h1{font-size:24px!important;line-height:1.25!important}
+    .stack{display:block!important;width:100%!important;padding-bottom:12px!important}
+  }
+</style>
+</head>
+<body style="margin:0;padding:0;background:#F1ECE0;">
+<div style="display:none;max-height:0;overflow:hidden;mso-hide:all;">Ponuka platí len obmedzený čas — Premium a Elite členstvo s kurzami zahrnutými.</div>
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#F1ECE0;">
+<tr><td align="center" style="padding:32px 16px;">
+
+  <table role="presentation" class="wrap" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px;max-width:600px;background:#FFFFFF;border-radius:14px;overflow:hidden;border:1px solid #E7E0D2;">
+
+    <tr><td class="px" style="padding:28px 40px 0 40px;">
+      <span style="font-family:'Courier New',Courier,monospace;font-size:13px;font-weight:700;letter-spacing:.08em;color:#14100D;">← SP TRÉNER</span>
+    </td></tr>
+
+    <tr><td class="px" style="padding:22px 40px 0 40px;">
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td style="background:#EFFCC7;border-radius:20px;padding:6px 14px;">
+        <span style="font-family:'Courier New',Courier,monospace;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#5C7A00;">🚩 Ponuka po webinári</span>
+      </td></tr></table>
+    </td></tr>
+
+    <tr><td class="px h1" style="padding:16px 40px 0 40px;font-family:Georgia,'Times New Roman',serif;font-weight:700;font-size:28px;line-height:1.25;color:#14100D;">
+      [MENO], tvoja ponuka je pripravená.
+    </td></tr>
+    <tr><td class="px" style="padding:10px 40px 0 40px;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6;color:#55504A;">
+      Ak si dnešný webinár stihol/a naživo, super — ak nie, žiadny problém, ponuka platí pre teba tak či tak, keďže si bol/a registrovaný/á. Platí ale len <strong style="color:#14100D;">obmedzený čas</strong>, potom sa vracia na bežnú cenu.
+    </td></tr>
+
+    <!-- price teaser -->
+    <tr><td class="px" style="padding:26px 40px 0 40px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td class="stack" width="48%" valign="top" style="background:#FAF7EF;border:1px solid #E7E0D2;border-radius:10px;padding:18px;">
+            <div style="font-family:Georgia,'Times New Roman',serif;font-weight:700;font-size:17px;color:#14100D;">Premium</div>
+            <div style="font-family:'Courier New',Courier,monospace;font-weight:700;font-size:24px;color:#14100D;margin-top:4px;">od 27 €</div>
+            <div style="font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#8A8378;margin-top:2px;">jednorazovo / 3 mesiace</div>
+          </td>
+          <td class="stack" width="4%">&nbsp;</td>
+          <td class="stack" width="48%" valign="top" style="background:#F8F4FF;border:1px solid #E4D9FF;border-radius:10px;padding:18px;">
+            <div style="font-family:Georgia,'Times New Roman',serif;font-weight:700;font-size:17px;color:#14100D;">Elite</div>
+            <div style="font-family:'Courier New',Courier,monospace;font-weight:700;font-size:24px;color:#14100D;margin-top:4px;">od 57 €</div>
+            <div style="font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#8A8378;margin-top:2px;">jednorazovo / 3 mesiace</div>
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+
+    <tr><td class="px" style="padding:22px 40px 0 40px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr><td width="20" valign="top" style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#7C5CFF;padding:5px 0;">✓</td>
+            <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.6;color:#3A362F;padding:5px 0;">Neobmedzený prístup k AI generátoru testov</td></tr>
+        <tr><td width="20" valign="top" style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#7C5CFF;padding:5px 0;">✓</td>
+            <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.6;color:#3A362F;padding:5px 0;">11 kurzov zahrnutých — univerzálne aj odborová knižnica</td></tr>
+        <tr><td width="20" valign="top" style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#7C5CFF;padding:5px 0;">✓</td>
+            <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.6;color:#3A362F;padding:5px 0;">Jednorazová platba — žiadne automatické opakované strhávanie</td></tr>
+      </table>
+    </td></tr>
+
+    <tr><td class="px" align="center" style="padding:28px 40px 0 40px;">
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td style="border-radius:8px;background:#C8FF00;">
+        <a href="https://sptrener.online/ponuka" target="_blank" style="display:inline-block;padding:16px 34px;font-family:'Courier New',Courier,monospace;font-weight:700;font-size:15px;color:#14100D;text-decoration:none;">Zobraziť moju ponuku →</a>
+      </td></tr></table>
+    </td></tr>
+    <tr><td class="px" align="center" style="padding:14px 40px 0 40px;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.5;color:#8A8378;">
+      Otvor to na rovnakom zariadení/prehliadači, kde si sa registroval/a na webinár — akciová cena je naň naviazaná.
+    </td></tr>
+
+    <tr><td style="padding-top:32px;"></td></tr>
+
+    <tr><td class="px" style="padding:20px 40px 32px 40px;border-top:1px solid #EFEAE0;">
+      <div style="font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.7;color:#A39D8F;text-align:center;">
+        SP Tréner · Ngroup, s. r. o. · Dunajská 8, 811 08 Bratislava · IČO 53813189<br>
+        <a href="https://sptrener.online/legal.html#vop" style="color:#A39D8F;">Obchodné podmienky</a> ·
+        <a href="https://sptrener.online/legal.html#privacy" style="color:#A39D8F;">Ochrana osobných údajov</a> ·
+        <a href="[UNSUBSCRIBE]" style="color:#A39D8F;">Odhlásiť sa</a>
+      </div>
+    </td></tr>
+
+  </table>
+</td></tr>
+</table>
+</body>
+</html>

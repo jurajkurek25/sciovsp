@@ -1,0 +1,19 @@
+# SP Tréner
+
+> SP Tréner je AI platforma na prípravu na vysokoškolské prijímacie testy (VŠP/NSZ) a fakultné prijímačky (medicína, právo, ekonómia) pre študentov na Slovensku a v Česku.
+
+SP Tréner ponúka reálne simulácie prijímacích testov na čas, AI generátor nových úloh, AI analýzu výsledkov po teste (AI Coach) a video kurzy s lekciami vedenými lektormi. Prvé 3 testy sú zadarmo, ďalší prístup je cez mesačné predplatné (Premium/Elite) alebo jednorazový nákup kurzu.
+
+## Hlavné stránky
+
+- [Domovská stránka](https://sptrener.online/): popis produktu, cenové plány, spustenie testu
+- [Aplikácia](https://sptrener.online/app): samotný nástroj na precvičovanie a testy
+- [Video kurzy](https://sptrener.online/kurzy): zoznam platených a bezplatných video kurzov
+- [Blog](https://sptrener.online/blog): články o príprave na prijímačky, VŠP a NSZ
+- [RSS feed blogu](https://sptrener.online/blog/rss.xml)
+- [Obchodné podmienky a ochrana osobných údajov](https://sptrener.online/legal.html)
+- [Darčekové karty](https://sptrener.online/darcekova-karta)
+
+## Kontakt
+
+- Email: juraj@jurajkurek.com

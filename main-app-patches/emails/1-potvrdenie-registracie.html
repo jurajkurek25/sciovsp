@@ -1,0 +1,116 @@
+<!--
+  EMAIL 1/4 — Potvrdenie registrácie (welcome + detaily termínu)
+  Kedy poslať: hneď po registrácii na /webinar (Ecomail automation trigger:
+  "pridaný do zoznamu 15" alebo obdobný "subscribed" event).
+  Návrh predmetu: Si zaregistrovaný/á! Tu je tvoj termín 🎉
+
+  PLACEHOLDERY NA NAHRADENIE (Ecomail merge tagmi z tvojho účtu — presnú
+  syntax %%MENO%% / {{meno}} / [MENO] over v Ecomail editore, nie som si
+  istý ich presným formátom, nedalo sa mi to overiť naživo):
+    [MENO]        – meno kontaktu (fallback "budúci vysokoškolák/áčka")
+    [TERMIN]      – napr. "Štvrtok 14.08 o 20:00"
+    [UNSUBSCRIBE] – odhlasovací odkaz (Ecomail ho zvyčajne vkladá automaticky
+                    do footera šablóny cez vlastný merge tag — over, či ho
+                    treba pridať ručne alebo si ho editor doplní sám)
+-->
+<!DOCTYPE html>
+<html lang="sk" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>Si zaregistrovaný/á!</title>
+<!--[if mso]>
+<noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript>
+<![endif]-->
+<style>
+  body,table,td,a{-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%}
+  table,td{mso-table-lspace:0pt;mso-table-rspace:0pt}
+  img{-ms-interpolation-mode:bicubic;border:0;height:auto;line-height:100%;outline:none;text-decoration:none}
+  body{margin:0;padding:0;width:100%!important;height:100%!important;background:#F1ECE0}
+  @media screen and (max-width:600px){
+    .wrap{width:100%!important}
+    .px{padding-left:20px!important;padding-right:20px!important}
+    .h1{font-size:24px!important;line-height:1.25!important}
+  }
+</style>
+</head>
+<body style="margin:0;padding:0;background:#F1ECE0;">
+<!-- preheader (skrytý náhľadový text v inboxe) -->
+<div style="display:none;max-height:0;overflow:hidden;mso-hide:all;">Tvoje miesto na vysielaní je rezervované — tu je termín a čo bude ďalej.</div>
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#F1ECE0;">
+<tr><td align="center" style="padding:32px 16px;">
+
+  <table role="presentation" class="wrap" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px;max-width:600px;background:#FFFFFF;border-radius:14px;overflow:hidden;border:1px solid #E7E0D2;">
+
+    <!-- header / wordmark -->
+    <tr><td class="px" style="padding:28px 40px 0 40px;">
+      <span style="font-family:'Courier New',Courier,monospace;font-size:13px;font-weight:700;letter-spacing:.08em;color:#14100D;">← SP TRÉNER</span>
+    </td></tr>
+
+    <!-- check badge + heading -->
+    <tr><td class="px" align="center" style="padding:28px 40px 0 40px;">
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td style="width:56px;height:56px;border-radius:50%;background:#EFFCC7;text-align:center;vertical-align:middle;font-size:26px;line-height:56px;">✅</td></tr></table>
+    </td></tr>
+    <tr><td class="px h1" align="center" style="padding:16px 40px 0 40px;font-family:Georgia,'Times New Roman',serif;font-weight:700;font-size:28px;line-height:1.25;color:#14100D;">
+      Si zaregistrovaný/á, [MENO]! 🎉
+    </td></tr>
+    <tr><td class="px" align="center" style="padding:10px 40px 0 40px;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6;color:#55504A;">
+      Tvoje miesto na bezplatnom vysielaní je rezervované. Tu je presný termín a čo môžeš čakať.
+    </td></tr>
+
+    <!-- termín box -->
+    <tr><td class="px" style="padding:24px 40px 0 40px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#FAF7EF;border:1px solid #E7E0D2;border-left:4px solid #7C5CFF;border-radius:10px;">
+        <tr><td align="center" style="padding:18px 20px;">
+          <div style="font-family:'Courier New',Courier,monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#8A8378;margin-bottom:6px;">Tvoj termín</div>
+          <div style="font-family:Georgia,'Times New Roman',serif;font-weight:700;font-size:21px;color:#14100D;">[TERMIN]</div>
+        </td></tr>
+      </table>
+    </td></tr>
+
+    <!-- CTA -->
+    <tr><td class="px" align="center" style="padding:26px 40px 0 40px;">
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td style="border-radius:8px;background:#C8FF00;">
+        <a href="https://sptrener.online/webinar/live" target="_blank" style="display:inline-block;padding:14px 28px;font-family:'Courier New',Courier,monospace;font-weight:700;font-size:14px;color:#14100D;text-decoration:none;">Otvoriť miestnosť vysielania →</a>
+      </td></tr></table>
+    </td></tr>
+
+    <!-- čo bude ďalej -->
+    <tr><td class="px" style="padding:30px 40px 0 40px;">
+      <div style="font-family:'Courier New',Courier,monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#7C5CFF;margin-bottom:14px;text-align:center;">Čo bude ďalej</div>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td width="24" valign="top" style="font-family:'Courier New',Courier,monospace;font-size:12px;color:#7C5CFF;padding:6px 0;">01</td>
+          <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.6;color:#3A362F;padding:6px 0;">Deň pred termínom ti pošleme pripomienku.</td>
+        </tr>
+        <tr>
+          <td width="24" valign="top" style="font-family:'Courier New',Courier,monospace;font-size:12px;color:#7C5CFF;padding:6px 0;">02</td>
+          <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.6;color:#3A362F;padding:6px 0;">Tesne pred štartom dostaneš odkaz aj pripomienku "začíname o chvíľu".</td>
+        </tr>
+        <tr>
+          <td width="24" valign="top" style="font-family:'Courier New',Courier,monospace;font-size:12px;color:#7C5CFF;padding:6px 0;">03</td>
+          <td style="font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.6;color:#3A362F;padding:6px 0;">Ak prídeš neskôr, video sa spustí presne od miesta, kde vysielanie práve je — nič nezmeškáš od začiatku.</td>
+        </tr>
+      </table>
+    </td></tr>
+
+    <!-- spacer -->
+    <tr><td style="padding-top:32px;"></td></tr>
+
+    <!-- footer -->
+    <tr><td class="px" style="padding:20px 40px 32px 40px;border-top:1px solid #EFEAE0;">
+      <div style="font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.7;color:#A39D8F;text-align:center;">
+        SP Tréner · Ngroup, s. r. o. · Dunajská 8, 811 08 Bratislava · IČO 53813189<br>
+        <a href="https://sptrener.online/legal.html#vop" style="color:#A39D8F;">Obchodné podmienky</a> ·
+        <a href="https://sptrener.online/legal.html#privacy" style="color:#A39D8F;">Ochrana osobných údajov</a> ·
+        <a href="[UNSUBSCRIBE]" style="color:#A39D8F;">Odhlásiť sa</a>
+      </div>
+    </td></tr>
+
+  </table>
+</td></tr>
+</table>
+</body>
+</html>

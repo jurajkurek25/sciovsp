@@ -1,0 +1,21 @@
+{
+  "name": "sptrener-ad-service",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Samostatná appka pre ad.sptrener.online — vlastná registrácia/prihlásenie a MySQL, bez Supabase.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.5",
+    "dotenv": "^17.3.1",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.3",
+    "multer": "^2.0.0",
+    "mysql2": "^3.23.2",
+    "nodemailer": "^8.0.3",
+    "stripe": "^20.4.1"
+  }
+}
