@@ -60,11 +60,13 @@ router.get('/api/instructor/courses', requireInstructorAuth, async (req, res) =>
 });
 
 const ACCESS_MODES = ['paid', 'free', 'subscription'];
+const COURSE_CATEGORIES = ['priprava-na-skusku', 'prihlaska', 'osobny-rozvoj'];
 
 router.post('/api/instructor/courses', requireInstructorAuth, requireTermsAccepted, async (req, res) => {
-  const { title, description, priceCents, coverImageUrl, salesContent, introVideoUrl, accessMode, includedInPremium, includedInElite } = req.body || {};
+  const { title, description, priceCents, coverImageUrl, salesContent, introVideoUrl, accessMode, includedInPremium, includedInElite, category } = req.body || {};
   if (!title) return res.status(400).json({ error: 'Chýba title.' });
   if (accessMode !== undefined && !ACCESS_MODES.includes(accessMode)) return res.status(400).json({ error: 'Neplatný accessMode.' });
+  if (category !== undefined && category !== null && category !== '' && !COURSE_CATEGORIES.includes(category)) return res.status(400).json({ error: 'Neplatná kategória kurzu.' });
   let slug = slugify(title);
   if (!slug) return res.status(400).json({ error: 'Z názvu sa nedá vytvoriť slug.' });
   const { data: existing } = await mainDb.from('courses').select('id').eq('slug', slug);
@@ -78,7 +80,8 @@ router.post('/api/instructor/courses', requireInstructorAuth, requireTermsAccept
     instructor_id: req.instructor.id,
     instructor_name: req.instructor.name || null, instructor_bio: req.instructor.bio || null, instructor_photo_url: req.instructor.photo_url || null,
     platform_cut_percent: req.instructor.default_cut_percent,
-    access_mode: accessMode || 'paid', included_in_premium: !!includedInPremium, included_in_elite: !!includedInElite
+    access_mode: accessMode || 'paid', included_in_premium: !!includedInPremium, included_in_elite: !!includedInElite,
+    category: category || null
   }).select().single();
   if (error) { console.error(error); return res.status(500).json({ error: error.message }); }
   res.json({ ok: true, course: data });
@@ -87,8 +90,9 @@ router.post('/api/instructor/courses', requireInstructorAuth, requireTermsAccept
 router.put('/api/instructor/courses/:id', requireInstructorAuth, async (req, res) => {
   const course = await ownCourseOr404(req, res);
   if (!course) return;
-  const { title, description, priceCents, coverImageUrl, salesContent, introVideoUrl, submittedForReview, accessMode, includedInPremium, includedInElite } = req.body || {};
+  const { title, description, priceCents, coverImageUrl, salesContent, introVideoUrl, submittedForReview, accessMode, includedInPremium, includedInElite, category } = req.body || {};
   if (accessMode !== undefined && !ACCESS_MODES.includes(accessMode)) return res.status(400).json({ error: 'Neplatný accessMode.' });
+  if (category !== undefined && category !== null && category !== '' && !COURSE_CATEGORIES.includes(category)) return res.status(400).json({ error: 'Neplatná kategória kurzu.' });
   const update = {};
   if (title !== undefined) update.title = title;
   if (description !== undefined) update.description = description;
@@ -100,6 +104,7 @@ router.put('/api/instructor/courses/:id', requireInstructorAuth, async (req, res
   if (accessMode !== undefined) update.access_mode = accessMode;
   if (includedInPremium !== undefined) update.included_in_premium = !!includedInPremium;
   if (includedInElite !== undefined) update.included_in_elite = !!includedInElite;
+  if (category !== undefined) update.category = category || null;
   const { data, error } = await mainDb.from('courses').update(update).eq('id', course.id).select().single();
   if (error) { console.error(error); return res.status(500).json({ error: error.message }); }
   res.json({ ok: true, course: data });
