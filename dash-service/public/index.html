@@ -1794,12 +1794,16 @@ async function renderBugs() {
 }
 
 // ─────────────────────────── ADVISOR ───────────────────────────
+function formatChatMsg(text) {
+  return (text || '').replace(/</g, '&lt;').replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+}
+
 async function renderAdvisor() {
   const { messages } = await api('/api/dash/advisor/history');
   $('#main').innerHTML = `
     <div class="pagehead"><h2>AI poradca</h2></div>
     <div class="chat">
-      <div class="chat-msgs" id="chatMsgs">${messages.map(m => `<div class="msg ${m.role}">${(m.content||'').replace(/</g,'&lt;')}</div>`).join('')}</div>
+      <div class="chat-msgs" id="chatMsgs">${messages.map(m => `<div class="msg ${m.role}">${formatChatMsg(m.content)}</div>`).join('')}</div>
       <div class="chat-input">
         <textarea id="chatInput" placeholder="Opýtaj sa na čísla, trendy, čo zlepšiť…"></textarea>
         <button class="btn" id="chatSendBtn">Poslať</button>
@@ -1817,13 +1821,13 @@ async function sendAdvisorMsg() {
   if (!message) return;
   input.value = '';
   const msgsEl = $('#chatMsgs');
-  msgsEl.insertAdjacentHTML('beforeend', `<div class="msg user">${message.replace(/</g,'&lt;')}</div>`);
+  msgsEl.insertAdjacentHTML('beforeend', `<div class="msg user">${formatChatMsg(message)}</div>`);
   msgsEl.insertAdjacentHTML('beforeend', `<div class="msg assistant" id="pendingReply">…</div>`);
   msgsEl.scrollTop = msgsEl.scrollHeight;
   try {
     if (!currentOverviewSnapshot) currentOverviewSnapshot = await api('/api/dash/overview');
     const { reply } = await api('/api/dash/advisor/chat', { method: 'POST', body: JSON.stringify({ message, overviewSnapshot: currentOverviewSnapshot }) });
-    $('#pendingReply').textContent = reply;
+    $('#pendingReply').innerHTML = formatChatMsg(reply);
     $('#pendingReply').removeAttribute('id');
   } catch (err) {
     $('#pendingReply').textContent = 'Chyba: ' + err.message;
