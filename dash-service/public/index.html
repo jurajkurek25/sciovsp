@@ -586,9 +586,13 @@ function courseFormHtml(c, categories) {
       <label style="display:flex;align-items:center;gap:.4rem;cursor:pointer"><input type="checkbox" class="cf-tier-elite" ${c?.included_in_elite ? 'checked' : ''} style="width:16px;height:16px;accent-color:var(--purple)"> Elite</label>
     </div>
     <h4 style="margin-top:1.2rem">Kategória</h4>
-    <p class="muted" style="margin-top:-.4rem;margin-bottom:.5rem">Voľný text — môžeš zadať existujúcu kategóriu (z ponuky) alebo napísať úplne novú. Podľa nej sa kurz dá filtrovať na /kurzy. Voliteľné.</p>
-    <input class="cf-category" list="cf-category-list" placeholder="napr. Príprava na skúšku" value="${(c?.category||'').replace(/"/g,'&quot;')}" style="width:100%;max-width:360px;padding:.6rem .8rem;background:var(--black3);border:1px solid var(--border2);border-radius:8px;font-size:.83rem;box-sizing:border-box">
-    <datalist id="cf-category-list">${(categories||[]).map(cat => `<option value="${cat.replace(/"/g,'&quot;')}">`).join('')}</datalist>
+    <p class="muted" style="margin-top:-.4rem;margin-bottom:.5rem">Kategórie vidia a používajú všetci inštruktori aj ty — ak nenájdeš vhodnú, vyber "Vlastná kategória" a napíš novú. Podľa nej sa kurz dá filtrovať na /kurzy. Voliteľné.</p>
+    <select class="cf-category" style="width:100%;max-width:360px;padding:.6rem .8rem;background:var(--black3);border:1px solid var(--border2);border-radius:8px;font-size:.83rem;appearance:none;-webkit-appearance:none;background-image:url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 20 20%22 fill=%22%238a8aa3%22><path d=%22M5.5 7.5l4.5 5 4.5-5z%22/></svg>');background-repeat:no-repeat;background-position:right .7rem center;background-size:1.1rem">
+      <option value="" ${!c?.category ? 'selected' : ''}>Bez kategórie</option>
+      ${(categories||[]).map(cat => `<option value="${cat.replace(/"/g,'&quot;')}" ${c?.category === cat ? 'selected' : ''}>${cat}</option>`).join('')}
+      <option value="__custom__" ${(c?.category && !(categories||[]).includes(c.category)) ? 'selected' : ''}>+ Vlastná kategória…</option>
+    </select>
+    <input class="cf-category-custom" placeholder="Napíš novú kategóriu" value="${(c?.category && !(categories||[]).includes(c.category)) ? c.category.replace(/"/g,'&quot;') : ''}" style="width:100%;max-width:360px;padding:.6rem .8rem;background:var(--black3);border:1px solid var(--border2);border-radius:8px;font-size:.83rem;box-sizing:border-box;margin-top:.5rem;display:${(c?.category && !(categories||[]).includes(c.category)) ? 'block' : 'none'}">
     ${coverFieldHtml('cf-cover', c?.cover_image_url)}
     <input class="cf-intro-video" placeholder="URL úvodného videa (sales letter video, voliteľné)" value="${(c?.intro_video_url||'').replace(/"/g,'&quot;')}" style="width:100%;padding:.6rem .8rem;background:var(--black3);border:1px solid var(--border2);border-radius:8px;font-size:.83rem;margin-top:.6rem;box-sizing:border-box">
     <textarea class="cf-desc" placeholder="Krátky popis (karta v zozname + meta description, cca 1-2 vety)" style="min-height:60px">${c?.description||''}</textarea>
@@ -622,6 +626,9 @@ function bindCourseForm(course) {
   const accessModeEl = $('.cf-access-mode', root);
   const tierRow = $('.cf-tier-row', root);
   accessModeEl.onchange = () => { tierRow.style.display = accessModeEl.value === 'subscription' ? 'flex' : 'none'; };
+  const categoryEl = $('.cf-category', root);
+  const categoryCustomEl = $('.cf-category-custom', root);
+  categoryEl.onchange = () => { categoryCustomEl.style.display = categoryEl.value === '__custom__' ? 'block' : 'none'; };
   $('.cf-save', root).onclick = async () => {
     const body = {
       title: $('.cf-title', root).value, description: $('.cf-desc', root).value,
@@ -632,7 +639,7 @@ function bindCourseForm(course) {
       instructorBio: $('.cf-instructor-bio', root).value.trim(),
       accessMode: accessModeEl.value,
       includedInPremium: $('.cf-tier-premium', root).checked, includedInElite: $('.cf-tier-elite', root).checked,
-      category: $('.cf-category', root).value.trim()
+      category: categoryEl.value === '__custom__' ? categoryCustomEl.value.trim() : categoryEl.value
     };
     const platformCutEl = $('.cf-platform-cut', root);
     const referralCutEl = $('.cf-referral-cut', root);
