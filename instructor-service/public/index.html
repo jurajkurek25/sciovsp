@@ -205,7 +205,7 @@ const T = {
     accessModeLabel: 'Dostupnosť kurzu', accessModePaid: 'Platený (bežný predaj)', accessModeFree: 'Zadarmo pre každého', accessModeSubscription: 'Súčasť predplatného appky',
     accessModeNote: 'Pri "Súčasť predplatného" je kurz zadarmo len počas aktívneho predplatného vo vybraných tieroch — mimo predplatného sa dá kúpiť aj priamo za cenu vyššie.',
     tierPremium: 'Premium', tierElite: 'Elite',
-    categoryLabel: 'Kategória', categoryNone: 'Bez kategórie', categoryPrep: '🎯 Príprava na skúšku', categoryApp: '✍️ Prihláška', categoryGrowth: '🧠 Osobný rozvoj',
+    categoryLabel: 'Kategória', categoryHint: 'Voľný text — zadaj existujúcu kategóriu z ponuky alebo napíš úplne novú.', categoryPrep: 'Príprava na skúšku', categoryApp: 'Prihláška', categoryGrowth: 'Osobný rozvoj',
     saveBtn: 'Uložiť', submitReviewBtn: 'Odoslať na schválenie', submittedReviewBtn: 'Odoslané na schválenie ✓', deleteBtn: 'Zmazať',
     referralLabel: 'Tvoj referral odkaz na tento kurz (platforma si necháva len {percent}%, zvyšok je tvoj)',
     lessonsTitle: 'Lekcie', noLessons: 'Zatiaľ žiadne lekcie.', addLessonBtn: '+ Pridať lekciu',
@@ -326,7 +326,7 @@ const T = {
     accessModeLabel: 'Dostupnost kurzu', accessModePaid: 'Placený (běžný prodej)', accessModeFree: 'Zdarma pro každého', accessModeSubscription: 'Součást předplatného appky',
     accessModeNote: 'U "Součást předplatného" je kurz zdarma jen během aktivního předplatného ve vybraných tarifech — mimo předplatné se dá koupit i přímo za cenu výše.',
     tierPremium: 'Premium', tierElite: 'Elite',
-    categoryLabel: 'Kategorie', categoryNone: 'Bez kategorie', categoryPrep: '🎯 Příprava na zkoušku', categoryApp: '✍️ Přihláška', categoryGrowth: '🧠 Osobní rozvoj',
+    categoryLabel: 'Kategorie', categoryHint: 'Volný text — zadej existující kategorii z nabídky nebo napiš úplně novou.', categoryPrep: 'Příprava na zkoušku', categoryApp: 'Přihláška', categoryGrowth: 'Osobní rozvoj',
     saveBtn: 'Uložit', submitReviewBtn: 'Odeslat ke schválení', submittedReviewBtn: 'Odesláno ke schválení ✓', deleteBtn: 'Smazat',
     referralLabel: 'Tvůj referral odkaz na tento kurz (platforma si nechává jen {percent}%, zbytek je tvůj)',
     lessonsTitle: 'Lekce', noLessons: 'Zatím žádné lekce.', addLessonBtn: '+ Přidat lekci',
@@ -820,12 +820,9 @@ async function renderCourseDetail(id) {
       </div>
       <div class="field">
         <label>${t('categoryLabel')}</label>
-        <select id="f-category">
-          <option value="" ${!course.category ? 'selected' : ''}>${t('categoryNone')}</option>
-          <option value="priprava-na-skusku" ${course.category === 'priprava-na-skusku' ? 'selected' : ''}>${t('categoryPrep')}</option>
-          <option value="prihlaska" ${course.category === 'prihlaska' ? 'selected' : ''}>${t('categoryApp')}</option>
-          <option value="osobny-rozvoj" ${course.category === 'osobny-rozvoj' ? 'selected' : ''}>${t('categoryGrowth')}</option>
-        </select>
+        <input id="f-category" list="f-category-list" value="${escapeHtml(course.category || '')}">
+        <datalist id="f-category-list">${[...new Set([t('categoryPrep'), t('categoryApp'), t('categoryGrowth'), ...(coursesData.courses || []).map(c => c.category).filter(Boolean)])].map(cat => `<option value="${escapeHtml(cat)}">`).join('')}</datalist>
+        <p class="muted" style="margin-top:.3rem">${t('categoryHint')}</p>
       </div>
       <div class="row2">
         ${fileUploadField('f-cover', t('fieldCover'), 'image', course.cover_image_url)}
@@ -908,7 +905,7 @@ async function saveCourse(id) {
         accessMode: document.getElementById('f-access-mode').value,
         includedInPremium: document.getElementById('f-tier-premium').checked,
         includedInElite: document.getElementById('f-tier-elite').checked,
-        category: document.getElementById('f-category').value
+        category: document.getElementById('f-category').value.trim()
       })
     });
     feedback.textContent = t('saved'); feedback.className = 'feedback ok';

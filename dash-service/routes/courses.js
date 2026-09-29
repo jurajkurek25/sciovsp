@@ -39,6 +39,14 @@ async function replaceQuizQuestions(lessonId, quizQuestions) {
   await mainDb.from('course_lesson_quiz_questions').insert(rows);
 }
 
+function cleanCategory(category) {
+  if (category === undefined) return undefined;
+  const trimmed = String(category || '').trim();
+  return trimmed || null;
+}
+
+const ACCESS_MODES = ['paid', 'free', 'subscription'];
+
 router.get('/api/dash/courses', requireDashAuth, async (req, res) => {
   const { data: courses, error } = await mainDb.from('courses').select('*').order('created_at', { ascending: false });
   if (error) return res.status(500).json({ error: error.message });
@@ -56,10 +64,8 @@ router.get('/api/dash/courses', requireDashAuth, async (req, res) => {
   res.json({ courses: withCounts });
 });
 
-const ACCESS_MODES = ['paid', 'free', 'subscription'];
-
 router.post('/api/dash/courses', requireDashAuth, async (req, res) => {
-  const { title, description, priceCents, coverImageUrl, salesContent, introVideoUrl, instructorName, instructorBio, instructorPhotoUrl, accessMode, includedInPremium, includedInElite } = req.body || {};
+  const { title, description, priceCents, coverImageUrl, salesContent, introVideoUrl, instructorName, instructorBio, instructorPhotoUrl, accessMode, includedInPremium, includedInElite, category } = req.body || {};
   if (!title) return res.status(400).json({ error: 'Chýba title.' });
   if (accessMode !== undefined && !ACCESS_MODES.includes(accessMode)) return res.status(400).json({ error: 'Neplatný accessMode.' });
   let slug = slugify(title);
@@ -73,7 +79,8 @@ router.post('/api/dash/courses', requireDashAuth, async (req, res) => {
     cover_image_url: coverImageUrl || null, sales_content: salesContent || null,
     intro_video_url: introVideoUrl || null, published: false,
     instructor_name: instructorName || null, instructor_bio: instructorBio || null, instructor_photo_url: instructorPhotoUrl || null,
-    access_mode: accessMode || 'paid', included_in_premium: !!includedInPremium, included_in_elite: !!includedInElite
+    access_mode: accessMode || 'paid', included_in_premium: !!includedInPremium, included_in_elite: !!includedInElite,
+    category: cleanCategory(category) || null
   }).select().single();
   if (error) return res.status(500).json({ error: error.message });
   res.json({ ok: true, course: data });
@@ -83,7 +90,7 @@ router.put('/api/dash/courses/:id', requireDashAuth, async (req, res) => {
   const {
     title, description, priceCents, coverImageUrl, salesContent, introVideoUrl, published,
     instructorName, instructorBio, instructorPhotoUrl, platformCutPercent, referralCutPercent,
-    accessMode, includedInPremium, includedInElite
+    accessMode, includedInPremium, includedInElite, category
   } = req.body || {};
   if (accessMode !== undefined && !ACCESS_MODES.includes(accessMode)) return res.status(400).json({ error: 'Neplatný accessMode.' });
   const update = {};
@@ -102,6 +109,7 @@ router.put('/api/dash/courses/:id', requireDashAuth, async (req, res) => {
   if (accessMode !== undefined) update.access_mode = accessMode;
   if (includedInPremium !== undefined) update.included_in_premium = !!includedInPremium;
   if (includedInElite !== undefined) update.included_in_elite = !!includedInElite;
+  if (category !== undefined) update.category = cleanCategory(category);
   const { data, error } = await mainDb.from('courses').update(update).eq('id', req.params.id).select().single();
   if (error) return res.status(500).json({ error: error.message });
   res.json({ ok: true, course: data });
