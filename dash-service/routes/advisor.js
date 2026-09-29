@@ -32,7 +32,8 @@ router.post('/api/dash/advisor/chat', requireDashAuth, async (req, res) => {
 
     const reply = await callClaude({
       system: buildSystemPrompt(overviewSnapshot || {}),
-      messages: history.map(m => ({ role: m.role, content: m.content }))
+      messages: history.map(m => ({ role: m.role, content: m.content })),
+      maxTokens: 8192
     });
 
     await supabase.from('dash_advisor_messages').insert([
