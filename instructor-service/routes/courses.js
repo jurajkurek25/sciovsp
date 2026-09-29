@@ -59,6 +59,16 @@ router.get('/api/instructor/courses', requireInstructorAuth, async (req, res) =>
   res.json({ courses: withCounts });
 });
 
+// Kategórie naprieč VŠETKÝMI kurzami (nielen tohto inštruktora) -- aby si
+// inštruktori navzájom nevymýšľali odlišné varianty tej istej kategórie.
+// Vracia len samotné texty kategórií (žiadne iné údaje o cudzích kurzoch).
+router.get('/api/instructor/categories', requireInstructorAuth, async (req, res) => {
+  const { data: courses, error } = await mainDb.from('courses').select('category');
+  if (error) { console.error(error); return res.status(500).json({ error: error.message }); }
+  const categories = [...new Set((courses || []).map(c => c.category).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'sk'));
+  res.json({ categories });
+});
+
 function cleanCategory(category) {
   if (category === undefined) return undefined;
   const trimmed = String(category || '').trim();

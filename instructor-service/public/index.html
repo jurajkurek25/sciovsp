@@ -205,7 +205,7 @@ const T = {
     accessModeLabel: 'Dostupnosť kurzu', accessModePaid: 'Platený (bežný predaj)', accessModeFree: 'Zadarmo pre každého', accessModeSubscription: 'Súčasť predplatného appky',
     accessModeNote: 'Pri "Súčasť predplatného" je kurz zadarmo len počas aktívneho predplatného vo vybraných tieroch — mimo predplatného sa dá kúpiť aj priamo za cenu vyššie.',
     tierPremium: 'Premium', tierElite: 'Elite',
-    categoryLabel: 'Kategória', categoryHint: 'Voľný text — zadaj existujúcu kategóriu z ponuky alebo napíš úplne novú.', categoryPrep: 'Príprava na skúšku', categoryApp: 'Prihláška', categoryGrowth: 'Osobný rozvoj',
+    categoryLabel: 'Kategória', categoryNone: 'Bez kategórie', categoryCustom: '+ Vlastná kategória…', categoryCustomPlaceholder: 'Napíš novú kategóriu', categoryHint: 'Kategórie vidia a používajú všetci inštruktori — ak nenájdeš vhodnú, vyber "Vlastná kategória" a napíš novú.',
     saveBtn: 'Uložiť', submitReviewBtn: 'Odoslať na schválenie', submittedReviewBtn: 'Odoslané na schválenie ✓', deleteBtn: 'Zmazať',
     referralLabel: 'Tvoj referral odkaz na tento kurz (platforma si necháva len {percent}%, zvyšok je tvoj)',
     lessonsTitle: 'Lekcie', noLessons: 'Zatiaľ žiadne lekcie.', addLessonBtn: '+ Pridať lekciu',
@@ -326,7 +326,7 @@ const T = {
     accessModeLabel: 'Dostupnost kurzu', accessModePaid: 'Placený (běžný prodej)', accessModeFree: 'Zdarma pro každého', accessModeSubscription: 'Součást předplatného appky',
     accessModeNote: 'U "Součást předplatného" je kurz zdarma jen během aktivního předplatného ve vybraných tarifech — mimo předplatné se dá koupit i přímo za cenu výše.',
     tierPremium: 'Premium', tierElite: 'Elite',
-    categoryLabel: 'Kategorie', categoryHint: 'Volný text — zadej existující kategorii z nabídky nebo napiš úplně novou.', categoryPrep: 'Příprava na zkoušku', categoryApp: 'Přihláška', categoryGrowth: 'Osobní rozvoj',
+    categoryLabel: 'Kategorie', categoryNone: 'Bez kategorie', categoryCustom: '+ Vlastní kategorie…', categoryCustomPlaceholder: 'Napiš novou kategorii', categoryHint: 'Kategorie vidí a používají všichni instruktoři — pokud nenajdeš vhodnou, vyber "Vlastní kategorie" a napiš novou.',
     saveBtn: 'Uložit', submitReviewBtn: 'Odeslat ke schválení', submittedReviewBtn: 'Odesláno ke schválení ✓', deleteBtn: 'Smazat',
     referralLabel: 'Tvůj referral odkaz na tento kurz (platforma si nechává jen {percent}%, zbytek je tvůj)',
     lessonsTitle: 'Lekce', noLessons: 'Zatím žádné lekce.', addLessonBtn: '+ Přidat lekci',
@@ -783,10 +783,10 @@ async function createCourse() {
 async function renderCourseDetail(id) {
   const tabRoot = document.getElementById('tabRoot');
   tabRoot.innerHTML = `<p class="muted">${t('loading')}</p>`;
-  let coursesData, lessonsData;
+  let coursesData, lessonsData, categoriesData;
   try {
-    [coursesData, lessonsData] = await Promise.all([
-      api('/api/instructor/courses'), api(`/api/instructor/courses/${id}/lessons`)
+    [coursesData, lessonsData, categoriesData] = await Promise.all([
+      api('/api/instructor/courses'), api(`/api/instructor/courses/${id}/lessons`), api('/api/instructor/categories')
     ]);
   } catch (e) { tabRoot.innerHTML = `<p class="feedback err">${escapeHtml(e.message)}</p>`; return; }
   const course = (coursesData.courses || []).find(c => c.id === id);
@@ -820,8 +820,12 @@ async function renderCourseDetail(id) {
       </div>
       <div class="field">
         <label>${t('categoryLabel')}</label>
-        <input id="f-category" list="f-category-list" value="${escapeHtml(course.category || '')}">
-        <datalist id="f-category-list">${[...new Set([t('categoryPrep'), t('categoryApp'), t('categoryGrowth'), ...(coursesData.courses || []).map(c => c.category).filter(Boolean)])].map(cat => `<option value="${escapeHtml(cat)}">`).join('')}</datalist>
+        <select id="f-category">
+          <option value="" ${!course.category ? 'selected' : ''}>${t('categoryNone')}</option>
+          ${(categoriesData.categories || []).map(cat => `<option value="${escapeHtml(cat)}" ${course.category === cat ? 'selected' : ''}>${escapeHtml(cat)}</option>`).join('')}
+          <option value="__custom__" ${(course.category && !(categoriesData.categories || []).includes(course.category)) ? 'selected' : ''}>${t('categoryCustom')}</option>
+        </select>
+        <input id="f-category-custom" placeholder="${escapeHtml(t('categoryCustomPlaceholder'))}" value="${escapeHtml((course.category && !(categoriesData.categories || []).includes(course.category)) ? course.category : '')}" style="margin-top:.5rem;display:${(course.category && !(categoriesData.categories || []).includes(course.category)) ? 'block' : 'none'}">
         <p class="muted" style="margin-top:.3rem">${t('categoryHint')}</p>
       </div>
       <div class="row2">
@@ -862,6 +866,9 @@ async function renderCourseDetail(id) {
   document.getElementById('f-access-mode').onchange = (e) => {
     document.getElementById('f-tier-row').style.display = e.target.value === 'subscription' ? 'flex' : 'none';
   };
+  document.getElementById('f-category').onchange = (e) => {
+    document.getElementById('f-category-custom').style.display = e.target.value === '__custom__' ? 'block' : 'none';
+  };
   bindFileUpload('f-cover', 'image');
   bindFileUpload('f-intro', 'video');
   const submitBtn = document.getElementById('submitReviewBtn');
@@ -892,6 +899,8 @@ function lessonEditHtml(l) {
 
 async function saveCourse(id) {
   const feedback = document.getElementById('courseFeedback');
+  const categorySelect = document.getElementById('f-category').value;
+  const category = categorySelect === '__custom__' ? document.getElementById('f-category-custom').value.trim() : categorySelect;
   try {
     await api(`/api/instructor/courses/${id}`, {
       method: 'PUT',
@@ -905,7 +914,7 @@ async function saveCourse(id) {
         accessMode: document.getElementById('f-access-mode').value,
         includedInPremium: document.getElementById('f-tier-premium').checked,
         includedInElite: document.getElementById('f-tier-elite').checked,
-        category: document.getElementById('f-category').value.trim()
+        category: category
       })
     });
     feedback.textContent = t('saved'); feedback.className = 'feedback ok';
