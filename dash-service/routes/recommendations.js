@@ -13,10 +13,10 @@ router.get('/api/dash/recommendations', requireDashAuth, async (req, res) => {
 });
 
 router.post('/api/dash/recommendations', requireDashAuth, async (req, res) => {
-  const { categorySlug, categoryTitleSk, categoryTitleCs, icon, titleSk, titleCs, descriptionSk, descriptionCs, ctaSk, ctaCs, url, sortOrder } = req.body || {};
+  const { categorySlug, categoryTitleSk, categoryTitleCs, icon, titleSk, titleCs, descriptionSk, descriptionCs, ctaSk, ctaCs, urlSk, urlCs, sortOrder } = req.body || {};
   if (!categorySlug || !categorySlug.trim()) return res.status(400).json({ error: 'Chýba kategória.' });
   if (!titleSk || !titleSk.trim() || !titleCs || !titleCs.trim()) return res.status(400).json({ error: 'Chýba názov produktu (SK aj CZ).' });
-  if (!url || !url.trim()) return res.status(400).json({ error: 'Chýba affiliate odkaz.' });
+  if (!urlSk || !urlSk.trim()) return res.status(400).json({ error: 'Chýba affiliate odkaz (SK).' });
   const { data, error } = await mainDb.from('affiliate_products').insert({
     category_slug: categorySlug.trim(),
     category_title_sk: (categoryTitleSk || '').trim() || categorySlug.trim(),
@@ -28,7 +28,8 @@ router.post('/api/dash/recommendations', requireDashAuth, async (req, res) => {
     description_cs: (descriptionCs || '').trim(),
     cta_sk: (ctaSk || '').trim() || 'Pozrieť ponuku →',
     cta_cs: (ctaCs || '').trim() || 'Podívat se na nabídku →',
-    url: url.trim(),
+    url_sk: urlSk.trim(),
+    url_cs: (urlCs || '').trim() || urlSk.trim(),
     sort_order: sortOrder ? Number(sortOrder) : 0,
     active: true
   }).select().single();
@@ -37,7 +38,7 @@ router.post('/api/dash/recommendations', requireDashAuth, async (req, res) => {
 });
 
 router.put('/api/dash/recommendations/:id', requireDashAuth, async (req, res) => {
-  const { active, sortOrder, titleSk, titleCs, descriptionSk, descriptionCs, ctaSk, ctaCs, url, icon, categoryTitleSk, categoryTitleCs } = req.body || {};
+  const { active, sortOrder, titleSk, titleCs, descriptionSk, descriptionCs, ctaSk, ctaCs, urlSk, urlCs, icon, categoryTitleSk, categoryTitleCs } = req.body || {};
   const update = {};
   if (active !== undefined) update.active = !!active;
   if (sortOrder !== undefined) update.sort_order = Number(sortOrder);
@@ -47,7 +48,8 @@ router.put('/api/dash/recommendations/:id', requireDashAuth, async (req, res) =>
   if (descriptionCs !== undefined) update.description_cs = descriptionCs;
   if (ctaSk !== undefined) update.cta_sk = ctaSk;
   if (ctaCs !== undefined) update.cta_cs = ctaCs;
-  if (url !== undefined) update.url = url;
+  if (urlSk !== undefined) update.url_sk = urlSk;
+  if (urlCs !== undefined) update.url_cs = urlCs;
   if (icon !== undefined) update.icon = icon;
   if (categoryTitleSk !== undefined) update.category_title_sk = categoryTitleSk;
   if (categoryTitleCs !== undefined) update.category_title_cs = categoryTitleCs;

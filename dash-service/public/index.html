@@ -154,6 +154,7 @@ textarea{width:100%;min-height:110px;padding:.7rem;background:var(--black3);bord
     <a class="navlink" data-page="giftcardsales">Darčekové karty (predaj)</a>
     <a class="navlink" data-page="webinar">Webinár — kontakty</a>
     <a class="navlink" data-page="community">Komunita</a>
+    <a class="navlink" data-page="recommendations">Odporúčame (affiliate)</a>
     <a class="navlink" data-page="payouts">Výplaty (PAY by square)</a>
     <a class="navlink" data-page="instructorpayouts">Výplaty inštruktorov</a>
     <a class="navlink" data-page="discountcodes">Zľavové kódy</a>
@@ -243,7 +244,7 @@ function showApp() {
 }
 
 // ─────────────────────────── ROUTER ───────────────────────────
-const PAGES = { overview: renderOverview, trends: renderTrends, academy: renderAcademy, courses: renderCourses, blog: renderBlog, houseads: renderHouseAds, giftcards: renderGiftcards, giftcardsales: renderGiftCardSales, payouts: renderPayouts, instructorpayouts: renderInstructorPayouts, discountcodes: renderDiscountCodes, instructors: renderInstructors, bugs: renderBugs, advisor: renderAdvisor, aiops: renderAiops, webinar: renderWebinar, community: renderCommunity };
+const PAGES = { overview: renderOverview, trends: renderTrends, academy: renderAcademy, courses: renderCourses, blog: renderBlog, houseads: renderHouseAds, giftcards: renderGiftcards, giftcardsales: renderGiftCardSales, payouts: renderPayouts, instructorpayouts: renderInstructorPayouts, discountcodes: renderDiscountCodes, instructors: renderInstructors, bugs: renderBugs, advisor: renderAdvisor, aiops: renderAiops, webinar: renderWebinar, community: renderCommunity, recommendations: renderRecommendations };
 
 $$('.navlink[data-page]').forEach(a => a.addEventListener('click', () => { navigate(a.dataset.page); closeMobileNav(); }));
 
@@ -1765,6 +1766,122 @@ async function renderDiscountCodes() {
     if (!confirm('Zmazať tento kód?')) return;
     const id = btn.closest('tr').dataset.id;
     try { await api(`/api/dash/discount-codes/${id}`, { method: 'DELETE' }); navigate('discountcodes'); }
+    catch (err) { alert(err.message); }
+  });
+}
+
+// ─────────────────────────── RECOMMENDATIONS ───────────────────────────
+async function renderRecommendations() {
+  const { products } = await api('/api/dash/recommendations');
+  $('#main').innerHTML = `
+    <div class="pagehead"><h2>Odporúčame (affiliate odkazy)</h2></div>
+    <div class="card" style="margin-bottom:1.4rem">
+      <div class="formrow">
+        <input class="rc-category-slug" placeholder="Kategória — slug (napr. batohy-cestovanie)" style="flex:1;min-width:200px">
+        <input class="rc-icon" placeholder="Ikona (emoji, napr. 🎒)" style="width:140px">
+        <input class="rc-sort" type="number" placeholder="Poradie" style="width:100px">
+      </div>
+      <div class="formrow" style="margin-top:.6rem">
+        <input class="rc-category-title-sk" placeholder="Názov kategórie SK" style="flex:1;min-width:200px">
+        <input class="rc-category-title-cs" placeholder="Název kategorie CZ" style="flex:1;min-width:200px">
+      </div>
+      <div class="formrow" style="margin-top:.6rem">
+        <input class="rc-title-sk" placeholder="Názov produktu SK" style="flex:1;min-width:200px">
+        <input class="rc-title-cs" placeholder="Název produktu CZ" style="flex:1;min-width:200px">
+      </div>
+      <div class="formrow" style="margin-top:.6rem">
+        <input class="rc-desc-sk" placeholder="Popis SK" style="flex:1;min-width:200px">
+        <input class="rc-desc-cs" placeholder="Popis CZ" style="flex:1;min-width:200px">
+      </div>
+      <div class="formrow" style="margin-top:.6rem">
+        <input class="rc-cta-sk" placeholder="Text tlačidla SK (napr. Pozrieť ponuku →)" style="flex:1;min-width:200px">
+        <input class="rc-cta-cs" placeholder="Text tlačidla CZ (napr. Podívat se na nabídku →)" style="flex:1;min-width:200px">
+      </div>
+      <div class="formrow" style="margin-top:.6rem">
+        <input class="rc-url-sk" placeholder="Affiliate odkaz SK (https://...)" style="flex:1;min-width:220px">
+        <input class="rc-url-cs" placeholder="Affiliate odkaz CZ (prázdne = rovnaký ako SK)" style="flex:1;min-width:220px">
+      </div>
+      <button class="btn rc-create" style="margin-top:.6rem">Pridať odkaz</button>
+      <div class="feedback" id="rcFeedback"></div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Kategória</th><th>Názov (SK)</th><th>Odkazy</th><th>Poradie</th><th>Stav</th><th></th></tr></thead>
+        <tbody>${products.map(p => `<tr data-id="${p.id}">
+          <td>${p.icon} ${p.category_title_sk}</td>
+          <td>${p.title_sk}</td>
+          <td class="muted" style="max-width:260px">
+            <div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">SK: <a href="${p.url_sk}" target="_blank">${p.url_sk}</a></div>
+            <div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">CZ: <a href="${p.url_cs}" target="_blank">${p.url_cs}</a></div>
+          </td>
+          <td class="muted">${p.sort_order}</td>
+          <td>${p.active ? '<span class="pill resolved">aktívny</span>' : '<span class="pill pending">vypnutý</span>'}</td>
+          <td style="display:flex;gap:.4rem;flex-wrap:wrap">
+            <button class="btn secondary rc-edit-urls">Upraviť odkazy</button>
+            <button class="btn secondary rc-toggle" data-active="${p.active}">${p.active ? 'Vypnúť' : 'Zapnúť'}</button>
+            <button class="btn danger rc-delete">Zmazať</button>
+          </td>
+        </tr>
+        <tr class="rc-edit-row hidden" data-id="${p.id}">
+          <td colspan="6">
+            <div class="formrow">
+              <input class="rc-edit-url-sk" placeholder="Affiliate odkaz SK" value="${(p.url_sk||'').replace(/"/g,'&quot;')}" style="flex:1;min-width:220px">
+              <input class="rc-edit-url-cs" placeholder="Affiliate odkaz CZ" value="${(p.url_cs||'').replace(/"/g,'&quot;')}" style="flex:1;min-width:220px">
+              <button class="btn rc-save-urls">Uložiť</button>
+              <button class="btn secondary rc-cancel-urls">Zrušiť</button>
+            </div>
+          </td>
+        </tr>`).join('') || '<tr><td class="muted" colspan="6">Zatiaľ žiadne odkazy.</td></tr>'}</tbody>
+      </table>
+    </div>`;
+  $('.rc-create').onclick = async () => {
+    const feedback = $('#rcFeedback');
+    feedback.textContent = ''; feedback.style.color = '';
+    try {
+      await api('/api/dash/recommendations', { method: 'POST', body: JSON.stringify({
+        categorySlug: $('.rc-category-slug').value,
+        categoryTitleSk: $('.rc-category-title-sk').value,
+        categoryTitleCs: $('.rc-category-title-cs').value,
+        icon: $('.rc-icon').value,
+        titleSk: $('.rc-title-sk').value,
+        titleCs: $('.rc-title-cs').value,
+        descriptionSk: $('.rc-desc-sk').value,
+        descriptionCs: $('.rc-desc-cs').value,
+        ctaSk: $('.rc-cta-sk').value,
+        ctaCs: $('.rc-cta-cs').value,
+        urlSk: $('.rc-url-sk').value,
+        urlCs: $('.rc-url-cs').value,
+        sortOrder: $('.rc-sort').value || 0
+      }) });
+      navigate('recommendations');
+    } catch (err) { feedback.textContent = err.message; feedback.style.color = 'var(--red)'; }
+  };
+  $$('.rc-edit-urls').forEach(btn => btn.onclick = () => {
+    const id = btn.closest('tr').dataset.id;
+    $$('.rc-edit-row').forEach(row => { if (row.dataset.id === id) row.classList.toggle('hidden'); else row.classList.add('hidden'); });
+  });
+  $$('.rc-cancel-urls').forEach(btn => btn.onclick = () => { btn.closest('.rc-edit-row').classList.add('hidden'); });
+  $$('.rc-save-urls').forEach(btn => btn.onclick = async () => {
+    const row = btn.closest('.rc-edit-row');
+    const id = row.dataset.id;
+    try {
+      await api(`/api/dash/recommendations/${id}`, { method: 'PUT', body: JSON.stringify({
+        urlSk: $('.rc-edit-url-sk', row).value,
+        urlCs: $('.rc-edit-url-cs', row).value
+      }) });
+      navigate('recommendations');
+    } catch (err) { alert(err.message); }
+  });
+  $$('.rc-toggle').forEach(btn => btn.onclick = async () => {
+    const id = btn.closest('tr').dataset.id;
+    const nowActive = btn.dataset.active === 'true';
+    try { await api(`/api/dash/recommendations/${id}`, { method: 'PUT', body: JSON.stringify({ active: !nowActive }) }); navigate('recommendations'); }
+    catch (err) { alert(err.message); }
+  });
+  $$('.rc-delete').forEach(btn => btn.onclick = async () => {
+    if (!confirm('Zmazať tento odkaz?')) return;
+    const id = btn.closest('tr').dataset.id;
+    try { await api(`/api/dash/recommendations/${id}`, { method: 'DELETE' }); navigate('recommendations'); }
     catch (err) { alert(err.message); }
   });
 }
