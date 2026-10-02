@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bezplatné vysielanie — SP Tréner</title>
+<meta name="description" content="Ako sa dostať na vysnívanú vysokú školu — aj keď ti ostáva len pár týždňov a nechceš sa učiť dňom i nocou. Bezplatné vysielanie každý štvrtok o 20:00.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Manrope:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+/* Rovnaká vizuálna identita ako /ponuka a /webinar/live ("Ignition
+   Signal") — celý lievik (webinár → live → ponuka) má pôsobiť ako
+   jedna súvislá cesta. */
+:root{
+  --ink:#14100D; --ink2:#1c1610; --ink3:#241c14;
+  --text:#F6F1E7; --text2:rgba(246,241,231,.66); --text3:rgba(246,241,231,.4);
+  --ignite:#c8ff00; --ignite2:#d9ff66;
+  --signal:#7c5cff; --signal2:#b09bff;
+  --brand-volt:#c8ff00; --brand-mono:'DM Mono',monospace;
+  --border:rgba(246,241,231,.14); --border2:rgba(246,241,231,.24);
+  --serif:'Bricolage Grotesque',Georgia,serif; --mono:'Space Mono',monospace; --sans:'Manrope',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--ink);color:var(--text);font-family:var(--sans);line-height:1.6;min-height:100vh}
+a{color:var(--signal)}
+button{font-family:inherit}
+input{font-family:inherit}
+
+#partnerBanner{display:none;align-items:center;justify-content:center;gap:.6rem;flex-wrap:wrap;position:sticky;top:0;left:0;right:0;z-index:50;background:var(--ink3);border-bottom:1px solid var(--border2);padding:.6rem 1rem;text-align:center;font-size:.82rem}
+#partnerBanner .banner-text{color:var(--text2)}
+#partnerBanner .banner-text strong{color:var(--ignite)}
+#partnerBanner .banner-code{background:rgba(200,255,0,.12);border:1px solid rgba(200,255,0,.3);border-radius:6px;padding:.2rem .65rem;color:var(--ignite);letter-spacing:.1em;font-weight:700;cursor:pointer}
+#partnerBanner .banner-close{background:none;border:none;color:var(--text3);cursor:pointer;font-size:1rem;line-height:1;padding:.25rem}
+#partnerBanner .banner-close:hover{color:var(--text)}
+
+.top{max-width:900px;margin:0 auto;padding:1.5rem 1.2rem 0;display:flex;justify-content:space-between;align-items:center}
+.top a.back{font-family:var(--brand-mono);font-weight:500;font-size:.82rem;color:var(--brand-volt);text-decoration:none}
+.lang-switch{display:flex;gap:.35rem}
+.lang-switch button{font-family:var(--mono);font-size:.7rem;padding:.3rem .6rem;background:var(--ink2);border:1px solid var(--border2);border-radius:4px;color:var(--text2);cursor:pointer}
+.lang-switch button.active{color:var(--ignite);border-color:var(--ignite)}
+
+.wrap{max-width:640px;margin:0 auto;padding:1.6rem 1.2rem 5rem}
+.hero{text-align:center;padding:2rem 0 1rem}
+.eyebrow{display:inline-flex;align-items:center;gap:.5rem;font-family:var(--mono);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ignite);border:1px solid rgba(200,255,0,.35);background:rgba(200,255,0,.08);padding:.4rem .8rem;border-radius:3px;margin-bottom:1.2rem}
+.eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--ignite);animation:pulse 1.6s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+h1{font-family:var(--serif);font-weight:800;font-size:clamp(2rem,5vw,2.8rem);line-height:1.1;margin-bottom:1rem}
+.sub{color:var(--text2);font-size:1.05rem;max-width:520px;margin:0 auto 2rem}
+
+.next-session{max-width:420px;margin:0 auto 2rem;background:var(--ink3);border:1px solid var(--border2);border-left:3px solid var(--signal);border-radius:10px;padding:1.2rem 1.4rem;text-align:center}
+.next-session .label{font-family:var(--mono);font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:.4rem}
+.next-session .date{font-family:var(--serif);font-weight:800;font-size:1.4rem}
+
+.benefits{max-width:480px;margin:0 auto 2rem;background:var(--ink3);border:1px solid var(--border2);border-radius:12px;padding:1.4rem 1.6rem}
+.benefits .label{font-family:var(--mono);font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ignite2);margin-bottom:.9rem}
+.benefits ul{list-style:none;display:flex;flex-direction:column;gap:.75rem}
+.benefits li{font-size:.92rem;color:var(--text2);display:flex;gap:.6rem;align-items:flex-start;text-align:left}
+.benefits li svg{flex-shrink:0;margin-top:.2rem}
+
+.reg-form{max-width:380px;margin:0 auto;background:var(--ink3);border:1px solid var(--border2);border-radius:12px;padding:1.6rem}
+.reg-form label{display:block;font-family:var(--mono);font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);margin-bottom:.35rem}
+.reg-form input{width:100%;padding:.7rem .8rem;background:var(--ink2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:.9rem;margin-bottom:1rem}
+.reg-form button{width:100%;padding:.9rem;background:var(--ignite);color:var(--ink);border:none;border-radius:8px;font-family:var(--mono);font-weight:700;font-size:.9rem;cursor:pointer}
+.reg-form .err{color:var(--ignite2);font-size:.8rem;margin-top:.5rem;min-height:1.1em}
+
+.already-box{max-width:420px;margin:0 auto;background:var(--ink3);border:1px solid var(--border2);border-radius:10px;padding:1.4rem;text-align:center;display:none}
+.already-box.active{display:block}
+.already-box a.cta{display:inline-block;margin-top:1rem;padding:.85rem 1.5rem;background:var(--signal);color:#fff;border-radius:8px;text-decoration:none;font-family:var(--mono);font-weight:700;font-size:.88rem}
+
+.site-footer{max-width:640px;margin:0 auto;padding:2rem 1.2rem 2.5rem;text-align:center;border-top:1px solid var(--border)}
+.footer-links{display:flex;justify-content:center;gap:.6rem;font-family:var(--mono);font-size:.78rem;margin-bottom:.8rem}
+.footer-links a{color:var(--text2);text-decoration:none}
+.footer-links a:hover{color:var(--text)}
+.footer-dot{color:var(--text3)}
+.footer-disclaimer{font-size:.72rem;color:var(--text3);line-height:1.5;max-width:480px;margin:0 auto}
+</style>
+</head>
+<body>
+<div id="partnerBanner">
+  <span class="banner-text" id="bannerText">Pozval ťa <strong id="bannerName"></strong> na SP Tréner. Tvoj kód:</span>
+  <span class="banner-code" id="bannerCode" onclick="copyRefCode()" title="Klikni pre kopírovanie"></span>
+  <button class="banner-close" onclick="closeBanner()" title="Zavrieť">✕</button>
+</div>
+<div class="top">
+  <a class="back" href="/" id="tBack">← SP Tréner</a>
+  <div class="lang-switch">
+    <button id="langSkBtn" onclick="setLang('sk')">SK</button>
+    <button id="langCsBtn" onclick="setLang('cs')">CZ</button>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="hero">
+    <span class="eyebrow"><span class="dot"></span> <span id="tEyebrow">Bezplatné vysielanie</span></span>
+    <h1 id="tH1">Ako sa dostať na vysnívanú vysokú školu — aj keď ti ostáva len pár týždňov a nechceš sa učiť dňom i nocou</h1>
+  </div>
+
+  <div class="next-session">
+    <div class="label" id="tNextLabel">Najbližší termín</div>
+    <div class="date" id="nextSessionDate">—</div>
+  </div>
+
+  <div class="benefits">
+    <div class="label" id="tBenefitsLabel">Čo na vysielaní získaš</div>
+    <ul>
+      <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3.5" stroke="#7c5cff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> <span id="tBenefit1">Kompletný postup, ako sa dostať na vysnívanú vysokú školu</span></li>
+      <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3.5" stroke="#7c5cff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> <span id="tBenefit2">Ako si rozvrhnúť prípravu, aj keď nemáš veľa času</span></li>
+      <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3.5" stroke="#7c5cff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> <span id="tBenefit3">Ako získať viac energie na učenie</span></li>
+      <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 7l3.5 3.5L12 3.5" stroke="#7c5cff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> <span id="tBenefit4">Pracovný zošit na stiahnutie zadarmo</span></li>
+    </ul>
+  </div>
+
+  <div class="reg-form" id="regForm">
+    <label id="tNameLabel">Meno</label>
+    <input type="text" id="regName" placeholder="Tvoje meno">
+    <label id="tEmailLabel">Email</label>
+    <input type="email" id="regEmail" placeholder="tvoj@email.sk">
+    <button id="regSubmitBtn"><span id="tRegSubmit">Zaregistrovať sa zadarmo</span></button>
+    <div class="err" id="regErr"></div>
+  </div>
+
+  <div class="already-box" id="alreadyBox">
+    <p id="tAlreadyText">Si už zaregistrovaný/á na najbližšie vysielanie.</p>
+    <a class="cta" href="/webinar/live" id="tAlreadyCta">Prejsť na vysielanie →</a>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <div class="footer-links">
+    <a href="/legal.html#vop" id="tFooterTerms">Obchodné podmienky</a>
+    <span class="footer-dot">·</span>
+    <a href="/legal.html#privacy" id="tFooterPrivacy">Ochrana osobných údajov</a>
+  </div>
+  <p class="footer-disclaimer" id="tFooterDisclaimer">Táto stránka nie je súčasťou webu Facebook ani spoločnosti Meta, Inc. a nie je nimi žiadnym spôsobom podporovaná ani sponzorovaná. FACEBOOK a INSTAGRAM sú ochranné známky spoločnosti Meta, Inc.</p>
+</footer>
+
+<script>
+// Zachytenie partnerského ?ref= presne ako na hlavnej index.html — bez
+// tohto by affiliate linky mierené priamo na /webinar (nie na hlavnú
+// stránku) stratili referral atribúciu úplne, keďže sessionStorage sa
+// predtým nastavoval len na index.html.
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  const ref = params.get('ref');
+  if (!ref) return;
+  sessionStorage.setItem('partner_ref', ref.toUpperCase());
+  fetch('/api/partner/ref/' + encodeURIComponent(ref))
+    .then(r => r.json())
+    .then(data => {
+      if (!data.name) return;
+      document.getElementById('bannerName').textContent = data.name;
+      document.getElementById('bannerCode').textContent = data.refCode;
+      document.getElementById('partnerBanner').style.display = 'flex';
+    })
+    .catch(() => {});
+})();
+function copyRefCode() {
+  const code = document.getElementById('bannerCode').textContent;
+  navigator.clipboard.writeText(code).then(() => {
+    const el = document.getElementById('bannerCode');
+    const orig = el.textContent;
+    el.textContent = '✓ Skopírované';
+    setTimeout(() => el.textContent = orig, 1500);
+  });
+}
+function closeBanner() {
+  document.getElementById('partnerBanner').style.display = 'none';
+}
+
+// Vysiela sa iba raz týždenne — každý štvrtok o 20:00 (lokálny čas
+// prehliadača). Rovnaký princíp evergreen "join-in-progress" ako predtým,
+// len s jediným pevným termínom namiesto viacerých denných slotov.
+const SLOT_WEEKDAY = 4; // 0=Ne,1=Po,2=Ut,3=St,4=Št,5=Pi,6=So
+const SLOT_HOUR = 20;
+const VIDEO_DURATION_SECONDS = 45 * 60; // TODO: nastav na skutočnú dĺžku videa (zdieľané s webinar-live.html)
+
+function nextThursdayEight() {
+  const now = new Date();
+  const target = new Date(now);
+  const daysUntil = (SLOT_WEEKDAY - now.getDay() + 7) % 7;
+  target.setDate(now.getDate() + daysUntil);
+  target.setHours(SLOT_HOUR, 0, 0, 0);
+  if (target.getTime() <= now.getTime()) {
+    const elapsedIfToday = (now.getTime() - target.getTime()) / 1000;
+    if (daysUntil === 0 && elapsedIfToday < VIDEO_DURATION_SECONDS) return target; // dnes, ešte prebieha
+    target.setDate(target.getDate() + 7); // termín na tento týždeň už doznel — posuň o týždeň
+  }
+  return target;
+}
+
+function fmtSessionDate(d, l) {
+  const dayNamesSk = ['nedeľu', 'pondelok', 'utorok', 'stredu', 'štvrtok', 'piatok', 'sobotu'];
+  const dayNamesCs = ['neděli', 'pondělí', 'úterý', 'středu', 'čtvrtek', 'pátek', 'sobotu'];
+  const names = l === 'cs' ? dayNamesCs : dayNamesSk;
+  const dayName = names[d.getDay()];
+  const dd = String(d.getDate()).padStart(2, '0');
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const hh = String(d.getHours()).padStart(2, '0');
+  return dayName.charAt(0).toUpperCase() + dayName.slice(1) + ' ' + dd + '.' + mm + ' o ' + hh + ':00';
+}
+
+let nextSlot = nextThursdayEight();
+
+// Registrácia ide na vlastný endpoint (vlastný email systém, nie Ecomail) —
+// "fire and forget": chyba/výpadok odosielania emailu nesmie zablokovať
+// samotnú registráciu na vysielanie, preto presmerovanie na /webinar/dakujeme
+// prebehne aj keby fetch zlyhal.
+function submitRegistration(name, email) {
+  return fetch('/api/webinar/register', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name: name || null, email, slotStartMs: nextSlot.getTime() })
+  }).catch(() => {});
+}
+
+document.getElementById('regSubmitBtn').onclick = () => {
+  const name = document.getElementById('regName').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  const errEl = document.getElementById('regErr');
+  if (!email || !email.includes('@')) { errEl.textContent = t('emailError'); return; }
+  errEl.textContent = '';
+  const session = { slotStartMs: nextSlot.getTime(), name: name || null, email };
+  localStorage.setItem('sp_webinar_session', JSON.stringify(session));
+  // Nepresmerovávame rovno na vysielanie — najprv poďakovanie + potvrdenie
+  // opt-inu, nech je jasné, že treba potvrdiť email pred pripomienkami.
+  submitRegistration(name, email).finally(() => { location.href = '/webinar/dakujeme'; });
+};
+
+function checkExistingRegistration() {
+  try {
+    const saved = localStorage.getItem('sp_webinar_session');
+    if (!saved) return;
+    const session = JSON.parse(saved);
+    // Existujúca registrácia je stále platná, ak smeruje na ten istý
+    // (alebo novší) termín, aký je práve aktuálny najbližší štvrtok.
+    if (session.slotStartMs >= nextSlot.getTime() - 6 * 24 * 60 * 60 * 1000) {
+      document.getElementById('regForm').style.display = 'none';
+      document.getElementById('alreadyBox').classList.add('active');
+    }
+  } catch (e) {}
+}
+
+// ==================== i18n ====================
+const T = {
+  sk: {
+    pageTitle: 'Bezplatné vysielanie — SP Tréner',
+    eyebrow: 'Bezplatné vysielanie',
+    h1: 'Ako sa dostať na vysnívanú vysokú školu — aj keď ti ostáva len pár týždňov a nechceš sa učiť dňom i nocou',
+    nextLabel: 'Najbližší termín',
+    benefitsLabel: 'Čo na vysielaní získaš',
+    benefit1: 'Kompletný postup, ako sa dostať na vysnívanú vysokú školu',
+    benefit2: 'Ako si rozvrhnúť prípravu, aj keď nemáš veľa času',
+    benefit3: 'Ako získať viac energie na učenie',
+    benefit4: 'Pracovný zošit na stiahnutie zadarmo',
+    nameLabel: 'Meno', emailLabel: 'Email', regSubmit: 'Zaregistrovať sa zadarmo', emailError: 'Zadaj platný email.',
+    alreadyText: 'Si už zaregistrovaný/á na najbližšie vysielanie.', alreadyCta: 'Prejsť na vysielanie →',
+    footerTerms: 'Obchodné podmienky', footerPrivacy: 'Ochrana osobných údajov',
+    footerDisclaimer: 'Táto stránka nie je súčasťou webu Facebook ani spoločnosti Meta, Inc. a nie je nimi žiadnym spôsobom podporovaná ani sponzorovaná. FACEBOOK a INSTAGRAM sú ochranné známky spoločnosti Meta, Inc.'
+  },
+  cs: {
+    pageTitle: 'Bezplatné vysílání — SP Tréner',
+    eyebrow: 'Bezplatné vysílání',
+    h1: 'Jak se dostat na vysněnou vysokou školu — i když ti zbývá jen pár týdnů a nechceš se učit dnem i nocí',
+    nextLabel: 'Nejbližší termín',
+    benefitsLabel: 'Co na vysílání získáš',
+    benefit1: 'Kompletní postup, jak se dostat na vysněnou vysokou školu',
+    benefit2: 'Jak si rozvrhnout přípravu, i když nemáš moc času',
+    benefit3: 'Jak získat víc energie na učení',
+    benefit4: 'Pracovní sešit ke stažení zdarma',
+    nameLabel: 'Jméno', emailLabel: 'Email', regSubmit: 'Zaregistrovat se zdarma', emailError: 'Zadej platný email.',
+    alreadyText: 'Už jsi zaregistrovaný/á na nejbližší vysílání.', alreadyCta: 'Přejít na vysílání →',
+    footerTerms: 'Obchodní podmínky', footerPrivacy: 'Ochrana osobních údajů',
+    footerDisclaimer: 'Tato stránka není součástí webu Facebook ani společnosti Meta, Inc. a není jimi žádným způsobem podporována ani sponzorována. FACEBOOK a INSTAGRAM jsou ochranné známky společnosti Meta, Inc.'
+  }
+};
+
+let lang = localStorage.getItem('sp_webinar_lang') || 'sk';
+function t(key) { return (T[lang] && T[lang][key] !== undefined) ? T[lang][key] : T.sk[key]; }
+
+function setLang(l) {
+  lang = l;
+  localStorage.setItem('sp_webinar_lang', l);
+  document.documentElement.lang = l === 'cs' ? 'cs' : 'sk';
+  document.title = t('pageTitle');
+  document.getElementById('langSkBtn').classList.toggle('active', l === 'sk');
+  document.getElementById('langCsBtn').classList.toggle('active', l === 'cs');
+
+  document.getElementById('tEyebrow').textContent = t('eyebrow');
+  document.getElementById('tH1').textContent = t('h1');
+  document.getElementById('tNextLabel').textContent = t('nextLabel');
+  document.getElementById('tBenefitsLabel').textContent = t('benefitsLabel');
+  document.getElementById('tBenefit1').textContent = t('benefit1');
+  document.getElementById('tBenefit2').textContent = t('benefit2');
+  document.getElementById('tBenefit3').textContent = t('benefit3');
+  document.getElementById('tBenefit4').textContent = t('benefit4');
+  document.getElementById('tNameLabel').textContent = t('nameLabel');
+  document.getElementById('tEmailLabel').textContent = t('emailLabel');
+  document.getElementById('tRegSubmit').textContent = t('regSubmit');
+  document.getElementById('tAlreadyText').textContent = t('alreadyText');
+  document.getElementById('tAlreadyCta').textContent = t('alreadyCta');
+  document.getElementById('nextSessionDate').textContent = fmtSessionDate(nextSlot, l);
+  document.getElementById('tFooterTerms').textContent = t('footerTerms');
+  document.getElementById('tFooterPrivacy').textContent = t('footerPrivacy');
+  document.getElementById('tFooterDisclaimer').textContent = t('footerDisclaimer');
+}
+
+setLang(lang);
+checkExistingRegistration();
+</script>
+</body>
+</html>

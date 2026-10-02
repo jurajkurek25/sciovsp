@@ -8,6 +8,9 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Za reverse proxy (Cloudflare/Render/...) — správny req.hostname pre subdomain routing (ad.sptrener.online) a req.ip pre rate limiting
+app.set('trust proxy', 1);
+
 // ─── Bezpečnosť ─────────────────────────────────────────────
 app.use(helmet({ contentSecurityPolicy: false }));
 
@@ -43,6 +46,16 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/auth', authLimiter, require('./routes/auth'));
 app.use('/api/stripe', require('./routes/stripe'));
 app.use('/api/ai', aiLimiter, require('./routes/ai'));
+// routes/generate.js only exposes POST /generate-topic — scope the limiter to that
+// exact path, not the whole /api prefix, or it silently rate-limits every other
+// unmatched /api/* request (blog, ads, rewards, ...) against the same 30/hour budget.
+app.use('/api/generate-topic', aiLimiter);
+app.use('/api', require('./routes/generate'));
+app.use(require('./routes/blog'));
+app.use('/api/ads-auth', authLimiter);
+app.use(require('./routes/ads'));
+app.use(require('./routes/videoAds'));
+app.use(require('./routes/rewards'));
 
 // Health check
 app.get('/api/health', (req, res) => res.json({
@@ -52,6 +65,15 @@ app.get('/api/health', (req, res) => res.json({
 }));
 
 // ─── Statický frontend ────────────────────────────────────
+const AD_HOSTS = new Set(['ad.sptrener.online', 'ad.localhost']);
+
+// Reklamná subdoména dostane vlastnú SPA stránku pre všetky GET požiadavky
+// (musí bežať PRED express.static, inak by "/" vždy servírovalo public/index.html)
+app.get('*', (req, res, next) => {
+  if (!AD_HOSTS.has(req.hostname)) return next();
+  res.sendFile(path.join(__dirname, 'public', 'ads.html'));
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
