@@ -1,4 +1,5 @@
 const express = require('express');
+const rateLimit = require('express-rate-limit');
 const router = express.Router();
 const { loginWithGoogle, logout, SESSION_COOKIE, SESSION_DAYS, requireDashAuth } = require('../lib/auth');
 
@@ -10,7 +11,16 @@ const COOKIE_OPTS = {
   maxAge: SESSION_DAYS * 24 * 60 * 60 * 1000
 };
 
-router.post('/api/dash/login', async (req, res) => {
+// Ochrana proti brute-force/zahlteniu login endpointu (ten jediný je v
+// dash-i chránený heslom/tokenom zvonka, ostatné je OAuth bez samostatného
+// backend loginu).
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  message: { error: 'Príliš veľa pokusov o prihlásenie. Skús znova za 15 minút.' }
+});
+
+router.post('/api/dash/login', loginLimiter, async (req, res) => {
   try {
     const session = await loginWithGoogle(req.body?.token);
     res.cookie(SESSION_COOKIE, session.token, COOKIE_OPTS);
