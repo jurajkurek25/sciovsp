@@ -5,8 +5,24 @@
 // nikdy nevidí — samostatné od "uploadInstructions" (tie žiak vidí).
 const express = require('express');
 const router = express.Router();
+const sanitizeHtml = require('sanitize-html');
 const { requireDashAuth } = require('../lib/auth');
 const { supabase: mainDb } = require('../lib/db-main');
+
+// course.sales_content ide z inštruktorského/dash editora priamo do DB a
+// potom sa (a) vykresľuje na verejnej stránke kurzu a (b) načítava cez
+// quill.root.innerHTML pri editácii v dash-i — bez sanitizácie by mohol
+// inštruktor dostať XSS payload do SUPERADMIN session pri review kurzu.
+const SALES_CONTENT_SANITIZE_OPTS = {
+  allowedTags: ['p', 'br', 'strong', 'b', 'em', 'i', 'h2', 'h3', 'ul', 'ol', 'li', 'blockquote', 'a'],
+  allowedAttributes: { a: ['href', 'target', 'rel'] },
+  allowedSchemes: ['http', 'https', 'mailto'],
+  transformTags: { a: sanitizeHtml.simpleTransform('a', { target: '_blank', rel: 'noopener noreferrer nofollow' }) }
+};
+function sanitizeSalesContent(html) {
+  if (!html) return html;
+  return sanitizeHtml(html, SALES_CONTENT_SANITIZE_OPTS);
+}
 
 function slugify(s) {
   return String(s || '')
@@ -76,7 +92,7 @@ router.post('/api/dash/courses', requireDashAuth, async (req, res) => {
     ? 5700 : Math.max(0, Number(priceCents) || 0);
   const { data, error } = await mainDb.from('courses').insert({
     slug, title, description: description || '', price_cents: priceCentsValue,
-    cover_image_url: coverImageUrl || null, sales_content: salesContent || null,
+    cover_image_url: coverImageUrl || null, sales_content: sanitizeSalesContent(salesContent) || null,
     intro_video_url: introVideoUrl || null, published: false,
     instructor_name: instructorName || null, instructor_bio: instructorBio || null, instructor_photo_url: instructorPhotoUrl || null,
     access_mode: accessMode || 'paid', included_in_premium: !!includedInPremium, included_in_elite: !!includedInElite,
@@ -98,7 +114,7 @@ router.put('/api/dash/courses/:id', requireDashAuth, async (req, res) => {
   if (description !== undefined) update.description = description;
   if (priceCents !== undefined) update.price_cents = Number(priceCents);
   if (coverImageUrl !== undefined) update.cover_image_url = coverImageUrl;
-  if (salesContent !== undefined) update.sales_content = salesContent;
+  if (salesContent !== undefined) update.sales_content = sanitizeSalesContent(salesContent);
   if (introVideoUrl !== undefined) update.intro_video_url = introVideoUrl;
   if (published !== undefined) update.published = !!published;
   if (instructorName !== undefined) update.instructor_name = instructorName;
