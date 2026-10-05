@@ -15,6 +15,7 @@
 // Vyžaduje nainštalované sanitize-html (npm install sanitize-html) a
 // spustenie z koreňa dash-service (potrebuje ../lib/db-main).
 
+require('dotenv').config();
 const sanitizeHtml = require('sanitize-html');
 const { supabase: mainDb } = require('../lib/db-main');
 
