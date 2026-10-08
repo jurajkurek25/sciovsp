@@ -1,5 +1,6 @@
 require('dotenv').config();
 const express = require('express');
+const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
 
@@ -7,6 +8,10 @@ const app = express();
 // Express by defaultu posiela X-Powered-By: Express pri res.send()/
 // res.json() -- disable() je spoľahlivý spôsob, ako to úplne vypnúť.
 app.disable('x-powered-by');
+// Doteraz nemal VÔBEC žiadny helmet -- chýbal HSTS, X-Content-Type-
+// Options aj X-Frame-Options úplne. CSP vypnuté rovnako ako v dash/main
+// app (public/index.html má inline <script>, strict CSP by to rozbilo).
+app.use(helmet({ contentSecurityPolicy: false }));
 app.use((req, res, next) => {
   // Čistý admin panel -- nikde sa nepoužíva kamera/mikrofón/geolokácia a
   // pod., takže sa dá všetko bezpečne zamknúť.
