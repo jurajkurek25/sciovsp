@@ -66,6 +66,15 @@ app.get('/{*splat}', (req, res) => {
 // ("Cannot POST /xyz"), ktorá odhaľuje použitý framework.
 app.use((req, res) => res.status(404).json({ error: 'Not found.' }));
 
+// Bez tohto Express padá pri neošetrenej výnimke na svoj vlastný default
+// error handler, ktorý vie vypísať celý stack trace do odpovede. Musí
+// byť POSLEDNÝ middleware -- presne 4 parametre (err, ...) je pre
+// Express signál, že ide o error handler.
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err);
+  res.status(500).json({ error: 'Interná chyba servera.' });
+});
+
 const PORT = process.env.DASH_PORT || 4000;
 app.listen(PORT, () => {
   console.log(`SP Tréner dash beží na porte ${PORT}`);
