@@ -1,9 +1,16 @@
 require('dotenv').config();
 const express = require('express');
+const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
 const path = require('path');
 
 const app = express();
+// Jediná služba so superadmin session (dash_session cookie) nemala VÔBEC
+// žiadne bezpečnostné hlavičky -- chýbala napr. clickjacking ochrana
+// (X-Frame-Options), takže sa dash dal vložiť do <iframe> na cudzej
+// stránke. CSP vypnuté rovnako ako v main app/instructor-service (public/
+// index.html má veľa inline <script>, strict CSP by to rozbilo).
+app.use(helmet({ contentSecurityPolicy: false }));
 app.use(express.json({ limit: '2mb' }));
 app.use(cookieParser());
 
