@@ -11,6 +11,12 @@ const app = express();
 // stránke. CSP vypnuté rovnako ako v main app/instructor-service (public/
 // index.html má veľa inline <script>, strict CSP by to rozbilo).
 app.use(helmet({ contentSecurityPolicy: false }));
+app.use((req, res, next) => {
+  // Čistý admin panel -- nikde sa nepoužíva kamera/mikrofón/geolokácia a
+  // pod., takže sa dá všetko bezpečne zamknúť.
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=(), picture-in-picture=()');
+  next();
+});
 app.use(express.json({ limit: '2mb' }));
 app.use(cookieParser());
 
