@@ -5,6 +5,11 @@ const cookieParser = require('cookie-parser');
 const path = require('path');
 
 const app = express();
+// Express by defaultu posiela X-Powered-By: Express pri res.send()/
+// res.json() AJ KEĎ helmet beží skôr -- disable() je jediný spoľahlivý
+// spôsob, ako to úplne vypnúť (helmet.hidePoweredBy sa s tým nestíha
+// pretekať).
+app.disable('x-powered-by');
 // Jediná služba so superadmin session (dash_session cookie) nemala VÔBEC
 // žiadne bezpečnostné hlavičky -- chýbala napr. clickjacking ochrana
 // (X-Frame-Options), takže sa dash dal vložiť do <iframe> na cudzej
@@ -56,6 +61,10 @@ app.get('/{*splat}', (req, res) => {
   if (req.path.startsWith('/api/')) return res.status(404).json({ error: 'Not found.' });
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
+// Čokoľvek, čo sem dorazí (iná HTTP metóda než GET na neexistujúcu
+// cestu), by inak dostalo Express-ovu vlastnú default 404 stránku
+// ("Cannot POST /xyz"), ktorá odhaľuje použitý framework.
+app.use((req, res) => res.status(404).json({ error: 'Not found.' }));
 
 const PORT = process.env.DASH_PORT || 4000;
 app.listen(PORT, () => {

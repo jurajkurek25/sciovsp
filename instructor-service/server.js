@@ -4,6 +4,9 @@ const rateLimit = require('express-rate-limit');
 const path = require('path');
 
 const app = express();
+// Express by defaultu posiela X-Powered-By: Express pri res.send()/
+// res.json() -- disable() je spoľahlivý spôsob, ako to úplne vypnúť.
+app.disable('x-powered-by');
 app.use((req, res, next) => {
   // Čistý admin panel -- nikde sa nepoužíva kamera/mikrofón/geolokácia a
   // pod., takže sa dá všetko bezpečne zamknúť.
@@ -49,6 +52,10 @@ app.get('/{*splat}', (req, res) => {
   if (req.path.startsWith('/api/')) return res.status(404).json({ error: 'Not found.' });
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
+// Čokoľvek, čo sem dorazí (iná HTTP metóda než GET na neexistujúcu
+// cestu), by inak dostalo Express-ovu vlastnú default 404 stránku
+// ("Cannot POST /xyz"), ktorá odhaľuje použitý framework.
+app.use((req, res) => res.status(404).json({ error: 'Not found.' }));
 
 const PORT = process.env.INSTRUCTOR_PORT || 4100;
 app.listen(PORT, () => {
