@@ -20,6 +20,15 @@ const authFailureLimiter = rateLimit({
 });
 app.use(authFailureLimiter);
 
+// Všetky /api/* odpovede nesú dáta inštruktora -- default Cache-Control
+// (public, max-age=0 z express.static/prehliadača) by to mohlo nechať v
+// zdieľanej cache/proxy. Statické súbory nižšie si svoj Cache-Control
+// riešia samé (express.static), toto sa ich netýka.
+app.use((req, res, next) => {
+  if (req.path.startsWith('/api/')) res.setHeader('Cache-Control', 'no-store');
+  next();
+});
+
 app.use(require('./routes/auth'));
 app.use(require('./routes/courses'));
 app.use(require('./routes/comments'));

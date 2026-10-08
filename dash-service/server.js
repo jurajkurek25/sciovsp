@@ -14,6 +14,15 @@ app.use(helmet({ contentSecurityPolicy: false }));
 app.use(express.json({ limit: '2mb' }));
 app.use(cookieParser());
 
+// Všetky /api/* odpovede nesú superadmin dáta -- default Cache-Control
+// (public, max-age=0 z express.static/prehliadača) by to mohlo nechať v
+// zdieľanej cache/proxy. Statické súbory nižšie si svoj Cache-Control
+// riešia samé (express.static), toto sa ich netýka.
+app.use((req, res, next) => {
+  if (req.path.startsWith('/api/')) res.setHeader('Cache-Control', 'no-store');
+  next();
+});
+
 app.use(require('./routes/auth'));
 app.use(require('./routes/overview'));
 app.use(require('./routes/academy'));
