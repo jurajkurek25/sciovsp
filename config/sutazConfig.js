@@ -72,8 +72,8 @@ const SUTAZ_CONFIG = {
     serviceUsageFrom: '2026-10-10',     // od kedy musí byť SP TRENER aktívne používaný
     serviceUsageTo: '2027-08-31',
     admissionPeriodFrom: '2026-10-10',  // obdobie, kedy musí byť doručené rozhodnutie o prijatí
-    admissionPeriodTo: '2027-08-31',
-    applicationDeadline: '2027-09-09',  // uzávierka prihlášok do súťaže
+    admissionPeriodTo: '2027-09-08',
+    applicationDeadline: '2027-09-09',  // uzávierka prihlášok do súťaže -- POZOR: len 1 deň po konci obdobia prijatia (2027-09-08), kto dostane rozhodnutie posledný deň má málo času podať prihlášku
     drawDate: '2027-09-14'              // dátum žrebovania -- 5 dní po uzávierke na kontrolu prihlášok
   },
 
