@@ -48,24 +48,37 @@ const SUTAZ_CONFIG = {
     // Štatút (čl. V) odporúča hodnotu JEDNEJ poukážky do 350 EUR -- nad
     // tým sa už zdaňuje presah (§9 ods.2 písm. m) zákona č. 595/2003 Z.z.,
     // platí len pre SK výhercu, pozri czTaxFreeThresholdEur nižšie).
-    count: null,          // napr. 3
-    valueEachEur: null,   // napr. 50
+    count: 1,
+    valueEachEur: 100,
     currency: 'EUR',
-    deliveryMethod: null, // elektronické/fyzické + spôsob uplatnenia (čl. V ods. 2)
-    validityNote: null,   // platnosť poukážky (čl. V ods. 2)
+    deliveryMethod: 'elektronicky e-mailom na kontaktný e-mail uvedený v prihláške',
+    validityNote: null,   // platnosť poukážky (čl. V ods. 2) -- ešte nepotvrdené
     taxFreeThresholdEur: 350,   // SK hranica, §9 ods. 2 písm. m) zák. č. 595/2003 Z.z. -- platí len pre výhercu s bydliskom v SR
-    czTaxFreeThresholdEur: null, // český ekvivalent -- DOPLNIŤ pred spustením, SK hranica sa naň nevzťahuje
-    voucherUsableInBothCountries: null // true/false -- MUSÍ sa overiť priamo u Martinus pred spustením
+    // Český ekvivalent: §4 odst. 1 písm. f) zákona č. 586/1992 Sb. (ZDP),
+    // výhry z reklamných/verejných súťaží osvobodené do 10 000 Kč. Prepočet
+    // na EUR je približný (kurz sa mení) -- pri hodnote výhry 100 € je to
+    // jedno, presah pod oboma hranicami je rádovo väčší než výhra.
+    czTaxFreeThresholdEur: 400,
+    // Nie je to jedna univerzálna poukážka pre obe krajiny -- SK výherca
+    // dostane poukážku na martinus.sk, ČR výherca na martinus.cz (dva
+    // samostatné varianty podľa bydliska, potvrdené). Bez partnerstva s
+    // Martinus (martinusPartnershipConfirmed) ide o bežný retailový nákup
+    // poukážky na oboch weboch, nie o špeciálnu dohodu.
+    voucherUsableInBothCountries: false
   },
 
   dates: {
     // Všetky dátumy ako ISO stringy ("YYYY-MM-DD") alebo null.
-    serviceUsageFrom: null,     // od kedy musí byť SP TRENER aktívne používaný
-    serviceUsageTo: null,
-    admissionPeriodFrom: null,  // obdobie, kedy musí byť doručené rozhodnutie o prijatí
-    admissionPeriodTo: null,
-    applicationDeadline: null,  // uzávierka prihlášok do súťaže
-    drawDate: null              // dátum žrebovania
+    serviceUsageFrom: '2026-10-10',     // od kedy musí byť SP TRENER aktívne používaný
+    serviceUsageTo: '2027-08-31',
+    admissionPeriodFrom: '2026-10-10',  // obdobie, kedy musí byť doručené rozhodnutie o prijatí
+    admissionPeriodTo: '2027-08-31',
+    // POZOR: applicationDeadline (uzávierka prihlášok) MUSÍ byť <= drawDate,
+    // inak by sa dalo prihlásiť až PO žrebovaní. Juraj dal 2027-09-05 (po
+    // žrebovaní 2027-09-01) -- rozpor, nevyplnené dovtedy, kým nepotvrdí
+    // správne poradie. Pozri rozhovor so systémom 2026-10-10.
+    applicationDeadline: null,  // uzávierka prihlášok do súťaže -- DOPLŇ (konflikt s drawDate)
+    drawDate: '2027-09-01'              // dátum žrebovania
   },
 
   // Mechanika žrebovania (čl. VI) -- pravidlá sú hotové, len počet
@@ -91,6 +104,11 @@ const SUTAZ_CONFIG = {
     requiresPaidAccess: true,
     requiresCompletedTest: true,
     minCompletedTests: 1, // musí byť dokončený PRED doručením rozhodnutia o prijatí (čl. III ods. 1) -- appka vie overiť len aktuálny počet, nie časovú súvislosť s dátumom prijatia (žiadne dáta o časovaní jednotlivých testov), pozri POZNÁMKA nižšie
+    // "Aspoň mesiac používania" -- appka nemá log aktívneho používania,
+    // najbližšia overiteľná vec je vek účtu (users.created_at, rovnaký
+    // vzor ako min_account_age_days pri affiliate kampaniach). Vynucuje sa
+    // v momente podania prihlášky: účet musí existovať aspoň toľkoto dní.
+    minAccountAgeDays: 30,
     admissionScope: 'bakalárske alebo spojené vysokoškolské štúdium na vysokej škole v Slovenskej republike alebo Českej republike', // čl. III ods. 1
     admissionViaAppealRecognized: true, // prijatie po odvolaní sa uznáva, ak doručené v stanovenom období (čl. III ods. 2)
     enrollmentRequired: false, // zápis na štúdium sa nevyžaduje (čl. III ods. 2)
@@ -102,10 +120,11 @@ const SUTAZ_CONFIG = {
   },
 
   links: {
-    fullStatuteUrl: null,     // odkaz na úplné znenie štatútu (PDF/stránka)
+    fullStatuteUrl: 'https://sptrener.online/sutaz/statut.pdf', // POZOR: súbor ešte nie je na serveri -- Juraj ho nahrá manuálne, over pred spustením že link reálne vráti dokument, inak 404 na verejnej stránke
     privacyPolicyUrl: '/legal#ochrana-udajov',
-    organizerContactEmail: null,
-    organizerName: null       // presný obchodný názov organizátora podľa štatútu
+    organizerContactEmail: 'sutaz@sptrener.online',
+    organizerName: 'Ngroup, s.r.o.', // sídlo: Dunajská 8, Bratislava -- Staré Mesto; IČO ešte nedoplnené (potrebné pre text štatútu, nie pre tento gate)
+    organizerAddress: 'Dunajská 8, 811 08 Bratislava - Staré Mesto'
   },
 
   results: {
@@ -126,7 +145,9 @@ function isConfigComplete(cfg) {
   const l = cfg.links;
   return (
     p.count != null && p.valueEachEur != null && !!p.deliveryMethod &&
-    p.voucherUsableInBothCountries === true && p.czTaxFreeThresholdEur != null &&
+    // true AJ false sú platné, rozhodnuté stavy (SK/CZ môžu mať oddelené
+    // poukážky) -- len null (nerozhodnuté) blokuje spustenie.
+    p.voucherUsableInBothCountries !== null && p.czTaxFreeThresholdEur != null &&
     !!d.serviceUsageFrom && !!d.admissionPeriodFrom && !!d.admissionPeriodTo &&
     !!d.applicationDeadline && !!d.drawDate &&
     !!cfg.eligibility.admissionScope &&

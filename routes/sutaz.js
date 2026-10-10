@@ -73,7 +73,7 @@ async function verifyToken(req) {
 async function getEligibility(email) {
   const { data: user } = await supabase
     .from('users')
-    .select('is_premium, plan, subscription_status, premium_expires_at, tests_count')
+    .select('is_premium, plan, subscription_status, premium_expires_at, tests_count, created_at')
     .eq('email', email)
     .maybeSingle();
 
@@ -82,13 +82,24 @@ async function getEligibility(email) {
   const testsCount = Number(user?.tests_count || 0);
   const minTests = SUTAZ_CONFIG.eligibility.minCompletedTests || 1;
 
+  // "Aspoň mesiac používania" -- appka nevie overiť aktívne používanie,
+  // len vek účtu (users.created_at). Pozri komentár pri
+  // eligibility.minAccountAgeDays v config/sutazConfig.js.
+  const minAccountAgeDays = SUTAZ_CONFIG.eligibility.minAccountAgeDays || 0;
+  const accountAgeDays = user?.created_at ? (Date.now() - new Date(user.created_at).getTime()) / 86400000 : 0;
+  const meetsAccountAgeRequirement = accountAgeDays >= minAccountAgeDays;
+
+  const meetsTestRequirement = testsCount >= minTests;
+  const baseEligible = SUTAZ_CONFIG.eligibility.requiresPaidAccess ? (isPaidAccess && meetsTestRequirement) : meetsTestRequirement;
+
   return {
     isPaidAccess,
     plan: user?.plan || null,
     subscriptionStatus: user?.subscription_status || null,
     testsCount,
-    meetsTestRequirement: testsCount >= minTests,
-    eligible: SUTAZ_CONFIG.eligibility.requiresPaidAccess ? (isPaidAccess && testsCount >= minTests) : testsCount >= minTests
+    meetsTestRequirement,
+    meetsAccountAgeRequirement,
+    eligible: baseEligible && meetsAccountAgeRequirement
   };
 }
 
@@ -214,7 +225,9 @@ module.exports = function registerSutaz(app) {
         if (!eligibility.eligible) {
           const reason = !eligibility.isPaidAccess
             ? 'Prihláška vyžaduje riadne zaplatený prístup k SP Tréner.'
-            : 'Prihláška vyžaduje aspoň ' + (SUTAZ_CONFIG.eligibility.minCompletedTests || 1) + ' dokončený tréningový test.';
+            : !eligibility.meetsAccountAgeRequirement
+              ? 'Prihláška vyžaduje, aby tvoj účet existoval aspoň ' + (SUTAZ_CONFIG.eligibility.minAccountAgeDays || 0) + ' dní.'
+              : 'Prihláška vyžaduje aspoň ' + (SUTAZ_CONFIG.eligibility.minCompletedTests || 1) + ' dokončený tréningový test.';
           return res.status(403).json({ error: reason });
         }
 

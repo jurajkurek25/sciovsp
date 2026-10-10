@@ -260,7 +260,7 @@ footer{border-top:1px solid var(--border);padding:2.5rem;display:flex;align-item
   <h2 class="section-title">Podmienky <em>zapojenia.</em></h2>
   <div class="elig-list">
     <div class="elig-item"><span class="elig-item-icon">✓</span><span>V deň podania prihlášky máš <b>aspoň 18 rokov</b> a bydlisko v <b>Slovenskej republike alebo Českej republike</b>. (Rozhoduje bydlisko, ktoré uvedieš v prihláške — nie občianstvo ani krajina vysokej školy.)</span></div>
-    <div class="elig-item"><span class="elig-item-icon">✓</span><span>V rozhodujúcom období si mal/a <b>riadne zaplatený prístup</b> k SP Tréner a pred doručením rozhodnutia o prijatí si v ňom dokončil/a aspoň <b>jeden tréningový test</b>. (Nákup prístupu môže za teba uhradiť aj iná osoba — rozhoduje, komu je pridelený. Samotný bezplatný skúšobný prístup nestačí.)</span></div>
+    <div class="elig-item"><span class="elig-item-icon">✓</span><span>V rozhodujúcom období si mal/a <b>riadne zaplatený prístup</b> k SP Tréner a pred doručením rozhodnutia o prijatí si v ňom dokončil/a aspoň <b>jeden tréningový test</b>. (Nákup prístupu môže za teba uhradiť aj iná osoba — rozhoduje, komu je pridelený. Samotný bezplatný skúšobný prístup nestačí.) Tvoj účet musí v momente podania prihlášky existovať aspoň <b>30 dní</b>.</span></div>
     <div class="elig-item"><span class="elig-item-icon">✓</span><span>V rozhodujúcom období ti bolo doručené rozhodnutie o prijatí na <b id="admissionScopeText">bakalárske alebo spojené vysokoškolské štúdium na vysokej škole v Slovenskej republike alebo Českej republike</b>. Samotné absolvovanie prijímačky, umiestnenie v poradovníku ani podanie prihlášky na školu nestačí. Prijatie po odvolaní sa uznáva, ak bolo doručené v stanovenom období. Zápis na štúdium sa nevyžaduje.</span></div>
     <div class="elig-item"><span class="elig-item-icon">✓</span><span>Včas podáš úplnú prihlášku a preukážeš splnenie podmienok.</span></div>
     <div class="elig-item"><span class="elig-item-icon">✓</span><span><b>Jedna osoba — jeden vstup</b> do žrebovania bez ohľadu na počet účtov, zakúpených mesiacov, testov alebo prijatí na školy. Jedna osoba môže získať najviac jednu výhru.</span></div>
@@ -495,7 +495,9 @@ async function renderFormCard(data){
   if (!me.eligibility.eligible) {
     const reason = !me.eligibility.isPaidAccess
       ? 'Prihláška vyžaduje riadne zaplatený prístup k SP Tréner.'
-      : `Prihláška vyžaduje aspoň 1 dokončený tréningový test (zatiaľ máš ${me.eligibility.testsCount}).`;
+      : !me.eligibility.meetsAccountAgeRequirement
+        ? 'Prihláška vyžaduje, aby tvoj účet existoval aspoň 30 dní.'
+        : `Prihláška vyžaduje aspoň 1 dokončený tréningový test (zatiaľ máš ${me.eligibility.testsCount}).`;
     el.innerHTML = `<div class="not-eligible-box"><b>Zatiaľ nespĺňaš podmienky.</b><br>${escapeHtml(reason)}</div><p style="margin-top:1rem"><a href="/app" class="btn-secondary">Pokračovať v tréningu →</a></p>`;
     return;
   }
