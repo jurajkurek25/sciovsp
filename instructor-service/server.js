@@ -14,12 +14,12 @@ app.set('trust proxy', 1);
 // res.json() -- disable() je spoľahlivý spôsob, ako to úplne vypnúť.
 app.disable('x-powered-by');
 // Doteraz nemal VÔBEC žiadny helmet -- chýbal HSTS, X-Content-Type-
-// Options aj X-Frame-Options úplne. CSP je v Report-Only režime (rovnaký
-// dvojfázový postup ako main-app-patches/62 → 231 a dash-service) --
-// zoznam domén overený proti VŠETKÝM externým zdrojom v public/index.html
+// Options aj X-Frame-Options úplne. CSP vynucujúca (nie Report-Only) --
+// Juraj sa rozhodol prepnúť rovno, bez čakania na click-through overenie.
+// Zoznam domén je overený proti VŠETKÝM externým zdrojom v public/index.html
 // (cdn.jsdelivr.net -- len Supabase SDK, fonts.googleapis.com/gstatic.com).
-// Kým niekto neprejde cez F12 → Console a nepotvrdí "nič sa nehlási",
-// nevynucuje sa.
+// Rýchly rollback: vráť riadok nižšie späť na
+// 'Content-Security-Policy-Report-Only' (viď git história tohto súboru).
 // X-Frame-Options, X-Content-Type-Options, X-XSS-Protection,
 // Referrer-Policy a X-Permitted-Cross-Domain-Policies NEnecháva
 // nastavovať helmet -- globálny /etc/nginx/nginx.conf na tomto serveri
@@ -30,7 +30,7 @@ app.disable('x-powered-by');
 // serveri -- bezpečnejšie je vypnúť duplicitu tu, v appke.
 app.use(helmet({ contentSecurityPolicy: false, xFrameOptions: false, xContentTypeOptions: false, xXssProtection: false, referrerPolicy: false, xPermittedCrossDomainPolicies: false }));
 app.use((req, res, next) => {
-  res.setHeader('Content-Security-Policy-Report-Only', [
+  res.setHeader('Content-Security-Policy', [
     "default-src 'self'",
     "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
