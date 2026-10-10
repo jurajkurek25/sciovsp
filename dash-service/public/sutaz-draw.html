@@ -51,6 +51,17 @@ body{margin:0;background:var(--black);color:var(--text);font-family:var(--sans);
 .history-item .pos{font-family:var(--mono);color:var(--volt);font-weight:700}
 .history-item .code{font-family:var(--mono);color:var(--text2);float:right}
 .history-empty{color:var(--text3);font-size:.85rem}
+
+.verify-card{background:var(--black2);border:1px solid var(--border);border-radius:10px;padding:1rem}
+.verify-card .pill{display:inline-block;padding:.25rem .65rem;border-radius:20px;font-family:var(--mono);font-size:.7rem;font-weight:700;margin-bottom:.6rem}
+.verify-card .pill.not-committed{background:rgba(255,201,77,.15);color:var(--yellow)}
+.verify-card .pill.committed{background:rgba(124,92,255,.15);color:var(--purple2)}
+.verify-card .pill.revealed{background:rgba(54,232,150,.15);color:var(--green)}
+.muted{color:var(--text3);font-size:.8rem;margin-bottom:.6rem;word-break:break-all}
+.hashmono{font-family:var(--mono);color:var(--text2)}
+.spin-btn.small{padding:.6rem 1rem;font-size:.78rem;width:100%;margin-bottom:.5rem}
+.verify-link{display:block;text-align:center;font-family:var(--mono);font-size:.78rem;color:var(--purple2);text-decoration:none;margin-top:.5rem}
+.verify-link:hover{text-decoration:underline}
 </style>
 </head>
 <body>
@@ -80,7 +91,15 @@ body{margin:0;background:var(--black);color:var(--text);font-family:var(--sans);
     </div>
 
     <div class="sidebar">
-      <h2>História žrebov</h2>
+      <h2>Overiteľnosť</h2>
+      <div class="verify-card">
+        <span class="pill" id="commitStatusPill">—</span>
+        <p class="muted" id="commitHashRow" style="display:none">Hash: <span id="commitHashText" class="hashmono"></span></p>
+        <button class="spin-btn secondary small" id="commitBtn" onclick="doCommit()">Zmraziť zoznam (commit) →</button>
+        <button class="spin-btn secondary small hidden" id="revealBtn" onclick="doReveal()">Odhaliť seed (reveal) →</button>
+        <a href="/sutaz-overenie" target="_blank" rel="noopener" class="verify-link">Verejná stránka overenia →</a>
+      </div>
+      <h2 style="margin-top:1.5rem">História žrebov</h2>
       <div id="historyList"><div class="history-empty">Zatiaľ žiadny žreb.</div></div>
     </div>
   </div>
@@ -112,8 +131,53 @@ async function api(path, opts = {}) {
 
 let currentCodes = [];
 let totalRotation = 0;
+let isCommitted = false;
+let isRevealed = false;
 const POSITION_LABELS = { 1: 'VÝHERCA', 2: 'NÁHRADNÍK #1', 3: 'NÁHRADNÍK #2', 4: 'NÁHRADNÍK #3' };
 function positionLabel(p) { return POSITION_LABELS[p] || ('NÁHRADNÍK #' + (p - 1)); }
+
+function renderCommitPanel(data) {
+  isCommitted = !!data.committed;
+  isRevealed = !!data.revealed;
+  const pill = $('#commitStatusPill');
+  pill.className = 'pill ' + (isRevealed ? 'revealed' : isCommitted ? 'committed' : 'not-committed');
+  pill.textContent = isRevealed ? 'Seed odhalený' : isCommitted ? 'Zmrazené' : 'Ešte nezmrazené';
+  $('#commitBtn').classList.toggle('hidden', isCommitted);
+  $('#revealBtn').classList.toggle('hidden', !isCommitted || isRevealed);
+  if (isCommitted && data.seedHash) {
+    $('#commitHashRow').style.display = 'block';
+    $('#commitHashText').textContent = data.seedHash.slice(0, 16) + '…';
+  }
+}
+
+async function doCommit() {
+  $('#commitBtn').disabled = true;
+  try {
+    const result = await api('/api/dash/sutaz-draw/commit', { method: 'POST' });
+    if (result.alreadyCommitted) alert('Zoznam bol už predtým zmrazený -- toto kolo pokračuje s pôvodným zoznamom.');
+    renderCommitPanel({ committed: true, revealed: false, seedHash: result.seedHash });
+    const { codes } = await api('/api/dash/sutaz-draw/pool');
+    renderWheel(codes);
+  } catch (e) {
+    alert('Chyba: ' + e.message);
+  } finally {
+    $('#commitBtn').disabled = false;
+  }
+}
+
+async function doReveal() {
+  if (!confirm('Odhaliť seed znamená, že žrebovanie pre toto kolo je definitívne hotové -- odhalenie je nezvratné. Pokračovať?')) return;
+  $('#revealBtn').disabled = true;
+  try {
+    const result = await api('/api/dash/sutaz-draw/reveal', { method: 'POST' });
+    renderCommitPanel({ committed: true, revealed: true, seedHash: $('#commitHashText').textContent });
+    alert('Seed odhalený. Verejná stránka overenia (/sutaz-overenie) teraz umožní komukoľvek prepočítať a overiť výsledok.');
+  } catch (e) {
+    alert('Chyba: ' + e.message);
+  } finally {
+    $('#revealBtn').disabled = false;
+  }
+}
 
 function renderWheel(codes) {
   currentCodes = codes;
@@ -127,8 +191,13 @@ function renderWheel(codes) {
     $('#spinBtn').textContent = 'Žiadni ďalší účastníci';
     return;
   }
-  $('#spinBtn').disabled = false;
-  $('#spinBtn').textContent = 'Zatočiť kolesom →';
+  if (!isCommitted) {
+    $('#spinBtn').disabled = true;
+    $('#spinBtn').textContent = 'Najprv zmraz zoznam (commit) →';
+  } else {
+    $('#spinBtn').disabled = false;
+    $('#spinBtn').textContent = 'Zatočiť kolesom →';
+  }
   const sliceAngle = 360 / n;
   const stops = [];
   for (let i = 0; i < n; i++) {
@@ -261,8 +330,9 @@ async function init() {
   }
   $('#app').classList.remove('hidden');
   try {
-    const { codes } = await api('/api/dash/sutaz-draw/pool');
-    renderWheel(codes);
+    const data = await api('/api/dash/sutaz-draw/pool');
+    renderCommitPanel(data);
+    renderWheel(data.codes);
   } catch (e) {
     $('#errorBox').textContent = e.message;
     $('#errorBox').classList.remove('hidden');

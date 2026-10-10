@@ -277,6 +277,38 @@ module.exports = function registerSutaz(app) {
     res.json(publicConfig());
   });
 
+  // GET /api/sutaz/draw-proof -- verejné, bez prihlásenia. Dáta na
+  // nezávislé overenie žrebovania (commit-reveal, čl. VI štatútu).
+  // Nikdy neobsahuje mená/mestá, len kódy a kryptografické hodnoty --
+  // bezpečne verejné aj PRED tým, než sa seed odhalí (odhaľuje sa len
+  // hash, seed ostáva null kým ho appka cez Dash neodhalí).
+  app.get('/api/sutaz/draw-proof', async (req, res) => {
+    try {
+      const { data: commitment } = await supabase.from('sutaz_draw_commitment')
+        .select('seed, seed_hash, pool_snapshot, committed_at, revealed_at')
+        .order('committed_at', { ascending: false }).limit(1).maybeSingle();
+      if (!commitment) return res.json({ committed: false });
+
+      const { data: draws } = await supabase.from('sutaz_draws')
+        .select('position, code, eligible_pool_size, drawn_at').order('position', { ascending: true });
+
+      res.json({
+        committed: true,
+        seedHash: commitment.seed_hash,
+        poolSnapshot: commitment.pool_snapshot,
+        poolSize: commitment.pool_snapshot.length,
+        committedAt: commitment.committed_at,
+        revealed: !!commitment.revealed_at,
+        seed: commitment.revealed_at ? commitment.seed : null,
+        revealedAt: commitment.revealed_at || null,
+        draws: (draws || []).map(d => ({ position: d.position, code: d.code, eligiblePoolSize: d.eligible_pool_size, drawnAt: d.drawn_at }))
+      });
+    } catch (e) {
+      console.error('sutaz draw-proof error:', e.message);
+      res.status(500).json({ error: 'Chyba servera.' });
+    }
+  });
+
   // GET /api/sutaz/me -- vyžaduje prihlásenie. Vráti údaje na predvyplnenie
   // formulára a signály oprávnenosti (nikdy sa nepoužíva na konečné
   // rozhodnutie -- to sa vždy prepočíta nanovo v POST /apply).
