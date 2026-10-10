@@ -8,9 +8,11 @@
 
 create table if not exists sutaz_applications (
   id uuid primary key default gen_random_uuid(),
-  email text not null unique,
+  email text not null unique, -- e-mail účtu SP TRENER (čl. IV ods. 1)
   full_name text not null,
-  phone text,
+  contact_email text not null, -- súťažný kontaktný e-mail, môže byť iný než účet (čl. IV ods. 1)
+  residence_municipality text not null, -- obec bydliska (čl. IV ods. 1)
+  residence_country text not null, -- štát bydliska (čl. IV ods. 1) -- appka vynucuje SR (čl. III ods. 1)
   school_name text not null,
   study_program text not null,
   admission_decision_date date not null,

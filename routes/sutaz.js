@@ -164,8 +164,17 @@ module.exports = function registerSutaz(app) {
       if (!authUser) return res.status(401).json({ error: 'Prihlás sa.' });
       const email = (authUser.email || '').toLowerCase();
 
-      const { fullName, schoolName, studyProgram, admissionDecisionDate, ageConfirmed, statuteAck } = req.body || {};
+      const { fullName, contactEmail, residenceMunicipality, residenceCountry, schoolName, studyProgram, admissionDecisionDate, ageConfirmed, statuteAck } = req.body || {};
       if (!fullName || !fullName.trim()) return res.status(400).json({ error: 'Chýba meno a priezvisko.' });
+      if (!contactEmail || !/^\S+@\S+\.\S+$/.test(contactEmail.trim())) return res.status(400).json({ error: 'Chýba alebo je neplatný súťažný kontaktný e-mail.' });
+      if (!residenceMunicipality || !residenceMunicipality.trim()) return res.status(400).json({ error: 'Chýba obec bydliska.' });
+      if (!residenceCountry || !residenceCountry.trim()) return res.status(400).json({ error: 'Chýba štát bydliska.' });
+      // Bydlisko v SR je podmienka účasti (čl. III ods. 1) -- self-deklarované,
+      // appka nežiada občiansky preukaz, len odfiltruje zjavne iné štáty.
+      const SK_RESIDENCE_VALUES = ['slovensko', 'slovenská republika', 'slovenska republika', 'sr', 'sk', 'slovakia'];
+      if (!SK_RESIDENCE_VALUES.includes(residenceCountry.trim().toLowerCase())) {
+        return res.status(403).json({ error: 'Súťaž je určená pre osoby s bydliskom v Slovenskej republike.' });
+      }
       if (!schoolName || !schoolName.trim()) return res.status(400).json({ error: 'Chýba názov vysokej školy.' });
       if (!studyProgram || !studyProgram.trim()) return res.status(400).json({ error: 'Chýba názov študijného programu.' });
       if (!admissionDecisionDate || !/^\d{4}-\d{2}-\d{2}$/.test(admissionDecisionDate)) {
@@ -210,7 +219,9 @@ module.exports = function registerSutaz(app) {
         const { error: insertError } = await supabase.from('sutaz_applications').insert({
           email,
           full_name: fullName.trim().slice(0, 200),
-          phone: (req.body.phone || '').trim().slice(0, 40) || null,
+          contact_email: contactEmail.trim().toLowerCase().slice(0, 200),
+          residence_municipality: residenceMunicipality.trim().slice(0, 200),
+          residence_country: residenceCountry.trim().slice(0, 100),
           school_name: schoolName.trim().slice(0, 300),
           study_program: studyProgram.trim().slice(0, 300),
           admission_decision_date: admissionDecisionDate,

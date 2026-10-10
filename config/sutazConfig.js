@@ -1,8 +1,12 @@
 // Konfigurácia súťaže "/sutaz" — JEDINÝ zdroj pravdy pre termíny, ceny,
-// odkazy a stav. VŠETKY údaje nižšie sú zatiaľ NEVYPLNENÉ (štatút súťaže
-// nebol k implementácii priložený) -- podľa zadania sa pri chýbajúcich
-// zásadných údajoch má zobraziť pracovný stav a NEUMOŽNIŤ odoslanie
-// prihlášky. Toto je presne ten stav, v akom je appka teraz.
+// odkazy a stav. Zdroj: "Statut-sutaze-SP-TRENER.md" (pracovný návrh,
+// 10. 10. 2026) -- dokument sám seba označuje ako návrh a má veľa polí
+// v [HRANATÝCH ZÁTVORKÁCH], ktoré treba doplniť pred zverejnením.
+// Polia nižšie, ktoré boli v návrhu PLNE vypísané (nie v zátvorkách) sú
+// vyplnené reálnym textom. Polia, ktoré boli v zátvorkách (organizátor,
+// dátumy, počet/hodnota výhier, odkazy) ostávajú null -- podľa zadania
+// sa pri chýbajúcich zásadných údajoch zobrazí pracovný stav a
+// NEUMOŽNÍ sa odoslanie prihlášky, kým ich niekto nedoplní.
 //
 // Juraj: vyplň nižšie uvedené polia podľa reálneho štatútu súťaže. Keď
 // budú vyplnené všetky polia v "required" zozname (pozri isConfigComplete
@@ -27,11 +31,14 @@ const SUTAZ_CONFIG = {
 
   prizes: {
     // Počet poukážok a ich hodnota -- zobrazené len keď OBOJE vyplnené.
+    // Štatút (čl. V) odporúča hodnotu JEDNEJ poukážky do 350 EUR -- nad
+    // tým sa už zdaňuje presah (§9 ods.2 písm. m) zákona č. 595/2003 Z.z.).
     count: null,          // napr. 3
     valueEachEur: null,   // napr. 50
     currency: 'EUR',
-    deliveryMethod: null, // napr. "elektronicky na e-mail výhercu do 30 dní od žrebovania"
-    validityNote: null    // napr. "platnosť poukážky 12 mesiacov od vystavenia"
+    deliveryMethod: null, // elektronické/fyzické + spôsob uplatnenia (čl. V ods. 2)
+    validityNote: null,   // platnosť poukážky (čl. V ods. 2)
+    taxFreeThresholdEur: 350 // §9 ods. 2 písm. m) zákona č. 595/2003 Z.z. -- fakt zo zákona, nezávislý od zvolenej hodnoty
   },
 
   dates: {
@@ -44,15 +51,32 @@ const SUTAZ_CONFIG = {
     drawDate: null              // dátum žrebovania
   },
 
+  // Mechanika žrebovania (čl. VI) -- pravidlá sú hotové, len počet
+  // náhradníkov ostáva v návrhu ako [POČET NÁHRADNÍKOV].
+  draw: {
+    alternatesCount: null, // čl. VI ods. 1
+    applicationReviewDays: 14, // potvrdenie prijatia prihlášky do žrebovania (čl. IV ods. 5)
+    clarificationResponseDays: 7, // lehota na doplnenie pri nejasnosti (čl. IV ods. 4)
+    winnerContactDays: 5, // kontaktovanie výhercu po žrebovaní (čl. VI ods. 4)
+    winnerConfirmDays: 14, // lehota výhercu na potvrdenie + doručovacie údaje (čl. VI ods. 4)
+    prizeDeliveryDays: 30, // odoslanie výhry od potvrdenia (čl. VI ods. 6)
+    winnerCodesPublishedDays: 7 // zverejnenie súťažných kódov výhercov (čl. VI ods. 7) -- LEN kódy, nie mená
+  },
+
   eligibility: {
-    minAge: 18,
+    minAge: 18, // dovŕšené v deň podania prihlášky (čl. III ods. 1)
     residency: 'Slovenská republika',
     requiresPaidAccess: true,
     requiresCompletedTest: true,
-    minCompletedTests: 1,
-    admissionScope: null, // napr. "denné bakalárske štúdium na verejnej/štátnej VŠ v SR alebo ČR"
-    oneEntryPerPerson: true,
-    activeSubscriptionRequiredAtDraw: false
+    minCompletedTests: 1, // musí byť dokončený PRED doručením rozhodnutia o prijatí (čl. III ods. 1) -- appka vie overiť len aktuálny počet, nie časovú súvislosť s dátumom prijatia (žiadne dáta o časovaní jednotlivých testov), pozri POZNÁMKA nižšie
+    admissionScope: 'bakalárske alebo spojené vysokoškolské štúdium na vysokej škole v Slovenskej republike alebo Českej republike', // čl. III ods. 1
+    admissionViaAppealRecognized: true, // prijatie po odvolaní sa uznáva, ak doručené v stanovenom období (čl. III ods. 2)
+    enrollmentRequired: false, // zápis na štúdium sa nevyžaduje (čl. III ods. 2)
+    oneEntryPerPerson: true, // jeden vstup bez ohľadu na počet účtov/testov/prijatí; max. jedna výhra na osobu (čl. III ods. 5)
+    activeSubscriptionRequiredAtDraw: false, // predplatné nemusí byť aktívne pri prijatí, prihláške ani žrebovaní (čl. III ods. 3)
+    thirdPartyCanPayAccess: true, // nákup môže uhradiť aj iná osoba, ak je prístup pridelený účtu účastníka (čl. III ods. 4)
+    freeTrialSufficient: false, // bezplatný skúšobný prístup sám osebe podmienku nespĺňa (čl. III ods. 4)
+    excludedPersonsNote: 'Vylúčený je organizátor, osoby zabezpečujúce kontrolu prihlášok alebo žrebovanie a ich manželia, partneri, rodičia, deti a súrodenci.' // čl. III ods. 6
   },
 
   links: {
