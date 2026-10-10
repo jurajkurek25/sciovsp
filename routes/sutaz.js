@@ -112,6 +112,62 @@ const MIME_EXT = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp'
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: ADMISSION_DOC_MAX_SIZE } });
 
+// Rovnaký vzor ako getOrCreateUnsubscribeToken v produkčnom server.js
+// (main-app-patches/126) -- vlastná kópia, routes/sutaz.js nemá prístup
+// do jeho scope. Odkazuje na existujúcu /api/account/unsubscribe route,
+// ktorú NEVYTVÁRA znova, len na ňu linkuje.
+async function getOrCreateUnsubscribeTokenLocal(email) {
+  const { data: row } = await supabase.from('users').select('unsubscribe_token').eq('email', email).maybeSingle();
+  if (row?.unsubscribe_token) return row.unsubscribe_token;
+  const token = crypto.randomBytes(24).toString('hex');
+  await supabase.from('users').update({ unsubscribe_token: token }).eq('email', email);
+  return token;
+}
+
+// Pozvánka do súťaže pre nových registrovaných -- pár dní po registrácii,
+// len počas otvoreného prihlasovania, len tým, ktorí ešte nepodali
+// prihlášku. sutaz_promo_email_sent_at zabraňuje opakovanému behu (nová
+// migrácia db/migrate_sutaz_promo_email.sql).
+const SUTAZ_PROMO_EMAIL_DELAY_DAYS = 3; // "pár dní" -- uprav tu, ak treba iný odstup
+async function sendSutazPromoEmails() {
+  try {
+    if (effectiveStatus(SUTAZ_CONFIG) !== 'open') return;
+    const maxCreatedAt = new Date(Date.now() - SUTAZ_PROMO_EMAIL_DELAY_DAYS * 86400000).toISOString();
+    const { data: candidates } = await supabase.from('users')
+      .select('email, name')
+      .is('sutaz_promo_email_sent_at', null)
+      .eq('marketing_emails_opt_out', false)
+      .lte('created_at', maxCreatedAt)
+      .limit(200);
+    if (!candidates || !candidates.length) return;
+
+    const emails = candidates.map(c => c.email);
+    const { data: applied } = await supabase.from('sutaz_applications').select('email').in('email', emails);
+    const appliedSet = new Set((applied || []).map(a => a.email));
+
+    for (const user of candidates) {
+      if (!appliedSet.has(user.email)) {
+        try {
+          const token = await getOrCreateUnsubscribeTokenLocal(user.email);
+          const html = fillEmailTemplate(loadEmailTemplate('sutaz-nova-registracia-pozvanka.html'), {
+            NAME: escapeHtml((user.name || '').trim().split(' ')[0] || 'tam'),
+            SUTAZ_URL: 'https://sptrener.online/sutaz',
+            UNSUBSCRIBE: 'https://sptrener.online/api/account/unsubscribe?token=' + token
+          });
+          const { sendMail } = require('../mailer');
+          await sendMail({ to: user.email, subject: 'Súťaž o darčekovú poukážku Martinus', html });
+        } catch (e) {
+          console.error('sutaz promo email send error:', user.email, e.message);
+          continue; // skús znova nabudúce, nemarkuj ako odoslané
+        }
+      }
+      await supabase.from('users').update({ sutaz_promo_email_sent_at: new Date().toISOString() }).eq('email', user.email);
+    }
+  } catch (e) {
+    console.error('sendSutazPromoEmails error:', e.message);
+  }
+}
+
 async function verifyToken(req) {
   const auth = req.headers.authorization;
   if (!auth || !auth.startsWith('Bearer ')) return null;
@@ -187,6 +243,12 @@ function publicConfig() {
 }
 
 module.exports = function registerSutaz(app) {
+  // Pozvánkové e-maily pre nových registrovaných -- rovnaký vzor ako
+  // setInterval(sendAffiliateCampaignEmails, 5*60*1000) v produkčnom
+  // server.js (main-app-patches/152). Bežia samostatne, nezávisle od
+  // toho, že tento modul nemá prístup do scope server.js.
+  setInterval(sendSutazPromoEmails, 5 * 60 * 1000);
+
   // GET /api/sutaz/status -- verejné, bez prihlásenia. Jediný zdroj
   // pravdy pre frontend o tom, čo má zobraziť.
   app.get('/api/sutaz/status', (req, res) => {
