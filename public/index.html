@@ -631,6 +631,19 @@ body.has-banner{padding-top:42px}
 .exit-popup-code{display:inline-flex;align-items:center;gap:.6rem;background:rgba(200,255,0,.08);border:1px dashed rgba(200,255,0,.4);border-radius:10px;padding:.6rem 1.25rem;font-family:var(--mono);font-size:1.1rem;font-weight:700;letter-spacing:.15em;color:var(--volt);margin-bottom:1.5rem}
 .exit-popup-btn{width:100%;padding:.95rem;background:var(--volt);color:var(--black);border:none;border-radius:10px;font-family:var(--mono);font-weight:700;font-size:.9rem;letter-spacing:.04em;cursor:pointer}
 
+/* ── SÚŤAŽ PROMO POPUP (zobrazí sa iba keď appka hlási status 'open') ── */
+.sutaz-popup-overlay{position:fixed;inset:0;background:rgba(8,8,13,.88);backdrop-filter:blur(14px);z-index:10001;display:flex;align-items:center;justify-content:center;padding:1.5rem;opacity:0;pointer-events:none;transition:opacity .3s ease}
+.sutaz-popup-overlay.active{opacity:1;pointer-events:all}
+.sutaz-popup{background:var(--black2);border:1px solid rgba(200,255,0,.25);border-radius:22px;max-width:440px;width:100%;padding:2.25rem;text-align:center;position:relative;transform:scale(.95);transition:transform .3s cubic-bezier(.22,1,.36,1);box-shadow:0 40px 100px rgba(0,0,0,.6)}
+.sutaz-popup-overlay.active .sutaz-popup{transform:scale(1)}
+.sutaz-popup-close{position:absolute;top:1rem;right:1rem;width:30px;height:30px;border-radius:8px;background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--text3);cursor:pointer;font-family:var(--mono)}
+.sutaz-popup-eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.25em;color:var(--volt);text-transform:uppercase;margin-bottom:.85rem}
+.sutaz-popup-title{font-family:var(--serif);font-size:1.75rem;line-height:1.15;margin-bottom:.75rem}
+.sutaz-popup-title em{color:var(--purple2);font-style:italic}
+.sutaz-popup-desc{font-size:.9rem;color:var(--text2);line-height:1.6;margin-bottom:1.5rem}
+.sutaz-popup-btn{width:100%;padding:.95rem;background:var(--volt);color:var(--black);border:none;border-radius:10px;font-family:var(--mono);font-weight:700;font-size:.9rem;letter-spacing:.04em;cursor:pointer}
+.sutaz-popup-later{width:100%;margin-top:.5rem;background:transparent;border:none;color:var(--text3);font-family:var(--mono);font-size:.75rem;cursor:pointer;padding:.5rem}
+
 @media(max-width:900px){
   .clan-layout{grid-template-columns:1fr;gap:2.5rem}
   .pricing-grid{grid-template-columns:1fr 1fr}
@@ -868,6 +881,18 @@ body.has-banner{padding-top:42px}
     <p class="exit-popup-desc">Prvé 3 testy máš aj tak zadarmo. Ak sa rozhodneš pre Premium teraz, dávame ti navyše zľavu na prvý mesiac.</p>
     <div class="exit-popup-code">ZOSTAN10</div>
     <button class="exit-popup-btn" onclick="closeExitPopup(); openPremiumPopup();">Uplatniť zľavu →</button>
+  </div>
+</div>
+
+<!-- SÚŤAŽ PROMO POPUP -->
+<div class="sutaz-popup-overlay" id="sutazPopup" onclick="if(event.target===this)closeSutazPromoPopup()">
+  <div class="sutaz-popup">
+    <button class="sutaz-popup-close" onclick="closeSutazPromoPopup()">✕</button>
+    <div class="sutaz-popup-eyebrow">Súťaž</div>
+    <h3 class="sutaz-popup-title">Vyhraj poukážku <em>Martinus</em></h3>
+    <p class="sutaz-popup-desc">Prijali ťa na vysokú školu? Zapoj sa do žrebovania o darčekovú poukážku Martinus v hodnote 100 €.</p>
+    <button class="sutaz-popup-btn" onclick="window.location.href='/sutaz'">Zistiť viac →</button>
+    <button class="sutaz-popup-later" onclick="closeSutazPromoPopup()">Možno neskôr</button>
   </div>
 </div>
 
@@ -2055,6 +2080,27 @@ if(urlParams.get('premium') === '1'){
 
 function closeExitPopup(){
   document.getElementById('exitPopup').classList.remove('active');
+}
+
+/* ── SÚŤAŽ PROMO POPUP ── */
+/* Táto stránka nemá Supabase session (anonymní návštevníci), takže
+   "nezapojil sa" sa tu nedá overiť cez /api/sutaz/me -- anonymný
+   návštevník ale z definície nemôže mať podanú prihlášku (tá vyžaduje
+   prihlásenie), takže to stačí. Zobrazí sa len keď appka hlási status
+   'open', a len raz (trvalé odmietnutie cez localStorage). */
+(function initSutazPromoPopup(){
+  if(localStorage.getItem('sutaz_popup_dismissed')==='1')return;
+  fetch('/api/sutaz/status').then(r=>r.json()).then(data=>{
+    if(data.status!=='open')return;
+    setTimeout(()=>{
+      if(localStorage.getItem('sutaz_popup_dismissed')==='1')return;
+      document.getElementById('sutazPopup').classList.add('active');
+    },5000);
+  }).catch(()=>{});
+})();
+function closeSutazPromoPopup(){
+  document.getElementById('sutazPopup').classList.remove('active');
+  localStorage.setItem('sutaz_popup_dismissed','1');
 }
 </script>
 </body>

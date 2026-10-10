@@ -855,6 +855,17 @@ h1.title span{font-style:italic;color:var(--purple2)}
   </div>
 </div>
 
+<div class="generalka-offer-overlay" id="sutazPopupModal" style="display:none;" onclick="if(event.target===this)closeSutazPopup()">
+  <div class="generalka-offer-box">
+    <button class="elite-modal-close" onclick="closeSutazPopup()">✕</button>
+    <div style="font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--volt);margin-bottom:.6rem" data-i18n="sutazPopupEyebrow"></div>
+    <div style="font-family:var(--serif);font-size:1.35rem;font-weight:400;margin-bottom:.5rem" data-i18n="sutazPopupTitle"></div>
+    <p style="color:var(--text2);font-size:.9rem;line-height:1.6;margin-bottom:1.2rem" data-i18n="sutazPopupBody"></p>
+    <button class="elite-plan-btn upgrade" style="width:100%" onclick="goToSutaz()" data-i18n="sutazPopupCta"></button>
+    <button style="width:100%;margin-top:.5rem;background:transparent;border:none;color:var(--text3);font-family:var(--mono);font-size:.75rem;cursor:pointer;padding:.5rem" onclick="closeSutazPopup()" data-i18n="sutazPopupLater"></button>
+  </div>
+</div>
+
 
 <div class="stats-row" id="homeStats">
     <div class="stat-pill"><span class="stat-val" id="statTests">0</span><span class="stat-label" data-i18n="statTests">Testov</span></div>
@@ -1188,6 +1199,9 @@ const TRANSLATIONS={
     genOfferEyebrow:'Tvoj test sa blíži',
     genOfferBody:'Vyskúšaj si <b style="color:var(--text)">SP Generálku</b> — kompletný 66-úlohový AI test v reálnych podmienkach (časomiera, anti-cheat, sledovanie pozornosti) a hĺbkovú AI analýzu, presne pred ostrým dňom.',
     genOfferCta:'Vyskúšať za 5,90 € →',genOfferLater:'Možno neskôr',
+    sutazPopupEyebrow:'Súťaž',sutazPopupTitle:'Vyhraj poukážku Martinus',
+    sutazPopupBody:'Prijali ťa na vysokú školu? Zapoj sa do žrebovania o darčekovú poukážku Martinus v hodnote 100 €.',
+    sutazPopupCta:'Zistiť viac →',sutazPopupLater:'Možno neskôr',
     genOfferTomorrow:'Test máš už zajtra.',genOfferDays:'Test máš už o {d} dni.',
     anonLimitMsg:'⚠️ Pre ďalší test sa prihlás cez Google.',registeredLimitMsg:'⚠️ Dosiahol si limit testov.',
     generateFirst:'Najprv vygeneruj nejaké úlohy!',
@@ -1346,6 +1360,9 @@ const TRANSLATIONS={
     genOfferEyebrow:'Tvůj test se blíží',
     genOfferBody:'Vyzkoušej si <b style="color:var(--text)">SP Generálku</b> — kompletní 66-úlohový AI test v reálných podmínkách (časomíra, anti-cheat, sledování pozornosti) a hloubkovou AI analýzu, přesně před ostrým dnem.',
     genOfferCta:'Vyzkoušet za 5,90 € →',genOfferLater:'Možná později',
+    sutazPopupEyebrow:'Soutěž',sutazPopupTitle:'Vyhraj poukázku Martinus',
+    sutazPopupBody:'Přijali tě na vysokou školu? Zapoj se do slosování o dárkovou poukázku Martinus v hodnotě 100 €.',
+    sutazPopupCta:'Zjistit víc →',sutazPopupLater:'Možná později',
     genOfferTomorrow:'Test máš už zítra.',genOfferDays:'Test máš už za {d} dny.',
     anonLimitMsg:'⚠️ Pro další test se přihlas přes Google.',registeredLimitMsg:'⚠️ Dosáhl jsi limitu testů.',
     generateFirst:'Nejprve vygeneruj nějaké úkoly!',
@@ -4850,6 +4867,36 @@ function openGeneralkaOfferPopup(daysUntil){
   if(sub)sub.textContent=daysUntil===1?t('genOfferTomorrow'):t('genOfferDays',{d:daysUntil});
   el.style.display='flex';
 }
+// Popup o súťaži "/sutaz" -- zobrazí sa len keď appka hlási status 'open'
+// A (ak je užívateľ prihlásený) ešte nepodal prihlášku. Odmietnutie je
+// trvalé (localStorage), nepýta sa znova pri každom načítaní.
+async function checkSutazPopup(token){
+  if(localStorage.getItem('sutaz_popup_dismissed')==='1')return;
+  try{
+    const statusRes=await fetch('/api/sutaz/status');
+    const statusData=await statusRes.json();
+    if(statusData.status!=='open')return;
+    if(token){
+      const meRes=await fetch('/api/sutaz/me',{headers:{Authorization:'Bearer '+token}});
+      if(meRes.ok){
+        const me=await meRes.json();
+        if(me.alreadyApplied)return;
+      }
+    }
+    setTimeout(openSutazPopup,4000);
+  }catch(e){}
+}
+function openSutazPopup(){
+  if(localStorage.getItem('sutaz_popup_dismissed')==='1')return;
+  const el=document.getElementById('sutazPopupModal');
+  if(el)el.style.display='flex';
+}
+function closeSutazPopup(){
+  const el=document.getElementById('sutazPopupModal');
+  if(el)el.style.display='none';
+  localStorage.setItem('sutaz_popup_dismissed','1');
+}
+function goToSutaz(){window.location.href='/sutaz';}
 function closeGeneralkaOfferPopup(){
   const el=document.getElementById('generalkaOfferModal');
   if(el)el.style.display='none';
@@ -5475,15 +5522,19 @@ const _supabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 
 async function initAuth(){
   const{data:{session}}=await _supabase.auth.getSession();
-  if(session?.user)await onUserLoggedIn(session.user,session.access_token);
-  // Guarded to fire at most once per tab: right after the OAuth redirect lands back
-  // here, getSession() can resolve before Supabase finishes parsing the token out of
-  // the URL hash, which would otherwise misread "not logged in yet" and loop back
-  // into another login redirect forever. The SIGNED_IN listener below still catches
-  // the real session a moment later and completes the pending upgrade normally.
-  else if(localStorage.getItem('vsp_pending_upgrade')&&!sessionStorage.getItem('vsp_upgrade_redirect_attempted')){
-    sessionStorage.setItem('vsp_upgrade_redirect_attempted','1');
-    loginWithGoogle();
+  if(session?.user){
+    await onUserLoggedIn(session.user,session.access_token);
+  }else{
+    // Guarded to fire at most once per tab: right after the OAuth redirect lands back
+    // here, getSession() can resolve before Supabase finishes parsing the token out of
+    // the URL hash, which would otherwise misread "not logged in yet" and loop back
+    // into another login redirect forever. The SIGNED_IN listener below still catches
+    // the real session a moment later and completes the pending upgrade normally.
+    if(localStorage.getItem('vsp_pending_upgrade')&&!sessionStorage.getItem('vsp_upgrade_redirect_attempted')){
+      sessionStorage.setItem('vsp_upgrade_redirect_attempted','1');
+      loginWithGoogle();
+    }
+    checkSutazPopup(null);
   }
   _supabase.auth.onAuthStateChange(async(event,session)=>{
     if(event==='SIGNED_IN'&&session?.user)await onUserLoggedIn(session.user,session.access_token);
@@ -5511,6 +5562,7 @@ async function onUserLoggedIn(user,token){
   attachPendingPartnerRef();
   checkCommunityAccessForNav();
   checkGeneralkaOfferPopup();
+  checkSutazPopup(token);
   const pendingUpgrade=localStorage.getItem('vsp_pending_upgrade');
   if(pendingUpgrade){localStorage.removeItem('vsp_pending_upgrade');if(pendingUpgrade==='elite')startEliteCheckout();else if(pendingUpgrade==='premium')startCheckout();}
 }
