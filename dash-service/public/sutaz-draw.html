@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="sk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Žrebovanie — SP Tréner</title>
+<style>
+:root{--black:#08080d;--black2:#0f0f18;--black3:#15151f;--border:rgba(255,255,255,.08);--border2:rgba(255,255,255,.14);--text:#eeeef5;--text2:#a1a1bc;--text3:#5c5c7a;--volt:#c8ff00;--purple:#7c5cff;--purple2:#b09bff;--red:#ff3f5e;--green:#36e896;--yellow:#ffc94d;--serif:'Instrument Serif',Georgia,serif;--mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif}
+*{box-sizing:border-box}
+body{margin:0;background:var(--black);color:var(--text);font-family:var(--sans);min-height:100vh;overflow-x:hidden}
+#loginScreen{display:flex;align-items:center;justify-content:center;min-height:100vh;text-align:center;padding:2rem}
+#loginScreen a{color:var(--volt);text-decoration:none}
+.hidden{display:none !important}
+
+.stage{display:flex;min-height:100vh}
+.wheel-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;position:relative}
+.sidebar{width:340px;border-left:1px solid var(--border);padding:1.5rem;display:flex;flex-direction:column;gap:1rem;max-height:100vh;overflow-y:auto}
+@media(max-width:900px){.sidebar{display:none}}
+
+.brand{font-family:var(--serif);font-size:1.1rem;position:absolute;top:1.5rem;left:1.5rem;color:var(--text3)}
+.brand span{color:var(--volt)}
+.pool-count{position:absolute;top:1.5rem;right:1.5rem;font-family:var(--mono);font-size:.85rem;color:var(--text2);text-align:right}
+.pool-count b{color:var(--text);font-size:1.3rem;display:block}
+
+.wheel-wrap{position:relative;width:min(560px,80vw);height:min(560px,80vw);margin-bottom:2.5rem}
+.wheel-pointer{position:absolute;top:-14px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:18px solid transparent;border-right:18px solid transparent;border-top:28px solid var(--volt);z-index:3;filter:drop-shadow(0 2px 6px rgba(0,0,0,.5))}
+.wheel{width:100%;height:100%;border-radius:50%;position:relative;border:6px solid var(--black3);box-shadow:0 0 0 2px var(--border2),0 30px 80px rgba(0,0,0,.6);transition:transform 4.2s cubic-bezier(.17,.67,.21,1.01)}
+.wheel-center{position:absolute;top:50%;left:50%;width:64px;height:64px;transform:translate(-50%,-50%);border-radius:50%;background:var(--black2);border:3px solid var(--volt);z-index:2;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:1.4rem}
+.wheel-label{position:absolute;top:50%;left:50%;font-family:var(--mono);font-size:11px;font-weight:700;color:var(--black);transform-origin:0 0;white-space:nowrap;letter-spacing:.02em}
+
+.spin-btn{padding:1.1rem 2.8rem;background:var(--volt);color:var(--black);border:none;border-radius:14px;font-family:var(--mono);font-weight:700;font-size:1.05rem;letter-spacing:.05em;cursor:pointer;transition:transform .15s,opacity .2s}
+.spin-btn:hover:not(:disabled){transform:translateY(-2px)}
+.spin-btn:disabled{opacity:.4;cursor:not-allowed}
+.spin-btn.secondary{background:transparent;border:1px solid var(--border2);color:var(--text)}
+
+.error-box{margin-top:1rem;color:var(--red);font-family:var(--mono);font-size:.85rem;text-align:center;max-width:500px}
+
+.reveal-overlay{position:fixed;inset:0;background:rgba(8,8,13,.92);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;z-index:50;opacity:0;transition:opacity .4s}
+.reveal-overlay.show{display:flex;opacity:1}
+.reveal-card{background:var(--black2);border:1px solid rgba(200,255,0,.3);border-radius:28px;padding:3rem 3.5rem;text-align:center;max-width:560px;box-shadow:0 40px 120px rgba(0,0,0,.7);transform:scale(.9);transition:transform .4s cubic-bezier(.17,.67,.21,1.01)}
+.reveal-overlay.show .reveal-card{transform:scale(1)}
+.reveal-position{font-family:var(--mono);font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:var(--volt);margin-bottom:1rem}
+.reveal-name{font-family:var(--serif);font-size:3rem;line-height:1.1;margin-bottom:.4rem}
+.reveal-city{font-size:1.2rem;color:var(--text2);margin-bottom:1.6rem}
+.reveal-code{display:inline-block;font-family:var(--mono);font-size:1.6rem;font-weight:700;letter-spacing:.15em;color:var(--volt);background:rgba(200,255,0,.08);border:1px dashed rgba(200,255,0,.4);border-radius:10px;padding:.7rem 1.6rem;margin-bottom:2rem}
+.reveal-actions{display:flex;gap:.8rem;justify-content:center}
+
+.sidebar h2{font-family:var(--serif);font-size:1.3rem;margin:0 0 .5rem}
+.history-item{background:var(--black2);border:1px solid var(--border);border-radius:10px;padding:.8rem .9rem;margin-bottom:.6rem;font-size:.85rem}
+.history-item .pos{font-family:var(--mono);color:var(--volt);font-weight:700}
+.history-item .code{font-family:var(--mono);color:var(--text2);float:right}
+.history-empty{color:var(--text3);font-size:.85rem}
+</style>
+</head>
+<body>
+
+<div id="loginScreen" class="hidden">
+  <div>
+    <p>Musíš byť prihlásený v Dash.</p>
+    <a href="/">&larr; Prejsť na prihlásenie</a>
+  </div>
+</div>
+
+<div id="app" class="hidden">
+  <div class="stage">
+    <div class="wheel-col">
+      <div class="brand">SP <span>TRÉNER</span> — žrebovanie</div>
+      <div class="pool-count"><b id="poolCount">—</b>v kolese</div>
+
+      <div class="wheel-wrap">
+        <div class="wheel-pointer"></div>
+        <div class="wheel" id="wheel">
+          <div class="wheel-center">🎁</div>
+        </div>
+      </div>
+
+      <button class="spin-btn" id="spinBtn" onclick="spin()">Zatočiť kolesom →</button>
+      <div class="error-box hidden" id="errorBox"></div>
+    </div>
+
+    <div class="sidebar">
+      <h2>História žrebov</h2>
+      <div id="historyList"><div class="history-empty">Zatiaľ žiadny žreb.</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="reveal-overlay" id="revealOverlay">
+  <div class="reveal-card">
+    <div class="reveal-position" id="revealPosition">VÝHERCA</div>
+    <div class="reveal-name" id="revealName">—</div>
+    <div class="reveal-city" id="revealCity">—</div>
+    <div class="reveal-code" id="revealCode">——————</div>
+    <div class="reveal-actions">
+      <button class="spin-btn secondary" onclick="closeReveal()">Zavrieť</button>
+      <button class="spin-btn" onclick="closeRevealAndContinue()">Žrebovať ďalšieho →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const WHEEL_COLORS = ['#c8ff00', '#7c5cff', '#36e896', '#ff3f5e', '#b09bff', '#ffc94d'];
+
+async function api(path, opts = {}) {
+  const res = await fetch(path, { ...opts, headers: { 'content-type': 'application/json', ...(opts.headers || {}) }, credentials: 'same-origin' });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
+  return data;
+}
+
+let currentCodes = [];
+let totalRotation = 0;
+const POSITION_LABELS = { 1: 'VÝHERCA', 2: 'NÁHRADNÍK #1', 3: 'NÁHRADNÍK #2', 4: 'NÁHRADNÍK #3' };
+function positionLabel(p) { return POSITION_LABELS[p] || ('NÁHRADNÍK #' + (p - 1)); }
+
+function renderWheel(codes) {
+  currentCodes = codes;
+  const wheel = $('#wheel');
+  const n = codes.length;
+  $('#poolCount').textContent = n;
+  if (!n) {
+    wheel.style.background = 'var(--black3)';
+    wheel.querySelectorAll('.wheel-label').forEach(el => el.remove());
+    $('#spinBtn').disabled = true;
+    $('#spinBtn').textContent = 'Žiadni ďalší účastníci';
+    return;
+  }
+  $('#spinBtn').disabled = false;
+  $('#spinBtn').textContent = 'Zatočiť kolesom →';
+  const sliceAngle = 360 / n;
+  const stops = [];
+  for (let i = 0; i < n; i++) {
+    const color = WHEEL_COLORS[i % WHEEL_COLORS.length];
+    stops.push(`${color} ${i * sliceAngle}deg ${(i + 1) * sliceAngle}deg`);
+  }
+  wheel.style.background = `conic-gradient(${stops.join(',')})`;
+
+  wheel.querySelectorAll('.wheel-label').forEach(el => el.remove());
+  if (n <= 24) {
+    // Vodorovný text bez rotácie namiesto radiálneho -- radiálny text sa
+    // na spodnej polovici kolesa inak musí korigovať o 180° (inak je
+    // hlavou dole) a aj po korekcii je ťažšie čitateľný. Vodorovný je
+    // vždy čitateľný rovnako, čo je na livestreame dôležitejšie než
+    // "elegancia".
+    const radius = ((wheel.clientWidth || 560) / 2) * 0.62;
+    for (let i = 0; i < n; i++) {
+      const center = i * sliceAngle + sliceAngle / 2;
+      const rad = (center - 90) * Math.PI / 180; // -90: 0° = hore (12h), nie vpravo (3h)
+      const x = Math.cos(rad) * radius;
+      const y = Math.sin(rad) * radius;
+      const label = document.createElement('div');
+      label.className = 'wheel-label';
+      label.textContent = codes[i];
+      label.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`;
+      wheel.appendChild(label);
+    }
+  }
+}
+
+function spinWheelTo(targetIndex, n) {
+  const sliceAngle = 360 / n;
+  const targetCenterAngle = targetIndex * sliceAngle + sliceAngle / 2;
+  const currentMod = ((totalRotation % 360) + 360) % 360;
+  let delta = (360 - targetCenterAngle - currentMod) % 360;
+  if (delta < 0) delta += 360;
+  totalRotation += 5 * 360 + delta;
+  $('#wheel').style.transform = `rotate(${totalRotation}deg)`;
+}
+
+async function spin() {
+  $('#errorBox').classList.add('hidden');
+  $('#spinBtn').disabled = true;
+  try {
+    const result = await api('/api/dash/sutaz-draw/spin', { method: 'POST' });
+    // Koleso musí ukazovať presne ten zoznam, z ktorého server reálne
+    // vybral -- ak sa od posledného /pool fetchu odlišuje (napr. iná
+    // karta), prekresli ho hneď, BEZ animácie, a až potom zatoč.
+    if (JSON.stringify(result.wheelCodes) !== JSON.stringify(currentCodes)) {
+      renderWheel(result.wheelCodes);
+    }
+    const idx = result.wheelCodes.indexOf(result.code);
+    spinWheelTo(idx, result.wheelCodes.length);
+
+    setTimeout(() => showReveal(result), 4300);
+  } catch (e) {
+    $('#errorBox').textContent = e.message;
+    $('#errorBox').classList.remove('hidden');
+    $('#spinBtn').disabled = false;
+  }
+}
+
+function showReveal(result) {
+  $('#revealPosition').textContent = positionLabel(result.position);
+  $('#revealName').textContent = result.firstName;
+  $('#revealCity').textContent = result.municipality;
+  $('#revealCode').textContent = result.code;
+  $('#revealOverlay').classList.add('show');
+  prependHistory(result);
+}
+
+function closeReveal() {
+  $('#revealOverlay').classList.remove('show');
+  $('#spinBtn').disabled = false;
+}
+
+async function closeRevealAndContinue() {
+  closeReveal();
+  try {
+    const { codes } = await api('/api/dash/sutaz-draw/pool');
+    renderWheel(codes);
+  } catch (e) {}
+}
+
+function prependHistory(result) {
+  const list = $('#historyList');
+  if (list.querySelector('.history-empty')) list.innerHTML = '';
+  const item = document.createElement('div');
+  item.className = 'history-item';
+  item.innerHTML = `<span class="pos">#${result.position}</span> <span class="code">${result.code}</span><br>${result.firstName} &middot; ${result.municipality}`;
+  list.prepend(item);
+}
+
+async function loadHistory() {
+  try {
+    const { draws } = await api('/api/dash/sutaz-draw/history');
+    if (!draws.length) return;
+    const list = $('#historyList');
+    list.innerHTML = '';
+    draws.slice().reverse().forEach(d => {
+      const item = document.createElement('div');
+      item.className = 'history-item';
+      item.innerHTML = `<span class="pos">#${d.position}</span> <span class="code">${d.code}</span><br>${d.firstName} &middot; ${d.municipality}`;
+      list.appendChild(item);
+    });
+  } catch (e) {}
+}
+
+async function init() {
+  try {
+    await api('/api/dash/me');
+  } catch (e) {
+    $('#loginScreen').classList.remove('hidden');
+    return;
+  }
+  $('#app').classList.remove('hidden');
+  try {
+    const { codes } = await api('/api/dash/sutaz-draw/pool');
+    renderWheel(codes);
+  } catch (e) {
+    $('#errorBox').textContent = e.message;
+    $('#errorBox').classList.remove('hidden');
+  }
+  loadHistory();
+}
+init();
+</script>
+</body>
+</html>

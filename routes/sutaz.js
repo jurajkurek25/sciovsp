@@ -104,6 +104,25 @@ const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
+// Súťažný kód (čl. VI ods. 1 štatútu) -- 6 znakov, bez zameniteľných
+// znakov (0/O, 1/I/L), crypto.randomInt je kryptograficky bezpečný a
+// bez modulo-skreslenia (na rozdiel od Math.random() alebo %-trikov na
+// Buffer bajtoch). Kontroluje unikátnosť v DB, nielen spolieha na
+// veľkosť priestoru kódov.
+const PARTICIPANT_CODE_ALPHABET = '23456789ABCDEFGHJKMNPQRSTUVWXYZ';
+const PARTICIPANT_CODE_LENGTH = 6;
+async function generateUniqueParticipantCode() {
+  for (let attempt = 0; attempt < 10; attempt++) {
+    let code = '';
+    for (let i = 0; i < PARTICIPANT_CODE_LENGTH; i++) {
+      code += PARTICIPANT_CODE_ALPHABET[crypto.randomInt(PARTICIPANT_CODE_ALPHABET.length)];
+    }
+    const { data } = await supabase.from('sutaz_applications').select('id').eq('participant_code', code).maybeSingle();
+    if (!data) return code;
+  }
+  throw new Error('Nepodarilo sa vygenerovať unikátny súťažný kód.');
+}
+
 const ADMISSION_DOC_MIME = ['image/png', 'image/jpeg', 'image/webp', 'application/pdf'];
 const ADMISSION_DOC_MAX_SIZE = 10 * 1024 * 1024; // 10 MB
 const ADMISSION_DOC_BUCKET = 'sutaz-admission-docs';
@@ -383,6 +402,10 @@ module.exports = function registerSutaz(app) {
           console.error('sutaz AI admission check error (falling back to manual review):', e.message);
         }
 
+        // Súťažný kód (čl. VI ods. 1) sa prideľuje len platným/overeným
+        // účastníkom -- zamietnutému ani čakajúcemu sa nepridelí.
+        const participantCode = finalStatus === 'verified' ? await generateUniqueParticipantCode() : null;
+
         const { error: insertError } = await supabase.from('sutaz_applications').insert({
           email,
           full_name: fullName.trim().slice(0, 200),
@@ -394,6 +417,7 @@ module.exports = function registerSutaz(app) {
           admission_decision_date: admissionDecisionDate,
           admission_doc_path: filePath,
           admission_doc_mime: req.file.mimetype,
+          participant_code: participantCode,
           age_confirmed: true,
           statute_ack: true,
           verified_tests_count: eligibility.testsCount,
@@ -418,7 +442,7 @@ module.exports = function registerSutaz(app) {
           const firstName = escapeHtml(fullName.trim().split(' ')[0] || 'tam');
           if (finalStatus === 'verified') {
             const html = fillEmailTemplate(loadEmailTemplate('sutaz-prihlaska-verified.html'), {
-              NAME: firstName, SUTAZ_URL: 'https://sptrener.online/sutaz'
+              NAME: firstName, SUTAZ_URL: 'https://sptrener.online/sutaz', CODE: escapeHtml(participantCode)
             });
             sendMail({ to: email, subject: 'Prihláška do súťaže SP Tréner — zaradená do žrebovania', html }).catch(() => {});
           } else if (finalStatus === 'rejected') {

@@ -162,6 +162,7 @@ textarea{width:100%;min-height:110px;padding:.7rem;background:var(--black3);bord
     <a class="navlink" data-page="discountcodes">Zľavové kódy</a>
     <a class="navlink" data-page="instructors">Inštruktori</a>
     <a class="navlink" data-page="sutazApplications">Súťaž — prihlášky</a>
+    <a class="navlink" href="/sutaz-draw.html" target="_blank" rel="noopener">Súťaž — žrebovanie 🎡</a>
     <a class="navlink" data-page="bugs">Nahlásené chyby</a>
     <a class="navlink" data-page="advisor">AI poradca</a>
     <a class="navlink" data-page="aiops">AI ops log</a>
@@ -1933,6 +1934,7 @@ async function renderSutazApplications() {
         <p class="muted">Rozhodnutie o prijatí: ${escapeHtmlDash(a.admissionDecisionDate) || '—'} &middot; ${a.admissionDocUrl ? `<a href="${a.admissionDocUrl}" target="_blank" rel="noopener">zobraziť doklad (${escapeHtmlDash(a.admissionDocMime)})</a>` : 'doklad nedostupný'}</p>
         <p class="muted">Pri podaní: ${a.verifiedTestsCount ?? '?'} dokončených testov &middot; plán: ${escapeHtmlDash(a.verifiedPlan) || '—'} &middot; predplatné: ${escapeHtmlDash(a.verifiedSubscriptionStatus) || '—'} &middot; veková a štatútová zhoda: ${a.ageConfirmed ? 'áno' : 'NIE'} / ${a.statuteAck ? 'áno' : 'NIE'}</p>
         ${a.aiVerdict ? `<p class="muted">AI overenie dokladu: <b>${escapeHtmlDash(a.aiVerdict)}</b>${a.aiReason ? ' — ' + escapeHtmlDash(a.aiReason) : ''}</p>` : `<p class="muted" style="color:var(--yellow)">AI overenie dokladu zlyhalo/nedostupné — treba manuálnu kontrolu.</p>`}
+        ${a.participantCode ? `<p class="muted">Súťažný kód: <b style="color:var(--volt);font-family:var(--mono)">${escapeHtmlDash(a.participantCode)}</b>${a.drawPosition ? ` &middot; vyžrebovaný ako #${a.drawPosition}` : ''}</p>` : ''}
         <textarea class="reviewer-note" rows="2" placeholder="Poznámka k overeniu (dôvod zamietnutia, detaily)...">${escapeHtmlDash(a.reviewerNote)}</textarea>
         <div style="display:flex;gap:.5rem;align-items:center;margin-top:.5rem;flex-wrap:wrap">
           <select class="status-select">
