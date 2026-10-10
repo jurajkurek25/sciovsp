@@ -5,6 +5,11 @@ const rateLimit = require('express-rate-limit');
 const path = require('path');
 
 const app = express();
+// Za CloudPanel/Nginx (jeden lokálny reverse proxy hop) -- bez tohto
+// express-rate-limit hádže ERR_ERL_UNEXPECTED_X_FORWARDED_FOR na každý
+// request s X-Forwarded-For, pretože bez trust proxy nevie bezpečne
+// určiť klientovu IP z hlavičky.
+app.set('trust proxy', 1);
 // Express by defaultu posiela X-Powered-By: Express pri res.send()/
 // res.json() -- disable() je spoľahlivý spôsob, ako to úplne vypnúť.
 app.disable('x-powered-by');
