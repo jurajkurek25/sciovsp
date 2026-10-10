@@ -26,7 +26,8 @@ body{margin:0;background:var(--black);color:var(--text);font-family:var(--sans);
 .wheel-pointer{position:absolute;top:-14px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:18px solid transparent;border-right:18px solid transparent;border-top:28px solid var(--volt);z-index:3;filter:drop-shadow(0 2px 6px rgba(0,0,0,.5))}
 .wheel{width:100%;height:100%;border-radius:50%;position:relative;border:6px solid var(--black3);box-shadow:0 0 0 2px var(--border2),0 30px 80px rgba(0,0,0,.6);transition:transform 4.2s cubic-bezier(.17,.67,.21,1.01)}
 .wheel-center{position:absolute;top:50%;left:50%;width:64px;height:64px;transform:translate(-50%,-50%);border-radius:50%;background:var(--black2);border:3px solid var(--volt);z-index:2;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:1.4rem}
-.wheel-label{position:absolute;top:50%;left:50%;font-family:var(--mono);font-size:11px;font-weight:700;color:var(--black);transform-origin:0 0;white-space:nowrap;letter-spacing:.02em}
+.wheel-label{position:absolute;left:50%;transform-origin:0 50%;text-align:right;overflow:hidden}
+.wheel-label span{display:inline-block;font-family:var(--mono);font-weight:700;color:var(--black);white-space:nowrap;letter-spacing:.01em;max-width:100%;overflow:hidden;text-overflow:ellipsis;vertical-align:middle}
 
 .spin-btn{padding:1.1rem 2.8rem;background:var(--volt);color:var(--black);border:none;border-radius:14px;font-family:var(--mono);font-weight:700;font-size:1.05rem;letter-spacing:.05em;cursor:pointer;transition:transform .15s,opacity .2s}
 .spin-btn:hover:not(:disabled){transform:translateY(-2px)}
@@ -137,24 +138,39 @@ function renderWheel(codes) {
   wheel.style.background = `conic-gradient(${stops.join(',')})`;
 
   wheel.querySelectorAll('.wheel-label').forEach(el => el.remove());
-  if (n <= 24) {
-    // Vodorovný text bez rotácie namiesto radiálneho -- radiálny text sa
-    // na spodnej polovici kolesa inak musí korigovať o 180° (inak je
-    // hlavou dole) a aj po korekcii je ťažšie čitateľný. Vodorovný je
-    // vždy čitateľný rovnako, čo je na livestreame dôležitejšie než
-    // "elegancia".
-    const radius = ((wheel.clientWidth || 560) / 2) * 0.62;
-    for (let i = 0; i < n; i++) {
-      const center = i * sliceAngle + sliceAngle / 2;
-      const rad = (center - 90) * Math.PI / 180; // -90: 0° = hore (12h), nie vpravo (3h)
-      const x = Math.cos(rad) * radius;
-      const y = Math.sin(rad) * radius;
-      const label = document.createElement('div');
-      label.className = 'wheel-label';
-      label.textContent = codes[i];
-      label.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`;
-      wheel.appendChild(label);
-    }
+  // VŠETKY kódy musia byť viditeľné pred žrebovaním, aby sa v kolese
+  // každý mohol nájsť -- žiadny limit na počet, len sa pri väčšom počte
+  // zmenšuje písmo. Radiálne zarovnanie pozdĺž výseku (nie vodorovne) sa
+  // škáluje oveľa lepšie s počtom účastníkov -- pri veľa tenkých
+  // výsekoch sa text zmestí pozdĺž polomeru, vodorovný by presahoval do
+  // susedných výsekov.
+  const outerRadius = (wheel.clientWidth || 560) / 2;
+  const boxWidth = outerRadius - 44;
+  const fontSize = Math.max(6, Math.min(12, 200 / n));
+  const lineHeight = fontSize * 1.3;
+  for (let i = 0; i < n; i++) {
+    const center = i * sliceAngle + sliceAngle / 2; // 0° = hore (12h), v smere hodinových ručičiek
+    const baseRot = center - 90; // CSS rotate(0) smeruje doprava (3h) -- posun o -90° zarovná 0° s "hore"
+    const norm = ((baseRot % 360) + 360) % 360;
+    // Vonkajší box VŽDY smeruje presne na svoj výsek (baseRot, nikdy
+    // +180 -- to by ho poslalo na opačnú stranu kolesa). Len samotný
+    // text VNÚTRI sa na spodnej polovici (norm 90°-270°) otočí o 180°
+    // okolo VLASTNÉHO stredu, takže zostane pri vonkajšom okraji výseku
+    // a len sa "postaví na hlavu" opačne, aby bol čitateľný.
+    const flip = norm > 90 && norm < 270;
+    const label = document.createElement('div');
+    label.className = 'wheel-label';
+    label.style.top = `calc(50% - ${lineHeight / 2}px)`;
+    label.style.width = boxWidth + 'px';
+    label.style.height = lineHeight + 'px';
+    label.style.lineHeight = lineHeight + 'px';
+    label.style.transform = `rotate(${baseRot}deg)`;
+    const span = document.createElement('span');
+    span.textContent = codes[i];
+    span.style.fontSize = fontSize + 'px';
+    if (flip) span.style.transform = 'rotate(180deg)';
+    label.appendChild(span);
+    wheel.appendChild(label);
   }
 }
 
