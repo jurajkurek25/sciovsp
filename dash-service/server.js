@@ -18,10 +18,25 @@ app.disable('x-powered-by');
 // Jediná služba so superadmin session (dash_session cookie) nemala VÔBEC
 // žiadne bezpečnostné hlavičky -- chýbala napr. clickjacking ochrana
 // (X-Frame-Options), takže sa dash dal vložiť do <iframe> na cudzej
-// stránke. CSP vypnuté rovnako ako v main app/instructor-service (public/
-// index.html má veľa inline <script>, strict CSP by to rozbilo).
+// stránke. CSP (nižšie) je zatiaľ v Report-Only režime -- presne ten istý
+// dvojfázový postup ako v hlavnej appke (main-app-patches/62 → 231):
+// zoznam domén je overený proti VŠETKÝM externým zdrojom v public/*.html
+// (cdn.jsdelivr.net -- Supabase SDK + Quill, fonts.googleapis.com/
+// fonts.gstatic.com), ale kým to niekto neprejde cez F12 → Console a
+// nepotvrdí, že sa nič nehlási ako "Refused to...", nevynucuje sa.
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use((req, res, next) => {
+  res.setHeader('Content-Security-Policy-Report-Only', [
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net",
+    "font-src 'self' https://fonts.gstatic.com",
+    "img-src 'self' data: https:",
+    "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
+    "frame-ancestors 'none'",
+    "object-src 'none'",
+    "base-uri 'self'"
+  ].join('; '));
   // Čistý admin panel -- nikde sa nepoužíva kamera/mikrofón/geolokácia a
   // pod., takže sa dá všetko bezpečne zamknúť.
   res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=(), picture-in-picture=()');
