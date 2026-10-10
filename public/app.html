@@ -5518,7 +5518,11 @@ applyTranslations();updateHomeStats();updateGenTopicChips('verbal');renderAuthBu
 <script>
 const SUPABASE_URL='https://zrnqiwareacqyndwchsv.supabase.co';
 const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpybnFpd2FyZWFjcXluZHdjaHN2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMDA3NTAsImV4cCI6MjA4OTc3Njc1MH0.iUne23YDxp12Iwxdk9U8MfcV0NTBtrNf9OgsjQdiADk';
-const _supabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+// flowType: 'pkce' -- implicit flow (default) vracal access_token priamo
+// vo fragmente URL (#access_token=...), viditeľný v adresnom riadku a
+// histórii prehliadača. PKCE namiesto toho po Google redirecte vráti len
+// jednorazový ?code=, ktorý si klient vymení za session interne.
+const _supabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{flowType:'pkce'}});
 
 async function initAuth(){
   const{data:{session}}=await _supabase.auth.getSession();
