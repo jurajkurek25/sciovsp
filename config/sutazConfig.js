@@ -22,7 +22,7 @@
 //   results     -- výsledky žrebovania sú známe (resultsUrl/resultsText)
 
 const SUTAZ_CONFIG = {
-  status: 'coming_soon',
+  status: 'open',
 
   // Martinus musí byť explicitne potvrdený ako partner, inak appka
   // vždy zobrazuje "Martinus nie je organizátorom ani partnerom súťaže."
@@ -73,12 +73,8 @@ const SUTAZ_CONFIG = {
     serviceUsageTo: '2027-08-31',
     admissionPeriodFrom: '2026-10-10',  // obdobie, kedy musí byť doručené rozhodnutie o prijatí
     admissionPeriodTo: '2027-08-31',
-    // POZOR: applicationDeadline (uzávierka prihlášok) MUSÍ byť <= drawDate,
-    // inak by sa dalo prihlásiť až PO žrebovaní. Juraj dal 2027-09-05 (po
-    // žrebovaní 2027-09-01) -- rozpor, nevyplnené dovtedy, kým nepotvrdí
-    // správne poradie. Pozri rozhovor so systémom 2026-10-10.
-    applicationDeadline: null,  // uzávierka prihlášok do súťaže -- DOPLŇ (konflikt s drawDate)
-    drawDate: '2027-09-01'              // dátum žrebovania
+    applicationDeadline: '2027-09-09',  // uzávierka prihlášok do súťaže
+    drawDate: '2027-09-14'              // dátum žrebovania -- 5 dní po uzávierke na kontrolu prihlášok
   },
 
   // Mechanika žrebovania (čl. VI) -- pravidlá sú hotové, len počet
