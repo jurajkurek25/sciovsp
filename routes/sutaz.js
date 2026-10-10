@@ -245,10 +245,12 @@ function publicConfig() {
 module.exports = function registerSutaz(app) {
   // Pozvánkové e-maily pre nových registrovaných -- podobný vzor ako
   // setInterval(sendAffiliateCampaignEmails, 5*60*1000) v produkčnom
-  // server.js (main-app-patches/152), ale pri 3-dňovom odstupe stačí raz
-  // za hodinu, nie každých 5 minút. Bežia samostatne, nezávisle od toho,
-  // že tento modul nemá prístup do scope server.js.
-  setInterval(sendSutazPromoEmails, 60 * 60 * 1000);
+  // server.js (main-app-patches/152), ale odstup (3 dni) je fixný, takže
+  // presnosť na hodiny nič nepridáva -- stačí raz za deň. Bežia
+  // samostatne, nezávisle od toho, že tento modul nemá prístup do scope
+  // server.js.
+  setInterval(sendSutazPromoEmails, 24 * 60 * 60 * 1000);
+  sendSutazPromoEmails(); // aj hneď pri štarte appky, nielen po prvom intervale
 
   // GET /api/sutaz/status -- verejné, bez prihlásenia. Jediný zdroj
   // pravdy pre frontend o tom, čo má zobraziť.
