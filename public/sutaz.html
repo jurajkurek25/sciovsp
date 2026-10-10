@@ -259,7 +259,7 @@ footer{border-top:1px solid var(--border);padding:2.5rem;display:flex;align-item
   <div class="section-label">Kto sa môže zapojiť</div>
   <h2 class="section-title">Podmienky <em>zapojenia.</em></h2>
   <div class="elig-list">
-    <div class="elig-item"><span class="elig-item-icon">✓</span><span>V deň podania prihlášky máš <b>aspoň 18 rokov</b> a bydlisko v <b>Slovenskej republike</b>.</span></div>
+    <div class="elig-item"><span class="elig-item-icon">✓</span><span>V deň podania prihlášky máš <b>aspoň 18 rokov</b> a bydlisko v <b>Slovenskej republike alebo Českej republike</b>. (Rozhoduje bydlisko, ktoré uvedieš v prihláške — nie občianstvo ani krajina vysokej školy.)</span></div>
     <div class="elig-item"><span class="elig-item-icon">✓</span><span>V rozhodujúcom období si mal/a <b>riadne zaplatený prístup</b> k SP Tréner a pred doručením rozhodnutia o prijatí si v ňom dokončil/a aspoň <b>jeden tréningový test</b>. (Nákup prístupu môže za teba uhradiť aj iná osoba — rozhoduje, komu je pridelený. Samotný bezplatný skúšobný prístup nestačí.)</span></div>
     <div class="elig-item"><span class="elig-item-icon">✓</span><span>V rozhodujúcom období ti bolo doručené rozhodnutie o prijatí na <b id="admissionScopeText">bakalárske alebo spojené vysokoškolské štúdium na vysokej škole v Slovenskej republike alebo Českej republike</b>. Samotné absolvovanie prijímačky, umiestnenie v poradovníku ani podanie prihlášky na školu nestačí. Prijatie po odvolaní sa uznáva, ak bolo doručené v stanovenom období. Zápis na štúdium sa nevyžaduje.</span></div>
     <div class="elig-item"><span class="elig-item-icon">✓</span><span>Včas podáš úplnú prihlášku a preukážeš splnenie podmienok.</span></div>
@@ -293,6 +293,7 @@ footer{border-top:1px solid var(--border);padding:2.5rem;display:flex;align-item
   <div class="section-label">Často kladené otázky</div>
   <h2 class="section-title">Máš <em>otázky?</em></h2>
   <div style="margin-top:1.5rem">
+    <div class="faq-item"><button class="faq-question" onclick="toggleFaq(this)"><span>Môžem sa zapojiť, ak mám bydlisko v Česku?</span><span class="faq-arrow">+</span></button><div class="faq-answer"><div class="faq-answer-inner">Áno. Súťaž je spoločná pre osoby s bydliskom v Slovenskej aj Českej republike — žrebuje sa spoločne, zo všetkých oprávnených účastníkov z oboch krajín naraz. Rozhoduje bydlisko, ktoré uvedieš v prihláške, nie občianstvo ani to, v ktorej krajine je tvoja škola.</div></div></div>
     <div class="faq-item"><button class="faq-question" onclick="toggleFaq(this)"><span>Musím mať stále aktívne predplatné?</span><span class="faq-arrow">+</span></button><div class="faq-answer"><div class="faq-answer-inner">Nie. Predplatné nemusí byť aktívne pri prijatí na školu, pri podaní prihlášky ani pri žrebovaní — zrušenie jeho automatického obnovovania na účasť nemá vplyv. V rozhodujúcom období si ale musel/a mať riadne zaplatený prístup a dokončiť v ňom aspoň jeden tréningový test pred doručením rozhodnutia o prijatí.</div></div></div>
     <div class="faq-item"><button class="faq-question" onclick="toggleFaq(this)"><span>Môžem sa zapojiť po prijatí na odvolanie?</span><span class="faq-arrow">+</span></button><div class="faq-answer"><div class="faq-answer-inner">Áno. Prijatie po odvolaní sa uznáva, ak ti bolo rozhodnutie o prijatí doručené v stanovenom rozhodujúcom období.</div></div></div>
     <div class="faq-item"><button class="faq-question" onclick="toggleFaq(this)"><span>Čo ak ma prijali na viac škôl?</span><span class="faq-arrow">+</span></button><div class="faq-answer"><div class="faq-answer-inner">Nič sa nemení — jedna osoba má vždy jeden vstup do žrebovania bez ohľadu na to, koľko prijatí, účtov alebo dokončených testov máš. K prihláške priložíš doklad k jednému z prijatí, ktoré spĺňa podmienky.</div></div></div>
@@ -400,17 +401,27 @@ function renderPrizeCard(data){
     return;
   }
   const p = data.prizes;
-  const taxNote = p.taxFreeThresholdEur && p.valueEachEur != null
-    ? (p.valueEachEur <= p.taxFreeThresholdEur
-        ? `Výhra do ${escapeHtml(p.taxFreeThresholdEur)} € je podľa zákona oslobodená od dane z príjmu.`
-        : `Zo zákona je od dane oslobodená suma do ${escapeHtml(p.taxFreeThresholdEur)} €, zvyšok sa zdaňuje — výherca dostane presnú hodnotu výhry na vyčíslenie.`)
-    : '';
+  let taxNote = '';
+  if (p.valueEachEur != null) {
+    const skPart = p.taxFreeThresholdEur != null
+      ? `v SR do ${escapeHtml(p.taxFreeThresholdEur)} € oslobodené od dane${p.valueEachEur > p.taxFreeThresholdEur ? ', zvyšok sa zdaňuje' : ''}`
+      : '';
+    const czPart = p.czTaxFreeThresholdEur != null
+      ? `v ČR do ${escapeHtml(p.czTaxFreeThresholdEur)} € oslobodené od dane${p.valueEachEur > p.czTaxFreeThresholdEur ? ', zvyšok sa zdaňuje' : ''}`
+      : '';
+    taxNote = [skPart, czPart].filter(Boolean).join('; ') || '';
+    if (taxNote) taxNote += ' — presnú hodnotu výhry oznámime výhercovi na vyčíslenie.';
+  }
+  const voucherNote = p.voucherUsableInBothCountries === true
+    ? 'Poukážka je použiteľná pre výhercu v SR aj v ČR.'
+    : (p.voucherUsableInBothCountries === false ? 'Poukážka má osobitný variant pre SR a ČR podľa bydliska výhercu.' : '');
   el.innerHTML = `
     <div class="prize-value">${escapeHtml(p.count)} × ${escapeHtml(p.valueEachEur)} €</div>
     <div class="prize-count">darčekových poukážok Martinus</div>
     <div class="prize-meta">
       ${p.deliveryMethod ? `<div class="prize-meta-row"><b>Doručenie:</b><span>${escapeHtml(p.deliveryMethod)}</span></div>` : ''}
       ${p.validityNote ? `<div class="prize-meta-row"><b>Platnosť:</b><span>${escapeHtml(p.validityNote)}</span></div>` : ''}
+      ${voucherNote ? `<div class="prize-meta-row"><b>Platnosť v krajine:</b><span>${voucherNote}</span></div>` : ''}
       <div class="prize-meta-row"><b>Výmena:</b><span>výhra sa nevymieňa za hotovosť; organizátor hradí náklady na doručenie a aktiváciu.</span></div>
       ${taxNote ? `<div class="prize-meta-row"><b>Daň:</b><span>${taxNote}</span></div>` : ''}
     </div>`;
@@ -495,7 +506,7 @@ async function renderFormCard(data){
       <div class="form-row"><label for="fFullName">Meno a priezvisko *</label><input type="text" id="fFullName" name="fullName" required maxlength="200" value="${escapeHtml(me.name || '')}"></div>
       <div class="form-row"><label for="fContactEmail">Súťažný kontaktný e-mail *</label><input type="text" id="fContactEmail" name="contactEmail" required maxlength="200" value="${escapeHtml(me.email || '')}"><div class="form-hint">Môže byť iný než e-mail tvojho SP Tréner účtu — použijeme ho na kontaktovanie ohľadom súťaže.</div></div>
       <div class="form-row"><label for="fMunicipality">Obec bydliska *</label><input type="text" id="fMunicipality" name="residenceMunicipality" required maxlength="200"></div>
-      <div class="form-row"><label for="fCountry">Štát bydliska *</label><input type="text" id="fCountry" name="residenceCountry" required maxlength="100" value="Slovenská republika"><div class="form-hint">Súťaž je len pre osoby s bydliskom v Slovenskej republike.</div></div>
+      <div class="form-row"><label for="fCountry">Štát bydliska *</label><input type="text" id="fCountry" name="residenceCountry" required maxlength="100" placeholder="Slovenská republika / Česká republika"><div class="form-hint">Súťaž je len pre osoby s bydliskom v Slovenskej republike alebo Českej republike.</div></div>
       <div class="form-row"><label for="fSchool">Názov vysokej školy *</label><input type="text" id="fSchool" name="schoolName" required maxlength="300"></div>
       <div class="form-row"><label for="fProgram">Študijný program *</label><input type="text" id="fProgram" name="studyProgram" required maxlength="300"></div>
       <div class="form-row"><label for="fDate">Dátum doručenia rozhodnutia o prijatí *</label><input type="date" id="fDate" name="admissionDecisionDate" required></div>

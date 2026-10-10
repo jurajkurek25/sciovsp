@@ -10,6 +10,11 @@
 // prihlasovanie), kým chýba čokoľvek zásadné -- toto rozhodnutie platí
 // zhodne na frontende aj tu na serveri, takže sa nedá obísť priamym
 // volaním API.
+//
+// SR + ČR, spoločné žrebovanie (pozri eligibility.residencyCountries v
+// configu). POZOR mimo tohto súboru: bežná cena SP Tréner (kurzy/
+// predplatné) sa kvôli súťaži nesmie umelo navýšiť -- v ČR by rozdiel
+// medzi účtovanou a obvyklou cenou mohol byť posúdený ako "stávka".
 'use strict';
 
 const { createClient } = require('@supabase/supabase-js');
@@ -169,11 +174,18 @@ module.exports = function registerSutaz(app) {
       if (!contactEmail || !/^\S+@\S+\.\S+$/.test(contactEmail.trim())) return res.status(400).json({ error: 'Chýba alebo je neplatný súťažný kontaktný e-mail.' });
       if (!residenceMunicipality || !residenceMunicipality.trim()) return res.status(400).json({ error: 'Chýba obec bydliska.' });
       if (!residenceCountry || !residenceCountry.trim()) return res.status(400).json({ error: 'Chýba štát bydliska.' });
-      // Bydlisko v SR je podmienka účasti (čl. III ods. 1) -- self-deklarované,
+      // Bydlisko v SR alebo ČR je podmienka účasti -- rozšírené z pôvodného
+      // návrhu (len SR) na spoločné žrebovanie SR+ČR. Self-deklarované,
       // appka nežiada občiansky preukaz, len odfiltruje zjavne iné štáty.
-      const SK_RESIDENCE_VALUES = ['slovensko', 'slovenská republika', 'slovenska republika', 'sr', 'sk', 'slovakia'];
-      if (!SK_RESIDENCE_VALUES.includes(residenceCountry.trim().toLowerCase())) {
-        return res.status(403).json({ error: 'Súťaž je určená pre osoby s bydliskom v Slovenskej republike.' });
+      // Krajina z tohto poľa (nie občianstvo, nie krajina VŠ) určuje, do
+      // ktorej "skupiny" účastník patrí -- tu sa len validuje, v DB sa
+      // ukladá presne tak, ako ju účastník napísal (pozri residence_country).
+      const ELIGIBLE_RESIDENCE_VALUES = [
+        'slovensko', 'slovenská republika', 'slovenska republika', 'sr', 'sk', 'slovakia',
+        'česko', 'česká republika', 'ceska republika', 'čr', 'cr', 'cz', 'czech republic', 'czechia'
+      ];
+      if (!ELIGIBLE_RESIDENCE_VALUES.includes(residenceCountry.trim().toLowerCase())) {
+        return res.status(403).json({ error: 'Súťaž je určená pre osoby s bydliskom v Slovenskej republike alebo Českej republike.' });
       }
       if (!schoolName || !schoolName.trim()) return res.status(400).json({ error: 'Chýba názov vysokej školy.' });
       if (!studyProgram || !studyProgram.trim()) return res.status(400).json({ error: 'Chýba názov študijného programu.' });

@@ -29,16 +29,33 @@ const SUTAZ_CONFIG = {
   // a nikde nesmie byť logo/spojenie "SP TRENER × Martinus".
   martinusPartnershipConfirmed: false,
 
+  // Súťaž rozšírená na SR + ČR so SPOLOČNÝM žrebovaním (jeden zoznam
+  // účastníkov, ktorákoľvek cena môže ísť účastníkovi z ktorejkoľvek
+  // krajiny) -- rozhodnuté 2026 na základe konzultácie: zdieľané
+  // žrebovanie je pri propagačných súťažiach bežne možné, nie je to
+  // osobitná zákonná výnimka, podmienky musia vyhovovať právu OBOCH
+  // krajín súčasne. Pred reálnym spustením MUSIA byť doplnené:
+  //   - voucherUsableInBothCountries: overiť u Martinus, že SK poukážka
+  //     funguje aj na CZ webe (alebo zabezpečiť CZ variant)
+  //   - czTaxFreeThresholdEur: slovenská hranica 350 € (§9 ods.2 písm. m)
+  //     zák. č. 595/2003 Z.z.) sa NEPRENÁŠA na českého výhercu -- zistiť
+  //     a doplniť český ekvivalent
+  //   - cena služby (bežná appka, mimo tohto configu) sa kvôli súťaži
+  //     nesmie umelo navýšiť -- v ČR by rozdiel medzi účtovanou a
+  //     obvyklou cenou mohol byť posúdený ako "stávka"
   prizes: {
     // Počet poukážok a ich hodnota -- zobrazené len keď OBOJE vyplnené.
     // Štatút (čl. V) odporúča hodnotu JEDNEJ poukážky do 350 EUR -- nad
-    // tým sa už zdaňuje presah (§9 ods.2 písm. m) zákona č. 595/2003 Z.z.).
+    // tým sa už zdaňuje presah (§9 ods.2 písm. m) zákona č. 595/2003 Z.z.,
+    // platí len pre SK výhercu, pozri czTaxFreeThresholdEur nižšie).
     count: null,          // napr. 3
     valueEachEur: null,   // napr. 50
     currency: 'EUR',
     deliveryMethod: null, // elektronické/fyzické + spôsob uplatnenia (čl. V ods. 2)
     validityNote: null,   // platnosť poukážky (čl. V ods. 2)
-    taxFreeThresholdEur: 350 // §9 ods. 2 písm. m) zákona č. 595/2003 Z.z. -- fakt zo zákona, nezávislý od zvolenej hodnoty
+    taxFreeThresholdEur: 350,   // SK hranica, §9 ods. 2 písm. m) zák. č. 595/2003 Z.z. -- platí len pre výhercu s bydliskom v SR
+    czTaxFreeThresholdEur: null, // český ekvivalent -- DOPLNIŤ pred spustením, SK hranica sa naň nevzťahuje
+    voucherUsableInBothCountries: null // true/false -- MUSÍ sa overiť priamo u Martinus pred spustením
   },
 
   dates: {
@@ -65,7 +82,12 @@ const SUTAZ_CONFIG = {
 
   eligibility: {
     minAge: 18, // dovŕšené v deň podania prihlášky (čl. III ods. 1)
-    residency: 'Slovenská republika',
+    // Rozšírené z pôvodného návrhu (len SR) na SR + ČR, spoločné
+    // žrebovanie. Krajina účastníka = bydlisko DEKLAROVANÉ PRI
+    // PRIHLÁSENÍ (nie občianstvo, nie krajina vysokej školy) -- jedna
+    // osoba patrí vždy len do jednej skupiny.
+    residencyCountries: ['Slovenská republika', 'Česká republika'],
+    residency: 'Slovenská republika alebo Česká republika',
     requiresPaidAccess: true,
     requiresCompletedTest: true,
     minCompletedTests: 1, // musí byť dokončený PRED doručením rozhodnutia o prijatí (čl. III ods. 1) -- appka vie overiť len aktuálny počet, nie časovú súvislosť s dátumom prijatia (žiadne dáta o časovaní jednotlivých testov), pozri POZNÁMKA nižšie
@@ -104,6 +126,7 @@ function isConfigComplete(cfg) {
   const l = cfg.links;
   return (
     p.count != null && p.valueEachEur != null && !!p.deliveryMethod &&
+    p.voucherUsableInBothCountries === true && p.czTaxFreeThresholdEur != null &&
     !!d.serviceUsageFrom && !!d.admissionPeriodFrom && !!d.admissionPeriodTo &&
     !!d.applicationDeadline && !!d.drawDate &&
     !!cfg.eligibility.admissionScope &&
