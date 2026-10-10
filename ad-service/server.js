@@ -48,7 +48,7 @@ app.disable('x-powered-by');
 // appka môže nastaviť sama bez rizika duplicity.
 app.use(helmet({ contentSecurityPolicy: false, xFrameOptions: false, xContentTypeOptions: false, xXssProtection: false, referrerPolicy: false, xPermittedCrossDomainPolicies: false }));
 app.use((req, res, next) => {
-  res.setHeader('Content-Security-Policy-Report-Only', [
+  res.setHeader('Content-Security-Policy', [
     "default-src 'self'",
     "script-src 'self' 'unsafe-inline'",
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
