@@ -68,6 +68,19 @@ body{margin:0;background:var(--black);color:var(--text);font-family:var(--sans);
 .qr-box p{margin:0;font-family:var(--mono);font-size:.68rem;color:#111;text-align:center;line-height:1.3}
 .qr-box p b{display:block;color:var(--purple);font-size:.72rem}
 @media(max-width:700px){.qr-box{display:none}}
+
+#startScreen{display:flex;align-items:center;justify-content:center;min-height:100vh;text-align:center;padding:2rem;position:relative;overflow:hidden;background:radial-gradient(ellipse at 50% 40%,rgba(124,92,255,.18),transparent 60%),var(--black)}
+#startScreen::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,rgba(200,255,0,.08),transparent 55%);animation:pulseglow 4s ease-in-out infinite}
+@keyframes pulseglow{0%,100%{opacity:.6}50%{opacity:1}}
+.start-content{position:relative;z-index:1;max-width:560px}
+.start-live-badge{display:inline-flex;align-items:center;gap:.5rem;font-family:var(--mono);font-size:.78rem;letter-spacing:.15em;text-transform:uppercase;color:var(--red);background:rgba(255,63,94,.1);border:1px solid rgba(255,63,94,.3);border-radius:20px;padding:.45rem 1rem;margin-bottom:2rem}
+.start-live-dot{width:8px;height:8px;border-radius:50%;background:var(--red);animation:blink 1.4s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+.start-brand{font-family:var(--mono);font-size:.85rem;letter-spacing:.3em;color:var(--text3);margin-bottom:.8rem}
+.start-brand span{color:var(--volt)}
+.start-content h1{font-family:var(--serif);font-size:3.2rem;line-height:1.1;margin:0 0 1rem;color:var(--text)}
+.start-content p{color:var(--text2);font-size:1.05rem;line-height:1.6;margin:0 0 2.5rem}
+@media(max-width:600px){.start-content h1{font-size:2.2rem}}
 </style>
 </head>
 <body>
@@ -76,6 +89,16 @@ body{margin:0;background:var(--black);color:var(--text);font-family:var(--sans);
   <div>
     <p>Musíš byť prihlásený v Dash.</p>
     <a href="/">&larr; Prejsť na prihlásenie</a>
+  </div>
+</div>
+
+<div id="startScreen" class="hidden">
+  <div class="start-content">
+    <div class="start-live-badge"><span class="start-live-dot"></span> naživo o chvíľu</div>
+    <div class="start-brand">SP <span>TRÉNER</span></div>
+    <h1>Žrebovanie súťaže</h1>
+    <p>Koleso je pripravené. Keď bude kamera aj zvuk naživo a diváci pripravení, klikni a spusti ho.</p>
+    <button class="spin-btn" onclick="startShow()">Spustiť žrebovanie →</button>
   </div>
 </div>
 
@@ -331,6 +354,11 @@ async function loadHistory() {
   } catch (e) {}
 }
 
+function startShow() {
+  $('#startScreen').classList.add('hidden');
+  $('#app').classList.remove('hidden');
+}
+
 async function init() {
   try {
     await api('/api/dash/me');
@@ -338,7 +366,7 @@ async function init() {
     $('#loginScreen').classList.remove('hidden');
     return;
   }
-  $('#app').classList.remove('hidden');
+  $('#startScreen').classList.remove('hidden');
   try {
     const data = await api('/api/dash/sutaz-draw/pool');
     renderCommitPanel(data);
