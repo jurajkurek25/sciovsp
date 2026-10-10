@@ -14,16 +14,33 @@ app.set('trust proxy', 1);
 // res.json() -- disable() je spoľahlivý spôsob, ako to úplne vypnúť.
 app.disable('x-powered-by');
 // Doteraz nemal VÔBEC žiadny helmet -- chýbal HSTS, X-Content-Type-
-// Options aj X-Frame-Options úplne. CSP vypnuté rovnako ako v dash/main
-// app (public/index.html má inline <script>, strict CSP by to rozbilo).
-// X-Frame-Options, X-Content-Type-Options a X-XSS-Protection NEnecháva
+// Options aj X-Frame-Options úplne. CSP je v Report-Only režime (rovnaký
+// dvojfázový postup ako main-app-patches/62 → 231 a dash-service) --
+// zoznam domén overený proti VŠETKÝM externým zdrojom v public/index.html
+// (cdn.jsdelivr.net -- len Supabase SDK, fonts.googleapis.com/gstatic.com).
+// Kým niekto neprejde cez F12 → Console a nepotvrdí "nič sa nehlási",
+// nevynucuje sa.
+// X-Frame-Options, X-Content-Type-Options, X-XSS-Protection,
+// Referrer-Policy a X-Permitted-Cross-Domain-Policies NEnecháva
 // nastavovať helmet -- globálny /etc/nginx/nginx.conf na tomto serveri
 // (platí pre VŠETKY stránky na stroji, nielen túto appku) ich už posiela
-// sám, takže by sa inak zdvojili ("SAMEORIGIN, SAMEORIGIN" a pod.).
-// Mazanie z nginx.conf by ovplyvnilo aj ostatné, nesúvisiace stránky na
-// tomto serveri -- bezpečnejšie je vypnúť duplicitu tu, v appke.
-app.use(helmet({ contentSecurityPolicy: false, xFrameOptions: false, xContentTypeOptions: false, xXssProtection: false }));
+// sám, takže by sa inak zdvojili/konfliktovali ("SAMEORIGIN, SAMEORIGIN",
+// helmet's "no-referrer" vs. nginx's "same-origin", a pod.). Mazanie
+// z nginx.conf by ovplyvnilo aj ostatné, nesúvisiace stránky na tomto
+// serveri -- bezpečnejšie je vypnúť duplicitu tu, v appke.
+app.use(helmet({ contentSecurityPolicy: false, xFrameOptions: false, xContentTypeOptions: false, xXssProtection: false, referrerPolicy: false, xPermittedCrossDomainPolicies: false }));
 app.use((req, res, next) => {
+  res.setHeader('Content-Security-Policy-Report-Only', [
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "font-src 'self' https://fonts.gstatic.com",
+    "img-src 'self' data: https:",
+    "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
+    "frame-ancestors 'none'",
+    "object-src 'none'",
+    "base-uri 'self'"
+  ].join('; '));
   // Čistý admin panel -- nikde sa nepoužíva kamera/mikrofón/geolokácia a
   // pod., takže sa dá všetko bezpečne zamknúť.
   res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=(), picture-in-picture=()');

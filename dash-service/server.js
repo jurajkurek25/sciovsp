@@ -27,13 +27,15 @@ app.disable('x-powered-by');
 // Console na "Refused to..." a pošli mi presné hlásenie -- doplním
 // chýbajúcu doménu. Rýchly rollback: vráť riadok nižšie späť na
 // 'Content-Security-Policy-Report-Only' (viď git história tohto súboru).
-// X-Frame-Options, X-Content-Type-Options a X-XSS-Protection NEnecháva
+// X-Frame-Options, X-Content-Type-Options, X-XSS-Protection,
+// Referrer-Policy a X-Permitted-Cross-Domain-Policies NEnecháva
 // nastavovať helmet -- globálny /etc/nginx/nginx.conf na tomto serveri
 // (platí pre VŠETKY stránky na stroji, nielen túto appku) ich už posiela
-// sám, takže by sa inak zdvojili ("SAMEORIGIN, SAMEORIGIN" a pod.).
+// sám, takže by sa inak zdvojili/konfliktovali ("SAMEORIGIN, SAMEORIGIN",
+// helmet's "no-referrer" vs. nginx's "same-origin", a pod.).
 // Mazanie z nginx.conf by ovplyvnilo aj ostatné, nesúvisiace stránky na
 // tomto serveri -- bezpečnejšie je vypnúť duplicitu tu, v appke.
-app.use(helmet({ contentSecurityPolicy: false, xFrameOptions: false, xContentTypeOptions: false, xXssProtection: false }));
+app.use(helmet({ contentSecurityPolicy: false, xFrameOptions: false, xContentTypeOptions: false, xXssProtection: false, referrerPolicy: false, xPermittedCrossDomainPolicies: false }));
 app.use((req, res, next) => {
   res.setHeader('Content-Security-Policy', [
     "default-src 'self'",
