@@ -79,8 +79,9 @@ body{margin:0;background:var(--black);color:var(--text);font-family:var(--sans);
 .start-brand{font-family:var(--mono);font-size:.85rem;letter-spacing:.3em;color:var(--text3);margin-bottom:.8rem}
 .start-brand span{color:var(--volt)}
 .start-content h1{font-family:var(--serif);font-size:3.2rem;line-height:1.1;margin:0 0 1rem;color:var(--text)}
-.start-content p{color:var(--text2);font-size:1.05rem;line-height:1.6;margin:0 0 2.5rem}
-@media(max-width:600px){.start-content h1{font-size:2.2rem}}
+.start-content p{color:var(--text2);font-size:1.05rem;line-height:1.6;margin:0 0 .8rem}
+.start-countdown{font-family:var(--mono);font-size:5.5rem;font-weight:700;color:var(--volt);letter-spacing:.02em;margin:0 0 2.5rem;font-variant-numeric:tabular-nums}
+@media(max-width:600px){.start-content h1{font-size:2.2rem}.start-countdown{font-size:3.5rem}}
 </style>
 </head>
 <body>
@@ -97,8 +98,9 @@ body{margin:0;background:var(--black);color:var(--text);font-family:var(--sans);
     <div class="start-live-badge"><span class="start-live-dot"></span> naživo o chvíľu</div>
     <div class="start-brand">SP <span>TRÉNER</span></div>
     <h1>Žrebovanie súťaže</h1>
-    <p>Koleso je pripravené. Keď bude kamera aj zvuk naživo a diváci pripravení, klikni a spusti ho.</p>
-    <button class="spin-btn" onclick="startShow()">Spustiť žrebovanie →</button>
+    <p>Žrebovanie začína o</p>
+    <div class="start-countdown" id="countdownText">5:00</div>
+    <button class="spin-btn secondary" onclick="startShow()">Spustiť teraz →</button>
   </div>
 </div>
 
@@ -354,7 +356,25 @@ async function loadHistory() {
   } catch (e) {}
 }
 
+let countdownInterval = null;
+
+function startCountdown(seconds) {
+  let remaining = seconds;
+  const render = () => {
+    const m = Math.floor(remaining / 60);
+    const s = remaining % 60;
+    $('#countdownText').textContent = `${m}:${String(s).padStart(2, '0')}`;
+  };
+  render();
+  countdownInterval = setInterval(() => {
+    remaining--;
+    render();
+    if (remaining <= 0) startShow();
+  }, 1000);
+}
+
 function startShow() {
+  if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
   $('#startScreen').classList.add('hidden');
   $('#app').classList.remove('hidden');
 }
@@ -367,6 +387,7 @@ async function init() {
     return;
   }
   $('#startScreen').classList.remove('hidden');
+  startCountdown(5 * 60);
   try {
     const data = await api('/api/dash/sutaz-draw/pool');
     renderCommitPanel(data);
