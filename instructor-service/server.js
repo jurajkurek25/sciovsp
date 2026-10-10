@@ -16,7 +16,13 @@ app.disable('x-powered-by');
 // Doteraz nemal VÔBEC žiadny helmet -- chýbal HSTS, X-Content-Type-
 // Options aj X-Frame-Options úplne. CSP vypnuté rovnako ako v dash/main
 // app (public/index.html má inline <script>, strict CSP by to rozbilo).
-app.use(helmet({ contentSecurityPolicy: false }));
+// X-Frame-Options, X-Content-Type-Options a X-XSS-Protection NEnecháva
+// nastavovať helmet -- globálny /etc/nginx/nginx.conf na tomto serveri
+// (platí pre VŠETKY stránky na stroji, nielen túto appku) ich už posiela
+// sám, takže by sa inak zdvojili ("SAMEORIGIN, SAMEORIGIN" a pod.).
+// Mazanie z nginx.conf by ovplyvnilo aj ostatné, nesúvisiace stránky na
+// tomto serveri -- bezpečnejšie je vypnúť duplicitu tu, v appke.
+app.use(helmet({ contentSecurityPolicy: false, xFrameOptions: false, xContentTypeOptions: false, xXssProtection: false }));
 app.use((req, res, next) => {
   // Čistý admin panel -- nikde sa nepoužíva kamera/mikrofón/geolokácia a
   // pod., takže sa dá všetko bezpečne zamknúť.

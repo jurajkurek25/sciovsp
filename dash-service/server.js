@@ -24,7 +24,13 @@ app.disable('x-powered-by');
 // (cdn.jsdelivr.net -- Supabase SDK + Quill, fonts.googleapis.com/
 // fonts.gstatic.com), ale kým to niekto neprejde cez F12 → Console a
 // nepotvrdí, že sa nič nehlási ako "Refused to...", nevynucuje sa.
-app.use(helmet({ contentSecurityPolicy: false }));
+// X-Frame-Options, X-Content-Type-Options a X-XSS-Protection NEnecháva
+// nastavovať helmet -- globálny /etc/nginx/nginx.conf na tomto serveri
+// (platí pre VŠETKY stránky na stroji, nielen túto appku) ich už posiela
+// sám, takže by sa inak zdvojili ("SAMEORIGIN, SAMEORIGIN" a pod.).
+// Mazanie z nginx.conf by ovplyvnilo aj ostatné, nesúvisiace stránky na
+// tomto serveri -- bezpečnejšie je vypnúť duplicitu tu, v appke.
+app.use(helmet({ contentSecurityPolicy: false, xFrameOptions: false, xContentTypeOptions: false, xXssProtection: false }));
 app.use((req, res, next) => {
   res.setHeader('Content-Security-Policy-Report-Only', [
     "default-src 'self'",
