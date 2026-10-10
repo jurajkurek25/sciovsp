@@ -1932,6 +1932,7 @@ async function renderSutazApplications() {
         <p class="muted">${escapeHtmlDash(a.residenceMunicipality)}, ${escapeHtmlDash(a.residenceCountry)} &middot; ${escapeHtmlDash(a.schoolName)} — ${escapeHtmlDash(a.studyProgram)}</p>
         <p class="muted">Rozhodnutie o prijatí: ${escapeHtmlDash(a.admissionDecisionDate) || '—'} &middot; ${a.admissionDocUrl ? `<a href="${a.admissionDocUrl}" target="_blank" rel="noopener">zobraziť doklad (${escapeHtmlDash(a.admissionDocMime)})</a>` : 'doklad nedostupný'}</p>
         <p class="muted">Pri podaní: ${a.verifiedTestsCount ?? '?'} dokončených testov &middot; plán: ${escapeHtmlDash(a.verifiedPlan) || '—'} &middot; predplatné: ${escapeHtmlDash(a.verifiedSubscriptionStatus) || '—'} &middot; veková a štatútová zhoda: ${a.ageConfirmed ? 'áno' : 'NIE'} / ${a.statuteAck ? 'áno' : 'NIE'}</p>
+        ${a.aiVerdict ? `<p class="muted">AI overenie dokladu: <b>${escapeHtmlDash(a.aiVerdict)}</b>${a.aiReason ? ' — ' + escapeHtmlDash(a.aiReason) : ''}</p>` : `<p class="muted" style="color:var(--yellow)">AI overenie dokladu zlyhalo/nedostupné — treba manuálnu kontrolu.</p>`}
         <textarea class="reviewer-note" rows="2" placeholder="Poznámka k overeniu (dôvod zamietnutia, detaily)...">${escapeHtmlDash(a.reviewerNote)}</textarea>
         <div style="display:flex;gap:.5rem;align-items:center;margin-top:.5rem;flex-wrap:wrap">
           <select class="status-select">

@@ -568,7 +568,16 @@ async function renderFormCard(data){
       const result = await res.json();
       if (!res.ok) throw new Error(result.error || 'Odoslanie zlyhalo.');
 
-      el.innerHTML = `<div class="form-success show"><div class="form-success-icon">✅</div><div class="form-success-title">Prihláška prijatá na overenie</div><div class="form-success-desc">Tvoja prihláška bola prijatá na overenie — ešte to neznamená automatické zaradenie do žrebovania. Najprv skontrolujeme splnenie podmienok. Potvrdenie dostaneš aj na e-mail.</div></div>`;
+      // Doklad sa overuje automaticky hneď pri odoslaní (AI) -- výsledok
+      // (verified/rejected/pending) prichádza priamo v odpovedi, appka
+      // nehovorí vždy rovnaké "čakáš na overenie", ak už je výsledok známy.
+      const resultViews = {
+        verified: { icon: '🎉', title: 'Prihláška overená a zaradená do žrebovania', desc: 'Doklad o prijatí bol automaticky overený. Nič ďalšie momentálne nemusíš robiť — o výsledku žrebovania sa dozvieš podľa termínov v štatúte. Potvrdenie dostaneš aj na e-mail.' },
+        rejected: { icon: '⚠️', title: 'Prihláška nespĺňa podmienky', desc: 'Doklad o prijatí automatické overenie nepotvrdilo. Dôvod a možnosť namietať nájdeš v e-maile, ktorý sme ti práve poslali.' },
+        pending: { icon: '✅', title: 'Prihláška prijatá na overenie', desc: 'Automatické overenie bolo momentálne nedostupné — prihlášku skontrolujeme manuálne. Potvrdenie dostaneš aj na e-mail.' }
+      };
+      const view = resultViews[result.status] || resultViews.pending;
+      el.innerHTML = `<div class="form-success show"><div class="form-success-icon">${view.icon}</div><div class="form-success-title">${escapeHtml(view.title)}</div><div class="form-success-desc">${escapeHtml(view.desc)}</div></div>`;
     } catch(err) {
       errEl.textContent = err.message || 'Odoslanie zlyhalo, skús to znova.';
       errEl.classList.add('show');

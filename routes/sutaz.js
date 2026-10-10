@@ -41,6 +41,65 @@ function escapeHtml(s) {
   return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
+// Odstráni súvislé číselné úseky (4+ číslic, prípadne s / - alebo
+// medzerou) z textu -- defenzívna poistka PROTI tomu, aby sa do DB
+// (ai_reason) dostalo rodné číslo, dátum narodenia a pod., aj keby to
+// model ignoroval systémový pokyn nižšie. "Prísne zakázané ukladať
+// citlivé údaje" -- toto je kód, nie len prompt.
+function stripDigitSequences(s) {
+  return String(s == null ? '' : s).replace(/\d[\d/.\-\s]{3,}\d/g, '[odstránené]').slice(0, 300);
+}
+
+// Rovnaký vzor ako callAnthropicGrade v produkčnom server.js (hodnotenie
+// nahratých materiálov pri kurzoch) -- base64 image/document blok +
+// Claude vision, len iná otázka a iný (striktnejší) systémový prompt.
+// routes/sutaz.js nemá prístup do scope server.js, takže ide o vlastnú
+// malú kópiu, nie o zdieľanú funkciu.
+const ADMISSION_AI_MODEL_CHAIN = ['claude-sonnet-5', 'claude-sonnet-4-6'];
+async function checkAdmissionDocWithAI(fileBuffer, mimeType, modelIdx) {
+  modelIdx = modelIdx || 0;
+  if (!process.env.ANTHROPIC_API_KEY) throw new Error('ANTHROPIC_API_KEY nie je nastavený.');
+  const base64 = fileBuffer.toString('base64');
+  const fileBlock = mimeType === 'application/pdf'
+    ? { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64 } }
+    : { type: 'image', source: { type: 'base64', media_type: mimeType, data: base64 } };
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': process.env.ANTHROPIC_API_KEY,
+      'anthropic-version': '2023-06-01'
+    },
+    body: JSON.stringify({
+      model: ADMISSION_AI_MODEL_CHAIN[modelIdx],
+      max_tokens: 500,
+      system: 'Si asistent, ktorý len OVERUJE, či priložený dokument preukazuje PRIJATIE uchádzača na bakalárske alebo spojené vysokoškolské štúdium (nestačí samotná účasť na prijímačke, umiestnenie v poradovníku ani podanie prihlášky na školu). Odpovedaj VÝLUČNE JSON bez backticks a bez akéhokoľvek iného textu: {"verdict":"admitted" alebo "not_admitted" alebo "unclear","reasonShort":"jedna krátka veta po slovensky"}. Je PRÍSNE ZAKÁZANÉ do "reasonShort" uvádzať meno, rodné číslo, dátum narodenia, adresu, podpis, čiarové/QR kódy ani akékoľvek iné osobné alebo citlivé údaje z dokumentu -- napíš len všeobecné zhodnotenie typu dokumentu a záveru (napr. "dokument je rozhodnutie o prijatí na bakalárske štúdium").',
+      messages: [{
+        role: 'user',
+        content: [
+          { type: 'text', text: 'Over, či tento dokument preukazuje prijatie uchádzača na vysokoškolské štúdium.' },
+          fileBlock
+        ]
+      }]
+    })
+  });
+  const data = await res.json();
+  if (!res.ok || data.error) {
+    const errMsg = (data.error && data.error.message) || ('HTTP ' + res.status);
+    const looksLikeModelIssue = res.status === 404 || /model/i.test(errMsg);
+    if (looksLikeModelIssue && modelIdx < ADMISSION_AI_MODEL_CHAIN.length - 1) {
+      console.error(`⚠️ sutaz AI model '${ADMISSION_AI_MODEL_CHAIN[modelIdx]}' zlyhal, skúšam '${ADMISSION_AI_MODEL_CHAIN[modelIdx + 1]}'.`);
+      return checkAdmissionDocWithAI(fileBuffer, mimeType, modelIdx + 1);
+    }
+    throw new Error(errMsg);
+  }
+  const text = (data.content || []).find(b => b.type === 'text')?.text || '';
+  const clean = text.replace(/```json\s*/gi, '').replace(/```\s*/gi, '').trim();
+  const parsed = JSON.parse(clean.replace(/,\s*([}\]])/g, '$1'));
+  const verdict = ['admitted', 'not_admitted', 'unclear'].includes(parsed.verdict) ? parsed.verdict : 'unclear';
+  return { verdict, reason: stripDigitSequences(parsed.reasonShort) };
+}
+
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
@@ -241,6 +300,24 @@ module.exports = function registerSutaz(app) {
           return res.status(500).json({ error: 'Nahrávanie dokladu zlyhalo, skús to znova.' });
         }
 
+        // AI automaticky rozhodne o statuse podľa dokladu -- "admitted" =>
+        // rovno 'verified' (bez čakania na manuálnu kontrolu), "not_admitted"
+        // alebo "unclear" => rovno 'rejected'. Ak AI zlyhá/je nedostupná
+        // (chýba kľúč, výpadok, parse error), appka NEHÁDA -- spadne na
+        // bezpečný 'pending' pre manuálnu kontrolu. Rozhodnuté explicitne s
+        // Jurajom: plná automatizácia oboma smermi je prijateľné riziko.
+        let finalStatus = 'pending';
+        let aiVerdict = null;
+        let aiReason = null;
+        try {
+          const aiResult = await checkAdmissionDocWithAI(req.file.buffer, req.file.mimetype);
+          aiVerdict = aiResult.verdict;
+          aiReason = aiResult.reason;
+          finalStatus = aiVerdict === 'admitted' ? 'verified' : 'rejected';
+        } catch (e) {
+          console.error('sutaz AI admission check error (falling back to manual review):', e.message);
+        }
+
         const { error: insertError } = await supabase.from('sutaz_applications').insert({
           email,
           full_name: fullName.trim().slice(0, 200),
@@ -258,7 +335,11 @@ module.exports = function registerSutaz(app) {
           verified_is_premium: eligibility.isPaidAccess,
           verified_plan: eligibility.plan,
           verified_subscription_status: eligibility.subscriptionStatus,
-          status: 'pending'
+          status: finalStatus,
+          ai_verdict: aiVerdict,
+          ai_reason: aiReason,
+          reviewer_note: aiVerdict ? `Automaticky (AI): ${aiVerdict}${aiReason ? ' — ' + aiReason : ''}` : null,
+          reviewed_at: finalStatus === 'pending' ? null : new Date().toISOString()
         });
         if (insertError) {
           // Unique constraint na email -- súbežný druhý request tej istej osoby.
@@ -269,16 +350,29 @@ module.exports = function registerSutaz(app) {
 
         try {
           const { sendMail } = require('../mailer');
-          const html = fillEmailTemplate(loadEmailTemplate('sutaz-prihlaska-prijata.html'), {
-            NAME: escapeHtml(fullName.trim().split(' ')[0] || 'tam'),
-            SUTAZ_URL: 'https://sptrener.online/sutaz'
-          });
-          sendMail({ to: email, subject: 'Prihláška do súťaže SP Tréner — prijatá na overenie', html }).catch(() => {});
+          const firstName = escapeHtml(fullName.trim().split(' ')[0] || 'tam');
+          if (finalStatus === 'verified') {
+            const html = fillEmailTemplate(loadEmailTemplate('sutaz-prihlaska-verified.html'), {
+              NAME: firstName, SUTAZ_URL: 'https://sptrener.online/sutaz'
+            });
+            sendMail({ to: email, subject: 'Prihláška do súťaže SP Tréner — zaradená do žrebovania', html }).catch(() => {});
+          } else if (finalStatus === 'rejected') {
+            const html = fillEmailTemplate(loadEmailTemplate('sutaz-prihlaska-zamietnuta.html'), {
+              NAME: firstName, REASON: escapeHtml(aiReason || 'doklad nepreukazuje prijatie na vysokoškolské štúdium'),
+              CONTACT_EMAIL: SUTAZ_CONFIG.links.organizerContactEmail || 'sutaz@sptrener.online'
+            });
+            sendMail({ to: email, subject: 'Prihláška do súťaže SP Tréner — nespĺňa podmienky', html }).catch(() => {});
+          } else {
+            const html = fillEmailTemplate(loadEmailTemplate('sutaz-prihlaska-prijata.html'), {
+              NAME: firstName, SUTAZ_URL: 'https://sptrener.online/sutaz'
+            });
+            sendMail({ to: email, subject: 'Prihláška do súťaže SP Tréner — prijatá na overenie', html }).catch(() => {});
+          }
         } catch (e) {
           console.error('sutaz confirmation email error:', e.message);
         }
 
-        res.status(201).json({ ok: true, status: 'pending' });
+        res.status(201).json({ ok: true, status: finalStatus });
       } catch (e) {
         console.error('sutaz apply error:', e.message);
         res.status(500).json({ error: 'Chyba servera.' });

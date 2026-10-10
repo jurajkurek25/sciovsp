@@ -40,6 +40,8 @@ router.get('/api/dash/sutaz-applications', requireDashAuth, async (req, res) => 
       verifiedPlan: a.verified_plan,
       verifiedSubscriptionStatus: a.verified_subscription_status,
       status: a.status,
+      aiVerdict: a.ai_verdict,
+      aiReason: a.ai_reason,
       reviewerNote: a.reviewer_note,
       createdAt: a.created_at,
       reviewedAt: a.reviewed_at
