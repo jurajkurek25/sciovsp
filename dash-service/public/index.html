@@ -56,8 +56,10 @@ td{padding:.6rem;border-bottom:1px solid var(--border)}
 .pill{display:inline-block;padding:.2rem .55rem;border-radius:20px;font-family:var(--mono);font-size:.68rem}
 .pill.open{background:rgba(255,63,94,.15);color:var(--red)}
 .pill.pending{background:rgba(255,201,77,.15);color:var(--yellow)}
-.pill.resolved,.pill.completed{background:rgba(54,232,150,.15);color:var(--green)}
+.pill.resolved,.pill.completed,.pill.verified{background:rgba(54,232,150,.15);color:var(--green)}
 .pill.in_progress{background:rgba(124,92,255,.15);color:var(--purple2)}
+.pill.rejected{background:rgba(255,63,94,.15);color:var(--red)}
+.pill.winner{background:rgba(200,255,0,.15);color:var(--volt)}
 
 .formrow{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1rem}
 .formrow input,.formrow textarea,.formrow select{padding:.6rem .8rem;background:var(--black3);border:1px solid var(--border2);border-radius:8px;font-size:.83rem}
@@ -159,6 +161,7 @@ textarea{width:100%;min-height:110px;padding:.7rem;background:var(--black3);bord
     <a class="navlink" data-page="instructorpayouts">Výplaty inštruktorov</a>
     <a class="navlink" data-page="discountcodes">Zľavové kódy</a>
     <a class="navlink" data-page="instructors">Inštruktori</a>
+    <a class="navlink" data-page="sutazApplications">Súťaž — prihlášky</a>
     <a class="navlink" data-page="bugs">Nahlásené chyby</a>
     <a class="navlink" data-page="advisor">AI poradca</a>
     <a class="navlink" data-page="aiops">AI ops log</a>
@@ -244,7 +247,7 @@ function showApp() {
 }
 
 // ─────────────────────────── ROUTER ───────────────────────────
-const PAGES = { overview: renderOverview, trends: renderTrends, academy: renderAcademy, courses: renderCourses, blog: renderBlog, houseads: renderHouseAds, giftcards: renderGiftcards, giftcardsales: renderGiftCardSales, payouts: renderPayouts, instructorpayouts: renderInstructorPayouts, discountcodes: renderDiscountCodes, instructors: renderInstructors, bugs: renderBugs, advisor: renderAdvisor, aiops: renderAiops, webinar: renderWebinar, community: renderCommunity, recommendations: renderRecommendations };
+const PAGES = { overview: renderOverview, trends: renderTrends, academy: renderAcademy, courses: renderCourses, blog: renderBlog, houseads: renderHouseAds, giftcards: renderGiftcards, giftcardsales: renderGiftCardSales, payouts: renderPayouts, instructorpayouts: renderInstructorPayouts, discountcodes: renderDiscountCodes, instructors: renderInstructors, bugs: renderBugs, advisor: renderAdvisor, aiops: renderAiops, webinar: renderWebinar, community: renderCommunity, recommendations: renderRecommendations, sutazApplications: renderSutazApplications };
 
 $$('.navlink[data-page]').forEach(a => a.addEventListener('click', () => { navigate(a.dataset.page); closeMobileNav(); }));
 
@@ -1906,6 +1909,44 @@ async function renderBugs() {
   $$('.status-select').forEach(sel => sel.onchange = async () => {
     const id = sel.closest('.bug-item').dataset.id;
     try { await api(`/api/dash/bugs/${id}`, { method: 'PUT', body: JSON.stringify({ status: sel.value }) }); navigate('bugs'); }
+    catch (err) { alert(err.message); }
+  });
+}
+
+// ─────────────────────────── SÚŤAŽ "/sutaz" — PRIHLÁŠKY ───────────────────────────
+function escapeHtmlDash(s) { return (s == null ? '' : String(s)).replace(/</g, '&lt;'); }
+
+async function renderSutazApplications() {
+  const STATUS_LABELS = { pending: 'Čaká na overenie', verified: 'Overené', rejected: 'Zamietnuté', winner: 'Výherca' };
+  const { applications } = await api('/api/dash/sutaz-applications');
+  $('#main').innerHTML = `
+    <div class="pagehead"><h2>Súťaž — prihlášky</h2></div>
+    <p class="muted" style="margin-bottom:1rem">Odkaz na doklad o prijatí je platný 10 minút od načítania tejto stránky (obnov stránku, ak vypršal). Doklady sa nikdy nevystavujú verejne.</p>
+    <div id="sutazAppList">${applications.map(a => `
+      <div class="bug-item" data-id="${a.id}">
+        <div style="display:flex;justify-content:space-between;gap:.6rem;flex-wrap:wrap">
+          <span class="pill ${a.status}">${STATUS_LABELS[a.status] || a.status}</span>
+          <span class="muted">${new Date(a.createdAt).toLocaleString('sk-SK')}</span>
+        </div>
+        <p style="margin:.6rem 0"><strong>${escapeHtmlDash(a.fullName)}</strong> &middot; ${escapeHtmlDash(a.contactEmail)} <span class="muted">(účet: ${escapeHtmlDash(a.email)})</span></p>
+        <p class="muted">${escapeHtmlDash(a.residenceMunicipality)}, ${escapeHtmlDash(a.residenceCountry)} &middot; ${escapeHtmlDash(a.schoolName)} — ${escapeHtmlDash(a.studyProgram)}</p>
+        <p class="muted">Rozhodnutie o prijatí: ${escapeHtmlDash(a.admissionDecisionDate) || '—'} &middot; ${a.admissionDocUrl ? `<a href="${a.admissionDocUrl}" target="_blank" rel="noopener">zobraziť doklad (${escapeHtmlDash(a.admissionDocMime)})</a>` : 'doklad nedostupný'}</p>
+        <p class="muted">Pri podaní: ${a.verifiedTestsCount ?? '?'} dokončených testov &middot; plán: ${escapeHtmlDash(a.verifiedPlan) || '—'} &middot; predplatné: ${escapeHtmlDash(a.verifiedSubscriptionStatus) || '—'} &middot; veková a štatútová zhoda: ${a.ageConfirmed ? 'áno' : 'NIE'} / ${a.statuteAck ? 'áno' : 'NIE'}</p>
+        <textarea class="reviewer-note" rows="2" placeholder="Poznámka k overeniu (dôvod zamietnutia, detaily)...">${escapeHtmlDash(a.reviewerNote)}</textarea>
+        <div style="display:flex;gap:.5rem;align-items:center;margin-top:.5rem;flex-wrap:wrap">
+          <select class="status-select">
+            ${['pending', 'verified', 'rejected', 'winner'].map(s => `<option value="${s}" ${s === a.status ? 'selected' : ''}>${STATUS_LABELS[s]}</option>`).join('')}
+          </select>
+          <button class="btn-save-sutaz">Uložiť</button>
+        </div>
+      </div>`).join('') || '<p class="muted">Žiadne prihlášky.</p>'}</div>`;
+
+  $$('.btn-save-sutaz').forEach(btn => btn.onclick = async () => {
+    const item = btn.closest('.bug-item');
+    const id = item.dataset.id;
+    const status = item.querySelector('.status-select').value;
+    const reviewerNote = item.querySelector('.reviewer-note').value;
+    try { await api(`/api/dash/sutaz-applications/${id}`, { method: 'PUT', body: JSON.stringify({ status, reviewerNote }) }); navigate('sutazApplications'); }
     catch (err) { alert(err.message); }
   });
 }

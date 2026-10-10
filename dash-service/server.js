@@ -55,6 +55,7 @@ app.use(require('./routes/webinar'));
 app.use(require('./routes/maintenance'));
 app.use(require('./routes/reviews'));
 app.use(require('./routes/community'));
+app.use(require('./routes/sutaz-applications'));
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.get('/{*splat}', (req, res) => {
