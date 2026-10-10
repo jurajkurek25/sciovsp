@@ -100,6 +100,12 @@ nav.scrolled::before{content:'';position:absolute;inset:0;background:rgba(8,8,13
 .chance-note b{color:var(--text)}
 
 .card{background:var(--black2);border:1px solid var(--border);border-radius:14px;padding:1.75rem}
+.live-embed-wrap{position:relative;width:100%;max-width:720px;margin:0 auto;aspect-ratio:16/9;border-radius:14px;overflow:hidden;border:1px solid var(--border);box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.live-embed-wrap iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.live-embed-meta{text-align:center;margin-top:1.25rem;color:var(--text2);font-size:.9rem}
+.live-embed-meta b{color:var(--volt)}
+.live-embed-meta a{color:var(--purple2);text-decoration:none}
+.live-embed-meta a:hover{text-decoration:underline}
 .prize-card{text-align:center}
 .prize-value{font-family:var(--mono);font-size:3rem;font-weight:500;color:var(--volt);line-height:1;margin-bottom:.5rem}
 .prize-count{font-family:var(--mono);font-size:.85rem;color:var(--text2);letter-spacing:.05em}
@@ -279,6 +285,15 @@ footer{border-top:1px solid var(--border);padding:2.5rem;display:flex;align-item
   </div>
 </section>
 
+<section class="section" id="live">
+  <div class="section-label">Žrebovanie naživo</div>
+  <h2 class="section-title">Sleduj <em>priamy prenos.</em></h2>
+  <div class="live-embed-wrap">
+    <iframe src="https://www.youtube-nocookie.com/embed/vGXU8uu5HX4" title="SP Tréner — žrebovanie naživo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe>
+  </div>
+  <p class="live-embed-meta"><b id="liveDrawDateText">14. septembra o 17:00</b> — priamo na YouTube. <a href="https://www.youtube.com/live/vGXU8uu5HX4" target="_blank" rel="noopener">Otvoriť na YouTube →</a></p>
+</section>
+
 <!-- PRIHLÁSENIE -->
 <section class="section" id="prihlasenie">
   <div class="section-label">Prihlásenie</div>
@@ -442,6 +457,12 @@ function renderTimeline(data){
     ['Žrebovanie', fmtDate(d.drawDate)]
   ];
   el.innerHTML = cells.map(([label, value]) => `<div class="timeline-cell"><div class="timeline-label">${escapeHtml(label)}</div><div class="timeline-value">${value ? escapeHtml(value) : '—'}</div></div>`).join('');
+
+  const liveDateEl = document.getElementById('liveDrawDateText');
+  if (liveDateEl && d.drawDate) {
+    const formatted = fmtDate(d.drawDate);
+    if (formatted) liveDateEl.textContent = formatted + ' o 17:00';
+  }
 }
 
 function renderStatute(data){
