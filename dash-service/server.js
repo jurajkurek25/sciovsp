@@ -18,12 +18,15 @@ app.disable('x-powered-by');
 // Jediná služba so superadmin session (dash_session cookie) nemala VÔBEC
 // žiadne bezpečnostné hlavičky -- chýbala napr. clickjacking ochrana
 // (X-Frame-Options), takže sa dash dal vložiť do <iframe> na cudzej
-// stránke. CSP (nižšie) je zatiaľ v Report-Only režime -- presne ten istý
-// dvojfázový postup ako v hlavnej appke (main-app-patches/62 → 231):
-// zoznam domén je overený proti VŠETKÝM externým zdrojom v public/*.html
+// stránke. CSP vynucujúca (nie Report-Only) -- Juraj sa rozhodol prepnúť
+// rovno, bez čakania na click-through overenie admin panelu. Zoznam
+// domén je overený proti VŠETKÝM externým zdrojom v public/*.html
 // (cdn.jsdelivr.net -- Supabase SDK + Quill, fonts.googleapis.com/
-// fonts.gstatic.com), ale kým to niekto neprejde cez F12 → Console a
-// nepotvrdí, že sa nič nehlási ako "Refused to...", nevynucuje sa.
+// fonts.gstatic.com), ale ak sa niečo v admin paneli rozbije (najmä
+// editor kurzov/blogu s Quillom alebo nahrávanie obrázkov), pozri F12 →
+// Console na "Refused to..." a pošli mi presné hlásenie -- doplním
+// chýbajúcu doménu. Rýchly rollback: vráť riadok nižšie späť na
+// 'Content-Security-Policy-Report-Only' (viď git história tohto súboru).
 // X-Frame-Options, X-Content-Type-Options a X-XSS-Protection NEnecháva
 // nastavovať helmet -- globálny /etc/nginx/nginx.conf na tomto serveri
 // (platí pre VŠETKY stránky na stroji, nielen túto appku) ich už posiela
@@ -32,7 +35,7 @@ app.disable('x-powered-by');
 // tomto serveri -- bezpečnejšie je vypnúť duplicitu tu, v appke.
 app.use(helmet({ contentSecurityPolicy: false, xFrameOptions: false, xContentTypeOptions: false, xXssProtection: false }));
 app.use((req, res, next) => {
-  res.setHeader('Content-Security-Policy-Report-Only', [
+  res.setHeader('Content-Security-Policy', [
     "default-src 'self'",
     "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net",
