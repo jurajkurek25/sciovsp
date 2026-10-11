@@ -1835,15 +1835,31 @@ function closePremiumPopupOnOverlay(e){
   if(e.target === document.getElementById('premiumPopup')) closePremiumPopup();
 }
 
+function lockBodyScroll(){
+  document.body.dataset.scrollY = window.scrollY;
+  document.body.style.position = 'fixed';
+  document.body.style.top = -window.scrollY + 'px';
+  document.body.style.width = '100%';
+}
+function unlockBodyScroll(){
+  const y = parseInt(document.body.dataset.scrollY || '0', 10);
+  document.body.style.position = '';
+  document.body.style.top = '';
+  document.body.style.width = '';
+  delete document.body.dataset.scrollY;
+  window.scrollTo(0, y);
+}
 function toggleMobileNav(){
   const open = document.getElementById('navLinksWrap').classList.toggle('open');
   document.getElementById('navOverlay').classList.toggle('show', open);
   document.getElementById('navHamburger').textContent = open ? '✕' : '☰';
+  if(open) lockBodyScroll(); else unlockBodyScroll();
 }
 function closeMobileNav(){
   document.getElementById('navLinksWrap').classList.remove('open');
   document.getElementById('navOverlay').classList.remove('show');
   document.getElementById('navHamburger').textContent = '☰';
+  unlockBodyScroll();
 }
 
 function openComparePopup(){
