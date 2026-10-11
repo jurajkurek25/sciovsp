@@ -57,7 +57,10 @@ router.get('/api/dash/sutaz-applications', requireDashAuth, async (req, res) => 
   if (error) return res.status(500).json({ error: error.message });
 
   const applications = await Promise.all((data || []).map(async a => {
-    const { data: signed } = await mainDb.storage.from(ADMISSION_DOC_BUCKET).createSignedUrl(a.admission_doc_path, SIGNED_URL_TTL_SECONDS);
+    // Doklad sa 30 dní po overení naozaj maže zo Storage (čl. VII ods. 2
+    // štatútu, routes/sutaz.js deleteExpiredAdmissionDocs) -- po zmazaní
+    // nemá zmysel pýtať signed URL na neexistujúci súbor.
+    const signed = a.admission_doc_deleted_at ? null : (await mainDb.storage.from(ADMISSION_DOC_BUCKET).createSignedUrl(a.admission_doc_path, SIGNED_URL_TTL_SECONDS)).data;
     return {
       id: a.id,
       email: a.email,
@@ -70,6 +73,7 @@ router.get('/api/dash/sutaz-applications', requireDashAuth, async (req, res) => 
       admissionDecisionDate: a.admission_decision_date,
       admissionDocMime: a.admission_doc_mime,
       admissionDocUrl: signed?.signedUrl || null,
+      admissionDocDeletedAt: a.admission_doc_deleted_at,
       ageConfirmed: a.age_confirmed,
       statuteAck: a.statute_ack,
       verifiedTestsCount: a.verified_tests_count,

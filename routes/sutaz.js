@@ -187,6 +187,38 @@ async function sendSutazPromoEmails() {
   }
 }
 
+// Doklad o prijatí sa podľa čl. VII ods. 2 štatútu (aj FAQ na /sutaz) maže
+// do 30 dní PO OVERENÍ (reviewed_at, nie created_at) -- doteraz to bol len
+// text bez technického vynútenia, appka súbor v Storage nikdy nemazala.
+// admission_doc_path má NOT NULL a ostáva ako audit stopa; mazanie sa
+// eviduje cez admission_doc_deleted_at (db/migrate_sutaz_admission_doc_
+// retention.sql), aby sa ten istý záznam neskúšal mazať opakovane.
+const ADMISSION_DOC_RETENTION_DAYS = 30;
+async function deleteExpiredAdmissionDocs() {
+  try {
+    const cutoff = new Date(Date.now() - ADMISSION_DOC_RETENTION_DAYS * 86400000).toISOString();
+    const { data: candidates } = await supabase.from('sutaz_applications')
+      .select('id, admission_doc_path')
+      .not('reviewed_at', 'is', null)
+      .lte('reviewed_at', cutoff)
+      .is('admission_doc_deleted_at', null)
+      .limit(200);
+    if (!candidates || !candidates.length) return;
+
+    for (const application of candidates) {
+      try {
+        const { error: removeError } = await supabase.storage.from(ADMISSION_DOC_BUCKET).remove([application.admission_doc_path]);
+        if (removeError) { console.error('deleteExpiredAdmissionDocs remove error:', application.id, removeError.message); continue; }
+        await supabase.from('sutaz_applications').update({ admission_doc_deleted_at: new Date().toISOString() }).eq('id', application.id);
+      } catch (e) {
+        console.error('deleteExpiredAdmissionDocs item error:', application.id, e.message);
+      }
+    }
+  } catch (e) {
+    console.error('deleteExpiredAdmissionDocs error:', e.message);
+  }
+}
+
 async function verifyToken(req) {
   const auth = req.headers.authorization;
   if (!auth || !auth.startsWith('Bearer ')) return null;
@@ -270,6 +302,11 @@ module.exports = function registerSutaz(app) {
   // server.js.
   setInterval(sendSutazPromoEmails, 24 * 60 * 60 * 1000);
   sendSutazPromoEmails(); // aj hneď pri štarte appky, nielen po prvom intervale
+
+  // Reálne vynútenie 30-dňovej retencie dokladu o prijatí (čl. VII ods. 2) --
+  // denný beh stačí, presnosť na hodiny tu nič nepridáva.
+  setInterval(deleteExpiredAdmissionDocs, 24 * 60 * 60 * 1000);
+  deleteExpiredAdmissionDocs();
 
   // GET /api/sutaz/status -- verejné, bez prihlásenia. Jediný zdroj
   // pravdy pre frontend o tom, čo má zobraziť.
