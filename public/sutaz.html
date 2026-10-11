@@ -106,6 +106,21 @@ nav.scrolled::before{content:'';position:absolute;inset:0;background:rgba(8,8,13
 .live-embed-meta b{color:var(--volt)}
 .live-embed-meta a{color:var(--purple2);text-decoration:none}
 .live-embed-meta a:hover{text-decoration:underline}
+
+.live-thumb{display:block;text-decoration:none;background:radial-gradient(ellipse at 50% 25%,rgba(124,92,255,.25),transparent 60%),radial-gradient(ellipse at 50% 85%,rgba(200,255,0,.08),transparent 55%),var(--black2);transition:border-color .2s,transform .2s}
+.live-thumb:hover{border-color:var(--purple);transform:translateY(-2px)}
+.live-thumb-content{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.1rem;padding:1.5rem;text-align:center}
+.live-badge{display:inline-flex;align-items:center;gap:.5rem;font-family:var(--mono);font-size:.7rem;letter-spacing:.15em;text-transform:uppercase;color:var(--red);background:rgba(255,63,94,.1);border:1px solid rgba(255,63,94,.3);border-radius:20px;padding:.4rem .9rem}
+.live-badge-dot{width:7px;height:7px;border-radius:50%;background:var(--red);animation:liveblink 1.4s ease-in-out infinite}
+@keyframes liveblink{0%,100%{opacity:1}50%{opacity:.25}}
+.live-thumb-play{width:72px;height:72px;border-radius:50%;background:var(--volt);display:flex;align-items:center;justify-content:center;box-shadow:0 10px 30px rgba(200,255,0,.35);transition:transform .2s}
+.live-thumb:hover .live-thumb-play{transform:scale(1.08)}
+.live-thumb-brand{font-family:var(--mono);font-size:.8rem;letter-spacing:.2em;color:var(--text3)}
+.live-thumb-brand span{color:var(--volt)}
+.live-thumb-title{font-family:var(--serif);font-size:clamp(1.5rem,4vw,2.1rem);color:var(--text);margin:0}
+.live-thumb-date{font-family:var(--mono);font-size:1rem;color:var(--text2)}
+.live-thumb-date b{color:var(--volt)}
+.live-thumb-youtube{position:absolute;bottom:1.25rem;right:1.5rem;font-family:var(--mono);font-size:.72rem;letter-spacing:.1em;color:var(--text3)}
 .prize-card{text-align:center}
 .prize-value{font-family:var(--mono);font-size:3rem;font-weight:500;color:var(--volt);line-height:1;margin-bottom:.5rem}
 .prize-count{font-family:var(--mono);font-size:.85rem;color:var(--text2);letter-spacing:.05em}
@@ -288,10 +303,17 @@ footer{border-top:1px solid var(--border);padding:2.5rem;display:flex;align-item
 <section class="section" id="live">
   <div class="section-label">Žrebovanie naživo</div>
   <h2 class="section-title">Sleduj <em>priamy prenos.</em></h2>
-  <div class="live-embed-wrap">
-    <iframe src="https://www.youtube-nocookie.com/embed/vGXU8uu5HX4" title="SP Tréner — žrebovanie naživo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe>
-  </div>
-  <p class="live-embed-meta"><b id="liveDrawDateText">14. septembra o 17:00</b> — priamo na YouTube. <a href="https://www.youtube.com/live/vGXU8uu5HX4" target="_blank" rel="noopener">Otvoriť na YouTube →</a></p>
+  <a href="https://www.youtube.com/live/vGXU8uu5HX4" target="_blank" rel="noopener" class="live-embed-wrap live-thumb">
+    <div class="live-thumb-content">
+      <div class="live-badge"><span class="live-badge-dot"></span> naživo o chvíľu</div>
+      <div class="live-thumb-play"><svg width="24" height="24" viewBox="0 0 24 24" fill="var(--black)"><path d="M8 5v14l11-7z"/></svg></div>
+      <div class="live-thumb-brand">SP <span>TRÉNER</span> — žrebovanie súťaže</div>
+      <h3 class="live-thumb-title">Sleduj žrebovanie naživo</h3>
+      <div class="live-thumb-date"><b id="liveDrawDateText">14. septembra</b> o 17:00</div>
+    </div>
+    <span class="live-thumb-youtube">▶ YouTube</span>
+  </a>
+  <p class="live-embed-meta">Klikni na náhľad — prenos sa otvorí na YouTube.</p>
 </section>
 
 <!-- PRIHLÁSENIE -->
@@ -461,7 +483,7 @@ function renderTimeline(data){
   const liveDateEl = document.getElementById('liveDrawDateText');
   if (liveDateEl && d.drawDate) {
     const formatted = fmtDate(d.drawDate);
-    if (formatted) liveDateEl.textContent = formatted + ' o 17:00';
+    if (formatted) liveDateEl.textContent = formatted;
   }
 }
 
