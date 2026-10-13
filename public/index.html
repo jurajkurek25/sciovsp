@@ -93,16 +93,38 @@
 (function() {
   const params = new URLSearchParams(window.location.search);
   const ref = params.get('ref');
-  if (!ref) return;
-  sessionStorage.setItem('partner_ref', ref.toUpperCase());
-  fetch('/api/partner/ref/' + encodeURIComponent(ref))
+  if (ref) {
+    const refUpper = ref.toUpperCase();
+    sessionStorage.setItem('partner_ref', refUpper);
+    fetch('/api/partner/ref/' + encodeURIComponent(ref))
+      .then(r => r.json())
+      .then(data => {
+        if (!data.name) return;
+        document.getElementById('bannerName').textContent = data.name;
+        document.getElementById('bannerCode').textContent = data.refCode;
+        document.getElementById('partnerBanner').style.display = 'flex';
+        document.body.classList.add('has-banner');
+      })
+      .catch(() => {});
+  }
+  // Rovnaké overenie ako manuálne pole "mám odporúčací kód" (validateRefOnPopup),
+  // aby sa kód z ?ref= (tejto alebo predošlej stránky v rámci session, napr.
+  // kam-na-vysoku.html?ref=...) automaticky uplatnil pri platbe bez
+  // kopírovania. Preskočí sa, ak už je kód overený, aby sme nevolali API
+  // na každom načítaní stránky zbytočne.
+  const pendingCode = ref ? ref.toUpperCase() : sessionStorage.getItem('partner_ref');
+  if (!pendingCode || localStorage.getItem('vsp_pending_ref') === pendingCode) return;
+  fetch('https://sptrener.online/api/referral/validate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ code: pendingCode })
+  })
     .then(r => r.json())
     .then(data => {
-      if (!data.name) return;
-      document.getElementById('bannerName').textContent = data.name;
-      document.getElementById('bannerCode').textContent = data.refCode;
-      document.getElementById('partnerBanner').style.display = 'flex';
-      document.body.classList.add('has-banner');
+      if (data.valid) {
+        localStorage.setItem('vsp_pending_ref', pendingCode);
+        localStorage.setItem('vsp_pending_ref_type', data.type || 'user');
+      }
     })
     .catch(() => {});
 })();
@@ -1883,6 +1905,9 @@ function openElitePopup(){
   const overlay = document.getElementById('elitePopup');
   overlay.classList.add('active');
   document.body.style.overflow = 'hidden';
+  const savedRef = localStorage.getItem('vsp_pending_ref');
+  const refInput = document.getElementById('popupEliteRef');
+  if(refInput && savedRef) refInput.value = savedRef;
   setTimeout(() => document.getElementById('popupEliteEmail').focus(), 100);
 }
 
