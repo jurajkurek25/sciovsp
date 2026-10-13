@@ -124,6 +124,8 @@
       if (data.valid) {
         localStorage.setItem('vsp_pending_ref', pendingCode);
         localStorage.setItem('vsp_pending_ref_type', data.type || 'user');
+        if (data.type === 'partner' && data.name) localStorage.setItem('vsp_pending_ref_name', data.name);
+        else localStorage.removeItem('vsp_pending_ref_name');
       }
     })
     .catch(() => {});
@@ -1840,7 +1842,14 @@ function openPremiumPopup(){
   if(refInput && savedRef){
     refInput.value = savedRef;
     const rr = document.getElementById('popupRefResult');
-    if(rr){ rr.className = 'popup-ref-result ok'; rr.textContent = translations[currentLang].refValidOk || '+14 dní pre oboch! ✓'; }
+    if(rr){
+      rr.className = 'popup-ref-result ok';
+      const savedRefType = localStorage.getItem('vsp_pending_ref_type');
+      const savedRefName = localStorage.getItem('vsp_pending_ref_name');
+      rr.textContent = (savedRefType === 'partner' && savedRefName)
+        ? '✓ Kód od ' + savedRefName + ' — získaš zľavu na predplatné!'
+        : (translations[currentLang].refValidOk || '+14 dní pre oboch! ✓');
+    }
   }
   const lbl = btn.querySelector('.popup-btn-label');
   if(lbl) lbl.textContent = translations[currentLang][storedEmail ? 'popupMainBtnLoggedIn' : 'popupMainBtnLoggedOut'];
@@ -1983,11 +1992,14 @@ async function validateRefOnPopup(){
         : (translations[currentLang].refValidOk || '+14 dní pre oboch! ✓');
       localStorage.setItem('vsp_pending_ref', code);
       localStorage.setItem('vsp_pending_ref_type', data.type || 'user');
+      if (data.type === 'partner' && data.name) localStorage.setItem('vsp_pending_ref_name', data.name);
+      else localStorage.removeItem('vsp_pending_ref_name');
     } else {
       resultEl.className = 'popup-ref-result err';
       resultEl.textContent = data.error || translations[currentLang].refValidErr || 'Neplatný kód';
       localStorage.removeItem('vsp_pending_ref');
       localStorage.removeItem('vsp_pending_ref_type');
+      localStorage.removeItem('vsp_pending_ref_name');
     }
   } catch(e){
     resultEl.className = 'popup-ref-result err';
