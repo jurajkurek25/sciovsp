@@ -775,6 +775,12 @@ body.has-banner{padding-top:42px}
         <a href="https://sptrener.online/legal.html#privacy" target="_blank">ochranou osobných údajov</a>.
       </label>
     </div>
+    <div class="popup-consent-wrap">
+      <label class="popup-consent-label">
+        <input type="checkbox" id="popupMarketingCheckbox">
+        Chcem dostávať aj odporúčania a ponuky partnerov (voliteľné, kedykoľvek sa dá odhlásiť).
+      </label>
+    </div>
 
     <div class="popup-error" id="popupError"></div>
 
@@ -824,6 +830,12 @@ body.has-banner{padding-top:42px}
           <a href="https://sptrener.online/legal.html#vop" target="_blank">obchodnými podmienkami</a>
           a
           <a href="https://sptrener.online/legal.html#privacy" target="_blank">ochranou osobných údajov</a>.
+        </label>
+      </div>
+      <div class="popup-consent-wrap" style="padding:0;margin:.5rem 0 0">
+        <label class="popup-consent-label">
+          <input type="checkbox" id="popupEliteMarketingCheckbox">
+          Chcem dostávať aj odporúčania a ponuky partnerov (voliteľné, kedykoľvek sa dá odhlásiť).
         </label>
       </div>
       <div id="popupEliteError" class="popup-error"></div>
@@ -1951,7 +1963,7 @@ async function submitEliteCheckout(){
     const res = await fetch('/api/stripe/checkout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, plan: 'elite', refCode: refCode || null, refType: pendingRefType })
+      body: JSON.stringify({ email, plan: 'elite', refCode: refCode || null, refType: pendingRefType, marketingConsent: document.getElementById('popupEliteMarketingCheckbox').checked })
     });
     const data = await res.json();
     if(data.url){ window.location.href = data.url; }
@@ -2041,7 +2053,7 @@ async function handlePremiumCheckout(){
     const res = await fetch('https://sptrener.online/api/stripe/checkout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, refCode: pendingRef, refType: pendingRefType })
+      body: JSON.stringify({ email, refCode: pendingRef, refType: pendingRefType, marketingConsent: document.getElementById('popupMarketingCheckbox').checked })
     });
     const data = await res.json();
     if(data.url){ window.location.href = data.url; }
