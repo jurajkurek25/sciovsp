@@ -168,6 +168,20 @@ Pred `</body>` v `public/index.html` pridaj:
 
 AI náklady sú zhora obmedzené denným limitom `DAILY_AI_QUESTION_LIMIT` (default 50 úloh na používateľa za 24 h).
 
+### Zdieľaná banka úloh
+
+Vygenerované úlohy sa ukladajú do spoločnej banky (`bank_questions`) a používateľ dostane najprv úlohy z banky, ktoré ešte nevidel — Claude sa volá len keď v banke chýbajú. Banku dopĺňa raz za noc dávka cez Batch API (o 50 % lacnejšie):
+
+```bash
+npm run bank:fill   # doplní každú kombináciu časť × typ × obtiažnosť na BANK_TARGET_PER_BUCKET úloh
+```
+
+Prvé naplnenie (42 kombinácií × 30 úloh) stojí približne 3 $; potom sa už takmer nič negeneruje naživo.
+
+```cron
+0 3 * * * cd /var/www/vsp-trainer && npm run bank:fill >> /var/log/vsp-bank.log 2>&1
+```
+
 ---
 
 ## API endpointy
