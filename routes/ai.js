@@ -4,6 +4,20 @@ const { pool } = require('../db/pool');
 const { requireAuth, requirePro } = require('../middleware/auth');
 
 const ANTHROPIC_API = 'https://api.anthropic.com/v1/messages';
+// Sonnet 5.5 — lacnejší ($2/$10 za 1M tokenov) aj novší ako Sonnet 4.6 ($3/$15).
+const MODEL = 'claude-sonnet-5-5';
+
+// Strop nákladov: max. počet AI úloh na používateľa za 24 h.
+const DAILY_AI_QUESTION_LIMIT = Number(process.env.DAILY_AI_QUESTION_LIMIT) || 50;
+
+// Povolené hodnoty — nič iné sa do promptu nedostane (ochrana pred prompt
+// injection, t. j. zneužitím API kľúča na ľubovoľné iné texty).
+const TOPICS = {
+  verbal: ['Doplňovanie do viet', 'Vzťahy medzi slovami', 'Antosynonymá', 'Koherencia textov', 'Vyvodzovanie z krátkych textov', 'Porozumenie textu', 'Srovnávacie čítanie'],
+  analytical: ['Grafy a tabuľky', 'Porovnávanie hodnôt', 'Postačujúce podmienky', 'Slovné úlohy', 'Verbalizácia, matematizácia', 'Operácie a tajné operácie', 'Zebry (logické úlohy)']
+};
+const DIFFICULTIES = ['easy', 'medium', 'hard'];
+const RESULT_MODES = ['full', 'verbal', 'analytical', 'topic', 'ai'];
 
 // Systémový prompt — znalosť štruktúry SCIO VSP testov
 const SYSTEM_PROMPT = `Si odborník na tvorbu úloh pre slovenské SCIO Všeobecné študijné predpoklady (VSP/VŠP) testy.
@@ -53,9 +67,14 @@ Odpovedaj VÝHRADNE validným JSON v tomto formáte (žiadny iný text):
 // POST /api/ai/generate
 // Body: { part, topic, count, difficulty }
 router.post('/generate', requireAuth, requirePro, async (req, res) => {
-  const { part = 'verbal', topic, count = 5, difficulty = 'medium' } = req.body;
+  const { part = 'verbal', topic, difficulty = 'medium' } = req.body;
+  const count = Number(req.body.count ?? 5);
 
-  if (count > 10) return res.status(400).json({ error: 'Maximum 10 úloh naraz.' });
+  if (!Number.isInteger(count) || count < 1 || count > 10) return res.status(400).json({ error: 'Počet úloh musí byť 1 až 10.' });
+  if (!TOPICS[part]) return res.status(400).json({ error: 'Neplatná časť testu.' });
+  if (topic && !TOPICS[part].includes(topic)) return res.status(400).json({ error: 'Neplatný typ úlohy.' });
+  if (!DIFFICULTIES.includes(difficulty)) return res.status(400).json({ error: 'Neplatná obtiažnosť.' });
+
 
   const topicInstruction = topic
     ? `Vygeneruj ${count} úloh typu: "${topic}"`
@@ -67,6 +86,14 @@ router.post('/generate', requireAuth, requirePro, async (req, res) => {
 Vrát validný JSON podľa schémy.`;
 
   try {
+    const usage = await pool.query(
+      `SELECT COUNT(*)::int AS n FROM ai_questions WHERE user_id = $1 AND created_at > NOW() - INTERVAL '24 hours'`,
+      [req.user.id]
+    );
+    if (usage.rows[0].n + count > DAILY_AI_QUESTION_LIMIT) {
+      return res.status(429).json({ error: `Denný limit ${DAILY_AI_QUESTION_LIMIT} AI úloh je vyčerpaný. Skús to zajtra.` });
+    }
+
     const response = await fetch(ANTHROPIC_API, {
       method: 'POST',
       headers: {
@@ -75,8 +102,11 @@ Vrát validný JSON podľa schémy.`;
         'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
+        model: MODEL,
         max_tokens: 4000,
+        // Bez premýšľania — rovnaké správanie ako doteraz na Sonnet 4.6,
+        // žiadne platené tokeny navyše.
+        thinking: { type: 'between_tools' },
         system: SYSTEM_PROMPT,
         messages: [{ role: 'user', content: userPrompt }]
       })
@@ -109,20 +139,21 @@ Vrát validný JSON podľa schémy.`;
     // Ulož do databázy
     const saved = [];
     for (const q of questions) {
-      if (!q.question || !q.options || q.answer === undefined) continue;
+      const validOptions = Array.isArray(q.options) && [4, 8].includes(q.options.length);
+      if (!q.question || !validOptions || !Number.isInteger(q.answer) || q.answer < 0 || q.answer >= q.options.length) continue;
       const result = await pool.query(
         `INSERT INTO ai_questions (user_id, topic, part, question, options, answer, explanation, difficulty)
          VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
          RETURNING id`,
         [
           req.user.id,
-          q.topic || topic || 'Všeobecné',
-          q.part || part,
+          topic || (TOPICS[part].includes(q.topic) ? q.topic : 'Všeobecné'),
+          part,
           q.question,
           JSON.stringify(q.options),
           q.answer,
           q.explanation || '',
-          q.difficulty || difficulty
+          difficulty
         ]
       );
       saved.push({
@@ -149,7 +180,7 @@ router.get('/questions', requireAuth, requirePro, async (req, res) => {
     if (part) { params.push(part); query += ` AND part = $${params.length}`; }
     if (topic) { params.push(topic); query += ` AND topic = $${params.length}`; }
     query += ` ORDER BY created_at DESC LIMIT $${params.length + 1}`;
-    params.push(Math.min(parseInt(limit), 100));
+    params.push(Math.min(Math.max(parseInt(limit, 10) || 20, 1), 100));
 
     const result = await pool.query(query, params);
     res.json({
@@ -167,6 +198,11 @@ router.get('/questions', requireAuth, requirePro, async (req, res) => {
 // POST /api/ai/save-result — ulož výsledok testu
 router.post('/save-result', requireAuth, async (req, res) => {
   const { mode, score, correct, wrong, skipped, verbalPct, analytPct, estPct, durationS, answers } = req.body;
+  const ints = [correct, wrong, skipped, verbalPct, analytPct, estPct, durationS];
+  if (!RESULT_MODES.includes(mode)) return res.status(400).json({ error: 'Neplatný režim testu.' });
+  if (ints.some(v => v != null && (!Number.isInteger(v) || v < 0 || v > 100000))) return res.status(400).json({ error: 'Neplatné hodnoty výsledku.' });
+  if (score != null && (typeof score !== 'number' || !Number.isFinite(score))) return res.status(400).json({ error: 'Neplatné skóre.' });
+  if (JSON.stringify(answers ?? null).length > 20000) return res.status(400).json({ error: 'Príliš veľa odpovedí.' });
   try {
     await pool.query(
       `INSERT INTO test_results (user_id, mode, score, correct, wrong, skipped, verbal_pct, analyt_pct, est_pct, duration_s, answers)

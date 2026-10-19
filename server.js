@@ -5,8 +5,17 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
 
+if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
+  console.error('❌ JWT_SECRET chýba alebo je kratší ako 32 znakov — server sa nespustí.');
+  process.exit(1);
+}
+
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Za nginx — rate limit potom počíta podľa reálnej IP klienta, nie
+// 127.0.0.1 (inak by všetci používatelia zdieľali jeden limit).
+app.set('trust proxy', Number(process.env.TRUST_PROXY_HOPS ?? 1));
 
 // ─── Bezpečnosť ─────────────────────────────────────────────
 app.use(helmet({ contentSecurityPolicy: false }));
@@ -34,21 +43,20 @@ const aiLimiter = rateLimit({
 // ─── Body parsing ──────────────────────────────────────────
 // Webhook musí dostať raw body — registrujeme PRED express.json()
 const stripeRoutes = require('./routes/stripe');
-app.use('/api/stripe/webhook', stripeRoutes);
+app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), stripeRoutes.webhook);
 
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true }));
 
 // ─── Routes ───────────────────────────────────────────────
 app.use('/api/auth', authLimiter, require('./routes/auth'));
-app.use('/api/stripe', require('./routes/stripe'));
+app.use('/api/stripe', stripeRoutes);
 app.use('/api/ai', aiLimiter, require('./routes/ai'));
 
 // Health check
 app.get('/api/health', (req, res) => res.json({
   status: 'ok',
-  time: new Date().toISOString(),
-  env: process.env.NODE_ENV
+  time: new Date().toISOString()
 }));
 
 // ─── Statický frontend ────────────────────────────────────

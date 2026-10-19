@@ -160,11 +160,13 @@ Pred `</body>` v `public/index.html` pridaj:
 | Položka | Cena |
 |---------|------|
 | Hetzner VPS CX21 | ~5 €/mes |
-| Claude API (100 gen.) | ~2-5 €/mes |
+| Claude API (100 gen. × ~0,045 $, Sonnet 5.5) | ~4-5 €/mes |
 | Stripe fees (~3.4%+0.25€) | variabilné |
 | **Celkom** | ~10 € + Stripe |
 
-**Break-even: 3 platiacich používateľov**
+**Break-even: 3 platiacich používateľov** (pozor: 4,99 € je cena vrátane DPH — reálny príjem je nižší)
+
+AI náklady sú zhora obmedzené denným limitom `DAILY_AI_QUESTION_LIMIT` (default 50 úloh na používateľa za 24 h).
 
 ---
 

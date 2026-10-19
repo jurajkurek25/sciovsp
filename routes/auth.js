@@ -15,16 +15,19 @@ router.post('/register', async (req, res) => {
   const { email, password, name } = req.body;
   if (!email || !password) return res.status(400).json({ error: 'Email a heslo sú povinné.' });
   if (password.length < 8) return res.status(400).json({ error: 'Heslo musí mať aspoň 8 znakov.' });
-  if (!/\S+@\S+\.\S+/.test(email)) return res.status(400).json({ error: 'Neplatný email.' });
+  if (typeof email !== 'string' || email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return res.status(400).json({ error: 'Neplatný email.' });
 
-  const client = await pool.connect();
+  let client;
   try {
+    client = await pool.connect();
     const existing = await client.query('SELECT id FROM users WHERE email = $1', [email.toLowerCase()]);
     if (existing.rows.length > 0) return res.status(409).json({ error: 'Tento email je už zaregistrovaný.' });
 
     const hash = await bcrypt.hash(password, 12);
     const userId = uuidv4();
 
+    // Používateľ aj jeho free predplatné vzniknú spolu, alebo vôbec.
+    await client.query('BEGIN');
     await client.query(
       'INSERT INTO users (id, email, password_hash, name, verified) VALUES ($1, $2, $3, $4, $5)',
       [userId, email.toLowerCase(), hash, name || null, true]
@@ -35,21 +38,24 @@ router.post('/register', async (req, res) => {
       'INSERT INTO subscriptions (user_id, plan, status) VALUES ($1, $2, $3)',
       [userId, 'free', 'active']
     );
+    await client.query('COMMIT');
 
     const token = signToken(userId);
     res.status(201).json({ token, user: { id: userId, email: email.toLowerCase(), name, plan: 'free' } });
   } catch (e) {
+    if (client) await client.query('ROLLBACK').catch(() => {});
+    if (e.code === '23505') return res.status(409).json({ error: 'Tento email je už zaregistrovaný.' });
     console.error('Register error:', e);
     res.status(500).json({ error: 'Chyba servera.' });
   } finally {
-    client.release();
+    if (client) client.release();
   }
 });
 
 // POST /api/auth/login
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
-  if (!email || !password) return res.status(400).json({ error: 'Vyplň email a heslo.' });
+  if (typeof email !== 'string' || typeof password !== 'string' || !email || !password) return res.status(400).json({ error: 'Vyplň email a heslo.' });
 
   try {
     const result = await pool.query(
@@ -111,8 +117,10 @@ router.post('/change-password', requireAuth, async (req, res) => {
     if (!valid) return res.status(401).json({ error: 'Súčasné heslo je nesprávne.' });
 
     const hash = await bcrypt.hash(newPassword, 12);
-    await pool.query('UPDATE users SET password_hash = $1 WHERE id = $2', [hash, req.user.id]);
-    res.json({ success: true });
+    // password_changed_at zneplatní všetky staršie tokeny (ostatné zariadenia);
+    // toto zariadenie dostane nový token.
+    await pool.query('UPDATE users SET password_hash = $1, password_changed_at = NOW() WHERE id = $2', [hash, req.user.id]);
+    res.json({ success: true, token: signToken(req.user.id) });
   } catch (e) {
     res.status(500).json({ error: 'Chyba servera.' });
   }

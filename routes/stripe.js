@@ -2,12 +2,15 @@ const express = require('express');
 const router = express.Router();
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { pool } = require('../db/pool');
-const { requireAuth } = require('../middleware/auth');
+const { requireAuth, isProUser } = require('../middleware/auth');
 
 // POST /api/stripe/checkout — vytvorí platobný link
 router.post('/checkout', requireAuth, async (req, res) => {
   const userId = req.user.id;
   const email = req.user.email;
+
+  // Žiadne druhé predplatné (dvojitá platba) pre už aktívneho Pro používateľa.
+  if (isProUser(req.user)) return res.status(400).json({ error: 'Pro predplatné už máš aktívne.' });
 
   try {
     // Nájdi alebo vytvor Stripe zákazníka
@@ -72,16 +75,16 @@ router.get('/status', requireAuth, async (req, res) => {
       [req.user.id]
     );
     const sub = result.rows[0] || { plan: 'free', status: 'inactive' };
-    const isPro = sub.plan === 'pro' && sub.status === 'active' &&
-      (!sub.current_period_end || new Date(sub.current_period_end) > new Date());
+    const isPro = isProUser(sub);
     res.json({ ...sub, isPro });
   } catch (e) {
     res.status(500).json({ error: 'Chyba servera.' });
   }
 });
 
-// POST /api/stripe/webhook — Stripe eventy (raw body!)
-router.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+// POST /api/stripe/webhook — Stripe eventy (raw body!). Registrované priamo
+// v server.js pred express.json(), inak overenie podpisu vždy zlyhá.
+async function webhook(req, res) {
   const sig = req.headers['stripe-signature'];
   let event;
 
@@ -121,7 +124,7 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
         await pool.query(
           `UPDATE subscriptions SET
             status = $1,
-            plan = CASE WHEN $1 = 'active' THEN 'pro' ELSE plan END,
+            plan = CASE WHEN $1 IN ('active', 'trialing') THEN 'pro' ELSE plan END,
             current_period_start = to_timestamp($2),
             current_period_end = to_timestamp($3),
             cancel_at_period_end = $4,
@@ -152,10 +155,14 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
       }
     }
   } catch (e) {
+    // 500 → Stripe event zopakuje; inak by sa zaplatené predplatné
+    // pri výpadku DB nikdy neaktivovalo.
     console.error('Webhook handling error:', e);
+    return res.status(500).json({ error: 'Webhook handling failed.' });
   }
 
   res.json({ received: true });
-});
+}
 
 module.exports = router;
+module.exports.webhook = webhook;

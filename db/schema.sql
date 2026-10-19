@@ -14,8 +14,12 @@ CREATE TABLE IF NOT EXISTS users (
   reset_token   TEXT,
   reset_expires TIMESTAMPTZ,
   created_at    TIMESTAMPTZ DEFAULT NOW(),
-  last_login    TIMESTAMPTZ
+  last_login    TIMESTAMPTZ,
+  password_changed_at TIMESTAMPTZ
 );
+
+-- Pre existujúcu DB (tabuľka už bola vytvorená bez stĺpca)
+ALTER TABLE users ADD COLUMN IF NOT EXISTS password_changed_at TIMESTAMPTZ;
 
 -- Predplatné
 CREATE TABLE IF NOT EXISTS subscriptions (
