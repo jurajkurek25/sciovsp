@@ -35,8 +35,8 @@ function replaceExactCount(src, oldStr, newStr, expectedCount, label) {
 
 let html = fs.readFileSync(FILE, 'utf8');
 
-const OLD = `const res = awaitfetch('/api/webinar/offer-status', { headers });`;
-const NEW = `const res = await fetch('/api/webinar/offer-status', { headers });`;
+const OLD = `  const res = awaitfetch('/api/webinar/offer-status', { headers });`;
+const NEW = `  const res = await fetch('/api/webinar/offer-status', { headers });`;
 html = replaceExactCount(html, OLD, NEW, 1, 'awaitfetch typo');
 
 const backup = FILE + '.pre-270-ponuka-awaitfetch-typo-' + Date.now();
