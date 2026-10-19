@@ -838,6 +838,8 @@ h1.title span{font-style:italic;color:var(--purple2)}
           <span>⚡ <strong>Zlatý Status</strong> — v klanoch ťa všetcividia</span>
           <span>✦ <strong>Všetko z Premium</strong></span>
         </div>
+        <label style="display:flex;gap:.5rem;align-items:flex-start;font-size:.73rem;color:var(--text3);font-family:var(--mono);text-align:left;margin-top:.6rem"><input type="checkbox" id="eliteModalVopCheckbox" style="margin-top:.15rem;flex-shrink:0"><span>Súhlasím s <a href="/legal.html#vop" target="_blank" style="color:var(--text2)">obchodnými podmienkami</a> a <a href="/legal.html#privacy" target="_blank" style="color:var(--text2)">ochranou osobných údajov</a>.</span></label>
+        <label style="display:flex;gap:.5rem;align-items:flex-start;font-size:.73rem;color:var(--text3);font-family:var(--mono);text-align:left;margin-top:.6rem"><input type="checkbox" id="eliteModalMarketingCheckbox" style="margin-top:.15rem;flex-shrink:0"><span>Chcem dostávať aj odporúčania a ponuky partnerov (voliteľné, kedykoľvek sa dá odhlásiť).</span></label>
         <button class="elite-plan-btn upgrade" id="eliteCheckoutBtn" onclick="startEliteCheckout()">Nesmiem zlyhať →</button>
       </div>
     </div>
@@ -4112,6 +4114,8 @@ function showPaywall(type){
       </div>
       <div id="popupRefResult"></div>
     </div>
+    <label style="display:flex;gap:.5rem;align-items:flex-start;font-size:.73rem;color:var(--text3);font-family:var(--mono);text-align:left;margin-top:.6rem"><input type="checkbox" id="paywallVopCheckbox" style="margin-top:.15rem;flex-shrink:0"><span>Súhlasím s <a href="/legal.html#vop" target="_blank" style="color:var(--text2)">obchodnými podmienkami</a> a <a href="/legal.html#privacy" target="_blank" style="color:var(--text2)">ochranou osobných údajov</a>.</span></label>
+    <label style="display:flex;gap:.5rem;align-items:flex-start;font-size:.73rem;color:var(--text3);font-family:var(--mono);text-align:left;margin-top:.6rem"><input type="checkbox" id="paywallMarketingCheckbox" style="margin-top:.15rem;flex-shrink:0"><span>Chcem dostávať aj odporúčania a ponuky partnerov (voliteľné, kedykoľvek sa dá odhlásiť).</span></label>
   </div>`;
   document.body.appendChild(overlay);
   // Predvyplniť ref kód z bannera (?ref= URL)
@@ -4135,10 +4139,13 @@ function activatePromo(){
 // ============================================================
 async function startCheckout(){
   if(typeof currentUser==='undefined'||!currentUser){showToast(t('loginRequired'));if(typeof loginWithGoogle==='function')await loginWithGoogle();return;}
+  const vopBox=document.getElementById('paywallVopCheckbox');
+  if(vopBox&&!vopBox.checked){showToast('⚠️ Musíš súhlasiť s obchodnými podmienkami.');return;}
   const btn=document.querySelector('.paywall-cta');if(btn){btn.textContent=t('checkoutRedirect');btn.disabled=true;}
   try{
     const pendingRef=localStorage.getItem('vsp_pending_ref')||null;
-    const response=await fetch('/api/stripe/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:currentUser.email,refCode:pendingRef,refType:localStorage.getItem('vsp_pending_ref_type')||null})});
+    const marketingBox=document.getElementById('paywallMarketingCheckbox');
+    const response=await fetch('/api/stripe/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:currentUser.email,refCode:pendingRef,refType:localStorage.getItem('vsp_pending_ref_type')||null,marketingConsent:!!(marketingBox&&marketingBox.checked)})});
     const data=await response.json();
     if(data.url){window.location.href=data.url;}
     else{showToast('⚠️ '+(data.error||t('checkoutError')));if(btn){btn.textContent=t('paywallCTA');btn.disabled=false;}}
@@ -4172,7 +4179,7 @@ async function startAIFullTest(){
   document.body.appendChild(overlay);
   let prog=0;const progInterval=setInterval(()=>{prog=Math.min(prog+1.5,88);const b=document.getElementById('ai-full-bar');if(b)b.style.width=prog+'%';},500);
   try{
-    const response=await fetch('/api/generate-full-test',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({difficulty:'medium',lang:currentLang})});
+    const response=await fetch('/api/generate-full-test',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({difficulty:'medium',lang:currentLang,email:currentUser?currentUser.email:undefined})});
     clearInterval(progInterval);document.body.removeChild(overlay);
     if(!response.ok){const err=await response.json().catch(()=>({}));showToast('⚠️ '+(err.error||t('aiFullError')));return;}
     const data=await response.json();
@@ -5015,13 +5022,16 @@ function goToGeneralka(){
 
 async function startEliteCheckout(){
   if(!currentUser){showToast(t('loginRequired'));if(typeof loginWithGoogle==='function')await loginWithGoogle();return;}
+  const eliteVopBox=document.getElementById('eliteModalVopCheckbox');
+  if(eliteVopBox&&!eliteVopBox.checked){showToast('⚠️ Musíš súhlasiť s obchodnými podmienkami.');return;}
   const btn=document.getElementById('eliteCheckoutBtn');
   if(btn){btn.textContent='⏳ Presmerovávam...';btn.disabled=true;}
   try{
+    const eliteMarketingBox=document.getElementById('eliteModalMarketingCheckbox');
     const res=await fetch('/api/stripe/checkout',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({email:currentUser.email,plan:'elite',refCode:localStorage.getItem('vsp_pending_ref')||null})
+      body:JSON.stringify({email:currentUser.email,plan:'elite',refCode:localStorage.getItem('vsp_pending_ref')||null,marketingConsent:!!(eliteMarketingBox&&eliteMarketingBox.checked)})
     });
     const data=await res.json();
     if(data.url){window.location.href=data.url;}
