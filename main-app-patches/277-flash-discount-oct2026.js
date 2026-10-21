@@ -40,7 +40,7 @@ async function ensurePromotionCode() {
     name: 'Flash zľava -35% (21.10.2026)'
   });
   const promo = await stripe.promotionCodes.create({
-    coupon: coupon.id,
+    promotion: { type: 'coupon', coupon: coupon.id },
     code: PROMO_CODE,
     expires_at: expiresAtUnix
   });
