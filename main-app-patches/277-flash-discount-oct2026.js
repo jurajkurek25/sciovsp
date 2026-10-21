@@ -67,7 +67,7 @@ async function main() {
   let sent = 0, failed = 0;
   for (const u of (users || [])) {
     try {
-      await sendMail({ to: u.email, subject: '🔥 Len dnes: -35% na Premium aj Elite', html });
+      await sendMail({ to: u.email, subject: 'O polnoci táto zľava naozaj zmizne (-35%)', html });
       await supabase.from('users').update({ flash_discount_oct2026_sent_at: new Date().toISOString() }).eq('email', u.email);
       sent++;
       console.log('OK:', u.email);
