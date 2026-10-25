@@ -80,7 +80,6 @@ footer{border-top:1px solid var(--border);padding:2.5rem;padding-bottom:calc(2.5
 .course-card p{color:var(--text2);font-size:.85rem;margin-bottom:.8rem;flex:1}
 .course-price-tag{font-family:var(--mono);font-size:.8rem;color:var(--volt);font-weight:700}
 .course-cover{width:100%;height:150px;object-fit:cover;border-radius:10px;margin-bottom:.9rem;background:var(--black3);display:block}
-.course-noimg{width:100%;height:150px;border-radius:10px;margin-bottom:.9rem;background:linear-gradient(135deg,var(--black3),rgba(124,92,255,.1));display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;color:var(--text3);text-transform:uppercase}
 .course-badge{display:inline-block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--volt);background:rgba(200,255,0,.08);border:1px solid rgba(200,255,0,.2);padding:3px 9px;border-radius:20px;width:fit-content;margin-bottom:.6rem}
 .course-card-price-row{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-top:auto}
 .course-card-arrow{font-family:var(--mono);font-size:.78rem;color:var(--text2)}
@@ -171,9 +170,7 @@ function escapeHtml(s) {
 
 function productCardHtml(p) {
   const priceStr = (p.priceCents / 100).toFixed(2).replace('.', ',') + ' €';
-  const cover = p.coverImageUrl
-    ? `<img class="course-cover" src="${escapeHtml(p.coverImageUrl)}" alt="${escapeHtml(p.title)}" loading="lazy">`
-    : `<div class="course-noimg">${escapeHtml(p.fileType)}</div>`;
+  const cover = `<img class="course-cover" src="${escapeHtml(p.coverImageUrl)}" alt="${escapeHtml(p.title)}" loading="lazy">`;
   return `<a class="course-card" href="/obchod/${escapeHtml(p.slug)}" data-type="${escapeHtml(p.fileType)}" data-search="${escapeHtml(((p.title || '') + ' ' + (p.description || '')).toLowerCase())}">
     ${cover}
     <span class="course-badge">${escapeHtml(p.fileType)}</span>

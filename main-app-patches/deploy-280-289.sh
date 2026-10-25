@@ -30,6 +30,7 @@ PATCHES=(
   "289-mount-digital-shop.js"
   "290-add-obchod-to-site-nav.js"
   "291-expose-helpers-for-shop-sales-page.js"
+  "292-expose-svg-cover-helpers-for-shop.js"
 )
 REQUIRED_NEW_FILES=(
   "routes/shop.js"

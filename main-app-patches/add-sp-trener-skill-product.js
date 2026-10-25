@@ -24,7 +24,7 @@ const STORAGE_BUCKET = 'digital-products';
 const PRODUCT = {
   slug: 'sp-trener-skill',
   title: 'SP Tréner SKILL',
-  description: 'Vlastný Claude Skill, ktorý ťa pripraví na VŠP/OSP priamo v Claude -- bez appky, bez prihlasovania. Po nahratí ti vygeneruje cvičný test, pýta sa po jednej otázke, čaká na tvoju odpoveď a hneď po nej ti povie, či si odpovedal/a správne, s krátkym vysvetlením. Funguje v Claude Desktop aj v Claude Code.',
+  description: 'Nauč sa VŠP aj OSP priamo v Claude -- bez sťahovania appky, bez registrácie. Stačí nahrať tento Skill raz a Claude sa premení na tvojho osobného kouča na prijímačky: vygeneruje ti cvičný test podľa skutočných SCIO zadaní, pýta sa po jednej otázke, počká na tvoju odpoveď a hneď ti povie, či si trafil/a -- s krátkym vysvetlením prečo. Na konci dostaneš odhad percentilu a spätnú väzbu na to, ktoré typy úloh ti ešte robia problém. Funguje všade, kde máš Claude -- v appke aj v Claude Code, kedykoľvek ťa napadne si to precvičiť.',
   price_cents: 990,
   file_type: 'skill',
 };

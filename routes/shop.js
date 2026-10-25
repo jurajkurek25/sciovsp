@@ -69,6 +69,13 @@ async function requireShopAdmin(req, res, next) {
   }
 }
 
+// Keď produkt nemá nahratý obal, použi brandovaný SVG cover generovaný za
+// behu z názvu -- presne ten istý princíp ako courseCoverUrl() pre kurzy
+// (/kurzy-cover/:slug.svg). Žiadny externý image-gen, žiadne nové závislosti.
+function productCoverUrl(p) {
+  return p.cover_image_url || (BASE_URL + '/obchod-cover/' + p.slug + '.svg');
+}
+
 function serializeProduct(p, { includeInternal = false } = {}) {
   const out = {
     id: p.id,
@@ -77,7 +84,7 @@ function serializeProduct(p, { includeInternal = false } = {}) {
     description: p.description,
     priceCents: p.price_cents,
     fileType: p.file_type,
-    coverImageUrl: p.cover_image_url || null,
+    coverImageUrl: productCoverUrl(p),
     active: p.active
   };
   if (includeInternal) {
@@ -103,6 +110,52 @@ module.exports = function registerShop(app) {
   // už vložený v iných klientských stránkach appky), nejde o secret.
   app.get('/api/shop/config', (req, res) => {
     res.json({ supabaseUrl: SUPABASE_URL, supabaseAnonKey: process.env.SUPABASE_ANON_KEY });
+  });
+
+  // GET /obchod-cover/:slug.svg — brandovaný cover produktu generovaný za
+  // behu z názvu (rovnaký princíp ako /kurzy-cover/:slug.svg), použitý
+  // ako fallback vo vrátenom coverImageUrl, kým produkt nemá vlastný obal.
+  app.get('/obchod-cover/:slug.svg', async (req, res) => {
+    const escapeXml = app.locals.escapeXml;
+    const wrapSvgLines = app.locals.wrapSvgLines;
+    if (!escapeXml || !wrapSvgLines) {
+      console.error('obchod-cover: app.locals helpers chýbajú -- je aplikovaný main-app-patches/292-expose-svg-cover-helpers-for-shop.js?');
+      return res.status(500).send('');
+    }
+    try {
+      const { data: product } = await supabase.from('digital_products').select('title, file_type').eq('slug', req.params.slug).maybeSingle();
+      const title = product ? product.title : 'SP Tréner';
+      const label = product ? (product.file_type || 'produkt').toUpperCase() : 'OBCHOD';
+      const lines = wrapSvgLines(title, 24, 4);
+      const lineHeight = 62;
+      const titleBlockHeight = lines.length * lineHeight;
+      const startY = 315 - titleBlockHeight / 2 + lineHeight * 0.7;
+      const tspans = lines.map((line, i) => `<tspan x="80" y="${startY + i * lineHeight}">${escapeXml(line)}</tspan>`).join('');
+      const svg = `<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f0f18"/>
+      <stop offset="100%" stop-color="#08080d"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="88%" cy="10%" r="60%">
+      <stop offset="0%" stop-color="#c8ff00" stop-opacity="0.28"/>
+      <stop offset="100%" stop-color="#c8ff00" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect width="1200" height="630" fill="url(#glow)"/>
+  <circle cx="1130" cy="55" r="8" fill="#7c5cff"/>
+  <text x="80" y="78" font-family="'DM Mono', monospace" font-size="24" letter-spacing="4" fill="#eeeef5">SP TRÉNER</text>
+  <text x="80" y="${Math.max(startY - 55, 130)}" font-family="'DM Mono', monospace" font-size="22" letter-spacing="2" fill="#c8ff00">${escapeXml(label)}</text>
+  <text font-family="Georgia, serif" font-size="52" fill="#eeeef5">${tspans}</text>
+  <rect x="80" y="565" width="64" height="4" fill="#7c5cff"/>
+</svg>`;
+      res.type('image/svg+xml');
+      res.set('Cache-Control', 'public, max-age=3600');
+      res.send(svg);
+    } catch (e) {
+      res.status(500).send('');
+    }
   });
 
   // GET /api/shop/products — zoznam aktívnych produktov (bez storage_path).
@@ -215,9 +268,7 @@ module.exports = function registerShop(app) {
 
       const priceNum = (product.price_cents / 100).toFixed(2);
       const priceStr = priceNum.replace('.', ',') + ' €';
-      const coverHtml = product.cover_image_url
-        ? `<img class="course-hero-cover" src="${escapeHtml(product.cover_image_url)}" alt="${escapeHtml(product.title)}" loading="lazy">`
-        : `<div class="course-hero-cover product-noimg">${escapeHtml(product.file_type.toUpperCase())}</div>`;
+      const coverHtml = `<img class="course-hero-cover" src="${escapeHtml(productCoverUrl(product))}" alt="${escapeHtml(product.title)}" loading="lazy">`;
       const buyBoxHtml = `<div class="course-buy-box">
         <span class="course-price-tag">${priceStr}</span>
         <button class="course-buy-btn" onclick="openObchodCheckout()">${escapeHtml(T.buy)} →</button>
@@ -225,7 +276,6 @@ module.exports = function registerShop(app) {
 
       const body = `${KURZY_STYLE}
       <style>
-      .product-noimg{height:220px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:1rem;letter-spacing:.1em;color:var(--text3);background:linear-gradient(135deg,var(--black3),rgba(124,92,255,.1))}
       .product-badge{display:inline-block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--volt);background:rgba(200,255,0,.08);border:1px solid rgba(200,255,0,.2);padding:3px 9px;border-radius:20px;margin-bottom:.75rem}
       .popup-overlay{display:none;position:fixed;inset:0;background:rgba(8,8,13,.75);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;padding:1rem}
       .popup-overlay.show{display:flex}
@@ -298,7 +348,7 @@ module.exports = function registerShop(app) {
       const jsonLd = {
         '@context': 'https://schema.org', '@type': 'Product', name: product.title, description: product.description || product.title,
         offers: { '@type': 'Offer', price: priceNum, priceCurrency: 'EUR', url: BASE_URL + '/obchod/' + product.slug, availability: 'https://schema.org/InStock' },
-        ...(product.cover_image_url ? { image: product.cover_image_url } : {})
+        image: productCoverUrl(product)
       };
 
       res.send(blogLayout({
