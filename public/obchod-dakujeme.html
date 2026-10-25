@@ -5,32 +5,47 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ďakujeme — SP Tréner</title>
 <style>
-  :root { --navy:#1a1a2e; --lime:#c8ff00; --bg:#f4f4f7; }
-  body { margin:0; font-family:Arial,Helvetica,sans-serif; background:var(--bg); color:#222; }
-  header { background:var(--navy); color:#fff; padding:20px 24px; }
-  header span { font-size:20px; font-weight:bold; }
-  main { max-width:520px; margin:60px auto; padding:0 20px; text-align:center; }
-  .box { background:#fff; border-radius:12px; padding:40px 32px; box-shadow:0 1px 3px rgba(0,0,0,0.08); }
-  h1 { color:var(--navy); margin:0 0 12px; }
-  p { color:#555; line-height:1.6; }
-  a.download { display:inline-block; background:var(--lime); color:var(--navy); text-decoration:none; font-weight:bold; font-size:15px; padding:14px 28px; border-radius:8px; margin-top:20px; }
-  .note { font-size:13px; color:#888; margin-top:16px; }
-  .error { color:#c0392b; }
+@font-face{font-family:'DM Mono';font-style:normal;font-weight:400;font-display:swap;src:url(/fonts/dm-mono-400-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'DM Mono';font-style:normal;font-weight:400;font-display:swap;src:url(/fonts/dm-mono-400-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'DM Sans';font-style:normal;font-weight:300 700;font-display:swap;src:url(/fonts/dm-sans-var-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'DM Sans';font-style:normal;font-weight:300 700;font-display:swap;src:url(/fonts/dm-sans-var-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Instrument Serif';font-style:normal;font-weight:400;font-display:swap;src:url(/fonts/instrument-serif-normal-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Instrument Serif';font-style:normal;font-weight:400;font-display:swap;src:url(/fonts/instrument-serif-normal-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+:root{
+  --black:#08080d;--black2:#0f0f18;
+  --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.13);
+  --text:#eeeef5;--text2:#7777a0;--text3:#3d3d5c;
+  --volt:#c8ff00;--red:#ff3f5e;
+  --serif:'Instrument Serif',Georgia,serif;--mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--black);color:var(--text);font-family:var(--sans);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1.5rem}
+.box{background:var(--black2);border:1px solid var(--border2);border-radius:20px;padding:3rem 2.5rem;max-width:460px;width:100%;text-align:center}
+.nav-logo{font-family:var(--mono);font-size:12px;letter-spacing:.15em;color:var(--text2);display:inline-flex;align-items:center;gap:.5rem;margin-bottom:2rem}
+.nav-dot{width:6px;height:6px;background:var(--volt);border-radius:50%;display:inline-block}
+h1{font-family:var(--serif);font-size:2rem;margin-bottom:.75rem}
+p{color:var(--text2);line-height:1.6;font-size:.92rem}
+a.download{display:inline-flex;align-items:center;gap:.5rem;background:var(--volt);color:var(--black);text-decoration:none;font-weight:700;font-family:var(--mono);font-size:.85rem;letter-spacing:.03em;padding:.9rem 1.75rem;border-radius:10px;margin-top:1.5rem;transition:all .2s}
+a.download:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(200,255,0,.3)}
+.note{font-size:.78rem;color:var(--text3);margin-top:1.25rem;font-family:var(--mono)}
+.error{color:var(--red)}
 </style>
 </head>
 <body>
-<header><span>SP Tréner</span></header>
-<main>
-  <div class="box" id="box">
-    <p>Overujem platbu…</p>
-  </div>
-</main>
+<div class="box">
+  <div class="nav-logo"><div class="nav-dot"></div>SP TRÉNER</div>
+  <div id="content"><p>Overujem platbu…</p></div>
+</div>
 <script>
+function escapeHtml(s) {
+  return (s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
 async function run() {
-  const box = document.getElementById('box');
+  const content = document.getElementById('content');
   const params = new URLSearchParams(window.location.search);
   const sessionId = params.get('session_id');
-  if (!sessionId) { box.innerHTML = '<p class="error">Chýba identifikátor platby.</p>'; return; }
+  if (!sessionId) { content.innerHTML = '<p class="error">Chýba identifikátor platby.</p>'; return; }
 
   async function tryFetch(attempt) {
     try {
@@ -38,23 +53,20 @@ async function run() {
       const data = await res.json();
       if (!res.ok) {
         if (attempt < 5) { setTimeout(() => tryFetch(attempt + 1), 2000); return; }
-        box.innerHTML = '<p class="error">' + (data.error || 'Platba sa ešte nespracovala.') + '</p><p class="note">Skús obnoviť stránku o chvíľu — spracovanie môže trvať niekoľko sekúnd.</p>';
+        content.innerHTML = '<p class="error">' + (data.error || 'Platba sa ešte nespracovala.') + '</p><p class="note">Skús obnoviť stránku o chvíľu.</p>';
         return;
       }
-      box.innerHTML = `
+      content.innerHTML = `
         <h1>Ďakujeme!</h1>
-        <p>Tvoj produkt <strong>${escapeHtml(data.title)}</strong> je pripravený.</p>
-        <a class="download" href="${data.url}">Stiahnuť ${escapeHtml(data.fileType).toUpperCase()}</a>
+        <p>Tvoj produkt <strong style="color:var(--text)">${escapeHtml(data.title)}</strong> je pripravený.</p>
+        <a class="download" href="${data.url}">⬇ Stiahnuť ${escapeHtml(data.fileType).toUpperCase()}</a>
         <p class="note">Link je platný hodinu. Poslali sme ho aj na email ako záložnú kópiu.</p>
       `;
     } catch (e) {
-      box.innerHTML = '<p class="error">Chyba pripojenia.</p>';
+      content.innerHTML = '<p class="error">Chyba pripojenia.</p>';
     }
   }
   tryFetch(0);
-}
-function escapeHtml(s) {
-  return (s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 run();
 </script>
