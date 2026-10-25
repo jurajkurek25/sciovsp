@@ -26,9 +26,22 @@ nav{position:sticky;top:0;z-index:100;padding:1rem clamp(1rem,4vw,2rem);padding-
 .nav-logo{font-family:var(--mono);font-size:13px;letter-spacing:.15em;color:var(--text);text-decoration:none;white-space:nowrap;display:inline-flex;align-items:center;gap:.55rem}
 .nav-dot{width:7px;height:7px;background:var(--volt);border-radius:50%;animation:pulse-dot 2s infinite;display:inline-block}
 @keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.7)}}
-.nav-link{text-decoration:none;font-family:var(--mono);font-size:.78rem;letter-spacing:.05em;color:var(--text2)}
-.page{max-width:620px;margin:0 auto;padding:clamp(2rem,6vw,3.5rem) clamp(1rem,4vw,2rem) clamp(3rem,6vw,6rem);display:flex;align-items:center;justify-content:center;min-height:60vh}
-.breadcrumb{font-family:var(--mono);font-size:.72rem;color:var(--text3);display:flex;gap:.4rem;flex-wrap:wrap;position:absolute;top:84px;left:clamp(1rem,4vw,2rem)}
+.nav-link{text-decoration:none;font-family:var(--mono);font-size:.78rem;letter-spacing:.05em;border-radius:8px;transition:all .2s;color:var(--text2);padding:.65rem .85rem;border:1px solid transparent}
+.nav-link:hover{color:var(--text);border-color:var(--border2)}
+.nav-link.active{color:var(--volt);border-color:rgba(200,255,0,.25)}
+.nav-cta{padding:.6rem 1rem;background:var(--volt);color:var(--black);border-radius:8px;font-weight:700;font-family:var(--mono);font-size:.78rem;text-decoration:none;white-space:nowrap;border:none;cursor:pointer}
+.lang-switcher{display:flex;align-items:center;gap:.35rem}
+.lang-btn{padding:.45rem .7rem;border:1px solid var(--border2);background:transparent;color:var(--text2);border-radius:6px;font-family:var(--mono);font-size:.72rem;letter-spacing:.06em;cursor:pointer;transition:all .2s}
+.lang-btn:hover{color:var(--text);border-color:var(--purple)}
+.lang-btn.active{color:var(--volt);border-color:var(--volt)}
+.nav-right{display:flex;align-items:center;gap:.75rem}
+.nav-links-wrap{display:flex;align-items:center;gap:.75rem}
+.nav-hamburger{display:none;width:38px;height:38px;align-items:center;justify-content:center;flex-shrink:0;background:transparent;border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:1.05rem;cursor:pointer;transition:border-color .2s}
+.nav-hamburger:hover{border-color:var(--volt)}
+.nav-overlay{display:none;position:fixed;inset:0;background:rgba(8,8,13,.6);backdrop-filter:blur(2px);z-index:90}
+.nav-overlay.show{display:block}
+.page{max-width:620px;margin:0 auto;padding:clamp(2rem,6vw,3.5rem) clamp(1rem,4vw,2rem) clamp(3rem,6vw,6rem);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh}
+.breadcrumb{font-family:var(--mono);font-size:.72rem;color:var(--text3);margin-bottom:1.5rem;display:flex;gap:.4rem;flex-wrap:wrap;align-self:flex-start}
 .breadcrumb a{color:var(--text3);text-decoration:none}
 .breadcrumb a:hover{color:var(--purple2)}
 .box{background:var(--black2);border:1px solid var(--border2);border-radius:20px;padding:3rem 2.5rem;max-width:460px;width:100%;text-align:center}
@@ -43,14 +56,40 @@ footer{border-top:1px solid var(--border);padding:2.5rem;padding-bottom:calc(2.5
 .footer-links{display:flex;gap:1.5rem;flex-wrap:wrap}
 .footer-links a{font-size:.78rem;color:var(--text3);text-decoration:none;font-family:var(--mono);letter-spacing:.05em;transition:color .2s}
 .footer-links a:hover{color:var(--text2)}
-@media (max-width: 480px){ .breadcrumb{position:static;margin-bottom:1.5rem} .page{padding-top:1rem} }
+@media (max-width: 768px){
+  .nav-cta{padding:.5rem .9rem;font-size:.75rem}
+  .nav-hamburger{display:flex}
+  .nav-links-wrap{position:fixed;top:0;right:0;bottom:0;width:min(78vw,300px);background:rgba(15,15,24,.98);backdrop-filter:blur(14px);border-left:1px solid var(--border2);display:flex;flex-direction:column;align-items:stretch;gap:.4rem;padding:5.5rem 1.25rem 2rem;transform:translateX(100%);transition:transform .3s ease;z-index:150;overflow-y:auto}
+  .nav-links-wrap.open{transform:translateX(0)}
+  .nav-links-wrap .nav-link{padding:.85rem 1rem;border:1px solid var(--border);border-radius:10px;text-align:center;color:var(--text)}
+  .nav-links-wrap .lang-switcher{margin-top:.5rem;justify-content:center}
+  .nav-links-wrap .lang-btn{color:var(--text)}
+}
+@media (max-width: 480px){
+  nav{flex-wrap:wrap;row-gap:.5rem}
+  .nav-cta{padding:.4rem .65rem;font-size:.66rem}
+}
 </style>
 </head>
 <body>
 <nav id="mainNav">
   <a href="/" class="nav-logo"><span class="nav-dot"></span>SP TRÉNER</a>
-  <a href="/obchod" class="nav-link">← Späť do obchodu</a>
+  <div class="nav-right">
+    <div class="nav-links-wrap" id="navLinksWrap">
+      <a href="/blog" class="nav-link">Blog</a>
+      <a href="/kurzy" class="nav-link">Kurzy</a>
+      <a href="/obchod" class="nav-link active">Obchod</a>
+      <a href="/odporucame" class="nav-link">Odporúčame</a>
+      <div class="lang-switcher">
+        <button class="lang-btn active" id="langBtnSk" onclick="switchBlogLang('sk')">SK</button>
+        <button class="lang-btn" id="langBtnCs" onclick="switchBlogLang('cs')">CZ</button>
+      </div>
+    </div>
+    <button class="nav-cta" onclick="location.href='/?openPremium=1'">Vyskúšať zadarmo</button>
+    <button class="nav-hamburger" id="navHamburger" onclick="toggleMobileNav()" aria-label="Menu">☰</button>
+  </div>
 </nav>
+<div class="nav-overlay" id="navOverlay" onclick="closeMobileNav()"></div>
 
 <main class="page">
   <nav class="breadcrumb"><a href="/">SP Tréner</a><span>/</span><a href="/obchod">Obchod</a><span>/</span><span>Ďakujeme</span></nav>
@@ -70,6 +109,27 @@ footer{border-top:1px solid var(--border);padding:2.5rem;padding-bottom:calc(2.5
 </footer>
 
 <script>
+function toggleMobileNav(){
+  var open = document.getElementById('navLinksWrap').classList.toggle('open');
+  document.getElementById('navOverlay').classList.toggle('show', open);
+  document.getElementById('navHamburger').textContent = open ? '✕' : '☰';
+}
+function closeMobileNav(){
+  document.getElementById('navLinksWrap').classList.remove('open');
+  document.getElementById('navOverlay').classList.remove('show');
+  document.getElementById('navHamburger').textContent = '☰';
+}
+function switchBlogLang(l){
+  var u = new URL(window.location.href);
+  if (l === 'cs') { u.searchParams.set('lang', 'cs'); } else { u.searchParams.delete('lang'); }
+  window.location.href = u.toString();
+}
+(function(){
+  var isCs = new URLSearchParams(window.location.search).get('lang') === 'cs';
+  document.getElementById('langBtnSk').classList.toggle('active', !isCs);
+  document.getElementById('langBtnCs').classList.toggle('active', isCs);
+})();
+
 function escapeHtml(s) {
   return (s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
