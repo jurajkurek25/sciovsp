@@ -57,7 +57,7 @@ th{color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:.08
 .row-actions button{background:none;border:1px solid var(--border2);color:var(--text2);border-radius:6px;padding:4px 10px;font-size:11px;font-family:var(--mono)}
 .inactive{opacity:.45}
 form.add{display:grid;gap:.85rem;max-width:480px}
-form.add input,form.add textarea,form.add select{padding:.7rem;background:var(--black);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:var(--sans);font-size:.88rem}
+form.add input,form.add textarea,form.add select{width:100%;min-width:0;padding:.7rem;background:var(--black);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:var(--sans);font-size:.88rem}
 form.add label{font-size:.75rem;color:var(--text2);font-family:var(--mono);letter-spacing:.03em;margin-bottom:-.4rem}
 form.add button.submit{background:var(--volt);color:var(--black);border:none;border-radius:8px;padding:.75rem 1.1rem;font-weight:700;font-family:var(--mono);font-size:.82rem;margin-top:.25rem}
 .msg{font-size:.8rem;margin-top:.5rem;font-family:var(--mono)}
@@ -81,6 +81,17 @@ footer{border-top:1px solid var(--border);padding:2.5rem;padding-bottom:calc(2.5
 @media (max-width: 480px){
   nav{flex-wrap:wrap;row-gap:.5rem}
   .nav-cta{padding:.4rem .65rem;font-size:.66rem}
+}
+@media (max-width: 640px){
+  .panel{padding:1.1rem}
+  thead{display:none}
+  table,tbody,tr,td{display:block;width:100%}
+  tr{background:var(--black);border:1px solid var(--border);border-radius:10px;margin-bottom:.75rem;overflow:hidden}
+  tr:last-child{margin-bottom:0}
+  td{border-bottom:1px solid var(--border);padding:.6rem .9rem}
+  td:last-child{border-bottom:none}
+  td[data-label]::before{content:attr(data-label);display:block;font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:.2rem}
+  .row-actions button{width:100%;padding:.6rem}
 }
 </style>
 </head>
@@ -213,10 +224,10 @@ async function loadProducts() {
   const rows = document.getElementById('productRows');
   rows.innerHTML = (data.products || []).map(p => `
     <tr class="${p.active ? '' : 'inactive'}">
-      <td>${escapeHtml(p.title)}</td>
-      <td>${p.fileType}</td>
-      <td>${(p.priceCents / 100).toFixed(2)} €</td>
-      <td>${p.active ? 'aktívny' : 'skrytý'}</td>
+      <td data-label="Názov">${escapeHtml(p.title)}</td>
+      <td data-label="Typ">${p.fileType}</td>
+      <td data-label="Cena">${(p.priceCents / 100).toFixed(2)} €</td>
+      <td data-label="Stav">${p.active ? 'aktívny' : 'skrytý'}</td>
       <td class="row-actions">
         <button onclick="toggleActive(${p.id}, ${!p.active})">${p.active ? 'Skryť' : 'Zobraziť'}</button>
       </td>
