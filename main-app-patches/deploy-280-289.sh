@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Nasadenie patchov 280-289 (bezpečnostné opravy, lacnejšie modely, zdieľaný
-# test pool, obchod s digitálnymi produktami) + redesign obchod stránok.
+# Nasadenie patchov 280-290 (bezpečnostné opravy, lacnejšie modely, zdieľaný
+# test pool, obchod s digitálnymi produktami, zjednotenie nav menu) +
+# redesign obchod stránok.
 #
 # SPUSTI TOTO Z KOREŇA PRODUKČNEJ APPKY NA VPS (tam, kde leží živý server.js
 # a kam doteraz chodili všetky main-app-patches/*.js). Over si to pred
@@ -27,6 +28,7 @@ PATCHES=(
   "287-haiku-default-sonnet-for-generation.js"
   "288-shared-test-pool.js"
   "289-mount-digital-shop.js"
+  "290-add-obchod-to-site-nav.js"
 )
 REQUIRED_NEW_FILES=(
   "routes/shop.js"
