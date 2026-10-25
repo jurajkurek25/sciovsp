@@ -171,11 +171,12 @@ function escapeHtml(s) {
 function productCardHtml(p) {
   const priceStr = (p.priceCents / 100).toFixed(2).replace('.', ',') + ' €';
   const cover = `<img class="course-cover" src="${escapeHtml(p.coverImageUrl)}" alt="${escapeHtml(p.title)}" loading="lazy">`;
+  const firstParagraph = (p.description || '').split(/\n\s*\n/)[0].trim();
   return `<a class="course-card" href="/obchod/${escapeHtml(p.slug)}" data-type="${escapeHtml(p.fileType)}" data-search="${escapeHtml(((p.title || '') + ' ' + (p.description || '')).toLowerCase())}">
     ${cover}
     <span class="course-badge">${escapeHtml(p.fileType)}</span>
     <h3>${escapeHtml(p.title)}</h3>
-    <p>${escapeHtml((p.description || '').slice(0, 140))}</p>
+    <p>${escapeHtml(firstParagraph.slice(0, 140))}</p>
     <div class="course-card-price-row">
       <span class="course-price-tag">${priceStr}</span>
       <span class="course-card-arrow">Pozrieť →</span>

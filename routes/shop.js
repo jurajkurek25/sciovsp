@@ -43,6 +43,18 @@ function extensionFor(fileType) {
   return fileType === 'skill' ? '.skill' : '.' + fileType;
 }
 
+// Popis produktu sa píše ako viacero odstavcov oddelených prázdnym riadkom
+// (hook / ako to funguje / čo dostaneš) -- tieto dve pomocné funkcie z toho
+// urobia buď len prvú vetu (katalóg, meta description, JSON-LD) alebo
+// poriadne odstavce na predajnej stránke namiesto jedného bloku textu.
+function firstParagraph(text) {
+  return (text || '').split(/\n\s*\n/)[0].trim();
+}
+function descriptionHtml(text, escapeHtml) {
+  return (text || '').split(/\n\s*\n/).map(p => p.trim()).filter(Boolean)
+    .map(p => `<p>${escapeHtml(p)}</p>`).join('');
+}
+
 // ── Admin auth ───────────────────────────────────────────────────────────
 // Žiadny existujúci "requireAdmin" v appke nie je -- správa komunity/ads
 // žije v samostatnom dash-service. Pre tento shop: Bearer token + email
@@ -203,7 +215,7 @@ module.exports = function registerShop(app) {
             unit_amount: product.price_cents,
             product_data: {
               name: product.title,
-              ...(product.description ? { description: product.description.slice(0, 300) } : {}),
+              ...(product.description ? { description: firstParagraph(product.description).slice(0, 300) } : {}),
               ...(product.cover_image_url ? { images: [product.cover_image_url] } : {})
             }
           },
@@ -296,7 +308,7 @@ module.exports = function registerShop(app) {
         <h1 class="hero-title">${escapeHtml(product.title)}</h1>
         ${coverHtml}
         ${buyBoxHtml}
-        ${product.description ? `<article class="prose course-sales"><p>${escapeHtml(product.description)}</p></article>` : ''}
+        ${product.description ? `<article class="prose course-sales">${descriptionHtml(product.description, escapeHtml)}</article>` : ''}
         ${buyBoxHtml}
       </main>
 
@@ -345,15 +357,16 @@ module.exports = function registerShop(app) {
       });
       </script>`;
 
+      const metaDescription = product.description ? firstParagraph(product.description) : product.title;
       const jsonLd = {
-        '@context': 'https://schema.org', '@type': 'Product', name: product.title, description: product.description || product.title,
+        '@context': 'https://schema.org', '@type': 'Product', name: product.title, description: metaDescription,
         offers: { '@type': 'Offer', price: priceNum, priceCurrency: 'EUR', url: BASE_URL + '/obchod/' + product.slug, availability: 'https://schema.org/InStock' },
         image: productCoverUrl(product)
       };
 
       res.send(blogLayout({
         title: product.title + ' — SP Tréner',
-        description: (product.description || product.title).slice(0, 160),
+        description: metaDescription.slice(0, 160),
         body, canonicalPath: '/obchod/' + product.slug, jsonLd: [jsonLd], lang
       }));
     } catch (e) {
