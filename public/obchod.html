@@ -74,16 +74,16 @@ footer{border-top:1px solid var(--border);padding:2.5rem;padding-bottom:calc(2.5
 
 /* produktový katalóg — rovnaký vzor ako .course-grid/.course-card na /kurzy */
 .course-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.1rem;margin-top:1.6rem;justify-content:center}
-.course-card{display:flex;flex-direction:column;background:var(--black2);border:1px solid var(--border);border-radius:14px;padding:1.3rem;color:var(--text)}
+.course-card{display:flex;flex-direction:column;background:var(--black2);border:1px solid var(--border);border-radius:14px;padding:1.3rem;color:var(--text);text-decoration:none;transition:border-color .15s}
+.course-card:hover{border-color:var(--border2)}
 .course-card h3{font-family:var(--serif);font-size:1.3rem;margin-bottom:.5rem}
 .course-card p{color:var(--text2);font-size:.85rem;margin-bottom:.8rem;flex:1}
 .course-price-tag{font-family:var(--mono);font-size:.8rem;color:var(--volt);font-weight:700}
 .course-cover{width:100%;height:150px;object-fit:cover;border-radius:10px;margin-bottom:.9rem;background:var(--black3);display:block}
 .course-noimg{width:100%;height:150px;border-radius:10px;margin-bottom:.9rem;background:linear-gradient(135deg,var(--black3),rgba(124,92,255,.1));display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;color:var(--text3);text-transform:uppercase}
 .course-badge{display:inline-block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--volt);background:rgba(200,255,0,.08);border:1px solid rgba(200,255,0,.2);padding:3px 9px;border-radius:20px;width:fit-content;margin-bottom:.6rem}
-.course-buy-box{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-top:auto}
-.course-buy-btn{padding:.6rem 1.1rem;background:var(--volt);color:var(--black);border:none;border-radius:9px;font-weight:700;font-family:var(--mono);font-size:.78rem;cursor:pointer;transition:all .2s}
-.course-buy-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(200,255,0,.3)}
+.course-card-price-row{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-top:auto}
+.course-card-arrow{font-family:var(--mono);font-size:.78rem;color:var(--text2)}
 .filter-bar{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center;margin:1.4rem 0}
 .filter-search{flex:1 1 220px;padding:.65rem .9rem;background:var(--black2);border:1px solid var(--border2);border-radius:10px;color:var(--text);font-size:.9rem}
 .filter-search::placeholder{color:var(--text3)}
@@ -92,20 +92,6 @@ footer{border-top:1px solid var(--border);padding:2.5rem;padding-bottom:calc(2.5
 .filter-pill:hover{border-color:var(--purple)}
 .filter-pill.active{background:var(--volt);color:var(--black);border-color:var(--volt);font-weight:700}
 .filter-empty{display:none;color:var(--text3);font-size:.9rem;padding:2rem 0;text-align:center}
-
-/* checkout modal — rovnaký vzor ako premium-popup */
-.popup-overlay{display:none;position:fixed;inset:0;background:rgba(8,8,13,.75);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;padding:1rem}
-.popup-overlay.show{display:flex}
-.popup{background:var(--black2);border:1px solid var(--border2);border-radius:20px;padding:2rem;max-width:400px;width:100%;position:relative}
-.popup-close{position:absolute;top:1rem;right:1rem;background:none;border:none;color:var(--text2);font-size:1.1rem;cursor:pointer}
-.popup h3{font-family:var(--serif);font-size:1.4rem;margin-bottom:1.25rem;padding-right:1.5rem}
-.popup input[type=email]{width:100%;padding:.75rem;background:var(--black);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:var(--sans);font-size:.9rem;margin-bottom:1rem}
-.popup input[type=email]::placeholder{color:var(--text3)}
-.popup label.consent{display:flex;align-items:flex-start;gap:.5rem;font-size:.78rem;color:var(--text2);margin-bottom:1.5rem;line-height:1.5}
-.popup label.consent a{color:var(--purple2)}
-.popup .error{color:var(--red);font-size:.8rem;margin-top:-.5rem;margin-bottom:1rem}
-.popup .submit{width:100%;padding:.9rem;background:var(--volt);color:var(--black);border:none;border-radius:10px;font-weight:700;font-family:var(--mono);font-size:.85rem;letter-spacing:.04em;cursor:pointer}
-.popup .submit:disabled{opacity:.6;cursor:default}
 </style>
 </head>
 <body>
@@ -154,22 +140,6 @@ footer{border-top:1px solid var(--border);padding:2.5rem;padding-bottom:calc(2.5
   </div>
 </footer>
 
-<div class="popup-overlay" id="checkoutOverlay" onclick="if(event.target===this) closeCheckout()">
-  <div class="popup">
-    <button class="popup-close" onclick="closeCheckout()">✕</button>
-    <h3 id="checkoutTitle">Kúpiť</h3>
-    <form id="checkoutForm">
-      <input type="email" id="checkoutEmail" placeholder="meno@gmail.com" required>
-      <label class="consent">
-        <input type="checkbox" id="checkoutVop" required>
-        <span>Súhlasím s <a href="/legal.html#vop" target="_blank">obchodnými podmienkami</a>.</span>
-      </label>
-      <div class="error" id="checkoutError"></div>
-      <button type="submit" class="submit" id="checkoutSubmit">Pokračovať na platbu →</button>
-    </form>
-  </div>
-</div>
-
 <script>
 function toggleMobileNav(){
   var open = document.getElementById('navLinksWrap').classList.toggle('open');
@@ -192,10 +162,8 @@ function switchBlogLang(l){
   document.getElementById('langBtnCs').classList.toggle('active', isCs);
 })();
 
-let currentProductId = null;
 let allProducts = [];
 let activeType = '';
-const overlay = document.getElementById('checkoutOverlay');
 
 function escapeHtml(s) {
   return (s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -206,16 +174,16 @@ function productCardHtml(p) {
   const cover = p.coverImageUrl
     ? `<img class="course-cover" src="${escapeHtml(p.coverImageUrl)}" alt="${escapeHtml(p.title)}" loading="lazy">`
     : `<div class="course-noimg">${escapeHtml(p.fileType)}</div>`;
-  return `<div class="course-card" data-type="${escapeHtml(p.fileType)}" data-search="${escapeHtml(((p.title || '') + ' ' + (p.description || '')).toLowerCase())}">
+  return `<a class="course-card" href="/obchod/${escapeHtml(p.slug)}" data-type="${escapeHtml(p.fileType)}" data-search="${escapeHtml(((p.title || '') + ' ' + (p.description || '')).toLowerCase())}">
     ${cover}
     <span class="course-badge">${escapeHtml(p.fileType)}</span>
     <h3>${escapeHtml(p.title)}</h3>
     <p>${escapeHtml((p.description || '').slice(0, 140))}</p>
-    <div class="course-buy-box">
+    <div class="course-card-price-row">
       <span class="course-price-tag">${priceStr}</span>
-      <button class="course-buy-btn" onclick="openCheckout(${p.id}, '${escapeHtml(p.title).replace(/'/g, "\\'")}')">Kúpiť →</button>
+      <span class="course-card-arrow">Pozrieť →</span>
     </div>
-  </div>`;
+  </a>`;
 }
 
 function applyFilter() {
@@ -260,39 +228,6 @@ async function loadProducts() {
     grid.innerHTML = '<p class="empty-state">Nepodarilo sa načítať produkty.</p>';
   }
 }
-
-function openCheckout(productId, title) {
-  currentProductId = productId;
-  document.getElementById('checkoutTitle').textContent = title;
-  document.getElementById('checkoutError').textContent = '';
-  overlay.classList.add('show');
-}
-function closeCheckout() { overlay.classList.remove('show'); }
-
-document.getElementById('checkoutForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const submitBtn = document.getElementById('checkoutSubmit');
-  const errorEl = document.getElementById('checkoutError');
-  errorEl.textContent = '';
-  submitBtn.disabled = true;
-  try {
-    const res = await fetch('/api/shop/checkout', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        productId: currentProductId,
-        email: document.getElementById('checkoutEmail').value,
-        vopAccepted: document.getElementById('checkoutVop').checked
-      })
-    });
-    const data = await res.json();
-    if (!res.ok) { errorEl.textContent = data.error || 'Chyba.'; submitBtn.disabled = false; return; }
-    window.location.href = data.url;
-  } catch (e) {
-    errorEl.textContent = 'Chyba pripojenia, skús znova.';
-    submitBtn.disabled = false;
-  }
-});
 
 loadProducts();
 </script>

@@ -29,6 +29,7 @@ PATCHES=(
   "288-shared-test-pool.js"
   "289-mount-digital-shop.js"
   "290-add-obchod-to-site-nav.js"
+  "291-expose-helpers-for-shop-sales-page.js"
 )
 REQUIRED_NEW_FILES=(
   "routes/shop.js"

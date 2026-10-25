@@ -187,6 +187,131 @@ module.exports = function registerShop(app) {
     }
   });
 
+  // GET /obchod/:slug — predajná stránka jedného produktu, rovnaký dizajn
+  // ako /kurzy/:slug (blogLayout + KURZY_STYLE, sprístupnené cez
+  // app.locals -- pozri main-app-patches/291-expose-helpers-for-shop-sales-page.js).
+  // Katalóg (/obchod) teraz linkuje sem namiesto priameho "Kúpiť" na
+  // karte, presne ako /kurzy linkuje na /kurzy/:slug.
+  app.get('/obchod/:slug', async (req, res, next) => {
+    // /obchod/dakujeme a /obchod/admin sú statické stránky registrované
+    // neskôr v server.js (po /generalka) -- táto routa (mountnutá tu,
+    // blízko začiatku server.js) by ich inak predbehla a vrátila
+    // "produkt sa nenašiel" namiesto nich. Nechaj ich prejsť ďalej.
+    if (req.params.slug === 'dakujeme' || req.params.slug === 'admin') return next();
+    const blogLayout = app.locals.blogLayout;
+    const KURZY_STYLE = app.locals.KURZY_STYLE;
+    const escapeHtml = app.locals.escapeHtml;
+    const blogLang = app.locals.blogLang;
+    if (!blogLayout || !KURZY_STYLE || !escapeHtml || !blogLang) {
+      console.error('obchod/:slug: app.locals helpers chýbajú -- je aplikovaný main-app-patches/291-expose-helpers-for-shop-sales-page.js?');
+      return res.status(500).send('Chyba servera.');
+    }
+    try {
+      const lang = blogLang(req);
+      const T = lang === 'cs' ? { obchodLabel: 'Obchod', buy: 'Koupit', notFound: 'Produkt se nenašel.' }
+        : { obchodLabel: 'Obchod', buy: 'Kúpiť', notFound: 'Produkt sa nenašiel.' };
+      const { data: product } = await supabase.from('digital_products').select('*').eq('slug', req.params.slug).eq('active', true).maybeSingle();
+      if (!product) return res.status(404).send(T.notFound);
+
+      const priceNum = (product.price_cents / 100).toFixed(2);
+      const priceStr = priceNum.replace('.', ',') + ' €';
+      const coverHtml = product.cover_image_url
+        ? `<img class="course-hero-cover" src="${escapeHtml(product.cover_image_url)}" alt="${escapeHtml(product.title)}" loading="lazy">`
+        : `<div class="course-hero-cover product-noimg">${escapeHtml(product.file_type.toUpperCase())}</div>`;
+      const buyBoxHtml = `<div class="course-buy-box">
+        <span class="course-price-tag">${priceStr}</span>
+        <button class="course-buy-btn" onclick="openObchodCheckout()">${escapeHtml(T.buy)} →</button>
+      </div>`;
+
+      const body = `${KURZY_STYLE}
+      <style>
+      .product-noimg{height:220px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:1rem;letter-spacing:.1em;color:var(--text3);background:linear-gradient(135deg,var(--black3),rgba(124,92,255,.1))}
+      .product-badge{display:inline-block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--volt);background:rgba(200,255,0,.08);border:1px solid rgba(200,255,0,.2);padding:3px 9px;border-radius:20px;margin-bottom:.75rem}
+      .popup-overlay{display:none;position:fixed;inset:0;background:rgba(8,8,13,.75);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;padding:1rem}
+      .popup-overlay.show{display:flex}
+      .popup{background:var(--black2);border:1px solid var(--border2);border-radius:20px;padding:2rem;max-width:400px;width:100%;position:relative}
+      .popup-close{position:absolute;top:1rem;right:1rem;background:none;border:none;color:var(--text2);font-size:1.1rem;cursor:pointer}
+      .popup h3{font-family:var(--serif);font-size:1.4rem;margin-bottom:1.25rem;padding-right:1.5rem}
+      .popup input[type=email]{width:100%;padding:.75rem;background:var(--black);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:var(--sans);font-size:.9rem;margin-bottom:1rem}
+      .popup input[type=email]::placeholder{color:var(--text3)}
+      .popup label.consent{display:flex;align-items:flex-start;gap:.5rem;font-size:.78rem;color:var(--text2);margin-bottom:1.5rem;line-height:1.5}
+      .popup label.consent a{color:var(--purple2)}
+      .popup .error{color:var(--red);font-size:.8rem;margin-top:-.5rem;margin-bottom:1rem}
+      .popup .submit{width:100%;padding:.9rem;background:var(--volt);color:var(--black);border:none;border-radius:10px;font-weight:700;font-family:var(--mono);font-size:.85rem;letter-spacing:.04em;cursor:pointer}
+      .popup .submit:disabled{opacity:.6;cursor:default}
+      </style>
+      <main class="page">
+        <nav class="breadcrumb"><a href="/${lang === 'cs' ? '?lang=cs' : ''}">SP Tréner</a><span>/</span><a href="/obchod">${T.obchodLabel}</a><span>/</span><span>${escapeHtml(product.title)}</span></nav>
+        <span class="product-badge">${escapeHtml(product.file_type.toUpperCase())}</span>
+        <h1 class="hero-title">${escapeHtml(product.title)}</h1>
+        ${coverHtml}
+        ${buyBoxHtml}
+        ${product.description ? `<article class="prose course-sales"><p>${escapeHtml(product.description)}</p></article>` : ''}
+        ${buyBoxHtml}
+      </main>
+
+      <div class="popup-overlay" id="checkoutOverlay" onclick="if(event.target===this) closeObchodCheckout()">
+        <div class="popup">
+          <button class="popup-close" onclick="closeObchodCheckout()">✕</button>
+          <h3>${escapeHtml(product.title)}</h3>
+          <form id="checkoutForm">
+            <input type="email" id="checkoutEmail" placeholder="meno@gmail.com" required>
+            <label class="consent">
+              <input type="checkbox" id="checkoutVop" required>
+              <span>Súhlasím s <a href="/legal.html#vop" target="_blank">obchodnými podmienkami</a>.</span>
+            </label>
+            <div class="error" id="checkoutError"></div>
+            <button type="submit" class="submit" id="checkoutSubmit">Pokračovať na platbu →</button>
+          </form>
+        </div>
+      </div>
+      <script>
+      const obchodOverlay = document.getElementById('checkoutOverlay');
+      function openObchodCheckout() { document.getElementById('checkoutError').textContent = ''; obchodOverlay.classList.add('show'); }
+      function closeObchodCheckout() { obchodOverlay.classList.remove('show'); }
+      document.getElementById('checkoutForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const submitBtn = document.getElementById('checkoutSubmit');
+        const errorEl = document.getElementById('checkoutError');
+        errorEl.textContent = '';
+        submitBtn.disabled = true;
+        try {
+          const res = await fetch('/api/shop/checkout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              productId: ${JSON.stringify(product.id)},
+              email: document.getElementById('checkoutEmail').value,
+              vopAccepted: document.getElementById('checkoutVop').checked
+            })
+          });
+          const data = await res.json();
+          if (!res.ok) { errorEl.textContent = data.error || 'Chyba.'; submitBtn.disabled = false; return; }
+          window.location.href = data.url;
+        } catch (e) {
+          errorEl.textContent = 'Chyba pripojenia, skús znova.';
+          submitBtn.disabled = false;
+        }
+      });
+      </script>`;
+
+      const jsonLd = {
+        '@context': 'https://schema.org', '@type': 'Product', name: product.title, description: product.description || product.title,
+        offers: { '@type': 'Offer', price: priceNum, priceCurrency: 'EUR', url: BASE_URL + '/obchod/' + product.slug, availability: 'https://schema.org/InStock' },
+        ...(product.cover_image_url ? { image: product.cover_image_url } : {})
+      };
+
+      res.send(blogLayout({
+        title: product.title + ' — SP Tréner',
+        description: (product.description || product.title).slice(0, 160),
+        body, canonicalPath: '/obchod/' + product.slug, jsonLd: [jsonLd], lang
+      }));
+    } catch (e) {
+      console.error('obchod sales page error:', e.message);
+      res.status(500).send('Chyba servera.');
+    }
+  });
+
   // ── Admin ────────────────────────────────────────────────────────────
 
   app.get('/api/admin/shop/products', requireShopAdmin, async (req, res) => {
