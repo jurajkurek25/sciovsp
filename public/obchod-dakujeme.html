@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="sk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ďakujeme — SP Tréner</title>
+<style>
+  :root { --navy:#1a1a2e; --lime:#c8ff00; --bg:#f4f4f7; }
+  body { margin:0; font-family:Arial,Helvetica,sans-serif; background:var(--bg); color:#222; }
+  header { background:var(--navy); color:#fff; padding:20px 24px; }
+  header span { font-size:20px; font-weight:bold; }
+  main { max-width:520px; margin:60px auto; padding:0 20px; text-align:center; }
+  .box { background:#fff; border-radius:12px; padding:40px 32px; box-shadow:0 1px 3px rgba(0,0,0,0.08); }
+  h1 { color:var(--navy); margin:0 0 12px; }
+  p { color:#555; line-height:1.6; }
+  a.download { display:inline-block; background:var(--lime); color:var(--navy); text-decoration:none; font-weight:bold; font-size:15px; padding:14px 28px; border-radius:8px; margin-top:20px; }
+  .note { font-size:13px; color:#888; margin-top:16px; }
+  .error { color:#c0392b; }
+</style>
+</head>
+<body>
+<header><span>SP Tréner</span></header>
+<main>
+  <div class="box" id="box">
+    <p>Overujem platbu…</p>
+  </div>
+</main>
+<script>
+async function run() {
+  const box = document.getElementById('box');
+  const params = new URLSearchParams(window.location.search);
+  const sessionId = params.get('session_id');
+  if (!sessionId) { box.innerHTML = '<p class="error">Chýba identifikátor platby.</p>'; return; }
+
+  async function tryFetch(attempt) {
+    try {
+      const res = await fetch('/api/shop/purchase/' + encodeURIComponent(sessionId) + '/download');
+      const data = await res.json();
+      if (!res.ok) {
+        if (attempt < 5) { setTimeout(() => tryFetch(attempt + 1), 2000); return; }
+        box.innerHTML = '<p class="error">' + (data.error || 'Platba sa ešte nespracovala.') + '</p><p class="note">Skús obnoviť stránku o chvíľu — spracovanie môže trvať niekoľko sekúnd.</p>';
+        return;
+      }
+      box.innerHTML = `
+        <h1>Ďakujeme!</h1>
+        <p>Tvoj produkt <strong>${escapeHtml(data.title)}</strong> je pripravený.</p>
+        <a class="download" href="${data.url}">Stiahnuť ${escapeHtml(data.fileType).toUpperCase()}</a>
+        <p class="note">Link je platný hodinu. Poslali sme ho aj na email ako záložnú kópiu.</p>
+      `;
+    } catch (e) {
+      box.innerHTML = '<p class="error">Chyba pripojenia.</p>';
+    }
+  }
+  tryFetch(0);
+}
+function escapeHtml(s) {
+  return (s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+run();
+</script>
+</body>
+</html>

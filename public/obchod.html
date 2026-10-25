@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="sk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Obchod — SP Tréner</title>
+<style>
+  :root { --navy:#1a1a2e; --lime:#c8ff00; --bg:#f4f4f7; --ink2:#eceef2; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family:Arial,Helvetica,sans-serif; background:var(--bg); color:#222; }
+  header { background:var(--navy); color:#fff; padding:20px 24px; }
+  header span { font-size:20px; font-weight:bold; }
+  main { max-width:1000px; margin:0 auto; padding:32px 20px 60px; }
+  h1 { color:var(--navy); margin:0 0 24px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(240px, 1fr)); gap:20px; }
+  .card { background:#fff; border-radius:12px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.08); display:flex; flex-direction:column; }
+  .card img { width:100%; height:140px; object-fit:cover; background:var(--ink2); }
+  .card-body { padding:16px; display:flex; flex-direction:column; flex:1; }
+  .card-body h3 { margin:0 0 8px; color:var(--navy); font-size:16px; }
+  .card-body p { margin:0 0 12px; font-size:13px; color:#555; line-height:1.5; flex:1; }
+  .badge { display:inline-block; font-size:11px; font-weight:bold; text-transform:uppercase; color:var(--navy); background:var(--ink2); padding:3px 8px; border-radius:6px; margin-bottom:8px; width:fit-content; }
+  .price { font-weight:bold; color:var(--navy); font-size:18px; margin-bottom:10px; }
+  button.buy { background:var(--lime); color:var(--navy); border:none; border-radius:8px; padding:10px 16px; font-weight:bold; cursor:pointer; font-size:14px; }
+  button.buy:hover { opacity:0.9; }
+  button.buy:disabled { opacity:0.6; cursor:default; }
+  .empty { color:#777; text-align:center; padding:60px 0; }
+  dialog { border:none; border-radius:12px; padding:0; max-width:380px; width:90%; }
+  dialog form { padding:24px; }
+  dialog h3 { margin:0 0 16px; color:var(--navy); }
+  dialog input[type=email] { width:100%; padding:10px; border:1px solid #ccc; border-radius:6px; font-size:14px; margin-bottom:12px; }
+  dialog label { display:flex; align-items:flex-start; gap:8px; font-size:13px; color:#444; margin-bottom:16px; }
+  dialog .actions { display:flex; gap:10px; justify-content:flex-end; }
+  dialog button.cancel { background:none; border:1px solid #ccc; border-radius:8px; padding:10px 16px; cursor:pointer; }
+  .error { color:#c0392b; font-size:13px; margin-top:8px; }
+</style>
+</head>
+<body>
+<header><span>SP Tréner</span></header>
+<main>
+  <h1>Obchod</h1>
+  <div id="grid" class="grid"><p class="empty">Načítavam produkty…</p></div>
+</main>
+
+<dialog id="checkoutDialog">
+  <form id="checkoutForm">
+    <h3 id="checkoutTitle">Kúpiť</h3>
+    <input type="email" id="checkoutEmail" placeholder="Tvoj email" required>
+    <label>
+      <input type="checkbox" id="checkoutVop" required>
+      <span>Súhlasím s <a href="/legal" target="_blank">obchodnými podmienkami</a>.</span>
+    </label>
+    <div class="error" id="checkoutError"></div>
+    <div class="actions">
+      <button type="button" class="cancel" id="checkoutCancel">Zrušiť</button>
+      <button type="submit" class="buy" id="checkoutSubmit">Pokračovať na platbu</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+let currentProductId = null;
+const dialog = document.getElementById('checkoutDialog');
+
+async function loadProducts() {
+  const grid = document.getElementById('grid');
+  try {
+    const res = await fetch('/api/shop/products');
+    const data = await res.json();
+    const products = data.products || [];
+    if (!products.length) {
+      grid.innerHTML = '<p class="empty">Momentálne tu nič nie je — pozri sa neskôr.</p>';
+      return;
+    }
+    grid.innerHTML = products.map(p => `
+      <div class="card">
+        ${p.coverImageUrl ? `<img src="${p.coverImageUrl}" alt="">` : ''}
+        <div class="card-body">
+          <span class="badge">${p.fileType}</span>
+          <h3>${escapeHtml(p.title)}</h3>
+          <p>${escapeHtml(p.description || '')}</p>
+          <div class="price">${(p.priceCents / 100).toFixed(2)} €</div>
+          <button class="buy" onclick="openCheckout(${p.id}, '${escapeHtml(p.title).replace(/'/g, "\\'")}')">Kúpiť</button>
+        </div>
+      </div>
+    `).join('');
+  } catch (e) {
+    grid.innerHTML = '<p class="empty">Nepodarilo sa načítať produkty.</p>';
+  }
+}
+
+function escapeHtml(s) {
+  return (s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function openCheckout(productId, title) {
+  currentProductId = productId;
+  document.getElementById('checkoutTitle').textContent = 'Kúpiť: ' + title;
+  document.getElementById('checkoutError').textContent = '';
+  dialog.showModal();
+}
+
+document.getElementById('checkoutCancel').addEventListener('click', () => dialog.close());
+
+document.getElementById('checkoutForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const submitBtn = document.getElementById('checkoutSubmit');
+  const errorEl = document.getElementById('checkoutError');
+  errorEl.textContent = '';
+  submitBtn.disabled = true;
+  try {
+    const res = await fetch('/api/shop/checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        productId: currentProductId,
+        email: document.getElementById('checkoutEmail').value,
+        vopAccepted: document.getElementById('checkoutVop').checked
+      })
+    });
+    const data = await res.json();
+    if (!res.ok) { errorEl.textContent = data.error || 'Chyba.'; submitBtn.disabled = false; return; }
+    window.location.href = data.url;
+  } catch (e) {
+    errorEl.textContent = 'Chyba pripojenia, skús znova.';
+    submitBtn.disabled = false;
+  }
+});
+
+loadProducts();
+</script>
+</body>
+</html>

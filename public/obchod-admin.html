@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="sk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Administrácia obchodu — SP Tréner</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<style>
+  :root { --navy:#1a1a2e; --lime:#c8ff00; --bg:#f4f4f7; --ink2:#eceef2; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family:Arial,Helvetica,sans-serif; background:var(--bg); color:#222; }
+  header { background:var(--navy); color:#fff; padding:20px 24px; display:flex; justify-content:space-between; align-items:center; }
+  header span { font-size:20px; font-weight:bold; }
+  main { max-width:900px; margin:0 auto; padding:32px 20px 60px; }
+  button { cursor:pointer; }
+  .signin { background:var(--lime); color:var(--navy); border:none; border-radius:8px; padding:10px 18px; font-weight:bold; }
+  .panel { background:#fff; border-radius:12px; padding:24px; box-shadow:0 1px 3px rgba(0,0,0,0.08); margin-bottom:24px; }
+  h2 { color:var(--navy); margin:0 0 16px; }
+  table { width:100%; border-collapse:collapse; font-size:14px; }
+  th, td { text-align:left; padding:10px 8px; border-bottom:1px solid var(--ink2); }
+  th { color:#777; font-size:12px; text-transform:uppercase; }
+  .row-actions button { background:none; border:1px solid #ccc; border-radius:6px; padding:5px 10px; font-size:12px; margin-right:6px; }
+  .inactive { opacity:0.5; }
+  form.add { display:grid; gap:10px; max-width:480px; }
+  form.add input, form.add textarea, form.add select { padding:9px; border:1px solid #ccc; border-radius:6px; font-size:14px; font-family:inherit; }
+  form.add label { font-size:13px; color:#555; margin-bottom:-6px; }
+  form.add button.submit { background:var(--navy); color:#fff; border:none; border-radius:8px; padding:10px 16px; font-weight:bold; margin-top:4px; }
+  .msg { font-size:13px; margin-top:8px; }
+  .msg.error { color:#c0392b; }
+  .msg.ok { color:#2e7d32; }
+  .locked { text-align:center; padding:60px 0; color:#777; }
+</style>
+</head>
+<body>
+<header><span>SP Tréner — Obchod (admin)</span><button class="signin" id="signinBtn" style="display:none;">Prihlásiť sa cez Google</button></header>
+<main>
+  <div id="locked" class="locked">Načítavam…</div>
+  <div id="app" style="display:none;">
+    <div class="panel">
+      <h2>Produkty</h2>
+      <table>
+        <thead><tr><th>Názov</th><th>Typ</th><th>Cena</th><th>Stav</th><th></th></tr></thead>
+        <tbody id="productRows"></tbody>
+      </table>
+    </div>
+    <div class="panel">
+      <h2>Nový produkt</h2>
+      <form class="add" id="addForm">
+        <label>Názov</label>
+        <input type="text" name="title" required>
+        <label>Popis</label>
+        <textarea name="description" rows="3"></textarea>
+        <label>Cena (centy, napr. 700 = 7,00 €)</label>
+        <input type="number" name="priceCents" min="50" required>
+        <label>Typ súboru</label>
+        <select name="fileType" required>
+          <option value="pdf">PDF</option>
+          <option value="epub">EPUB</option>
+          <option value="mobi">MOBI</option>
+          <option value="skill">.skill</option>
+          <option value="zip">ZIP</option>
+        </select>
+        <label>Súbor produktu</label>
+        <input type="file" name="file" required>
+        <label>Obal (voliteľné, PNG/JPG/WEBP)</label>
+        <input type="file" name="cover" accept="image/png,image/jpeg,image/webp">
+        <button class="submit" type="submit">Vytvoriť produkt</button>
+        <div class="msg" id="addMsg"></div>
+      </form>
+    </div>
+  </div>
+</main>
+<script>
+let supabaseClient, accessToken;
+
+async function init() {
+  const cfgRes = await fetch('/api/shop/config');
+  const cfg = await cfgRes.json();
+  supabaseClient = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (session) {
+    accessToken = session.access_token;
+    await loadProducts();
+  } else {
+    document.getElementById('locked').innerHTML = '<p>Táto stránka je len pre administrátorov obchodu.</p>';
+    document.getElementById('signinBtn').style.display = 'inline-block';
+  }
+}
+
+document.getElementById('signinBtn').addEventListener('click', async () => {
+  await supabaseClient.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.href } });
+});
+
+async function authedFetch(url, options = {}) {
+  options.headers = Object.assign({}, options.headers, { Authorization: 'Bearer ' + accessToken });
+  return fetch(url, options);
+}
+
+async function loadProducts() {
+  const res = await authedFetch('/api/admin/shop/products');
+  if (res.status === 403) {
+    document.getElementById('locked').innerHTML = '<p>Prihlásený, ale tento účet nemá prístup do administrácie obchodu.</p>';
+    return;
+  }
+  const data = await res.json();
+  document.getElementById('locked').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  const rows = document.getElementById('productRows');
+  rows.innerHTML = (data.products || []).map(p => `
+    <tr class="${p.active ? '' : 'inactive'}">
+      <td>${escapeHtml(p.title)}</td>
+      <td>${p.fileType}</td>
+      <td>${(p.priceCents / 100).toFixed(2)} €</td>
+      <td>${p.active ? 'aktívny' : 'skrytý'}</td>
+      <td class="row-actions">
+        <button onclick="toggleActive(${p.id}, ${!p.active})">${p.active ? 'Skryť' : 'Zobraziť'}</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+async function toggleActive(id, newActive) {
+  if (newActive) {
+    const fd = new FormData();
+    fd.append('active', 'true');
+    await authedFetch('/api/admin/shop/products/' + id, { method: 'PUT', body: fd });
+  } else {
+    await authedFetch('/api/admin/shop/products/' + id, { method: 'DELETE' });
+  }
+  loadProducts();
+}
+
+document.getElementById('addForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const msg = document.getElementById('addMsg');
+  msg.textContent = '';
+  msg.className = 'msg';
+  const fd = new FormData(e.target);
+  try {
+    const res = await authedFetch('/api/admin/shop/products', { method: 'POST', body: fd });
+    const data = await res.json();
+    if (!res.ok) { msg.textContent = data.error || 'Chyba.'; msg.className = 'msg error'; return; }
+    msg.textContent = 'Produkt vytvorený.';
+    msg.className = 'msg ok';
+    e.target.reset();
+    loadProducts();
+  } catch (err) {
+    msg.textContent = 'Chyba pripojenia.';
+    msg.className = 'msg error';
+  }
+});
+
+function escapeHtml(s) {
+  return (s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+init();
+</script>
+</body>
+</html>
