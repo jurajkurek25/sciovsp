@@ -73,19 +73,19 @@ footer{border-top:1px solid var(--border);padding:2.5rem;padding-bottom:calc(2.5
 </head>
 <body>
 <nav id="mainNav">
-  <a href="/" class="nav-logo"><span class="nav-dot"></span>SP TRÉNER</a>
+  <a href="/" class="nav-logo" id="navLogo"><span class="nav-dot"></span>SP TRÉNER</a>
   <div class="nav-right">
     <div class="nav-links-wrap" id="navLinksWrap">
-      <a href="/blog" class="nav-link">Blog</a>
-      <a href="/kurzy" class="nav-link">Kurzy</a>
+      <a href="/blog" class="nav-link" id="navLinkBlog">Blog</a>
+      <a href="/kurzy" class="nav-link" id="navLinkKurzy">Kurzy</a>
       <a href="/obchod" class="nav-link active">Obchod</a>
-      <a href="/odporucame" class="nav-link">Odporúčame</a>
+      <a href="/odporucame" class="nav-link" id="navLinkOdporucame">Odporúčame</a>
       <div class="lang-switcher">
         <button class="lang-btn active" id="langBtnSk" onclick="switchBlogLang('sk')">SK</button>
         <button class="lang-btn" id="langBtnCs" onclick="switchBlogLang('cs')">CZ</button>
       </div>
     </div>
-    <button class="nav-cta" onclick="location.href='/?openPremium=1'">Vyskúšať zadarmo</button>
+    <button class="nav-cta" onclick="location.href='/?openPremium=1'">Začať zadarmo →</button>
     <button class="nav-hamburger" id="navHamburger" onclick="toggleMobileNav()" aria-label="Menu">☰</button>
   </div>
 </nav>
@@ -101,10 +101,14 @@ footer{border-top:1px solid var(--border);padding:2.5rem;padding-bottom:calc(2.5
 <footer>
   <div class="footer-logo">SP TRÉNER © 2026</div>
   <div class="footer-links">
-    <a href="/app">Appka</a>
-    <a href="/kurzy">Kurzy</a>
-    <a href="/blog">Blog</a>
+    <a href="/app">Aplikácia</a>
+    <a href="/blog" id="footerLinkBlog">Blog</a>
+    <a href="/kurzy" id="footerLinkKurzy">Kurzy</a>
     <a href="mailto:juraj@jurajkurek.com">Kontakt</a>
+    <a href="/legal.html#vop">VOP</a>
+    <a href="/legal.html#privacy">Súkromie</a>
+    <a href="https://partner.sptrener.online">Partnerský program</a>
+    <a href="https://ad.sptrener.online">Inzercia</a>
   </div>
 </footer>
 
@@ -128,6 +132,15 @@ function switchBlogLang(l){
   var isCs = new URLSearchParams(window.location.search).get('lang') === 'cs';
   document.getElementById('langBtnSk').classList.toggle('active', !isCs);
   document.getElementById('langBtnCs').classList.toggle('active', isCs);
+  if (isCs) {
+    var suffix = '?lang=cs';
+    document.getElementById('navLogo').href = '/' + suffix;
+    document.getElementById('navLinkBlog').href = '/blog' + suffix;
+    document.getElementById('navLinkKurzy').href = '/kurzy' + suffix;
+    document.getElementById('navLinkOdporucame').href = '/odporucame' + suffix;
+    document.getElementById('footerLinkBlog').href = '/blog' + suffix;
+    document.getElementById('footerLinkKurzy').href = '/kurzy' + suffix;
+  }
 })();
 
 function escapeHtml(s) {
