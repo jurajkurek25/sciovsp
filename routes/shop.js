@@ -252,6 +252,53 @@ module.exports = function registerShop(app) {
     }
   });
 
+  // GET /api/user/my-products — produkty prihláseného používateľa pre sekciu
+  // "Produkty" na /app (vedľa "Moje kurzy"). Vracia stripe_session_id
+  // namiesto priameho podpísaného linku -- appka si čerstvý link vyžiada
+  // až pri kliknutí cez už existujúci /api/shop/purchase/:sessionId/download
+  // (ten istý endpoint ako success stránka po zaplatení).
+  app.get('/api/user/my-products', async (req, res) => {
+    const auth = req.headers.authorization || '';
+    const token = auth.startsWith('Bearer ') ? auth.slice(7) : null;
+    if (!token) return res.status(401).json({ error: 'Prihlás sa.' });
+    try {
+      const { data: userData, error: userErr } = await supabase.auth.getUser(token);
+      if (userErr || !userData.user) return res.status(401).json({ error: 'Neplatná session.' });
+      const email = userData.user.email;
+
+      const { data: purchases } = await supabase.from('digital_product_purchases')
+        .select('product_id, stripe_session_id, created_at')
+        .eq('buyer_email', email).order('created_at', { ascending: false });
+      if (!purchases || !purchases.length) return res.json({ products: [] });
+
+      // viacnásobný nákup toho istého produktu (omylom/darček) -- zober
+      // najnovšiu platbu, aby download link vždy fungoval
+      const latestSessionByProduct = {};
+      for (const p of purchases) {
+        if (!(p.product_id in latestSessionByProduct)) latestSessionByProduct[p.product_id] = p.stripe_session_id;
+      }
+
+      // zámerne BEZ .eq('active', true) -- aj skrytý/stiahnutý produkt z
+      // katalógu musí zostať stiahnuteľný pre toho, kto si ho už kúpil
+      const { data: productsData } = await supabase.from('digital_products')
+        .select('id, slug, title, file_type, cover_image_url')
+        .in('id', Object.keys(latestSessionByProduct).map(Number));
+
+      const products = (productsData || []).map(p => ({
+        id: p.id,
+        slug: p.slug,
+        title: p.title,
+        fileType: p.file_type,
+        coverImageUrl: productCoverUrl(p),
+        sessionId: latestSessionByProduct[p.id]
+      }));
+      res.json({ products });
+    } catch (e) {
+      console.error('my-products error:', e.message);
+      res.status(500).json({ error: 'Chyba servera.' });
+    }
+  });
+
   // GET /obchod/:slug — predajná stránka jedného produktu, rovnaký dizajn
   // ako /kurzy/:slug (blogLayout + KURZY_STYLE, sprístupnené cez
   // app.locals -- pozri main-app-patches/291-expose-helpers-for-shop-sales-page.js).
