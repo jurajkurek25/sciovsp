@@ -453,9 +453,11 @@ async function recomputePhysicalPrice(id) {
 }
 
 async function togglePhysicalActive(id, newActive) {
-  const fd = new FormData();
-  fd.append('active', newActive ? 'true' : 'false');
-  const res = await authedFetch('/api/admin/shop/physical-products/' + id, { method: 'PUT', body: fd });
+  const res = await authedFetch('/api/admin/shop/physical-products/' + id, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ active: newActive })
+  });
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
     alert(data.error || 'Chyba.');
