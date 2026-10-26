@@ -40,6 +40,8 @@ const PHYSICAL_FILE_MAX_BYTES = 150 * 1024 * 1024; // 150 MB (vysokorozlíšené
 const PHYSICAL_SIGNED_URL_TTL_SECONDS = 24 * 60 * 60; // Lulu stiahne súbor asynchrónne, dáme mu celý deň
 const PHYSICAL_SHIPPING_COUNTRIES = ['SK', 'CZ']; // v1: len Slovensko a Česko (pozri poznámku pri checkout session)
 const PHYSICAL_SHIPPING_LEVEL = 'MAIL'; // najlevnejšia Lulu úroveň dopravy, použitá aj na kalkuláciu ceny aj na reálnu objednávku
+const LULU_PAGE_COUNT_MIN = 32; // Lulu Print API tvrdý limit (overené priamo oproti 400 chybe z ich API)
+const LULU_PAGE_COUNT_MAX = 800;
 const PHYSICAL_PRODUCTION_DELAY_MINUTES = 120; // 2h okno na manuálne zrušenie Print-Jobu pred tlačou, ak niečo nie je v poriadku
 
 // Referenčná adresa LEN na kalkuláciu základnej ceny (tlač + doprava + DPH)
@@ -950,7 +952,9 @@ module.exports = function registerShop(app) {
         if (!title) return res.status(400).json({ error: 'Vyplň názov.' });
         if (!podPackageId) return res.status(400).json({ error: 'Vyber alebo zadaj pod_package_id.' });
         const pageCountNum = parseInt(pageCount, 10);
-        if (!pageCountNum || pageCountNum < 2) return res.status(400).json({ error: 'Zadaj platný počet strán (min. 2).' });
+        if (!pageCountNum || pageCountNum < LULU_PAGE_COUNT_MIN || pageCountNum > LULU_PAGE_COUNT_MAX) {
+          return res.status(400).json({ error: 'Lulu vyžaduje interiér s ' + LULU_PAGE_COUNT_MIN + '–' + LULU_PAGE_COUNT_MAX + ' stranami. Zadaj platný počet strán.' });
+        }
         const marginNum = (marginPercent != null && marginPercent !== '') ? parseFloat(marginPercent) : 35;
         if (!(marginNum >= 0)) return res.status(400).json({ error: 'Neplatná marža.' });
 
