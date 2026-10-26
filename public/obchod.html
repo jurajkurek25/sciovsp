@@ -115,8 +115,8 @@ footer{border-top:1px solid var(--border);padding:2.5rem;padding-bottom:calc(2.5
 
 <main class="page">
   <nav class="breadcrumb"><a href="/">SP Tréner</a><span>/</span><span>Obchod</span></nav>
-  <h1 class="hero-title">Digitálne produkty <em>na stiahnutie</em></h1>
-  <p class="hero-sub">Jednorazová platba, žiadne predplatné. Stiahnuteľné hneď po zaplatení, aj emailom ako záloha.</p>
+  <h1 class="hero-title">Produkty <em>na stiahnutie aj do poštovej schránky</em></h1>
+  <p class="hero-sub">Jednorazová platba, žiadne predplatné. Digitálne produkty hneď po zaplatení, tlačené knihy poštou.</p>
 
   <div class="filter-bar" id="filterBar" style="display:none">
     <input type="text" class="filter-search" id="filterSearch" placeholder="Hľadať produkt…" oninput="applyFilter()">
@@ -180,12 +180,18 @@ function escapeHtml(s) {
 }
 
 function productCardHtml(p) {
+  const isPhysical = p.type === 'physical';
   const priceStr = (p.priceCents / 100).toFixed(2).replace('.', ',') + ' €';
-  const cover = `<img class="course-cover" src="${escapeHtml(p.coverImageUrl)}" alt="${escapeHtml(p.title)}" loading="lazy">`;
+  const href = isPhysical ? `/obchod-tlac/${escapeHtml(p.slug)}` : `/obchod/${escapeHtml(p.slug)}`;
+  const filterType = isPhysical ? 'physical' : p.fileType;
+  const badgeLabel = isPhysical ? '📦 tlač' : p.fileType;
+  const cover = p.coverImageUrl
+    ? `<img class="course-cover" src="${escapeHtml(p.coverImageUrl)}" alt="${escapeHtml(p.title)}" loading="lazy">`
+    : '';
   const firstParagraph = (p.description || '').split(/\n\s*\n/)[0].trim();
-  return `<a class="course-card" href="/obchod/${escapeHtml(p.slug)}" data-type="${escapeHtml(p.fileType)}" data-search="${escapeHtml(((p.title || '') + ' ' + (p.description || '')).toLowerCase())}">
+  return `<a class="course-card" href="${href}" data-type="${escapeHtml(filterType)}" data-search="${escapeHtml(((p.title || '') + ' ' + (p.description || '')).toLowerCase())}">
     ${cover}
-    <span class="course-badge">${escapeHtml(p.fileType)}</span>
+    <span class="course-badge">${escapeHtml(badgeLabel)}</span>
     <h3>${escapeHtml(p.title)}</h3>
     <p>${escapeHtml(firstParagraph.slice(0, 140))}</p>
     <div class="course-card-price-row">
@@ -218,18 +224,22 @@ function selectPill(type, btn) {
 async function loadProducts() {
   const grid = document.getElementById('grid');
   try {
-    const res = await fetch('/api/shop/products');
-    const data = await res.json();
-    allProducts = data.products || [];
+    const [digitalRes, physicalRes] = await Promise.all([
+      fetch('/api/shop/products'),
+      fetch('/api/shop/physical-products').catch(() => null)
+    ]);
+    const digitalData = await digitalRes.json();
+    const physicalData = physicalRes ? await physicalRes.json().catch(() => ({ products: [] })) : { products: [] };
+    allProducts = (digitalData.products || []).concat(physicalData.products || []);
     if (!allProducts.length) {
       grid.innerHTML = '<p class="empty-state">Momentálne tu nič nie je — pozri sa neskôr.</p>';
       return;
     }
-    const types = [...new Set(allProducts.map(p => p.fileType))];
+    const types = [...new Set(allProducts.map(p => p.type === 'physical' ? 'physical' : p.fileType))];
     if (types.length > 1) {
       const pillsEl = document.getElementById('filterPills');
       pillsEl.innerHTML = `<button class="filter-pill active" onclick="selectPill('', this)">Všetko</button>` +
-        types.map(t => `<button class="filter-pill" onclick="selectPill('${t}', this)">${escapeHtml(t.toUpperCase())}</button>`).join('');
+        types.map(t => `<button class="filter-pill" onclick="selectPill('${t}', this)">${t === 'physical' ? '📦 Tlačené' : escapeHtml(t.toUpperCase())}</button>`).join('');
       document.getElementById('filterBar').style.display = 'flex';
     }
     grid.innerHTML = allProducts.map(productCardHtml).join('');

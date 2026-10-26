@@ -151,7 +151,27 @@ async function run() {
   const content = document.getElementById('content');
   const params = new URLSearchParams(window.location.search);
   const sessionId = params.get('session_id');
+  const isPhysical = params.get('type') === 'physical';
   if (!sessionId) { content.innerHTML = '<p class="hero-sub error">Chýba identifikátor platby.</p>'; return; }
+
+  async function tryFetchPhysical(attempt) {
+    try {
+      const res = await fetch('/api/shop/physical-order/' + encodeURIComponent(sessionId));
+      const data = await res.json();
+      if (!res.ok) {
+        if (attempt < 5) { setTimeout(() => tryFetchPhysical(attempt + 1), 2000); return; }
+        content.innerHTML = '<p class="hero-sub error">' + (data.error || 'Platba sa ešte nespracovala.') + '</p><p class="note">Skús obnoviť stránku o chvíľu.</p>';
+        return;
+      }
+      content.innerHTML = `
+        <h1 class="hero-title">Ďakujeme!</h1>
+        <p class="hero-sub">Objednávka knihy <strong style="color:var(--text)">${escapeHtml(data.title)}</strong> je potvrdená.</p>
+        <p class="note">📦 Posielame ju priamo z tlačiarne -- doručenie obvykle 7–14 dní. Keď sa odošle, dáme ti vedieť emailom.</p>
+      `;
+    } catch (e) {
+      content.innerHTML = '<p class="hero-sub error">Chyba pripojenia.</p>';
+    }
+  }
 
   async function tryFetch(attempt) {
     try {
@@ -172,7 +192,8 @@ async function run() {
       content.innerHTML = '<p class="hero-sub error">Chyba pripojenia.</p>';
     }
   }
-  tryFetch(0);
+
+  if (isPhysical) { tryFetchPhysical(0); } else { tryFetch(0); }
 }
 run();
 </script>

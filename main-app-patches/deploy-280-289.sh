@@ -33,6 +33,7 @@ PATCHES=(
   "292-expose-svg-cover-helpers-for-shop.js"
   "293-free-ai-daily-caps.js"
   "294-close-free-course-ai-loophole.js"
+  "295-physical-products-webhook.js"
 )
 REQUIRED_NEW_FILES=(
   "routes/shop.js"
@@ -44,6 +45,8 @@ REQUIRED_NEW_FILES=(
   "db/migrate_generated_test_pool.sql"
   "db/migrate_digital_shop.sql"
   "db/migrate_free_ai_daily_caps.sql"
+  "db/migrate_physical_products.sql"
+  "lulu.js"
 )
 
 red()   { echo -e "\033[31m$1\033[0m"; }
@@ -85,20 +88,21 @@ green "✅ Všetky nové súbory aj patche sú na mieste."
 echo
 
 bold "=== 2) Databázové migrácie (Supabase SQL Editor) ==="
-yellow "Tieto 3 súbory MUSIA byť spustené v Supabase Dashboard → SQL Editor"
+yellow "Tieto 4 súbory MUSIA byť spustené v Supabase Dashboard → SQL Editor"
 yellow "PRED reštartom appky (sú idempotentné — bezpečné spustiť aj opakovane):"
 echo "   - db/migrate_zebra_mirror_daily_caps.sql"
 echo "   - db/migrate_generated_test_pool.sql"
 echo "   - db/migrate_digital_shop.sql   (vytvorí aj privátny bucket 'digital-products')"
+echo "   - db/migrate_physical_products.sql   (vytvorí aj privátny bucket 'physical-products')"
 echo
-read -r -p "Spustil/a si už tieto 3 SQL súbory v Supabase SQL Editore? [y/N] " db_confirm
+read -r -p "Spustil/a si už tieto 4 SQL súbory v Supabase SQL Editore? [y/N] " db_confirm
 if [[ "${db_confirm,,}" != "y" ]]; then
-  red "❌ Zastavujem. Spusti najprv tie 3 SQL súbory v Supabase, potom skript spusti znova."
+  red "❌ Zastavujem. Spusti najprv tie 4 SQL súbory v Supabase, potom skript spusti znova."
   exit 1
 fi
 echo
 
-bold "=== 3) .env — SHOP_ADMIN_EMAILS ==="
+bold "=== 3) .env — SHOP_ADMIN_EMAILS a Lulu Print API ==="
 if ! grep -q "^SHOP_ADMIN_EMAILS=" .env 2>/dev/null; then
   yellow "⚠️  V .env chýba SHOP_ADMIN_EMAILS (čiarkou oddelený zoznam emailov,"
   yellow "   ktoré majú prístup do /obchod/admin). Bez neho padne na ADMIN_EMAIL."
@@ -108,6 +112,18 @@ if ! grep -q "^SHOP_ADMIN_EMAILS=" .env 2>/dev/null; then
   fi
 else
   green "✅ SHOP_ADMIN_EMAILS je nastavené v .env."
+fi
+if ! grep -q "^LULU_SANDBOX_CLIENT_KEY=" .env 2>/dev/null; then
+  yellow "⚠️  V .env chýbajú LULU_SANDBOX_CLIENT_KEY / LULU_SANDBOX_CLIENT_SECRET."
+  yellow "   Bez nich fyzické publikácie (tlačené knihy) nebudú vedieť počítať cenu"
+  yellow "   ani vytvárať objednávky u Lulu. Nastav aj LULU_ENV=sandbox (nemeň na"
+  yellow "   'production', kým flow neoveríš end-to-end v sandboxe)."
+  read -r -p "Pokračovať aj tak (fyzické publikácie budú nefunkčné, kým to nedoplníš)? [y/N] " lulu_confirm
+  if [[ "${lulu_confirm,,}" != "y" ]]; then
+    exit 1
+  fi
+else
+  green "✅ LULU_SANDBOX_CLIENT_KEY je nastavené v .env."
 fi
 echo
 
