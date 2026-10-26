@@ -46,6 +46,7 @@ REQUIRED_NEW_FILES=(
   "db/migrate_digital_shop.sql"
   "db/migrate_free_ai_daily_caps.sql"
   "db/migrate_physical_products.sql"
+  "db/migrate_physical_products_shipping_breakdown.sql"
   "lulu.js"
 )
 

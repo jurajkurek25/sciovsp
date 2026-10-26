@@ -77,6 +77,7 @@ function serializePhysicalProduct(p, { includeInternal = false } = {}) {
     out.pageCount = p.page_count;
     out.marginPercent = p.margin_percent;
     out.baseCostCents = p.base_cost_cents;
+    out.shippingCostCents = p.shipping_cost_cents;
     out.priceCalculatedAt = p.price_calculated_at;
     out.sourceDigitalProductId = p.source_digital_product_id;
     out.createdAt = p.created_at;
@@ -1067,10 +1068,16 @@ module.exports = function registerShop(app) {
         shippingAddress: LULU_PRICE_REFERENCE_ADDRESS,
         shippingOption: PHYSICAL_SHIPPING_LEVEL
       });
+      // total_cost_incl_tax je súčet tlače + dopravy + poplatkov za vybavenie
+      // (overené oproti reálnemu príkladu z Lulu dokumentácie) -- doprava je
+      // teda v base_cost_cents (a tým aj v price_cents) VŽDY zahrnutá.
+      // shipping_cost_cents sa ukladá len navyše pre viditeľný rozpis v admine.
       const baseCostCents = Math.round(parseFloat(calc.total_cost_incl_tax) * 100);
+      const shippingCostCents = calc.shipping_cost?.total_cost_incl_tax != null
+        ? Math.round(parseFloat(calc.shipping_cost.total_cost_incl_tax) * 100) : null;
       const priceCents = Math.round(baseCostCents * (1 + product.margin_percent / 100));
       const { data: updated, error } = await supabase.from('physical_products').update({
-        base_cost_cents: baseCostCents, price_cents: priceCents, currency: calc.currency || 'EUR',
+        base_cost_cents: baseCostCents, shipping_cost_cents: shippingCostCents, price_cents: priceCents, currency: calc.currency || 'EUR',
         price_calculated_at: new Date().toISOString(), updated_at: new Date().toISOString()
       }).eq('id', product.id).select().single();
       if (error) throw error;
