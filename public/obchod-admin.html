@@ -182,7 +182,11 @@ footer{border-top:1px solid var(--border);padding:2.5rem;padding-bottom:calc(2.5
           <option value="">— žiadny —</option>
         </select>
         <label>Formát tlače (Lulu pod_package_id)</label>
-        <select name="podPackageId" id="podPackageSelect" required></select>
+        <select name="podPackageId" id="podPackageSelect" required>
+          <option value="0600X0900.BW.STD.PB.060UW444.MXX">6×9″ čiernobiela, mäkká väzba, matný obal (najbežnejšie a najlevnejšie)</option>
+          <option value="0583X0827.BW.STD.PB.060UW444.MXX">A5 čiernobiela, mäkká väzba, matný obal</option>
+          <option value="0600X0900.FC.STD.PB.080CW444.GXX">6×9″ farebná, mäkká väzba, lesklý obal</option>
+        </select>
         <label>Počet strán interiéru</label>
         <input type="number" name="pageCount" min="2" required>
         <label>Marža (%, napr. 35)</label>
@@ -400,12 +404,11 @@ function escapeHtml(s) {
 let currentPhysicalProducts = [];
 
 async function loadPhysicalSetup() {
+  // Formát tlače (podPackageSelect) je natvrdo v HTML -- nezávisí od žiadneho
+  // API volania, aby ho nevedela zablokovať sieťová/serverová chyba. Tu sa
+  // len dopĺňa zoznam existujúcich digitálnych produktov do druhého selectu;
+  // ak to zlyhá, formulár zostáva použiteľný (len bez tejto voľby).
   try {
-    const presetsRes = await authedFetch('/api/admin/shop/physical-product-presets');
-    const presetsData = await presetsRes.json();
-    const podSelect = document.getElementById('podPackageSelect');
-    podSelect.innerHTML = (presetsData.presets || []).map(p => `<option value="${escapeHtml(p.id)}">${escapeHtml(p.label)}</option>`).join('');
-
     const sourceSelect = document.getElementById('sourceDigitalProductSelect');
     sourceSelect.innerHTML = '<option value="">— žiadny —</option>' +
       currentProducts.map(p => `<option value="${p.id}">${escapeHtml(p.title)}</option>`).join('');
