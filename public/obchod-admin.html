@@ -64,6 +64,13 @@ form.add button.submit{background:var(--volt);color:var(--black);border:none;bor
 .msg.error{color:var(--red)}
 .msg.ok{color:var(--green)}
 .locked{text-align:center;padding:5rem 0;color:var(--text2);font-family:var(--mono);font-size:.9rem}
+.panel-note{font-size:.78rem;color:var(--text3);margin-top:-.5rem;margin-bottom:1.25rem;line-height:1.5}
+.popup-overlay{display:none;position:fixed;inset:0;background:rgba(8,8,13,.75);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;padding:1rem;overflow-y:auto}
+.popup-overlay.show{display:flex}
+.popup{background:var(--black2);border:1px solid var(--border2);border-radius:20px;padding:2rem;max-width:480px;width:100%;position:relative;margin:auto}
+.popup-close{position:absolute;top:1rem;right:1rem;background:none;border:none;color:var(--text2);font-size:1.1rem;cursor:pointer}
+.popup h3{font-family:var(--serif);font-size:1.4rem;margin-bottom:.5rem;padding-right:1.5rem}
+.popup .panel-note{margin-top:0}
 footer{border-top:1px solid var(--border);padding:2.5rem;padding-bottom:calc(2.5rem + env(safe-area-inset-bottom));display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
 .footer-logo{font-family:var(--mono);font-size:12px;letter-spacing:.15em;color:var(--text3)}
 .footer-links{display:flex;gap:1.5rem;flex-wrap:wrap}
@@ -91,6 +98,7 @@ footer{border-top:1px solid var(--border);padding:2.5rem;padding-bottom:calc(2.5
   td{border-bottom:1px solid var(--border);padding:.6rem .9rem}
   td:last-child{border-bottom:none}
   td[data-label]::before{content:attr(data-label);display:block;font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:.2rem}
+  .row-actions{display:flex;flex-direction:column;gap:.4rem}
   .row-actions button{width:100%;padding:.6rem}
 }
 </style>
@@ -122,6 +130,7 @@ footer{border-top:1px solid var(--border);padding:2.5rem;padding-bottom:calc(2.5
   <div id="app" style="display:none;">
     <div class="panel">
       <h2>Produkty</h2>
+      <p class="panel-note">Úprava názvu, popisu, ceny alebo súboru sa prejaví okamžite pre všetkých — aj pre tých, čo si produkt už kúpili (ich link na stiahnutie sa prepočíta na nový súbor), aj pre nových zákazníkov.</p>
       <table>
         <thead><tr><th>Názov</th><th>Typ</th><th>Cena</th><th>Stav</th><th></th></tr></thead>
         <tbody id="productRows"></tbody>
@@ -154,6 +163,29 @@ footer{border-top:1px solid var(--border);padding:2.5rem;padding-bottom:calc(2.5
     </div>
   </div>
 </main>
+
+<div class="popup-overlay" id="editOverlay" onclick="if(event.target===this) closeEditProduct()">
+  <div class="popup">
+    <button class="popup-close" onclick="closeEditProduct()">✕</button>
+    <h3 id="editTitle">Upraviť produkt</h3>
+    <p class="panel-note">Zmena sa prejaví pre všetkých — aj pre tých, čo si produkt už kúpili, aj pre nových zákazníkov.</p>
+    <form class="add" id="editForm">
+      <input type="hidden" name="id" id="editId">
+      <label>Názov</label>
+      <input type="text" name="title" id="editProductTitle" required>
+      <label>Popis</label>
+      <textarea name="description" id="editDescription" rows="3"></textarea>
+      <label>Cena (centy, napr. 700 = 7,00 €)</label>
+      <input type="number" name="priceCents" id="editPriceCents" min="50" required>
+      <label>Nahradiť súbor produktu (voliteľné — necháš prázdne, ak sa súbor nemení)</label>
+      <input type="file" name="file" id="editFile">
+      <label>Nahradiť obal (voliteľné, PNG/JPG/WEBP)</label>
+      <input type="file" name="cover" id="editCover" accept="image/png,image/jpeg,image/webp">
+      <button class="submit" type="submit">Uložiť zmeny</button>
+      <div class="msg" id="editMsg"></div>
+    </form>
+  </div>
+</div>
 
 <footer>
   <div class="footer-logo">SP TRÉNER © 2026</div>
@@ -226,6 +258,8 @@ async function authedFetch(url, options = {}) {
   return fetch(url, options);
 }
 
+let currentProducts = [];
+
 async function loadProducts() {
   const res = await authedFetch('/api/admin/shop/products');
   if (res.status === 403) {
@@ -233,16 +267,18 @@ async function loadProducts() {
     return;
   }
   const data = await res.json();
+  currentProducts = data.products || [];
   document.getElementById('locked').style.display = 'none';
   document.getElementById('app').style.display = 'block';
   const rows = document.getElementById('productRows');
-  rows.innerHTML = (data.products || []).map(p => `
+  rows.innerHTML = currentProducts.map(p => `
     <tr class="${p.active ? '' : 'inactive'}">
       <td data-label="Názov">${escapeHtml(p.title)}</td>
       <td data-label="Typ">${p.fileType}</td>
       <td data-label="Cena">${(p.priceCents / 100).toFixed(2)} €</td>
       <td data-label="Stav">${p.active ? 'aktívny' : 'skrytý'}</td>
       <td class="row-actions">
+        <button onclick="openEditProduct(${p.id})">Upraviť</button>
         <button onclick="toggleActive(${p.id}, ${!p.active})">${p.active ? 'Skryť' : 'Zobraziť'}</button>
       </td>
     </tr>
@@ -259,6 +295,46 @@ async function toggleActive(id, newActive) {
   }
   loadProducts();
 }
+
+function openEditProduct(id) {
+  const p = currentProducts.find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('editId').value = p.id;
+  document.getElementById('editTitle').textContent = 'Upraviť: ' + p.title;
+  document.getElementById('editProductTitle').value = p.title;
+  document.getElementById('editDescription').value = p.description || '';
+  document.getElementById('editPriceCents').value = p.priceCents;
+  document.getElementById('editFile').value = '';
+  document.getElementById('editCover').value = '';
+  document.getElementById('editMsg').textContent = '';
+  document.getElementById('editMsg').className = 'msg';
+  document.getElementById('editOverlay').classList.add('show');
+}
+function closeEditProduct() {
+  document.getElementById('editOverlay').classList.remove('show');
+}
+
+document.getElementById('editForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const msg = document.getElementById('editMsg');
+  msg.textContent = '';
+  msg.className = 'msg';
+  const id = document.getElementById('editId').value;
+  const fd = new FormData(e.target);
+  fd.delete('id');
+  try {
+    const res = await authedFetch('/api/admin/shop/products/' + id, { method: 'PUT', body: fd });
+    const data = await res.json();
+    if (!res.ok) { msg.textContent = data.error || 'Chyba.'; msg.className = 'msg error'; return; }
+    msg.textContent = 'Uložené — zmena je živá pre všetkých zákazníkov.';
+    msg.className = 'msg ok';
+    loadProducts();
+    setTimeout(closeEditProduct, 900);
+  } catch (err) {
+    msg.textContent = 'Chyba pripojenia.';
+    msg.className = 'msg error';
+  }
+});
 
 document.getElementById('addForm').addEventListener('submit', async (e) => {
   e.preventDefault();
