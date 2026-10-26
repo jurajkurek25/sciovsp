@@ -102,8 +102,15 @@ async function handlePhysicalProductPurchase(session) {
   const { data: product } = await supabase.from('physical_products').select('*').eq('id', session.metadata.physicalProductId).maybeSingle();
   if (!product) { console.error('Physical shop webhook: kniha', session.metadata.physicalProductId, 'sa nenašla.'); return; }
 
-  const shippingDetails = session.shipping_details || session.customer_details || {};
+  // Stripe presunul shipping_details z vrcholovej úrovne Checkout Session do
+  // collected_information.shipping_details (API verzia "basil", 2025-03-31).
+  // Čítame oboje -- novšie (collected_information) má prednosť, starší tvar
+  // je fallback pre prípad staršej zapečatenej API verzie knižnice stripe.
+  const shippingDetails = session.collected_information?.shipping_details || session.shipping_details || {};
   const addr = shippingDetails.address || {};
+  if (!addr.line1) {
+    console.error('🚨 physical_product_purchase: Stripe session', session.id, 'neobsahuje doručovaciu adresu (skontroluj Stripe API verziu/shipping_address_collection) -- Lulu objednávku pravdepodobne odmietne.');
+  }
   const shippingAddress = {
     name: shippingDetails.name || buyerEmail,
     street1: addr.line1 || '',
