@@ -31,6 +31,8 @@ PATCHES=(
   "290-add-obchod-to-site-nav.js"
   "291-expose-helpers-for-shop-sales-page.js"
   "292-expose-svg-cover-helpers-for-shop.js"
+  "293-free-ai-daily-caps.js"
+  "294-close-free-course-ai-loophole.js"
 )
 REQUIRED_NEW_FILES=(
   "routes/shop.js"
@@ -41,6 +43,7 @@ REQUIRED_NEW_FILES=(
   "db/migrate_zebra_mirror_daily_caps.sql"
   "db/migrate_generated_test_pool.sql"
   "db/migrate_digital_shop.sql"
+  "db/migrate_free_ai_daily_caps.sql"
 )
 
 red()   { echo -e "\033[31m$1\033[0m"; }
