@@ -70,7 +70,7 @@ function serializePhysicalProduct(p, { includeInternal = false } = {}) {
   const out = {
     id: p.id, slug: p.slug, title: p.title, description: p.description,
     priceCents: p.price_cents, currency: p.currency || 'EUR',
-    coverImageUrl: p.cover_image_url || null, active: p.active, type: 'physical'
+    coverImageUrl: physicalProductCoverUrl(p), active: p.active, type: 'physical'
   };
   if (includeInternal) {
     out.podPackageId = p.pod_package_id;
@@ -222,6 +222,12 @@ function productCoverUrl(p) {
   return p.cover_image_url || (BASE_URL + '/obchod-cover/' + p.slug + '.svg');
 }
 
+// Rovnaký princíp pre tlačené knihy (fyzické publikácie) -- vlastný obal, ak
+// ho admin nahral, inak brandovaný SVG z /obchod-tlac-cover/:slug.svg.
+function physicalProductCoverUrl(p) {
+  return p.cover_image_url || (BASE_URL + '/obchod-tlac-cover/' + p.slug + '.svg');
+}
+
 function serializeProduct(p, { includeInternal = false } = {}) {
   const out = {
     id: p.id,
@@ -272,6 +278,52 @@ module.exports = function registerShop(app) {
       const { data: product } = await supabase.from('digital_products').select('title, file_type').eq('slug', req.params.slug).maybeSingle();
       const title = product ? product.title : 'SP Tréner';
       const label = product ? (product.file_type || 'produkt').toUpperCase() : 'OBCHOD';
+      const lines = wrapSvgLines(title, 24, 4);
+      const lineHeight = 62;
+      const titleBlockHeight = lines.length * lineHeight;
+      const startY = 315 - titleBlockHeight / 2 + lineHeight * 0.7;
+      const tspans = lines.map((line, i) => `<tspan x="80" y="${startY + i * lineHeight}">${escapeXml(line)}</tspan>`).join('');
+      const svg = `<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f0f18"/>
+      <stop offset="100%" stop-color="#08080d"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="88%" cy="10%" r="60%">
+      <stop offset="0%" stop-color="#c8ff00" stop-opacity="0.28"/>
+      <stop offset="100%" stop-color="#c8ff00" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect width="1200" height="630" fill="url(#glow)"/>
+  <circle cx="1130" cy="55" r="8" fill="#7c5cff"/>
+  <text x="80" y="78" font-family="'DM Mono', monospace" font-size="24" letter-spacing="4" fill="#eeeef5">SP TRÉNER</text>
+  <text x="80" y="${Math.max(startY - 55, 130)}" font-family="'DM Mono', monospace" font-size="22" letter-spacing="2" fill="#c8ff00">${escapeXml(label)}</text>
+  <text font-family="Georgia, serif" font-size="52" fill="#eeeef5">${tspans}</text>
+  <rect x="80" y="565" width="64" height="4" fill="#7c5cff"/>
+</svg>`;
+      res.type('image/svg+xml');
+      res.set('Cache-Control', 'public, max-age=3600');
+      res.send(svg);
+    } catch (e) {
+      res.status(500).send('');
+    }
+  });
+
+  // GET /obchod-tlac-cover/:slug.svg — rovnaký brandovaný SVG cover ako
+  // /obchod-cover/:slug.svg, len pre fyzické publikácie (tabuľka
+  // physical_products namiesto digital_products).
+  app.get('/obchod-tlac-cover/:slug.svg', async (req, res) => {
+    const escapeXml = app.locals.escapeXml;
+    const wrapSvgLines = app.locals.wrapSvgLines;
+    if (!escapeXml || !wrapSvgLines) {
+      console.error('obchod-tlac-cover: app.locals helpers chýbajú -- je aplikovaný main-app-patches/292-expose-svg-cover-helpers-for-shop.js?');
+      return res.status(500).send('');
+    }
+    try {
+      const { data: product } = await supabase.from('physical_products').select('title').eq('slug', req.params.slug).maybeSingle();
+      const title = product ? product.title : 'SP Tréner';
+      const label = product ? 'TLAČENÁ KNIHA' : 'OBCHOD';
       const lines = wrapSvgLines(title, 24, 4);
       const lineHeight = 62;
       const titleBlockHeight = lines.length * lineHeight;
@@ -743,7 +795,7 @@ module.exports = function registerShop(app) {
             product_data: {
               name: product.title,
               ...(product.description ? { description: firstParagraph(product.description).slice(0, 300) } : {}),
-              ...(product.cover_image_url ? { images: [product.cover_image_url] } : {})
+              images: [physicalProductCoverUrl(product)]
             }
           },
           quantity: 1
@@ -825,17 +877,20 @@ module.exports = function registerShop(app) {
 
       const priceNum = (product.price_cents / 100).toFixed(2);
       const priceStr = priceNum.replace('.', ',') + ' €';
-      const coverHtml = product.cover_image_url
-        ? `<img class="course-hero-cover" src="${escapeHtml(product.cover_image_url)}" alt="${escapeHtml(product.title)}" loading="lazy">` : '';
+      const coverHtml = `<img class="course-hero-cover" src="${escapeHtml(physicalProductCoverUrl(product))}" alt="${escapeHtml(product.title)}" loading="lazy">`;
       const buyBoxHtml = `<div class="course-buy-box">
-        <span class="course-price-tag">${priceStr}</span>
+        <div class="buy-price-col">
+          <span class="course-price-tag">${priceStr}</span>
+          <span class="shipping-note">📦 ${escapeHtml(T.shipNote)}</span>
+        </div>
         <button class="course-buy-btn" onclick="openObchodCheckout()">${escapeHtml(T.buy)} →</button>
-      </div>
-      <p style="font-family:var(--mono);font-size:.78rem;color:var(--text3);margin-top:-.5rem">${escapeHtml(T.shipNote)}</p>`;
+      </div>`;
 
       const body = `${KURZY_STYLE}
       <style>
       .product-badge{display:inline-block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--volt);background:rgba(200,255,0,.08);border:1px solid rgba(200,255,0,.2);padding:3px 9px;border-radius:20px;margin-bottom:.75rem}
+      .buy-price-col{display:flex;flex-direction:column;align-items:flex-start;gap:.5rem}
+      .shipping-note{display:inline-flex;align-items:center;gap:.35rem;font-family:var(--mono);font-size:.72rem;color:var(--text2);background:rgba(124,92,255,.08);border:1px solid rgba(124,92,255,.25);padding:.4rem .7rem;border-radius:9px;width:fit-content}
       .popup-overlay{display:none;position:fixed;inset:0;background:rgba(8,8,13,.75);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;padding:1rem}
       .popup-overlay.show{display:flex}
       .popup{background:var(--black2);border:1px solid var(--border2);border-radius:20px;padding:2rem;max-width:400px;width:100%;position:relative}
@@ -908,7 +963,7 @@ module.exports = function registerShop(app) {
       const jsonLd = {
         '@context': 'https://schema.org', '@type': 'Product', name: product.title, description: metaDescription,
         offers: { '@type': 'Offer', price: priceNum, priceCurrency: product.currency || 'EUR', url: BASE_URL + '/obchod-tlac/' + product.slug, availability: 'https://schema.org/InStock' },
-        ...(product.cover_image_url ? { image: product.cover_image_url } : {})
+        image: physicalProductCoverUrl(product)
       };
 
       res.send(blogLayout({
