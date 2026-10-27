@@ -13,7 +13,23 @@ const { createClient } = require('@supabase/supabase-js');
 const Stripe = require('stripe');
 const multer = require('multer');
 const crypto = require('crypto');
+const sanitizeHtml = require('sanitize-html');
 const lulu = require('../lulu');
+
+// Rich-text predajný obsah z Quill editora v /obchod/admin (rovnaký vzor ako
+// courses.sales_content v dash-service) -- sanitizuje sa pri uložení, nie až
+// pri vykresľovaní, presne ako kurzy. Bez tohto by admin účet s XSS payloadom
+// v HTML mohol zasiahnuť kohokoľvek, kto si predajnú stránku zobrazí.
+const SALES_CONTENT_SANITIZE_OPTS = {
+  allowedTags: ['p', 'br', 'strong', 'b', 'em', 'i', 'h2', 'h3', 'ul', 'ol', 'li', 'blockquote', 'a'],
+  allowedAttributes: { a: ['href', 'target', 'rel'] },
+  allowedSchemes: ['http', 'https', 'mailto'],
+  transformTags: { a: sanitizeHtml.simpleTransform('a', { target: '_blank', rel: 'noopener noreferrer nofollow' }) }
+};
+function sanitizeSalesContent(html) {
+  if (!html) return html;
+  return sanitizeHtml(html, SALES_CONTENT_SANITIZE_OPTS);
+}
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
@@ -80,6 +96,7 @@ function serializePhysicalProduct(p, { includeInternal = false } = {}) {
     out.shippingCostCents = p.shipping_cost_cents;
     out.priceCalculatedAt = p.price_calculated_at;
     out.sourceDigitalProductId = p.source_digital_product_id;
+    out.salesContent = p.sales_content;
     out.createdAt = p.created_at;
   }
   return out;
@@ -249,6 +266,7 @@ function serializeProduct(p, { includeInternal = false } = {}) {
   };
   if (includeInternal) {
     out.storagePath = p.storage_path;
+    out.salesContent = p.sales_content;
     out.createdAt = p.created_at;
     out.updatedAt = p.updated_at;
   }
@@ -549,7 +567,7 @@ module.exports = function registerShop(app) {
         <h1 class="hero-title">${escapeHtml(product.title)}</h1>
         ${coverHtml}
         ${buyBoxHtml}
-        ${product.description ? `<article class="prose course-sales">${descriptionHtml(product.description, escapeHtml)}</article>` : ''}
+        ${product.sales_content ? `<article class="prose course-sales">${product.sales_content}</article>` : (product.description ? `<article class="prose course-sales">${descriptionHtml(product.description, escapeHtml)}</article>` : '')}
         ${buyBoxHtml}
       </main>
 
@@ -635,7 +653,7 @@ module.exports = function registerShop(app) {
     productUpload.fields([{ name: 'file', maxCount: 1 }, { name: 'cover', maxCount: 1 }])(req, res, async (err) => {
       if (err) return res.status(400).json({ error: 'Nahratie súboru zlyhalo (max ' + Math.round(PRODUCT_FILE_MAX_BYTES / 1024 / 1024) + ' MB).' });
       try {
-        const { title, description, priceCents, fileType } = req.body || {};
+        const { title, description, priceCents, fileType, salesContent } = req.body || {};
         const priceNum = parseInt(priceCents, 10);
         if (!title || !priceNum || priceNum < 50) return res.status(400).json({ error: 'Vyplň názov a platnú cenu (min 0,50 €).' });
         if (!ALLOWED_FILE_TYPES.includes(fileType)) return res.status(400).json({ error: 'Neplatný typ súboru. Povolené: ' + ALLOWED_FILE_TYPES.join(', ') + '.' });
@@ -671,7 +689,8 @@ module.exports = function registerShop(app) {
 
         const { data: product, error: insertErr } = await supabase.from('digital_products').insert({
           slug, title, description: description || null, price_cents: priceNum,
-          file_type: fileType, storage_path: storagePath, cover_image_url: coverImageUrl, active: true
+          file_type: fileType, storage_path: storagePath, cover_image_url: coverImageUrl, active: true,
+          sales_content: salesContent ? sanitizeSalesContent(salesContent) : null
         }).select().single();
         if (insertErr) throw insertErr;
         console.log('✅ Shop: nový produkt', slug, 'od', req.adminEmail);
@@ -692,9 +711,10 @@ module.exports = function registerShop(app) {
         if (!existing) return res.status(404).json({ error: 'Produkt sa nenašiel.' });
 
         const patch = { updated_at: new Date().toISOString() };
-        const { title, description, priceCents, active } = req.body || {};
+        const { title, description, priceCents, active, salesContent } = req.body || {};
         if (title != null && title !== '') patch.title = title;
         if (description != null) patch.description = description || null;
+        if (salesContent != null) patch.sales_content = salesContent ? sanitizeSalesContent(salesContent) : null;
         if (priceCents != null && priceCents !== '') {
           const priceNum = parseInt(priceCents, 10);
           if (!priceNum || priceNum < 50) return res.status(400).json({ error: 'Neplatná cena.' });
@@ -918,7 +938,7 @@ module.exports = function registerShop(app) {
         <h1 class="hero-title">${escapeHtml(product.title)}</h1>
         ${coverHtml}
         ${buyBoxHtml}
-        ${product.description ? `<article class="prose course-sales">${descriptionHtml(product.description, escapeHtml)}</article>` : ''}
+        ${product.sales_content ? `<article class="prose course-sales">${product.sales_content}</article>` : (product.description ? `<article class="prose course-sales">${descriptionHtml(product.description, escapeHtml)}</article>` : '')}
         ${buyBoxHtml}
       </main>
 
@@ -1011,7 +1031,7 @@ module.exports = function registerShop(app) {
     physicalUpload.fields([{ name: 'interior', maxCount: 1 }, { name: 'cover', maxCount: 1 }])(req, res, async (err) => {
       if (err) return res.status(400).json({ error: 'Nahratie súboru zlyhalo (max ' + Math.round(PHYSICAL_FILE_MAX_BYTES / 1024 / 1024) + ' MB na súbor).' });
       try {
-        const { title, description, sourceDigitalProductId, podPackageId, pageCount, marginPercent } = req.body || {};
+        const { title, description, sourceDigitalProductId, podPackageId, pageCount, marginPercent, salesContent } = req.body || {};
         if (!title) return res.status(400).json({ error: 'Vyplň názov.' });
         if (!podPackageId) return res.status(400).json({ error: 'Vyber alebo zadaj pod_package_id.' });
         const pageCountNum = parseInt(pageCount, 10);
@@ -1049,7 +1069,8 @@ module.exports = function registerShop(app) {
           source_digital_product_id: sourceDigitalProductId ? parseInt(sourceDigitalProductId, 10) : null,
           pod_package_id: podPackageId, page_count: pageCountNum,
           interior_storage_path: interiorPath, cover_storage_path: coverPath,
-          margin_percent: marginNum, active: false
+          margin_percent: marginNum, active: false,
+          sales_content: salesContent ? sanitizeSalesContent(salesContent) : null
         }).select().single();
         if (insertErr) throw insertErr;
         console.log('✅ Shop: nová tlačená kniha', slug, 'od', req.adminEmail, '-- zatiaľ NEAKTÍVNA, treba prepočítať cenu a aktivovať.');
@@ -1102,9 +1123,10 @@ module.exports = function registerShop(app) {
       const { data: existing } = await supabase.from('physical_products').select('*').eq('id', req.params.id).maybeSingle();
       if (!existing) return res.status(404).json({ error: 'Produkt sa nenašiel.' });
       const patch = { updated_at: new Date().toISOString() };
-      const { title, description, marginPercent, active } = req.body || {};
+      const { title, description, marginPercent, active, salesContent } = req.body || {};
       if (title != null && title !== '') patch.title = title;
       if (description != null) patch.description = description || null;
+      if (salesContent != null) patch.sales_content = salesContent ? sanitizeSalesContent(salesContent) : null;
       if (marginPercent != null && marginPercent !== '') {
         const m = parseFloat(marginPercent);
         if (!(m >= 0)) return res.status(400).json({ error: 'Neplatná marža.' });

@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Administrácia obchodu — SP Tréner</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
 <style>
 @font-face{font-family:'DM Mono';font-style:normal;font-weight:400;font-display:swap;src:url(/fonts/dm-mono-400-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
 @font-face{font-family:'DM Mono';font-style:normal;font-weight:400;font-display:swap;src:url(/fonts/dm-mono-400-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
@@ -101,6 +103,22 @@ footer{border-top:1px solid var(--border);padding:2.5rem;padding-bottom:calc(2.5
   .row-actions{display:flex;flex-direction:column;gap:.4rem}
   .row-actions button{width:100%;padding:.6rem}
 }
+.rich-editor{background:var(--black3);border:1px solid var(--border2);border-radius:8px;margin-top:.6rem;overflow:hidden}
+.rich-editor .ql-toolbar{background:var(--black2);border:none;border-bottom:1px solid var(--border2)}
+.rich-editor .ql-toolbar .ql-stroke{stroke:var(--text2)}
+.rich-editor .ql-toolbar .ql-fill{fill:var(--text2)}
+.rich-editor .ql-toolbar .ql-picker-label{color:var(--text2)}
+.rich-editor .ql-toolbar button:hover .ql-stroke,.rich-editor .ql-toolbar button.ql-active .ql-stroke{stroke:var(--volt)}
+.rich-editor .ql-toolbar button:hover .ql-fill,.rich-editor .ql-toolbar button.ql-active .ql-fill{fill:var(--volt)}
+.rich-editor .ql-toolbar button.ql-active .ql-picker-label{color:var(--volt)}
+.rich-editor .ql-container{border:none;font-family:var(--sans);font-size:.9rem;color:var(--text);min-height:200px}
+.rich-editor .ql-editor{min-height:200px}
+.rich-editor .ql-editor.ql-blank::before{color:var(--text3);font-style:normal}
+.rich-editor .ql-editor h2{font-family:var(--serif);font-size:1.4rem}
+.rich-editor .ql-editor h3{font-weight:700}
+.rich-editor .ql-editor a{color:var(--purple2)}
+.rich-editor .ql-picker-options{background:var(--black2);border:1px solid var(--border2)}
+.rich-editor .ql-picker-item{color:var(--text2)}
 </style>
 </head>
 <body>
@@ -141,8 +159,10 @@ footer{border-top:1px solid var(--border);padding:2.5rem;padding-bottom:calc(2.5
       <form class="add" id="addForm">
         <label>Názov</label>
         <input type="text" name="title" required>
-        <label>Popis</label>
+        <label>Krátky popis (karta v zozname + meta description, cca 1-2 vety)</label>
         <textarea name="description" rows="3"></textarea>
+        <label>Predajný text (zobrazí sa na stránke produktu — nadpisy, tučné, zoznamy)</label>
+        <div class="rich-editor"><div class="add-sales-editor" data-placeholder="Napíš predajný text produktu — nadpisy, tučné písmo, zoznamy..."></div></div>
         <label>Cena (centy, napr. 700 = 7,00 €)</label>
         <input type="number" name="priceCents" min="50" required>
         <label>Typ súboru</label>
@@ -175,8 +195,10 @@ footer{border-top:1px solid var(--border);padding:2.5rem;padding-bottom:calc(2.5
       <form class="add" id="addPhysicalForm">
         <label>Názov</label>
         <input type="text" name="title" required>
-        <label>Popis</label>
+        <label>Krátky popis (karta v zozname + meta description, cca 1-2 vety)</label>
         <textarea name="description" rows="3"></textarea>
+        <label>Predajný text (zobrazí sa na stránke knihy — nadpisy, tučné, zoznamy)</label>
+        <div class="rich-editor"><div class="add-physical-sales-editor" data-placeholder="Napíš predajný text knihy — nadpisy, tučné písmo, zoznamy..."></div></div>
         <label>Z existujúceho digitálneho produktu (voliteľné)</label>
         <select name="sourceDigitalProductId" id="sourceDigitalProductSelect">
           <option value="">— žiadny —</option>
@@ -211,8 +233,10 @@ footer{border-top:1px solid var(--border);padding:2.5rem;padding-bottom:calc(2.5
       <input type="hidden" name="id" id="editId">
       <label>Názov</label>
       <input type="text" name="title" id="editProductTitle" required>
-      <label>Popis</label>
+      <label>Krátky popis (karta v zozname + meta description, cca 1-2 vety)</label>
       <textarea name="description" id="editDescription" rows="3"></textarea>
+      <label>Predajný text (zobrazí sa na stránke produktu — nadpisy, tučné, zoznamy)</label>
+      <div class="rich-editor"><div class="edit-sales-editor" data-placeholder="Napíš predajný text produktu — nadpisy, tučné písmo, zoznamy..."></div></div>
       <label>Cena (centy, napr. 700 = 7,00 €)</label>
       <input type="number" name="priceCents" id="editPriceCents" min="50" required>
       <label>Nahradiť súbor produktu (voliteľné — necháš prázdne, ak sa súbor nemení)</label>
@@ -271,6 +295,44 @@ function switchBlogLang(l){
 })();
 
 let supabaseClient, accessToken;
+
+// ── Rich text editor (Quill) -- rovnaký vzor ako dash-service/public/index.html
+// (courses.sales_content). Tri formuláre, tri samostatné instancie.
+function initRichEditor(containerClass, initialHtml) {
+  const container = document.querySelector('.' + containerClass);
+  if (typeof Quill === 'undefined') return fallbackTextEditor(container, initialHtml);
+  try {
+    const quill = new Quill(container, {
+      theme: 'snow',
+      placeholder: container.dataset.placeholder || '',
+      modules: {
+        toolbar: [
+          [{ header: [2, 3, false] }],
+          ['bold', 'italic'],
+          [{ list: 'ordered' }, { list: 'bullet' }],
+          ['blockquote', 'link'],
+          ['clean']
+        ]
+      }
+    });
+    if (initialHtml) quill.root.innerHTML = initialHtml;
+    return quill;
+  } catch (err) {
+    return fallbackTextEditor(container, initialHtml);
+  }
+}
+function fallbackTextEditor(container, initialHtml) {
+  container.innerHTML = '';
+  const ta = document.createElement('textarea');
+  ta.style.cssText = 'width:100%;min-height:200px;padding:.8rem;background:transparent;border:none;color:var(--text);font-family:var(--sans);font-size:.9rem;resize:vertical;display:block';
+  ta.value = initialHtml || '';
+  ta.placeholder = 'Rich editor sa nepodarilo načítať — vlož HTML priamo (h2, p, ul/li, strong...).';
+  container.appendChild(ta);
+  return { getText: () => ta.value, root: { get innerHTML() { return ta.value; }, set innerHTML(v) { ta.value = v; } } };
+}
+const addSalesQuill = initRichEditor('add-sales-editor', '');
+const editSalesQuill = initRichEditor('edit-sales-editor', '');
+const addPhysicalSalesQuill = initRichEditor('add-physical-sales-editor', '');
 
 async function init() {
   const cfgRes = await fetch('/api/shop/config');
@@ -343,6 +405,7 @@ function openEditProduct(id) {
   document.getElementById('editTitle').textContent = 'Upraviť: ' + p.title;
   document.getElementById('editProductTitle').value = p.title;
   document.getElementById('editDescription').value = p.description || '';
+  editSalesQuill.root.innerHTML = p.salesContent || '';
   document.getElementById('editPriceCents').value = p.priceCents;
   document.getElementById('editFile').value = '';
   document.getElementById('editCover').value = '';
@@ -362,6 +425,7 @@ document.getElementById('editForm').addEventListener('submit', async (e) => {
   const id = document.getElementById('editId').value;
   const fd = new FormData(e.target);
   fd.delete('id');
+  fd.set('salesContent', editSalesQuill.getText().trim() ? editSalesQuill.root.innerHTML : '');
   try {
     const res = await authedFetch('/api/admin/shop/products/' + id, { method: 'PUT', body: fd });
     const data = await res.json();
@@ -382,6 +446,7 @@ document.getElementById('addForm').addEventListener('submit', async (e) => {
   msg.textContent = '';
   msg.className = 'msg';
   const fd = new FormData(e.target);
+  fd.set('salesContent', addSalesQuill.getText().trim() ? addSalesQuill.root.innerHTML : '');
   try {
     const res = await authedFetch('/api/admin/shop/products', { method: 'POST', body: fd });
     const data = await res.json();
@@ -389,6 +454,7 @@ document.getElementById('addForm').addEventListener('submit', async (e) => {
     msg.textContent = 'Produkt vytvorený.';
     msg.className = 'msg ok';
     e.target.reset();
+    addSalesQuill.root.innerHTML = '';
     loadProducts();
   } catch (err) {
     msg.textContent = 'Chyba pripojenia.';
@@ -471,6 +537,7 @@ document.getElementById('addPhysicalForm').addEventListener('submit', async (e) 
   msg.textContent = '';
   msg.className = 'msg';
   const fd = new FormData(e.target);
+  fd.set('salesContent', addPhysicalSalesQuill.getText().trim() ? addPhysicalSalesQuill.root.innerHTML : '');
   try {
     const res = await authedFetch('/api/admin/shop/physical-products', { method: 'POST', body: fd });
     const data = await res.json();
@@ -478,6 +545,7 @@ document.getElementById('addPhysicalForm').addEventListener('submit', async (e) 
     msg.textContent = 'Kniha vytvorená (zatiaľ skrytá) — teraz klikni „Prepočítať cenu“ a potom „Aktivovať“.';
     msg.className = 'msg ok';
     e.target.reset();
+    addPhysicalSalesQuill.root.innerHTML = '';
     loadPhysicalProducts();
   } catch (err) {
     msg.textContent = 'Chyba pripojenia.';
