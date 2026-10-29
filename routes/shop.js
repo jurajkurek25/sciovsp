@@ -817,7 +817,18 @@ module.exports = function registerShop(app) {
   // kalkulovaná -- medzinárodné doručenie by potrebovalo cenu počítanú
   // per-adresa, čo statická Stripe Checkout session nevie).
   app.post('/api/shop/physical-checkout', async (req, res) => {
-    const { physicalProductId, email, vopAccepted } = req.body || {};
+    const { physicalProductId, vopAccepted } = req.body || {};
+    let email = req.body && req.body.email;
+    // Prihlásený používateľ: email sa berie VÝHRADNE z overeného Supabase
+    // tokenu (Google účet), nie z tela requestu -- zabraňuje, aby si niekto
+    // prihlásený poslal cudzí email a objednávku/potvrdenie nasmeroval inam.
+    const auth = req.headers.authorization || '';
+    const token = auth.startsWith('Bearer ') ? auth.slice(7) : null;
+    if (token) {
+      const { data: userData, error: userErr } = await supabase.auth.getUser(token);
+      if (userErr || !userData.user) return res.status(401).json({ error: 'Neplatná session.' });
+      email = userData.user.email;
+    }
     if (!email || !email.includes('@')) return res.status(400).json({ error: 'Zadaj platný e-mail.' });
     if (!vopAccepted) return res.status(400).json({ error: 'Musíš súhlasiť s obchodnými podmienkami.' });
     if (!physicalProductId) return res.status(400).json({ error: 'Chýba kniha.' });
@@ -953,6 +964,7 @@ module.exports = function registerShop(app) {
           <button class="popup-close" onclick="closeObchodCheckout()">✕</button>
           <h3>${escapeHtml(product.title)}</h3>
           <form id="checkoutForm">
+            <div id="checkoutEmailLoggedIn" style="display:none;font-family:var(--mono);font-size:.8rem;color:var(--text2);margin-bottom:1rem">Objednávka pôjde na: <strong id="checkoutEmailDisplay" style="color:var(--text)"></strong></div>
             <input type="email" id="checkoutEmail" placeholder="meno@gmail.com" required>
             <label class="consent">
               <input type="checkbox" id="checkoutVop" required>
@@ -963,10 +975,34 @@ module.exports = function registerShop(app) {
           </form>
         </div>
       </div>
+      <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
       <script>
       const obchodOverlay = document.getElementById('checkoutOverlay');
+      let obchodAccessToken = null;
       function openObchodCheckout() { document.getElementById('checkoutError').textContent = ''; obchodOverlay.classList.add('show'); }
       function closeObchodCheckout() { obchodOverlay.classList.remove('show'); }
+
+      // Prihlásený zákazník -- email sa potiahne zo session (Google účet),
+      // nepýta sa znova. Neprihlásený -- pôvodné správanie, zadá ho ručne.
+      (async function initObchodAuth() {
+        try {
+          const cfgRes = await fetch('/api/shop/config');
+          const cfg = await cfgRes.json();
+          const supa = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+          const { data: { session } } = await supa.auth.getSession();
+          if (session) {
+            obchodAccessToken = session.access_token;
+            const email = session.user && session.user.email;
+            document.getElementById('checkoutEmail').style.display = 'none';
+            document.getElementById('checkoutEmail').required = false;
+            document.getElementById('checkoutEmailDisplay').textContent = email || '';
+            document.getElementById('checkoutEmailLoggedIn').style.display = 'block';
+          }
+        } catch (e) {
+          console.error('obchod auth check error:', e);
+        }
+      })();
+
       document.getElementById('checkoutForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const submitBtn = document.getElementById('checkoutSubmit');
@@ -974,9 +1010,11 @@ module.exports = function registerShop(app) {
         errorEl.textContent = '';
         submitBtn.disabled = true;
         try {
+          const headers = { 'Content-Type': 'application/json' };
+          if (obchodAccessToken) headers['Authorization'] = 'Bearer ' + obchodAccessToken;
           const res = await fetch('/api/shop/physical-checkout', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers,
             body: JSON.stringify({
               physicalProductId: ${JSON.stringify(product.id)},
               email: document.getElementById('checkoutEmail').value,
