@@ -770,6 +770,17 @@ module.exports = function registerCommunity(app) {
   // (rovnaké pole ako manuálny ban v dash-service), alebo nahlásenie
   // zamietne ako neopodstatnené. Obsah správ sa nikam mimo tejto funkcie
   // nezobrazuje — do audit tabuľky ide len verdikt a krátke zdôvodnenie.
+  // FINANČNÁ ZÁPLATA -- tento endpoint volá AI (callClaudeJudge) bez
+  // akéhokoľvek stropu. requireCommunityAccess znamená platiaci Premium/Elite
+  // člen, nie "hocikto" -- ale aj platiaci člen mohol doteraz zavolať toto
+  // ľubovoľne veľakrát za sebou, aj opakovane na tú istú konverzáciu, a
+  // zakaždým sa zaplatilo Claude API volanie. Dve nezávislé poistky:
+  //   1. Opakované nahlásenie TEJ ISTEJ konverzácie tým istým človekom
+  //      nevolá AI znova -- vráti sa už uložený verdikt.
+  //   2. Denný strop REPORT_DAILY_LIMIT nových (rôznych) nahlásení na
+  //      používateľa, počítaný priamo z community_message_reports (žiadna
+  //      nová migrácia netreba, tabuľka už má created_at).
+  const REPORT_DAILY_LIMIT = 10;
   app.post('/api/community/conversations/:id/report', requireCommunityAccess, async (req, res) => {
     try {
       const convoId = parseInt(req.params.id, 10);
@@ -777,6 +788,22 @@ module.exports = function registerCommunity(app) {
       if (!convo) return res.status(404).json({ error: 'Konverzácia sa nenašla.' });
       if (convo.user_a !== req.communityEmail && convo.user_b !== req.communityEmail) return res.status(403).json({ error: 'Nemáš prístup k tejto konverzácii.' });
       const reportedEmail = convo.user_a === req.communityEmail ? convo.user_b : convo.user_a;
+
+      const { data: existingReport } = await supabase.from('community_message_reports')
+        .select('ai_verdict, ai_reasoning').eq('conversation_id', convoId).eq('reporter_email', req.communityEmail)
+        .order('created_at', { ascending: false }).limit(1).maybeSingle();
+      if (existingReport) {
+        return res.json({ verdict: existingReport.ai_verdict, reasoning: existingReport.ai_reasoning, alreadyReported: true });
+      }
+
+      const todayStart = new Date();
+      todayStart.setUTCHours(0, 0, 0, 0);
+      const { count: todaysReportCount } = await supabase.from('community_message_reports')
+        .select('id', { count: 'exact', head: true }).eq('reporter_email', req.communityEmail).gte('created_at', todayStart.toISOString());
+      if ((todaysReportCount || 0) >= REPORT_DAILY_LIMIT) {
+        return res.status(429).json({ error: 'Dosiahol/a si denný limit nahlásení (' + REPORT_DAILY_LIMIT + '/deň). Skús to znova zajtra.' });
+      }
+
       const { data: messages, error } = await supabase.from('community_messages').select('sender_email, body, created_at').eq('conversation_id', convoId).order('created_at', { ascending: false }).limit(DM_REPORT_MAX_MESSAGES);
       if (error) throw error;
       const ordered = (messages || []).slice().reverse();
