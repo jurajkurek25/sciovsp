@@ -131,10 +131,37 @@ async function registerStatusWebhook(url) {
   return luluRequest('POST', '/webhooks/', { topics: ['PRINT_JOB_STATUS_CHANGED'], url });
 }
 
+// Overenie Lulu webhooku (Lulu-HMAC-SHA256 header): HMAC-SHA256(key = API
+// secret, message = SUROVÉ bajty tela requestu). Musí sa počítať z raw body,
+// nie z JSON.parse-nutého a znovu serializovaného objektu -- Lulu to
+// explicitne upozorňuje, formátovacie rozdiely by HMAC rozbili. Bez tejto
+// kontroly mohol ktokoľvek poslať na /api/shop/lulu-webhook vymyslený stav
+// objednávky (napr. falošné "SHIPPED").
+//
+// Lulu dokumentácia neuvádza presné kódovanie hlavičky (hex vs base64) --
+// namiesto hádania sa porovnáva proti obom možným kódovaniam súčasne.
+function verifyWebhookSignature(rawBody, headerValue) {
+  if (!CLIENT_SECRET || !headerValue) return false;
+  const crypto = require('crypto');
+  const mac = crypto.createHmac('sha256', CLIENT_SECRET).update(rawBody);
+  const expectedHex = mac.digest('hex');
+  const expectedB64 = Buffer.from(expectedHex, 'hex').toString('base64');
+  const header = String(headerValue).trim();
+
+  function timingSafeStrEqual(a, b) {
+    const bufA = Buffer.from(a);
+    const bufB = Buffer.from(b);
+    if (bufA.length !== bufB.length) return false;
+    return crypto.timingSafeEqual(bufA, bufB);
+  }
+  return timingSafeStrEqual(header, expectedHex) || timingSafeStrEqual(header, expectedB64);
+}
+
 module.exports = {
   IS_PRODUCTION,
   calculateCost,
   createPrintJob,
   getPrintJobStatus,
-  registerStatusWebhook
+  registerStatusWebhook,
+  verifyWebhookSignature
 };

@@ -192,6 +192,32 @@ async function handlePhysicalProductPurchase(session) {
   }
 }
 
+// Volané z server.js (main-app-patches/296) AŽ PO overení Lulu-HMAC-SHA256
+// podpisu -- `parsed` je už JSON.parse-nuté telo webhooku. Podľa Lulu
+// dokumentácie má tvar { topic, data }, kde `data` pre PRINT_JOB_STATUS_CHANGED
+// je kompletný Print-Job objekt (rovnaký ako GET /print-jobs/{id}/) --
+// číta sa teda `data.id` (Lulu print job id) a `data.status.name`. Zachytáva
+// aj staršiu/alternatívnu plochú štruktúru ako zálohu, keby sa reálny tvar
+// mierne líšil.
+async function handleLuluWebhookPayload(parsed) {
+  const data = (parsed && parsed.data) || parsed || {};
+  const printJobId = data.id || data.print_job_id;
+  const statusName = (data.status && data.status.name) || data.name;
+  if (!printJobId) {
+    console.error('Lulu webhook: payload neobsahuje print job id, nič neaktualizujem:', JSON.stringify(parsed).slice(0, 300));
+    return;
+  }
+  const { data: order } = await supabase.from('physical_product_orders').select('id').eq('lulu_print_job_id', printJobId).maybeSingle();
+  if (!order) {
+    console.log('ℹ️  Lulu webhook: Print-Job', printJobId, 'nemá zodpovedajúcu objednávku (iný účet/sandbox?), ignorujem.');
+    return;
+  }
+  await supabase.from('physical_product_orders').update({
+    lulu_status: statusName || 'UNKNOWN', updated_at: new Date().toISOString()
+  }).eq('id', order.id);
+  console.log('📦 Lulu webhook: Print-Job', printJobId, '→', statusName);
+}
+
 function slugify(s) {
   return (s || '').toString().toLowerCase()
     .replace(/[^a-z0-9\s-]/g, '')
@@ -855,32 +881,12 @@ module.exports = function registerShop(app) {
     }
   });
 
-  // POST /api/shop/lulu-webhook — prijíma PRINT_JOB_STATUS_CHANGED notifikácie
-  // z Lulu (registrované jednorazovo cez main-app-patches/register-lulu-webhook.js).
-  // Vždy vracia 200, aby Lulu nerobil nekonečné retry na našu internú chybu;
-  // aktualizuje len objednávky, ktoré už u nás existujú podľa lulu_print_job_id
-  // (žiadna signature-verifikácia nie je v Lulu API dokumentovaná, takže
-  // útočník môže nanajvýš nastaviť status string na existujúcej objednávke --
-  // nízky dopad, ale stojí za zváženie pri budúcom sprísnení).
-  app.post('/api/shop/lulu-webhook', async (req, res) => {
-    try {
-      const payload = req.body || {};
-      const printJobId = payload.print_job_id;
-      if (printJobId) {
-        const { data: order } = await supabase.from('physical_product_orders').select('id').eq('lulu_print_job_id', printJobId).maybeSingle();
-        if (order) {
-          await supabase.from('physical_product_orders').update({
-            lulu_status: payload.name || 'UNKNOWN', updated_at: new Date().toISOString()
-          }).eq('id', order.id);
-          console.log('📦 Lulu webhook: Print-Job', printJobId, '→', payload.name);
-        }
-      }
-      res.status(200).json({ ok: true });
-    } catch (e) {
-      console.error('lulu webhook error:', e.message);
-      res.status(200).json({ ok: true });
-    }
-  });
+  // POST /api/shop/lulu-webhook NIE JE tu -- vyžaduje SUROVÉ telo requestu
+  // pre HMAC overenie (Lulu-HMAC-SHA256 header), takže musí byť zaregistrovaná
+  // v server.js PRED app.use(express.json(...)), rovnako ako Stripe webhook.
+  // Skutočná logika (aktualizácia physical_product_orders) je nižšie v
+  // handleLuluWebhookPayload(), ktorú server.js volá cez app.locals AŽ PO
+  // overení podpisu -- pozri main-app-patches/296-lulu-webhook-verified.js.
 
   // GET /obchod-tlac/:slug — predajná stránka tlačenej knihy (rovnaký
   // dizajn ako /obchod/:slug a /kurzy/:slug), ale bez instant downloadu --
@@ -1161,4 +1167,5 @@ module.exports = function registerShop(app) {
   // aj nová physical_product_purchase vetva, main-app-patches/295).
   app.locals.shopSignedDownloadUrl = signedDownloadUrl;
   app.locals.handlePhysicalProductPurchase = handlePhysicalProductPurchase;
+  app.locals.handleLuluWebhookPayload = handleLuluWebhookPayload;
 };
