@@ -31,8 +31,8 @@
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kam na vysokú? Zisti to zadarmo za 7 minút — test odboru SP Tréner</title>
-<meta name="description" content="Nevieš, či ísť na vysokú a na akú? Bezplatný test s AI vyhodnotením ti za 7 minút ukáže, ktorý odbor a ktoré univerzity na Slovensku aj v Česku ti sedia najviac — a prečo.">
+<title>Kam na vysokú? Zisti to zadarmo za 5 minút — test odboru SP Tréner</title>
+<meta name="description" content="Nevieš, či ísť na vysokú a na akú? Bezplatný test s AI vyhodnotením ti za 5 minút ukáže, ktorý odbor a ktoré univerzity na Slovensku aj v Česku ti sedia najviac — a prečo.">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://sptrener.online/kam-na-vysoku">
 <meta name="theme-color" content="#faf6ef">
@@ -41,13 +41,13 @@
 <meta property="og:site_name" content="SP Tréner">
 <meta property="og:locale" content="sk_SK">
 <meta property="og:url" content="https://sptrener.online/kam-na-vysoku">
-<meta property="og:title" content="Kam na vysokú? Zisti to zadarmo za 7 minút">
+<meta property="og:title" content="Kam na vysokú? Zisti to zadarmo za 5 minút">
 <meta property="og:description" content="Bezplatný test odboru s AI vyhodnotením — zisti, ktorá vysoká škola a ktorý odbor na Slovensku aj v Česku ti sedí najviac, a prečo.">
 <meta property="og:image" content="https://sptrener.online/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Kam na vysokú? Zisti to zadarmo za 7 minút">
+<meta name="twitter:title" content="Kam na vysokú? Zisti to zadarmo za 5 minút">
 <meta name="twitter:description" content="Bezplatný test odboru s AI vyhodnotením — zisti, ktorá vysoká škola a ktorý odbor ti sedí najviac, a prečo.">
 <meta name="twitter:image" content="https://sptrener.online/og-image.png">
 
@@ -64,7 +64,7 @@
     {
       "@type": "Question",
       "name": "Ako dlho test trvá?",
-      "acceptedAnswer": { "@type": "Answer", "text": "Približne 7 minút — väčšina otázok je na jeden klik, plus pár otázok vlastnými slovami, aby bol výsledok presnejší." }
+      "acceptedAnswer": { "@type": "Answer", "text": "Približne 5 minút — väčšina otázok je na jeden klik, plus pár otázok vlastnými slovami, aby bol výsledok presnejší." }
     },
     {
       "@type": "Question",
@@ -302,9 +302,9 @@ footer{border-top:1px solid var(--border);margin-top:3rem;padding:2.2rem 0}
       <p id="tGateDesc" style="color:var(--ink2);font-size:.92rem">Zaregistruj sa zadarmo cez Google a hneď ho uvidíš — aj so zoznamom škôl, ktoré ti sedia.</p>
       <label class="consent-row">
         <input type="checkbox" id="consentCheck" onchange="updateGoogleBtnState()">
-        <span id="tConsentText">Súhlasím, že mi SP Tréner môže poslať výsledok tohto testu a súvisiace ponuky e-mailom. Bez súhlasu žiaľ výsledok nemôžeme odoslať.</span>
+        <span id="tConsentText">Súhlasím, že mi SP Tréner môže posielať súvisiace ponuky e-mailom (nepovinné — výsledok testu dostaneš tak či tak).</span>
       </label>
-      <button class="google-btn" id="googleLoginBtn" onclick="startLoginKV()" disabled>
+      <button class="google-btn" id="googleLoginBtn" onclick="startLoginKV()">
         <svg class="gsvg" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
         <span id="tGoogleBtn">Prihlásiť sa cez Google</span>
       </button>
@@ -610,7 +610,7 @@ const T = {
     sub:'Krátke otázky na klik plus pár otázok vlastnými slovami — a dostaneš odbor aj konkrétne školy na Slovensku a v Česku, ktoré ti sedia najviac. Zadarmo.',
     ctaStart:'Začať test →', ctaHow:'Ako to funguje ↓',
     reassure:'🎯 Žiadne dlhé formuláre — väčšina otázok je na jeden klik. Výsledok takmer hneď.',
-    trust1:'100% zadarmo', trust2:'7 minút', trust3:'SK aj CZ školy',
+    trust1:'100% zadarmo', trust2:'5 minút', trust3:'SK aj CZ školy',
     howTitle:'Ako to funguje', howSub:'Tri kroky, žiadne nejasnosti.',
     step1T:'Odpovieš na otázky', step1D:'Väčšina na jeden klik, pár vlastnými slovami — o tom, čo ťa baví, čo vieš a ako rozmýšľaš.',
     step2T:'Zaregistruješ sa cez Google', step2D:'Zadarmo, na 5 sekúnd — aby sme ti výsledok mohli uložiť a poslať.',
@@ -620,7 +620,7 @@ const T = {
     reflectHint:'Napíš aspoň pár slov.', reflectSubmit:'Zistiť výsledok →',
     aiLabel:'Tvoj osobný rozbor od AI', aiLoading:'AI pripravuje tvoj osobný rozbor…',
     gateTitle:'Tvoj výsledok je hotový!', gateDesc:'Zaregistruj sa zadarmo cez Google a hneď ho uvidíš — aj so zoznamom škôl, ktoré ti sedia.', googleBtn:'Prihlásiť sa cez Google',
-    consentText:'Súhlasím, že mi SP Tréner môže poslať výsledok tohto testu a súvisiace ponuky e-mailom. Bez súhlasu žiaľ výsledok nemôžeme odoslať.',
+    consentText:'Súhlasím, že mi SP Tréner môže posielať súvisiace ponuky e-mailom (nepovinné — výsledok testu dostaneš tak či tak).',
     resultEyebrow:'Tvoj odbor', schoolsTitle:'Školy, ktoré ti sedia',
     upsellTitle:'Priprav sa na prijímačky rovno teraz',
     upsellDesc:'SP Tréner ťa pripraví presne na testy, ktoré tvoj vysnívaný odbor vyžaduje — verbálne aj analytické myslenie, AI generátor úloh na mieru a viac.',
@@ -630,13 +630,13 @@ const T = {
     ctaPsychCourse:'Pozrieť kurz →',
     faqTitle:'Časté otázky',
     faqQ1:'Je test naozaj zadarmo?', faqA1:'Áno, celý test aj výsledok sú úplne zadarmo. Jediné, čo potrebuješ, je bezplatná registrácia cez Google, aby sme ti výsledok mohli uložiť.',
-    faqQ2:'Ako dlho test trvá?', faqA2:'Približne 7 minút — väčšina otázok je na jeden klik, plus pár otázok vlastnými slovami, aby bol výsledok presnejší.',
+    faqQ2:'Ako dlho test trvá?', faqA2:'Približne 5 minút — väčšina otázok je na jeden klik, plus pár otázok vlastnými slovami, aby bol výsledok presnejší.',
     faqQ3:'Je to vedecký test?', faqA3:'Test vychádza z bežne používaných princípov kariérového poradenstva, ale nenahrádza odborné psychologické poradenstvo. Je to skvelý prvý krok na zúženie výberu, nie definitívna odpoveď.',
     faqQ4:'Čo ak mi vyjde odbor, na ktorý SP Tréner nemá testy?', faqA4:'Aj tak dostaneš zoznam škôl a fakúlt, ktoré ti sedia. Na prijímačky, ktoré testujú všeobecné študijné predpoklady, čo robí väčšina škôl, ti pomôže náš VŠP tréning.',
     faqQ5:'Musím platiť, aby som videl výsledok?', faqA5:'Nie. Výsledok je zadarmo hneď po registrácii. Platené je len samotné SP Tréner Premium alebo Elite, ak sa rozhodneš pripraviť sa na prijímačky u nás.',
     faqQ6:'Môžem si test spraviť znova?', faqA6:'Áno, kedykoľvek — napríklad ak sa tvoje záujmy zmenia alebo si chceš výsledok overiť.',
     fLink1:'SP Tréner', fLink2:'Obchodné podmienky', fLink3:'Kontakt',
-    pageTitle:'Kam na vysokú? Zisti to zadarmo za 7 minút — test odboru SP Tréner',
+    pageTitle:'Kam na vysokú? Zisti to zadarmo za 5 minút — test odboru SP Tréner',
     progressLabel:function(i,n){return 'Otázka '+i+' / '+n;}
   },
   cs: {
@@ -645,7 +645,7 @@ const T = {
     sub:'Krátké otázky na klik plus pár otázek vlastními slovy — a dostaneš obor i konkrétní školy na Slovensku a v Česku, které ti sedí nejvíc. Zdarma.',
     ctaStart:'Začít test →', ctaHow:'Jak to funguje ↓',
     reassure:'🎯 Žádné dlouhé formuláře — většina otázek je na jeden klik. Výsledek skoro hned.',
-    trust1:'100% zdarma', trust2:'7 minut', trust3:'SK i CZ školy',
+    trust1:'100% zdarma', trust2:'5 minut', trust3:'SK i CZ školy',
     howTitle:'Jak to funguje', howSub:'Tři kroky, žádné nejasnosti.',
     step1T:'Odpovíš na otázky', step1D:'Většina na jeden klik, pár vlastními slovy — o tom, co tě baví, co umíš a jak přemýšlíš.',
     step2T:'Zaregistruješ se přes Google', step2D:'Zdarma, na 5 sekund — abychom ti výsledek mohli uložit a poslat.',
@@ -655,7 +655,7 @@ const T = {
     reflectHint:'Napiš aspoň pár slov.', reflectSubmit:'Zjistit výsledek →',
     aiLabel:'Tvůj osobní rozbor od AI', aiLoading:'AI připravuje tvůj osobní rozbor…',
     gateTitle:'Tvůj výsledek je hotový!', gateDesc:'Zaregistruj se zdarma přes Google a hned ho uvidíš — i se seznamem škol, které ti sedí.', googleBtn:'Přihlásit se přes Google',
-    consentText:'Souhlasím, že mi SP Tréner může poslat výsledek tohoto testu a související nabídky e-mailem. Bez souhlasu bohužel výsledek nemůžeme odeslat.',
+    consentText:'Souhlasím, že mi SP Tréner může zasílat související nabídky e-mailem (nepovinné — výsledek testu dostaneš tak jako tak).',
     resultEyebrow:'Tvůj obor', schoolsTitle:'Školy, které ti sedí',
     upsellTitle:'Připrav se na přijímačky rovnou teď',
     upsellDesc:'SP Tréner tě připraví přesně na testy, které tvůj vysněný obor vyžaduje — verbální i analytické myšlení, AI generátor úloh na míru a víc.',
@@ -665,13 +665,13 @@ const T = {
     ctaPsychCourse:'Podívat se na kurz →',
     faqTitle:'Časté otázky',
     faqQ1:'Je test opravdu zdarma?', faqA1:'Ano, celý test i výsledek jsou úplně zdarma. Jediné, co potřebuješ, je bezplatná registrace přes Google, abychom ti výsledek mohli uložit.',
-    faqQ2:'Jak dlouho test trvá?', faqA2:'Přibližně 7 minut — většina otázek je na jeden klik, plus pár otázek vlastními slovy, aby byl výsledek přesnější.',
+    faqQ2:'Jak dlouho test trvá?', faqA2:'Přibližně 5 minut — většina otázek je na jeden klik, plus pár otázek vlastními slovy, aby byl výsledek přesnější.',
     faqQ3:'Je to vědecký test?', faqA3:'Test vychází z běžně používaných principů kariérového poradenství, ale nenahrazuje odborné psychologické poradenství. Je to skvělý první krok k zúžení výběru, ne definitivní odpověď.',
     faqQ4:'Co když mi vyjde obor, na který SP Tréner nemá testy?', faqA4:'I tak dostaneš seznam škol a fakult, které ti sedí. Na přijímačky, které testují všeobecné studijní předpoklady, což dělá většina škol, ti pomůže náš VŠP trénink.',
     faqQ5:'Musím platit, abych viděl výsledek?', faqA5:'Ne. Výsledek je zdarma hned po registraci. Placené je jen samotné SP Tréner Premium nebo Elite, pokud se rozhodneš připravit se na přijímačky u nás.',
     faqQ6:'Můžu si test udělat znovu?', faqA6:'Ano, kdykoliv — například pokud se tvoje zájmy změní nebo si chceš výsledek ověřit.',
     fLink1:'SP Tréner', fLink2:'Obchodní podmínky', fLink3:'Kontakt',
-    pageTitle:'Kam na vysokou? Zjisti to zdarma za 7 minut — test oboru SP Tréner',
+    pageTitle:'Kam na vysokou? Zjisti to zdarma za 5 minut — test oboru SP Tréner',
     progressLabel:function(i,n){return 'Otázka '+i+' / '+n;}
   }
 };
@@ -862,7 +862,6 @@ async function initAuth(){
 let marketingConsent = false;
 function updateGoogleBtnState(){
   marketingConsent = !!document.getElementById('consentCheck').checked;
-  document.getElementById('googleLoginBtn').disabled = !marketingConsent;
 }
 function onLoggedInKV(){
   if (sessionStorage.getItem('kv_pending_reveal') === '1'){
@@ -877,7 +876,6 @@ function onLoggedInKV(){
   }
 }
 function startLoginKV(){
-  if (!marketingConsent) return;
   sessionStorage.setItem('kv_answers', JSON.stringify(answers));
   sessionStorage.setItem('kv_reflections', JSON.stringify(reflections));
   sessionStorage.setItem('kv_consent', '1');

@@ -844,11 +844,11 @@ body.has-banner{padding-top:42px}
 
     <div class="popup-features-mini">
       <span>💬 AI Mentor chat</span>
-      <span>🪞 Mirror Mode</span>
-      <span>⏱ Time-Kill Alert</span>
-      <span>📊 Týždenný Audit</span>
-      <span>🧩 Zebra Builder</span>
-      <span>⚡ Zlatý Status</span>
+      <span title="Len tvoje slabiny, -15% čas">🪞 Mirror Mode</span>
+      <span title="Kde páliš čas zbytočne">⏱ Time-Kill Alert</span>
+      <span title="Šanca na prijatie v %">📊 Týždenný Audit</span>
+      <span title="Logika krok za krokom">🧩 Zebra Builder</span>
+      <span title="Odznak v SP Klanoch">⚡ Zlatý Status</span>
       <span>🔥 Denný streak + odpočet</span>
     </div>
 
@@ -897,9 +897,9 @@ body.has-banner{padding-top:42px}
         <ul>
           <li><b>✓</b> Všetko z Premium</li>
           <li><b>✓</b> AI Mentor chat</li>
-          <li><b>✓</b> Mirror Mode</li>
-          <li><b>✓</b> Time-Kill Alert</li>
-          <li><b>✓</b> Týždenný Audit</li>
+          <li><b>✓</b> Mirror Mode — len tvoje slabiny</li>
+          <li><b>✓</b> Time-Kill Alert — kde páliš čas</li>
+          <li><b>✓</b> Týždenný Audit — šanca v %</li>
           <li><b>✓</b> Zebra Builder + Zlatý Status</li>
           <li><b>✓</b> Denný streak + odpočet do testu (email)</li>
         </ul>
@@ -1290,7 +1290,8 @@ body.has-banner{padding-top:42px}
         <button class="pricing-cta elite-cta" onclick="openElitePopup()" id="priceEliteCta">Nesmiem zlyhať →</button>
       </div>
     </div>
-    <p class="reveal" style="text-align:center;color:var(--text3);font-size:.8rem;margin-top:1.5rem;font-family:var(--mono)" id="pricingFooter">Mesačná platba · Žiadna zmluva · Zruš kedykoľvek jedným klikom</p>
+    <p class="reveal" style="text-align:center;color:var(--volt);font-size:.82rem;margin-top:1.5rem;font-family:var(--mono);font-weight:600" id="pricingGuarantee">🛡️ 7 dní na vrátenie peňazí, bez udania dôvodu</p>
+    <p class="reveal" style="text-align:center;color:var(--text3);font-size:.8rem;margin-top:.5rem;font-family:var(--mono)" id="pricingFooter">Mesačná platba · Žiadna zmluva · Zruš kedykoľvek jedným klikom</p>
   </div>
 </div>
 
@@ -1462,6 +1463,7 @@ sk:{
   pricePrem1:'Neobmedzené VŠP simulácie',pricePrem2:'AI generátor — nové úlohy každý deň',
   pricePrem3:'Postup riešenia krok za krokom',pricePrem4:'Percentilový tracker + história',
   pricePrem5:'Cielené precvičovanie slabých miest',pricePrem6:'SP Klany',pricePrem7:'Odpočítavanie do VŠP termínu',
+  pricingGuarantee:'🛡️ 7 dní na vrátenie peňazí, bez udania dôvodu',
   pricingFooter:'Mesačná platba · Žiadna zmluva · Zruš kedykoľvek jedným klikom',
   faqLabel:'FAQ',faqTitle:'Časté otázky',
   faq1Q:'Je to skutočne v štýle VŠP testov?',faq1A:'Áno. Každý okruh (doplňovanie do viet, zebry, koherencia textov, porovnávanie hodnôt...) je navrhnutý presne podľa reálnych VŠP formátov. AI generátor dostáva detailné inštrukcie pre každý typ úlohy, vrátane správneho rozloženia distraktorov.',
@@ -1573,6 +1575,7 @@ cs:{
   pricePrem1:'Neomezené VŠP simulace',pricePrem2:'AI generátor — nové úkoly každý den',
   pricePrem3:'Postup řešení krok za krokem',pricePrem4:'Percentilový tracker + historie',
   pricePrem5:'Cílené procvičování slabých míst',pricePrem6:'SP Klany',pricePrem7:'Odpočítávání do termínu VŠP',
+  pricingGuarantee:'🛡️ 7 dní na vrácení peněz, bez udání důvodu',
   pricingFooter:'Měsíční platba · Žádná smlouva · Zruš kdykoliv jedním kliknutím',
   faqLabel:'FAQ',faqTitle:'Časté otázky',
   faq1Q:'Je to skutečně ve stylu VŠP testů?',faq1A:'Ano. Každý okruh (doplňování do vět, zebry, koherence textů, porovnávání hodnot...) je navržen přesně podle reálných VŠP formátů. AI generátor dostává detailní instrukce pro každý typ úkolu, včetně správného rozložení distraktorů.',
@@ -1717,6 +1720,7 @@ function applyLanguage(lang, skipIfDefault){
   sT('priceFree4', t.priceFree4); sT('priceFree5', t.priceFree5); sT('priceFree6', t.priceFree6); sT('priceFree7', t.priceFree7);
   sT('pricePrem1', t.pricePrem1); sT('pricePrem2', t.pricePrem2); sT('pricePrem3', t.pricePrem3);
   sT('pricePrem4', t.pricePrem4); sT('pricePrem5', t.pricePrem5); sT('pricePrem6', t.pricePrem6); sT('pricePrem7', t.pricePrem7);
+  sT('pricingGuarantee', t.pricingGuarantee);
   sT('pricingFooter', t.pricingFooter);
   sT('faqLabel', t.faqLabel); sT('faqTitle', t.faqTitle);
   sT('faq1Q', t.faq1Q); sT('faq1A', t.faq1A);
