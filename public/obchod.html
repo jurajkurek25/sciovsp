@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="sk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Obchod — SP Tréner</title>
+<style>
+@font-face{font-family:'DM Mono';font-style:normal;font-weight:400;font-display:swap;src:url(/fonts/dm-mono-400-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'DM Mono';font-style:normal;font-weight:400;font-display:swap;src:url(/fonts/dm-mono-400-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'DM Mono';font-style:normal;font-weight:500;font-display:swap;src:url(/fonts/dm-mono-500-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'DM Mono';font-style:normal;font-weight:500;font-display:swap;src:url(/fonts/dm-mono-500-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'DM Sans';font-style:normal;font-weight:300 700;font-display:swap;src:url(/fonts/dm-sans-var-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'DM Sans';font-style:normal;font-weight:300 700;font-display:swap;src:url(/fonts/dm-sans-var-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Instrument Serif';font-style:normal;font-weight:400;font-display:swap;src:url(/fonts/instrument-serif-normal-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Instrument Serif';font-style:normal;font-weight:400;font-display:swap;src:url(/fonts/instrument-serif-normal-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+:root{
+  --black:#08080d;--black2:#0f0f18;--black3:#171724;
+  --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.13);
+  --text:#eeeef5;--text2:#a1a1bc;--text3:#5c5c7a;
+  --volt:#c8ff00;--purple:#7c5cff;--purple2:#b09bff;
+  --red:#ff3f5e;--green:#36e896;
+  --serif:'Instrument Serif',Georgia,serif;
+  --mono:'DM Mono',monospace;
+  --sans:'DM Sans',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--black);color:var(--text);font-family:var(--sans);line-height:1.65;overflow-x:hidden}
+a{color:inherit}
+nav{position:sticky;top:0;z-index:100;padding:1rem clamp(1rem,4vw,2rem);padding-top:calc(1rem + env(safe-area-inset-top));display:flex;justify-content:space-between;align-items:center;gap:.75rem;flex-wrap:wrap;background:var(--black);border-bottom:1px solid var(--border)}
+.nav-logo{font-family:var(--mono);font-size:13px;letter-spacing:.15em;color:var(--text);text-decoration:none;white-space:nowrap;display:inline-flex;align-items:center;gap:.55rem}
+.nav-dot{width:7px;height:7px;background:var(--volt);border-radius:50%;animation:pulse-dot 2s infinite;display:inline-block}
+@keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.7)}}
+.nav-link{text-decoration:none;font-family:var(--mono);font-size:.78rem;letter-spacing:.05em;border-radius:8px;transition:all .2s;color:var(--text2);padding:.65rem .85rem;border:1px solid transparent}
+.nav-link:hover{color:var(--text);border-color:var(--border2)}
+.nav-link.active{color:var(--volt);border-color:rgba(200,255,0,.25)}
+.nav-cta{padding:.6rem 1rem;background:var(--volt);color:var(--black);border-radius:8px;font-weight:700;font-family:var(--mono);font-size:.78rem;text-decoration:none;white-space:nowrap;border:none;cursor:pointer}
+.lang-switcher{display:flex;align-items:center;gap:.35rem}
+.lang-btn{padding:.45rem .7rem;border:1px solid var(--border2);background:transparent;color:var(--text2);border-radius:6px;font-family:var(--mono);font-size:.72rem;letter-spacing:.06em;cursor:pointer;transition:all .2s}
+.lang-btn:hover{color:var(--text);border-color:var(--purple)}
+.lang-btn.active{color:var(--volt);border-color:var(--volt)}
+.nav-right{display:flex;align-items:center;gap:.75rem}
+.nav-links-wrap{display:flex;align-items:center;gap:.75rem}
+.nav-hamburger{display:none;width:38px;height:38px;align-items:center;justify-content:center;flex-shrink:0;background:transparent;border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:1.05rem;cursor:pointer;transition:border-color .2s}
+.nav-hamburger:hover{border-color:var(--volt)}
+.nav-overlay{display:none;position:fixed;inset:0;background:rgba(8,8,13,.6);backdrop-filter:blur(2px);z-index:90}
+.nav-overlay.show{display:block}
+.page{max-width:900px;margin:0 auto;padding:clamp(2rem,6vw,3.5rem) clamp(1rem,4vw,2rem) clamp(3rem,6vw,6rem)}
+.breadcrumb{font-family:var(--mono);font-size:.72rem;color:var(--text3);margin-bottom:1.5rem;display:flex;gap:.4rem;flex-wrap:wrap;position:sticky;top:64px;z-index:99;background:var(--black);padding:.6rem 0}
+.breadcrumb a{color:var(--text3);text-decoration:none}
+.breadcrumb a:hover{color:var(--purple2)}
+.hero-title{font-family:var(--serif);font-size:clamp(2rem,6vw,3.6rem);line-height:1.1;margin-bottom:1rem;text-align:center}
+.hero-title em{font-style:italic;color:var(--purple2)}
+.hero-sub{color:var(--text2);max-width:640px;margin:0 auto 1rem;text-align:center}
+.empty-state{color:var(--text3);font-size:.9rem;padding:2rem 0;text-align:center}
+footer{border-top:1px solid var(--border);padding:2.5rem;padding-bottom:calc(2.5rem + env(safe-area-inset-bottom));display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+.footer-logo{font-family:var(--mono);font-size:12px;letter-spacing:.15em;color:var(--text3)}
+.footer-links{display:flex;gap:1.5rem;flex-wrap:wrap}
+.footer-links a{font-size:.78rem;color:var(--text3);text-decoration:none;font-family:var(--mono);letter-spacing:.05em;transition:color .2s}
+.footer-links a:hover{color:var(--text2)}
+@media (max-width: 768px){
+  .nav-cta{padding:.5rem .9rem;font-size:.75rem}
+  .nav-hamburger{display:flex}
+  .nav-links-wrap{position:fixed;top:0;right:0;bottom:0;width:min(78vw,300px);background:rgba(15,15,24,.98);backdrop-filter:blur(14px);border-left:1px solid var(--border2);display:flex;flex-direction:column;align-items:stretch;gap:.4rem;padding:5.5rem 1.25rem 2rem;transform:translateX(100%);transition:transform .3s ease;z-index:150;overflow-y:auto}
+  .nav-links-wrap.open{transform:translateX(0)}
+  .nav-links-wrap .nav-link{padding:.85rem 1rem;border:1px solid var(--border);border-radius:10px;text-align:center;color:var(--text)}
+  .nav-links-wrap .lang-switcher{margin-top:.5rem;justify-content:center}
+  .nav-links-wrap .lang-btn{color:var(--text)}
+}
+@media (max-width: 480px){
+  nav{flex-wrap:wrap;row-gap:.5rem}
+  .nav-cta{padding:.4rem .65rem;font-size:.66rem}
+}
+
+/* produktový katalóg — rovnaký vzor ako .course-grid/.course-card na /kurzy */
+.course-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.1rem;margin-top:1.6rem;justify-content:center}
+.course-card{display:flex;flex-direction:column;background:var(--black2);border:1px solid var(--border);border-radius:14px;padding:1.3rem;color:var(--text);text-decoration:none;transition:border-color .15s}
+.course-card:hover{border-color:var(--border2)}
+.course-card h3{font-family:var(--serif);font-size:1.3rem;margin-bottom:.5rem}
+.course-card p{color:var(--text2);font-size:.85rem;margin-bottom:.8rem;flex:1}
+.course-price-tag{font-family:var(--mono);font-size:.8rem;color:var(--volt);font-weight:700}
+.course-cover{width:100%;height:150px;object-fit:cover;border-radius:10px;margin-bottom:.9rem;background:var(--black3);display:block}
+.course-badge{display:inline-block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--volt);background:rgba(200,255,0,.08);border:1px solid rgba(200,255,0,.2);padding:3px 9px;border-radius:20px;width:fit-content;margin-bottom:.6rem}
+.course-card-price-row{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-top:auto}
+.course-card-arrow{font-family:var(--mono);font-size:.78rem;color:var(--text2)}
+.filter-bar{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center;margin:1.4rem 0}
+.filter-search{flex:1 1 220px;padding:.65rem .9rem;background:var(--black2);border:1px solid var(--border2);border-radius:10px;color:var(--text);font-size:.9rem}
+.filter-search::placeholder{color:var(--text3)}
+.filter-pills{display:flex;flex-wrap:wrap;gap:.5rem;justify-content:center}
+.filter-pill{padding:.5rem .9rem;background:var(--black2);border:1px solid var(--border2);border-radius:99px;color:var(--text2);font-size:.8rem;font-family:var(--mono);cursor:pointer;white-space:nowrap;user-select:none}
+.filter-pill:hover{border-color:var(--purple)}
+.filter-pill.active{background:var(--volt);color:var(--black);border-color:var(--volt);font-weight:700}
+.filter-empty{display:none;color:var(--text3);font-size:.9rem;padding:2rem 0;text-align:center}
+</style>
+</head>
+<body>
+<nav id="mainNav">
+  <a href="/" class="nav-logo" id="navLogo"><span class="nav-dot"></span>SP TRÉNER</a>
+  <div class="nav-right">
+    <div class="nav-links-wrap" id="navLinksWrap">
+      <a href="/blog" class="nav-link" id="navLinkBlog">Blog</a>
+      <a href="/kurzy" class="nav-link" id="navLinkKurzy">Kurzy</a>
+      <a href="/obchod" class="nav-link active">Obchod</a>
+      <a href="/odporucame" class="nav-link" id="navLinkOdporucame">Odporúčame</a>
+      <div class="lang-switcher">
+        <button class="lang-btn active" id="langBtnSk" onclick="switchBlogLang('sk')">SK</button>
+        <button class="lang-btn" id="langBtnCs" onclick="switchBlogLang('cs')">CZ</button>
+      </div>
+    </div>
+    <button class="nav-cta" onclick="location.href='/?openPremium=1'">Začať zadarmo →</button>
+    <button class="nav-hamburger" id="navHamburger" onclick="toggleMobileNav()" aria-label="Menu">☰</button>
+  </div>
+</nav>
+<div class="nav-overlay" id="navOverlay" onclick="closeMobileNav()"></div>
+
+<main class="page">
+  <nav class="breadcrumb"><a href="/">SP Tréner</a><span>/</span><span>Obchod</span></nav>
+  <h1 class="hero-title">Produkty <em>na stiahnutie aj do poštovej schránky</em></h1>
+  <p class="hero-sub">Jednorazová platba, žiadne predplatné. Digitálne produkty hneď po zaplatení, tlačené knihy poštou.</p>
+
+  <div class="filter-bar" id="filterBar" style="display:none">
+    <input type="text" class="filter-search" id="filterSearch" placeholder="Hľadať produkt…" oninput="applyFilter()">
+    <div class="filter-pills" id="filterPills"></div>
+  </div>
+
+  <div id="grid" class="course-grid"><p class="empty-state">Načítavam produkty…</p></div>
+  <p class="filter-empty" id="shopEmpty">Nič sa nenašlo. Skús iný filter.</p>
+</main>
+
+<footer>
+  <div class="footer-logo">SP TRÉNER © 2026</div>
+  <div class="footer-links">
+    <a href="/app">Aplikácia</a>
+    <a href="/blog" id="footerLinkBlog">Blog</a>
+    <a href="/kurzy" id="footerLinkKurzy">Kurzy</a>
+    <a href="mailto:juraj@jurajkurek.com">Kontakt</a>
+    <a href="/legal.html#vop">VOP</a>
+    <a href="/legal.html#privacy">Súkromie</a>
+    <a href="https://partner.sptrener.online">Partnerský program</a>
+    <a href="https://ad.sptrener.online">Inzercia</a>
+  </div>
+</footer>
+
+<script>
+function toggleMobileNav(){
+  var open = document.getElementById('navLinksWrap').classList.toggle('open');
+  document.getElementById('navOverlay').classList.toggle('show', open);
+  document.getElementById('navHamburger').textContent = open ? '✕' : '☰';
+}
+function closeMobileNav(){
+  document.getElementById('navLinksWrap').classList.remove('open');
+  document.getElementById('navOverlay').classList.remove('show');
+  document.getElementById('navHamburger').textContent = '☰';
+}
+function switchBlogLang(l){
+  var u = new URL(window.location.href);
+  if (l === 'cs') { u.searchParams.set('lang', 'cs'); } else { u.searchParams.delete('lang'); }
+  window.location.href = u.toString();
+}
+(function(){
+  var isCs = new URLSearchParams(window.location.search).get('lang') === 'cs';
+  document.getElementById('langBtnSk').classList.toggle('active', !isCs);
+  document.getElementById('langBtnCs').classList.toggle('active', isCs);
+  if (isCs) {
+    var suffix = '?lang=cs';
+    document.getElementById('navLogo').href = '/' + suffix;
+    document.getElementById('navLinkBlog').href = '/blog' + suffix;
+    document.getElementById('navLinkKurzy').href = '/kurzy' + suffix;
+    document.getElementById('navLinkOdporucame').href = '/odporucame' + suffix;
+    document.getElementById('footerLinkBlog').href = '/blog' + suffix;
+    document.getElementById('footerLinkKurzy').href = '/kurzy' + suffix;
+  }
+})();
+
+let allProducts = [];
+let activeType = '';
+
+function escapeHtml(s) {
+  return (s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function productCardHtml(p) {
+  const isPhysical = p.type === 'physical';
+  const priceStr = (p.priceCents / 100).toFixed(2).replace('.', ',') + ' €';
+  const href = isPhysical ? `/obchod-tlac/${escapeHtml(p.slug)}` : `/obchod/${escapeHtml(p.slug)}`;
+  const filterType = isPhysical ? 'physical' : p.fileType;
+  const badgeLabel = isPhysical ? '📦 tlač' : p.fileType;
+  const cover = p.coverImageUrl
+    ? `<img class="course-cover" src="${escapeHtml(p.coverImageUrl)}" alt="${escapeHtml(p.title)}" loading="lazy">`
+    : '';
+  const firstParagraph = (p.description || '').split(/\n\s*\n/)[0].trim();
+  return `<a class="course-card" href="${href}" data-type="${escapeHtml(filterType)}" data-search="${escapeHtml(((p.title || '') + ' ' + (p.description || '')).toLowerCase())}">
+    ${cover}
+    <span class="course-badge">${escapeHtml(badgeLabel)}</span>
+    <h3>${escapeHtml(p.title)}</h3>
+    <p>${escapeHtml(firstParagraph.slice(0, 140))}</p>
+    <div class="course-card-price-row">
+      <span class="course-price-tag">${priceStr}</span>
+      <span class="course-card-arrow">Pozrieť →</span>
+    </div>
+  </a>`;
+}
+
+function applyFilter() {
+  const q = document.getElementById('filterSearch').value.trim().toLowerCase();
+  let visible = 0;
+  document.querySelectorAll('#grid .course-card').forEach(card => {
+    const matchesType = !activeType || card.dataset.type === activeType;
+    const matchesSearch = !q || card.dataset.search.includes(q);
+    const show = matchesType && matchesSearch;
+    card.style.display = show ? '' : 'none';
+    if (show) visible++;
+  });
+  document.getElementById('shopEmpty').style.display = visible ? 'none' : 'block';
+}
+
+function selectPill(type, btn) {
+  activeType = type;
+  document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilter();
+}
+
+async function loadProducts() {
+  const grid = document.getElementById('grid');
+  try {
+    const [digitalRes, physicalRes] = await Promise.all([
+      fetch('/api/shop/products'),
+      fetch('/api/shop/physical-products').catch(() => null)
+    ]);
+    const digitalData = await digitalRes.json();
+    const physicalData = physicalRes ? await physicalRes.json().catch(() => ({ products: [] })) : { products: [] };
+    allProducts = (digitalData.products || []).concat(physicalData.products || []);
+    if (!allProducts.length) {
+      grid.innerHTML = '<p class="empty-state">Momentálne tu nič nie je — pozri sa neskôr.</p>';
+      return;
+    }
+    const types = [...new Set(allProducts.map(p => p.type === 'physical' ? 'physical' : p.fileType))];
+    if (types.length > 1) {
+      const pillsEl = document.getElementById('filterPills');
+      pillsEl.innerHTML = `<button class="filter-pill active" onclick="selectPill('', this)">Všetko</button>` +
+        types.map(t => `<button class="filter-pill" onclick="selectPill('${t}', this)">${t === 'physical' ? '📦 Tlačené' : escapeHtml(t.toUpperCase())}</button>`).join('');
+      document.getElementById('filterBar').style.display = 'flex';
+    }
+    grid.innerHTML = allProducts.map(productCardHtml).join('');
+  } catch (e) {
+    grid.innerHTML = '<p class="empty-state">Nepodarilo sa načítať produkty.</p>';
+  }
+}
+
+loadProducts();
+</script>
+</body>
+</html>
