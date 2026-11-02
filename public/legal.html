@@ -1191,6 +1191,10 @@
             Na stránke používame službu <strong>Cookiebot</strong> na správu súhlasov a <strong>Google Analytics</strong> na základnú webovú analytiku — tá beží až po udelení súhlasu.
           </p>
         </div>
+        <!-- CookieDeclaration je zámerne MIMO .legal-item[data-i18n="priv10"] -- ten div sa pri
+             prepnutí jazyka (SK/CS) prepisuje cez innerHTML, čím by sa vložený script tag aj
+             zmazal, a navyše script tag vložený cez innerHTML sa v prehliadači vôbec nespustí. -->
+        <script id="CookieDeclaration" src="https://consent.cookiebot.com/082b4b18-7f50-41b6-b374-be0c015a5fe0/cd.js" type="text/javascript" async></script>
 
         <div class="legal-item" data-i18n="priv11">
           <h3>11. Bezpečnosť</h3>
@@ -1224,7 +1228,7 @@
         <div class="legal-item" data-i18n="priv14">
           <h3>14. Posledná aktualizácia</h3>
           <p>
-            Tento dokument bol naposledy aktualizovaný <strong>14.8.2026</strong>.
+            Tento dokument bol naposledy aktualizovaný <strong>2.11.2026</strong>.
           </p>
         </div>
       </div>
@@ -1622,7 +1626,7 @@ priv13: `<h3>13. Kontakt</h3>
           </p>`,
 priv14: `<h3>14. Posledná aktualizácia</h3>
           <p>
-            Tento dokument bol naposledy aktualizovaný <strong>14.8.2026</strong>.
+            Tento dokument bol naposledy aktualizovaný <strong>2.11.2026</strong>.
           </p>`,
 footerCtaTitle: 'Právny základ má byť<br><em>jasný, nie ukrytý.</em>',
 footerCtaBtn: 'Späť na landing page →',
@@ -2004,7 +2008,7 @@ priv13: `<h3>13. Kontakt</h3>
           </p>`,
 priv14: `<h3>14. Poslední aktualizace</h3>
           <p>
-            Tento dokument byl naposledy aktualizován <strong>14.8.2026</strong>.
+            Tento dokument byl naposledy aktualizován <strong>2.11.2026</strong>.
           </p>`,
 footerCtaTitle: 'Právní základ má být<br><em>jasný, ne skrytý.</em>',
 footerCtaBtn: 'Zpět na landing page →',
