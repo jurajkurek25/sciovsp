@@ -1,0 +1,562 @@
+<!doctype html>
+<html lang="sk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Administrácia obchodu — SP Tréner</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<!-- Quill nahostený lokálne (public/vendor/quill/), nie z CDN -- vyhýba sa
+     prípadu, že by sa z jsdelivr načítal len quill.js bez quill.snow.css
+     (alebo naopak), čo by nechalo toolbar neoštýlovaný/rozbitý. -->
+<link href="/vendor/quill/quill.snow.css" rel="stylesheet">
+<script src="/vendor/quill/quill.js"></script>
+<style>
+@font-face{font-family:'DM Mono';font-style:normal;font-weight:400;font-display:swap;src:url(/fonts/dm-mono-400-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'DM Mono';font-style:normal;font-weight:400;font-display:swap;src:url(/fonts/dm-mono-400-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'DM Mono';font-style:normal;font-weight:500;font-display:swap;src:url(/fonts/dm-mono-500-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'DM Mono';font-style:normal;font-weight:500;font-display:swap;src:url(/fonts/dm-mono-500-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'DM Sans';font-style:normal;font-weight:300 700;font-display:swap;src:url(/fonts/dm-sans-var-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'DM Sans';font-style:normal;font-weight:300 700;font-display:swap;src:url(/fonts/dm-sans-var-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Instrument Serif';font-style:normal;font-weight:400;font-display:swap;src:url(/fonts/instrument-serif-normal-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Instrument Serif';font-style:normal;font-weight:400;font-display:swap;src:url(/fonts/instrument-serif-normal-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+:root{
+  --black:#08080d;--black2:#0f0f18;--black3:#171724;
+  --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.13);
+  --text:#eeeef5;--text2:#a1a1bc;--text3:#5c5c7a;
+  --volt:#c8ff00;--purple:#7c5cff;--purple2:#b09bff;--red:#ff3f5e;--green:#36e896;
+  --serif:'Instrument Serif',Georgia,serif;--mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--black);color:var(--text);font-family:var(--sans);line-height:1.65;overflow-x:hidden}
+a{color:inherit}
+button{cursor:pointer;font-family:inherit}
+nav{position:sticky;top:0;z-index:100;padding:1rem clamp(1rem,4vw,2rem);padding-top:calc(1rem + env(safe-area-inset-top));display:flex;justify-content:space-between;align-items:center;gap:.75rem;flex-wrap:wrap;background:var(--black);border-bottom:1px solid var(--border)}
+.nav-logo{font-family:var(--mono);font-size:13px;letter-spacing:.15em;color:var(--text);text-decoration:none;white-space:nowrap;display:inline-flex;align-items:center;gap:.55rem}
+.nav-dot{width:7px;height:7px;background:var(--volt);border-radius:50%;animation:pulse-dot 2s infinite;display:inline-block}
+@keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.7)}}
+.nav-link{text-decoration:none;font-family:var(--mono);font-size:.78rem;letter-spacing:.05em;border-radius:8px;transition:all .2s;color:var(--text2);padding:.65rem .85rem;border:1px solid transparent}
+.nav-link:hover{color:var(--text);border-color:var(--border2)}
+.nav-link.active{color:var(--volt);border-color:rgba(200,255,0,.25)}
+.nav-cta{padding:.6rem 1rem;background:var(--volt);color:var(--black);border-radius:8px;font-weight:700;font-family:var(--mono);font-size:.78rem;border:none;cursor:pointer;white-space:nowrap}
+.lang-switcher{display:flex;align-items:center;gap:.35rem}
+.lang-btn{padding:.45rem .7rem;border:1px solid var(--border2);background:transparent;color:var(--text2);border-radius:6px;font-family:var(--mono);font-size:.72rem;letter-spacing:.06em;cursor:pointer;transition:all .2s}
+.lang-btn:hover{color:var(--text);border-color:var(--purple)}
+.lang-btn.active{color:var(--volt);border-color:var(--volt)}
+.nav-right{display:flex;align-items:center;gap:.75rem}
+.nav-links-wrap{display:flex;align-items:center;gap:.75rem}
+.nav-hamburger{display:none;width:38px;height:38px;align-items:center;justify-content:center;flex-shrink:0;background:transparent;border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:1.05rem;cursor:pointer;transition:border-color .2s}
+.nav-hamburger:hover{border-color:var(--volt)}
+.nav-overlay{display:none;position:fixed;inset:0;background:rgba(8,8,13,.6);backdrop-filter:blur(2px);z-index:90}
+.nav-overlay.show{display:block}
+.page{max-width:900px;margin:0 auto;padding:clamp(2rem,6vw,3.5rem) clamp(1rem,4vw,2rem) clamp(3rem,6vw,6rem)}
+.breadcrumb{font-family:var(--mono);font-size:.72rem;color:var(--text3);margin-bottom:1.5rem;display:flex;gap:.4rem;flex-wrap:wrap}
+.breadcrumb a{color:var(--text3);text-decoration:none}
+.breadcrumb a:hover{color:var(--purple2)}
+.hero-title{font-family:var(--serif);font-size:clamp(1.8rem,5vw,2.4rem);line-height:1.1;margin-bottom:1.5rem}
+.panel{background:var(--black2);border:1px solid var(--border);border-radius:16px;padding:1.75rem;margin-bottom:1.75rem}
+.panel h2{font-family:var(--serif);font-size:1.4rem;margin-bottom:1.25rem}
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+th,td{text-align:left;padding:.65rem .5rem;border-bottom:1px solid var(--border)}
+th{color:var(--text3);font-size:10px;text-transform:uppercase;letter-spacing:.08em;font-family:var(--mono)}
+.row-actions button{background:none;border:1px solid var(--border2);color:var(--text2);border-radius:6px;padding:4px 10px;font-size:11px;font-family:var(--mono)}
+.inactive{opacity:.45}
+form.add{display:grid;gap:.85rem;max-width:480px}
+form.add input,form.add textarea,form.add select{width:100%;min-width:0;padding:.7rem;background:var(--black);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:var(--sans);font-size:.88rem}
+form.add label{font-size:.75rem;color:var(--text2);font-family:var(--mono);letter-spacing:.03em;margin-bottom:-.4rem}
+form.add button.submit{background:var(--volt);color:var(--black);border:none;border-radius:8px;padding:.75rem 1.1rem;font-weight:700;font-family:var(--mono);font-size:.82rem;margin-top:.25rem}
+.msg{font-size:.8rem;margin-top:.5rem;font-family:var(--mono)}
+.msg.error{color:var(--red)}
+.msg.ok{color:var(--green)}
+.locked{text-align:center;padding:5rem 0;color:var(--text2);font-family:var(--mono);font-size:.9rem}
+.panel-note{font-size:.78rem;color:var(--text3);margin-top:-.5rem;margin-bottom:1.25rem;line-height:1.5}
+.popup-overlay{display:none;position:fixed;inset:0;background:rgba(8,8,13,.75);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;padding:1rem;overflow-y:auto}
+.popup-overlay.show{display:flex}
+.popup{background:var(--black2);border:1px solid var(--border2);border-radius:20px;padding:2rem;max-width:480px;width:100%;position:relative;margin:auto}
+.popup-close{position:absolute;top:1rem;right:1rem;background:none;border:none;color:var(--text2);font-size:1.1rem;cursor:pointer}
+.popup h3{font-family:var(--serif);font-size:1.4rem;margin-bottom:.5rem;padding-right:1.5rem}
+.popup .panel-note{margin-top:0}
+footer{border-top:1px solid var(--border);padding:2.5rem;padding-bottom:calc(2.5rem + env(safe-area-inset-bottom));display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+.footer-logo{font-family:var(--mono);font-size:12px;letter-spacing:.15em;color:var(--text3)}
+.footer-links{display:flex;gap:1.5rem;flex-wrap:wrap}
+.footer-links a{font-size:.78rem;color:var(--text3);text-decoration:none;font-family:var(--mono);letter-spacing:.05em;transition:color .2s}
+.footer-links a:hover{color:var(--text2)}
+@media (max-width: 768px){
+  .nav-cta{padding:.5rem .9rem;font-size:.75rem}
+  .nav-hamburger{display:flex}
+  .nav-links-wrap{position:fixed;top:0;right:0;bottom:0;width:min(78vw,300px);background:rgba(15,15,24,.98);backdrop-filter:blur(14px);border-left:1px solid var(--border2);display:flex;flex-direction:column;align-items:stretch;gap:.4rem;padding:5.5rem 1.25rem 2rem;transform:translateX(100%);transition:transform .3s ease;z-index:150;overflow-y:auto}
+  .nav-links-wrap.open{transform:translateX(0)}
+  .nav-links-wrap .nav-link{padding:.85rem 1rem;border:1px solid var(--border);border-radius:10px;text-align:center;color:var(--text)}
+  .nav-links-wrap .lang-switcher{margin-top:.5rem;justify-content:center}
+  .nav-links-wrap .lang-btn{color:var(--text)}
+}
+@media (max-width: 480px){
+  nav{flex-wrap:wrap;row-gap:.5rem}
+  .nav-cta{padding:.4rem .65rem;font-size:.66rem}
+}
+@media (max-width: 640px){
+  .panel{padding:1.1rem}
+  thead{display:none}
+  table,tbody,tr,td{display:block;width:100%}
+  tr{background:var(--black);border:1px solid var(--border);border-radius:10px;margin-bottom:.75rem;overflow:hidden}
+  tr:last-child{margin-bottom:0}
+  td{border-bottom:1px solid var(--border);padding:.6rem .9rem}
+  td:last-child{border-bottom:none}
+  td[data-label]::before{content:attr(data-label);display:block;font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:.2rem}
+  .row-actions{display:flex;flex-direction:column;gap:.4rem}
+  .row-actions button{width:100%;padding:.6rem}
+}
+.rich-editor{background:var(--black3);border:1px solid var(--border2);border-radius:8px;margin-top:.6rem;overflow:hidden}
+.rich-editor .ql-toolbar{background:var(--black2);border:none;border-bottom:1px solid var(--border2)}
+.rich-editor .ql-toolbar .ql-stroke{stroke:var(--text2)}
+.rich-editor .ql-toolbar .ql-fill{fill:var(--text2)}
+.rich-editor .ql-toolbar .ql-picker-label{color:var(--text2)}
+.rich-editor .ql-toolbar button:hover .ql-stroke,.rich-editor .ql-toolbar button.ql-active .ql-stroke{stroke:var(--volt)}
+.rich-editor .ql-toolbar button:hover .ql-fill,.rich-editor .ql-toolbar button.ql-active .ql-fill{fill:var(--volt)}
+.rich-editor .ql-toolbar button.ql-active .ql-picker-label{color:var(--volt)}
+.rich-editor .ql-container{border:none;font-family:var(--sans);font-size:.9rem;color:var(--text);min-height:200px}
+.rich-editor .ql-editor{min-height:200px}
+.rich-editor .ql-editor.ql-blank::before{color:var(--text3);font-style:normal}
+.rich-editor .ql-editor h2{font-family:var(--serif);font-size:1.4rem}
+.rich-editor .ql-editor h3{font-weight:700}
+.rich-editor .ql-editor a{color:var(--purple2)}
+.rich-editor .ql-picker-options{background:var(--black2);border:1px solid var(--border2)}
+.rich-editor .ql-picker-item{color:var(--text2)}
+</style>
+</head>
+<body>
+<nav id="mainNav">
+  <a href="/" class="nav-logo" id="navLogo"><span class="nav-dot"></span>SP TRÉNER</a>
+  <div class="nav-right">
+    <div class="nav-links-wrap" id="navLinksWrap">
+      <a href="/blog" class="nav-link" id="navLinkBlog">Blog</a>
+      <a href="/kurzy" class="nav-link" id="navLinkKurzy">Kurzy</a>
+      <a href="/obchod" class="nav-link active">Obchod</a>
+      <a href="/odporucame" class="nav-link" id="navLinkOdporucame">Odporúčame</a>
+      <div class="lang-switcher">
+        <button class="lang-btn active" id="langBtnSk" onclick="switchBlogLang('sk')">SK</button>
+        <button class="lang-btn" id="langBtnCs" onclick="switchBlogLang('cs')">CZ</button>
+      </div>
+    </div>
+    <button class="nav-cta" id="signinBtn" style="display:none;">Prihlásiť sa cez Google</button>
+    <button class="nav-hamburger" id="navHamburger" onclick="toggleMobileNav()" aria-label="Menu">☰</button>
+  </div>
+</nav>
+<div class="nav-overlay" id="navOverlay" onclick="closeMobileNav()"></div>
+
+<main class="page">
+  <nav class="breadcrumb"><a href="/">SP Tréner</a><span>/</span><a href="/obchod">Obchod</a><span>/</span><span>Administrácia</span></nav>
+  <h1 class="hero-title">Administrácia obchodu</h1>
+  <div id="locked" class="locked">Načítavam…</div>
+  <div id="app" style="display:none;">
+    <div class="panel">
+      <h2>Produkty</h2>
+      <p class="panel-note">Úprava názvu, popisu, ceny alebo súboru sa prejaví okamžite pre všetkých — aj pre tých, čo si produkt už kúpili (ich link na stiahnutie sa prepočíta na nový súbor), aj pre nových zákazníkov.</p>
+      <table>
+        <thead><tr><th>Názov</th><th>Typ</th><th>Cena</th><th>Stav</th><th></th></tr></thead>
+        <tbody id="productRows"></tbody>
+      </table>
+    </div>
+    <div class="panel">
+      <h2>Nový produkt</h2>
+      <form class="add" id="addForm">
+        <label>Názov</label>
+        <input type="text" name="title" required>
+        <label>Krátky popis (karta v zozname + meta description, cca 1-2 vety)</label>
+        <textarea name="description" rows="3"></textarea>
+        <label>Predajný text (zobrazí sa na stránke produktu — nadpisy, tučné, zoznamy)</label>
+        <div class="rich-editor"><div class="add-sales-editor" data-placeholder="Napíš predajný text produktu — nadpisy, tučné písmo, zoznamy..."></div></div>
+        <label>Cena (centy, napr. 700 = 7,00 €)</label>
+        <input type="number" name="priceCents" min="50" required>
+        <label>Typ súboru</label>
+        <select name="fileType" required>
+          <option value="pdf">PDF</option>
+          <option value="epub">EPUB</option>
+          <option value="mobi">MOBI</option>
+          <option value="skill">.skill</option>
+          <option value="zip">ZIP</option>
+        </select>
+        <label>Súbor produktu</label>
+        <input type="file" name="file" required>
+        <label>Obal (voliteľné, PNG/JPG/WEBP)</label>
+        <input type="file" name="cover" accept="image/png,image/jpeg,image/webp">
+        <button class="submit" type="submit">Vytvoriť produkt</button>
+        <div class="msg" id="addMsg"></div>
+      </form>
+    </div>
+
+    <div class="panel">
+      <h2>📦 Tlačené knihy (Lulu Print API)</h2>
+      <p class="panel-note">Cena sa NEPÍŠE ručne — nastavíš len maržu, skutočnú cenu dopočíta Lulu Cost Calculator (tlač + doprava + DPH) po kliknutí na „Prepočítať cenu“. Nová kniha je vždy skrytá, kým cenu neprepočítaš a ručne ju neaktivuješ. Pred prvým skutočným predajom over v <a href="https://developers.lulu.com/user-profile/payment-methods" target="_blank" style="color:var(--purple2)">Lulu Developer Portáli</a>, že máš na PRODUKČNOM účte nastavenú platebnú kartu — bez nej každá objednávka ostane navždy nezaplatená u Lulu a kniha sa nikdy nevytlačí.</p>
+      <table>
+        <thead><tr><th>Názov</th><th>Cena</th><th>Marža</th><th>Stav</th><th></th></tr></thead>
+        <tbody id="physicalRows"></tbody>
+      </table>
+    </div>
+    <div class="panel">
+      <h2>Nová tlačená kniha</h2>
+      <form class="add" id="addPhysicalForm">
+        <label>Názov</label>
+        <input type="text" name="title" required>
+        <label>Krátky popis (karta v zozname + meta description, cca 1-2 vety)</label>
+        <textarea name="description" rows="3"></textarea>
+        <label>Predajný text (zobrazí sa na stránke knihy — nadpisy, tučné, zoznamy)</label>
+        <div class="rich-editor"><div class="add-physical-sales-editor" data-placeholder="Napíš predajný text knihy — nadpisy, tučné písmo, zoznamy..."></div></div>
+        <label>Z existujúceho digitálneho produktu (voliteľné)</label>
+        <select name="sourceDigitalProductId" id="sourceDigitalProductSelect">
+          <option value="">— žiadny —</option>
+        </select>
+        <label>Formát tlače (Lulu pod_package_id)</label>
+        <select name="podPackageId" id="podPackageSelect" required>
+          <option value="0600X0900.BW.STD.PB.060UW444.MXX">6×9″ čiernobiela, mäkká väzba, matný obal (najbežnejšie a najlevnejšie)</option>
+          <option value="0583X0827.BW.STD.PB.060UW444.MXX">A5 čiernobiela, mäkká väzba, matný obal</option>
+          <option value="0600X0900.FC.STD.PB.080CW444.GXX">6×9″ farebná, mäkká väzba, lesklý obal</option>
+        </select>
+        <label>Počet strán interiéru (Lulu vyžaduje 32–800)</label>
+        <input type="number" name="pageCount" min="32" max="800" required>
+        <label>Marža (%, napr. 35)</label>
+        <input type="number" name="marginPercent" min="0" step="0.5" value="35" required>
+        <label>Interiér (PDF)</label>
+        <input type="file" name="interior" accept="application/pdf" required>
+        <label>Obal (PDF, so správnym rozmerom a rezervou na hrbát)</label>
+        <input type="file" name="cover" accept="application/pdf" required>
+        <button class="submit" type="submit">Vytvoriť (zatiaľ skrytú) knihu</button>
+        <div class="msg" id="addPhysicalMsg"></div>
+      </form>
+    </div>
+  </div>
+</main>
+
+<div class="popup-overlay" id="editOverlay" onclick="if(event.target===this) closeEditProduct()">
+  <div class="popup">
+    <button class="popup-close" onclick="closeEditProduct()">✕</button>
+    <h3 id="editTitle">Upraviť produkt</h3>
+    <p class="panel-note">Zmena sa prejaví pre všetkých — aj pre tých, čo si produkt už kúpili, aj pre nových zákazníkov.</p>
+    <form class="add" id="editForm">
+      <input type="hidden" name="id" id="editId">
+      <label>Názov</label>
+      <input type="text" name="title" id="editProductTitle" required>
+      <label>Krátky popis (karta v zozname + meta description, cca 1-2 vety)</label>
+      <textarea name="description" id="editDescription" rows="3"></textarea>
+      <label>Predajný text (zobrazí sa na stránke produktu — nadpisy, tučné, zoznamy)</label>
+      <div class="rich-editor"><div class="edit-sales-editor" data-placeholder="Napíš predajný text produktu — nadpisy, tučné písmo, zoznamy..."></div></div>
+      <label>Cena (centy, napr. 700 = 7,00 €)</label>
+      <input type="number" name="priceCents" id="editPriceCents" min="50" required>
+      <label>Nahradiť súbor produktu (voliteľné — necháš prázdne, ak sa súbor nemení)</label>
+      <input type="file" name="file" id="editFile">
+      <label>Nahradiť obal (voliteľné, PNG/JPG/WEBP)</label>
+      <input type="file" name="cover" id="editCover" accept="image/png,image/jpeg,image/webp">
+      <button class="submit" type="submit">Uložiť zmeny</button>
+      <div class="msg" id="editMsg"></div>
+    </form>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-logo">SP TRÉNER © 2026</div>
+  <div class="footer-links">
+    <a href="/app">Aplikácia</a>
+    <a href="/blog" id="footerLinkBlog">Blog</a>
+    <a href="/kurzy" id="footerLinkKurzy">Kurzy</a>
+    <a href="mailto:juraj@jurajkurek.com">Kontakt</a>
+    <a href="/legal.html#vop">VOP</a>
+    <a href="/legal.html#privacy">Súkromie</a>
+    <a href="https://partner.sptrener.online">Partnerský program</a>
+    <a href="https://ad.sptrener.online">Inzercia</a>
+  </div>
+</footer>
+
+<script>
+function toggleMobileNav(){
+  var open = document.getElementById('navLinksWrap').classList.toggle('open');
+  document.getElementById('navOverlay').classList.toggle('show', open);
+  document.getElementById('navHamburger').textContent = open ? '✕' : '☰';
+}
+function closeMobileNav(){
+  document.getElementById('navLinksWrap').classList.remove('open');
+  document.getElementById('navOverlay').classList.remove('show');
+  document.getElementById('navHamburger').textContent = '☰';
+}
+function switchBlogLang(l){
+  var u = new URL(window.location.href);
+  if (l === 'cs') { u.searchParams.set('lang', 'cs'); } else { u.searchParams.delete('lang'); }
+  window.location.href = u.toString();
+}
+(function(){
+  var isCs = new URLSearchParams(window.location.search).get('lang') === 'cs';
+  document.getElementById('langBtnSk').classList.toggle('active', !isCs);
+  document.getElementById('langBtnCs').classList.toggle('active', isCs);
+  if (isCs) {
+    var suffix = '?lang=cs';
+    document.getElementById('navLogo').href = '/' + suffix;
+    document.getElementById('navLinkBlog').href = '/blog' + suffix;
+    document.getElementById('navLinkKurzy').href = '/kurzy' + suffix;
+    document.getElementById('navLinkOdporucame').href = '/odporucame' + suffix;
+    document.getElementById('footerLinkBlog').href = '/blog' + suffix;
+    document.getElementById('footerLinkKurzy').href = '/kurzy' + suffix;
+  }
+})();
+
+let supabaseClient, accessToken;
+
+// ── Rich text editor (Quill) -- rovnaký vzor ako dash-service/public/index.html
+// (courses.sales_content). Tri formuláre, tri samostatné instancie.
+function initRichEditor(containerClass, initialHtml) {
+  const container = document.querySelector('.' + containerClass);
+  if (typeof Quill === 'undefined') return fallbackTextEditor(container, initialHtml);
+  try {
+    const quill = new Quill(container, {
+      theme: 'snow',
+      placeholder: container.dataset.placeholder || '',
+      modules: {
+        toolbar: [
+          [{ header: [2, 3, false] }],
+          ['bold', 'italic'],
+          [{ list: 'ordered' }, { list: 'bullet' }],
+          ['blockquote', 'link'],
+          ['clean']
+        ]
+      }
+    });
+    if (initialHtml) quill.root.innerHTML = initialHtml;
+    return quill;
+  } catch (err) {
+    return fallbackTextEditor(container, initialHtml);
+  }
+}
+function fallbackTextEditor(container, initialHtml) {
+  container.innerHTML = '';
+  const ta = document.createElement('textarea');
+  ta.style.cssText = 'width:100%;min-height:200px;padding:.8rem;background:transparent;border:none;color:var(--text);font-family:var(--sans);font-size:.9rem;resize:vertical;display:block';
+  ta.value = initialHtml || '';
+  ta.placeholder = 'Rich editor sa nepodarilo načítať — vlož HTML priamo (h2, p, ul/li, strong...).';
+  container.appendChild(ta);
+  return { getText: () => ta.value, root: { get innerHTML() { return ta.value; }, set innerHTML(v) { ta.value = v; } } };
+}
+const addSalesQuill = initRichEditor('add-sales-editor', '');
+const editSalesQuill = initRichEditor('edit-sales-editor', '');
+const addPhysicalSalesQuill = initRichEditor('add-physical-sales-editor', '');
+
+async function init() {
+  const cfgRes = await fetch('/api/shop/config');
+  const cfg = await cfgRes.json();
+  supabaseClient = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (session) {
+    accessToken = session.access_token;
+    await loadProducts();
+    await loadPhysicalSetup();
+    await loadPhysicalProducts();
+  } else {
+    document.getElementById('locked').innerHTML = '<p>Táto stránka je len pre administrátorov obchodu.</p>';
+    document.getElementById('signinBtn').style.display = 'inline-block';
+  }
+}
+
+document.getElementById('signinBtn').addEventListener('click', async () => {
+  await supabaseClient.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.href } });
+});
+
+async function authedFetch(url, options = {}) {
+  options.headers = Object.assign({}, options.headers, { Authorization: 'Bearer ' + accessToken });
+  return fetch(url, options);
+}
+
+let currentProducts = [];
+
+async function loadProducts() {
+  const res = await authedFetch('/api/admin/shop/products');
+  if (res.status === 403) {
+    document.getElementById('locked').innerHTML = '<p>Prihlásený, ale tento účet nemá prístup do administrácie obchodu.</p>';
+    return;
+  }
+  const data = await res.json();
+  currentProducts = data.products || [];
+  document.getElementById('locked').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  const rows = document.getElementById('productRows');
+  rows.innerHTML = currentProducts.map(p => `
+    <tr class="${p.active ? '' : 'inactive'}">
+      <td data-label="Názov">${escapeHtml(p.title)}</td>
+      <td data-label="Typ">${p.fileType}</td>
+      <td data-label="Cena">${(p.priceCents / 100).toFixed(2)} €</td>
+      <td data-label="Stav">${p.active ? 'aktívny' : 'skrytý'}</td>
+      <td class="row-actions">
+        <button onclick="openEditProduct(${p.id})">Upraviť</button>
+        <button onclick="toggleActive(${p.id}, ${!p.active})">${p.active ? 'Skryť' : 'Zobraziť'}</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+async function toggleActive(id, newActive) {
+  if (newActive) {
+    const fd = new FormData();
+    fd.append('active', 'true');
+    await authedFetch('/api/admin/shop/products/' + id, { method: 'PUT', body: fd });
+  } else {
+    await authedFetch('/api/admin/shop/products/' + id, { method: 'DELETE' });
+  }
+  loadProducts();
+}
+
+function openEditProduct(id) {
+  const p = currentProducts.find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('editId').value = p.id;
+  document.getElementById('editTitle').textContent = 'Upraviť: ' + p.title;
+  document.getElementById('editProductTitle').value = p.title;
+  document.getElementById('editDescription').value = p.description || '';
+  editSalesQuill.root.innerHTML = p.salesContent || '';
+  document.getElementById('editPriceCents').value = p.priceCents;
+  document.getElementById('editFile').value = '';
+  document.getElementById('editCover').value = '';
+  document.getElementById('editMsg').textContent = '';
+  document.getElementById('editMsg').className = 'msg';
+  document.getElementById('editOverlay').classList.add('show');
+}
+function closeEditProduct() {
+  document.getElementById('editOverlay').classList.remove('show');
+}
+
+document.getElementById('editForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const msg = document.getElementById('editMsg');
+  msg.textContent = '';
+  msg.className = 'msg';
+  const id = document.getElementById('editId').value;
+  const fd = new FormData(e.target);
+  fd.delete('id');
+  fd.set('salesContent', editSalesQuill.getText().trim() ? editSalesQuill.root.innerHTML : '');
+  try {
+    const res = await authedFetch('/api/admin/shop/products/' + id, { method: 'PUT', body: fd });
+    const data = await res.json();
+    if (!res.ok) { msg.textContent = data.error || 'Chyba.'; msg.className = 'msg error'; return; }
+    msg.textContent = 'Uložené — zmena je živá pre všetkých zákazníkov.';
+    msg.className = 'msg ok';
+    loadProducts();
+    setTimeout(closeEditProduct, 900);
+  } catch (err) {
+    msg.textContent = 'Chyba pripojenia.';
+    msg.className = 'msg error';
+  }
+});
+
+document.getElementById('addForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const msg = document.getElementById('addMsg');
+  msg.textContent = '';
+  msg.className = 'msg';
+  const fd = new FormData(e.target);
+  fd.set('salesContent', addSalesQuill.getText().trim() ? addSalesQuill.root.innerHTML : '');
+  try {
+    const res = await authedFetch('/api/admin/shop/products', { method: 'POST', body: fd });
+    const data = await res.json();
+    if (!res.ok) { msg.textContent = data.error || 'Chyba.'; msg.className = 'msg error'; return; }
+    msg.textContent = 'Produkt vytvorený.';
+    msg.className = 'msg ok';
+    e.target.reset();
+    addSalesQuill.root.innerHTML = '';
+    loadProducts();
+  } catch (err) {
+    msg.textContent = 'Chyba pripojenia.';
+    msg.className = 'msg error';
+  }
+});
+
+function escapeHtml(s) {
+  return (s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// ── Tlačené knihy (Lulu) ──────────────────────────────────────────────
+let currentPhysicalProducts = [];
+
+async function loadPhysicalSetup() {
+  // Formát tlače (podPackageSelect) je natvrdo v HTML -- nezávisí od žiadneho
+  // API volania, aby ho nevedela zablokovať sieťová/serverová chyba. Tu sa
+  // len dopĺňa zoznam existujúcich digitálnych produktov do druhého selectu;
+  // ak to zlyhá, formulár zostáva použiteľný (len bez tejto voľby).
+  try {
+    const sourceSelect = document.getElementById('sourceDigitalProductSelect');
+    sourceSelect.innerHTML = '<option value="">— žiadny —</option>' +
+      currentProducts.map(p => `<option value="${p.id}">${escapeHtml(p.title)}</option>`).join('');
+  } catch (e) {
+    console.error('loadPhysicalSetup error:', e);
+  }
+}
+
+async function loadPhysicalProducts() {
+  try {
+    const res = await authedFetch('/api/admin/shop/physical-products');
+    if (!res.ok) return;
+    const data = await res.json();
+    currentPhysicalProducts = data.products || [];
+    const rows = document.getElementById('physicalRows');
+    rows.innerHTML = currentPhysicalProducts.map(p => `
+      <tr class="${p.active ? '' : 'inactive'}">
+        <td data-label="Názov">${escapeHtml(p.title)}</td>
+        <td data-label="Cena">${p.priceCents ? (p.priceCents / 100).toFixed(2) + ' €' : '— neprepočítané —'}${p.shippingCostCents != null ? `<div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:2px">z toho doprava ${(p.shippingCostCents / 100).toFixed(2)} €</div>` : ''}</td>
+        <td data-label="Marža">${p.marginPercent}%</td>
+        <td data-label="Stav">${p.active ? 'aktívna' : 'skrytá'}</td>
+        <td class="row-actions">
+          <button onclick="recomputePhysicalPrice(${p.id})">Prepočítať cenu</button>
+          <button onclick="togglePhysicalActive(${p.id}, ${!p.active})">${p.active ? 'Skryť' : 'Aktivovať'}</button>
+        </td>
+      </tr>
+    `).join('');
+  } catch (e) {
+    console.error('loadPhysicalProducts error:', e);
+  }
+}
+
+async function recomputePhysicalPrice(id) {
+  try {
+    const res = await authedFetch('/api/admin/shop/physical-products/' + id + '/recompute-price', { method: 'POST' });
+    const data = await res.json();
+    if (!res.ok) { alert(data.error || 'Lulu kalkulácia zlyhala.'); return; }
+    loadPhysicalProducts();
+  } catch (e) {
+    alert('Chyba pripojenia.');
+  }
+}
+
+async function togglePhysicalActive(id, newActive) {
+  const res = await authedFetch('/api/admin/shop/physical-products/' + id, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ active: newActive })
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    alert(data.error || 'Chyba.');
+  }
+  loadPhysicalProducts();
+}
+
+document.getElementById('addPhysicalForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const msg = document.getElementById('addPhysicalMsg');
+  msg.textContent = '';
+  msg.className = 'msg';
+  const fd = new FormData(e.target);
+  fd.set('salesContent', addPhysicalSalesQuill.getText().trim() ? addPhysicalSalesQuill.root.innerHTML : '');
+  try {
+    const res = await authedFetch('/api/admin/shop/physical-products', { method: 'POST', body: fd });
+    const data = await res.json();
+    if (!res.ok) { msg.textContent = data.error || 'Chyba.'; msg.className = 'msg error'; return; }
+    msg.textContent = 'Kniha vytvorená (zatiaľ skrytá) — teraz klikni „Prepočítať cenu“ a potom „Aktivovať“.';
+    msg.className = 'msg ok';
+    e.target.reset();
+    addPhysicalSalesQuill.root.innerHTML = '';
+    loadPhysicalProducts();
+  } catch (err) {
+    msg.textContent = 'Chyba pripojenia.';
+    msg.className = 'msg error';
+  }
+});
+
+init();
+</script>
+</body>
+</html>
