@@ -1455,6 +1455,48 @@ const TRANSLATIONS={
 };
 
 let currentLang=localStorage.getItem('vsp_lang')||'sk';
+
+// Zákaz účtu za duplicitné registrácie (main-app-patches/298) -- appka
+// nemá centrálny fetch wrapper (každé volanie používa vlastný raw
+// fetch()), preto sa window.fetch obalí raz tu, úplne navrchu, aby
+// zachytil KAŽDÚ 403 odpoveď s accountBanned:true bez ohľadu na to,
+// ktorá funkcia fetch zavolala.
+let _accountBannedShown=false;
+(function(){
+  const _origFetch=window.fetch;
+  window.fetch=async function(...args){
+    const res=await _origFetch.apply(this,args);
+    if(res.status===403){
+      try{
+        const data=await res.clone().json();
+        if(data&&data.accountBanned)showAccountBannedScreen(data.error);
+      }catch(e){}
+    }
+    return res;
+  };
+})();
+function showAccountBannedScreen(serverMsg){
+  if(_accountBannedShown)return;
+  _accountBannedShown=true;
+  const isCz=currentLang==='cz';
+  const overlay=document.createElement('div');
+  overlay.id='accountBannedOverlay';
+  overlay.style.cssText='position:fixed;inset:0;z-index:999999;background:#08080d;color:#eeeef5;display:flex;align-items:center;justify-content:center;padding:2rem;font-family:system-ui,sans-serif;text-align:center';
+  overlay.innerHTML=
+    '<div style="max-width:440px">'
+    +'<div style="font-size:2.5rem;margin-bottom:1rem">🚫</div>'
+    +'<h1 style="font-family:Georgia,serif;font-size:1.6rem;margin-bottom:1rem">'+(isCz?'Účet pozastaven':'Účet pozastavený')+'</h1>'
+    +'<p style="color:#a1a1bc;font-size:.95rem;line-height:1.6;margin-bottom:1.5rem">'+(isCz
+      ?'Tento účet jsme pozastavili kvůli podezření na zneužití (duplicitní registrace kvůli bezplatným testům). Pokud jde o omyl, napiš nám.'
+      :'Tento účet sme pozastavili pre podozrenie na zneužitie (duplicitné registrácie kvôli bezplatným testom). Ak ide o omyl, napíš nám.')+'</p>'
+    +'<button id="accountBannedCheckoutBtn" style="padding:.9rem 1.6rem;background:#c8ff00;color:#08080d;border:none;border-radius:10px;font-weight:700;font-family:monospace;cursor:pointer;margin-bottom:1rem;width:100%">'+(isCz?'Koupit Premium / Elite →':'Kúpiť Premium / Elite →')+'</button>'
+    +'<div><a href="mailto:juraj@jurajkurek.com" style="color:#7c5cff;font-size:.82rem;text-decoration:none">'+(isCz?'Napsat podporu':'Napísať podpore')+'</a></div>'
+    +'</div>';
+  document.body.appendChild(overlay);
+  document.getElementById('accountBannedCheckoutBtn').addEventListener('click',function(){
+    if(typeof startCheckout==='function')startCheckout();
+  });
+}
 function t(key,vars){
   let str=TRANSLATIONS[currentLang]?.[key]??TRANSLATIONS.sk?.[key]??key;
   if(vars)Object.entries(vars).forEach(([k,v])=>{str=str.replace(new RegExp('{'+k+'}','g'),v)});
