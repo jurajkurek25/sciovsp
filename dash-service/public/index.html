@@ -156,6 +156,7 @@ textarea{width:100%;min-height:110px;padding:.7rem;background:var(--black3);bord
     <a class="navlink" data-page="giftcardsales">Darčekové karty (predaj)</a>
     <a class="navlink" data-page="webinar">Webinár — kontakty</a>
     <a class="navlink" data-page="community">Komunita</a>
+    <a class="navlink" data-page="users">Používatelia (zákaz appky)</a>
     <a class="navlink" data-page="recommendations">Odporúčame (affiliate)</a>
     <a class="navlink" data-page="payouts">Výplaty (PAY by square)</a>
     <a class="navlink" data-page="instructorpayouts">Výplaty inštruktorov</a>
@@ -253,7 +254,7 @@ function showApp() {
 }
 
 // ─────────────────────────── ROUTER ───────────────────────────
-const PAGES = { overview: renderOverview, trends: renderTrends, academy: renderAcademy, courses: renderCourses, blog: renderBlog, houseads: renderHouseAds, giftcards: renderGiftcards, giftcardsales: renderGiftCardSales, payouts: renderPayouts, instructorpayouts: renderInstructorPayouts, discountcodes: renderDiscountCodes, instructors: renderInstructors, bugs: renderBugs, advisor: renderAdvisor, aiops: renderAiops, webinar: renderWebinar, community: renderCommunity, recommendations: renderRecommendations, sutazApplications: renderSutazApplications };
+const PAGES = { overview: renderOverview, trends: renderTrends, academy: renderAcademy, courses: renderCourses, blog: renderBlog, houseads: renderHouseAds, giftcards: renderGiftcards, giftcardsales: renderGiftCardSales, payouts: renderPayouts, instructorpayouts: renderInstructorPayouts, discountcodes: renderDiscountCodes, instructors: renderInstructors, bugs: renderBugs, advisor: renderAdvisor, aiops: renderAiops, webinar: renderWebinar, community: renderCommunity, users: renderUsers, recommendations: renderRecommendations, sutazApplications: renderSutazApplications };
 
 $$('.navlink[data-page]').forEach(a => a.addEventListener('click', () => { navigate(a.dataset.page); closeMobileNav(); }));
 
@@ -1402,6 +1403,65 @@ async function communityRevokeAccess() {
   if (!email) { msg.textContent = 'Zadaj email.'; return; }
   try { await api(`/api/dash/community/users/${encodeURIComponent(email)}/revoke-access`, { method: 'POST' }); msg.textContent = 'Prístup odobraný: ' + email; }
   catch (e) { msg.textContent = 'Chyba.'; }
+}
+
+async function renderUsers() {
+  const html = `
+    <div class="pagehead"><h2>Používatelia — zákaz appky</h2></div>
+    <div class="table-wrap" style="margin-bottom:1.25rem;padding:1rem">
+      <div class="muted" style="margin-bottom:.75rem">Zabanovaný email nemôže vôbec používať appku (AI testy, kurzy, komunita...). Odbanuje sa automaticky pri kúpe Premium/Elite predplatného, alebo ručne tu.</div>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center">
+        <input id="usersSearchQ" type="text" placeholder="hľadať podľa emailu…" style="flex:1;min-width:220px" onkeydown="if(event.key==='Enter')usersSearch()">
+        <button class="btn" onclick="usersSearch()">Hľadať</button>
+      </div>
+      <table style="margin-top:1rem">
+        <thead><tr><th>Email</th><th>Vytvorený</th><th>Plán</th><th>Voľné testy</th><th>Stav</th><th></th></tr></thead>
+        <tbody id="usersSearchTbody"><tr><td class="muted" colspan="6">Zadaj email a vyhľadaj.</td></tr></tbody>
+      </table>
+    </div>`;
+  $('#main').innerHTML = html;
+}
+
+function usersBanReasonPrompt() {
+  const reason = prompt('Dôvod zákazu (zobrazí sa len tebe v dash):', 'Duplicitný účet — obchádzanie bezplatných testov');
+  return reason === null ? null : (reason.trim() || 'Duplicitný účet');
+}
+
+async function usersSearch() {
+  const q = document.getElementById('usersSearchQ').value.trim();
+  const tbody = document.getElementById('usersSearchTbody');
+  if (!q) { tbody.innerHTML = '<tr><td class="muted" colspan="6">Zadaj email a vyhľadaj.</td></tr>'; return; }
+  tbody.innerHTML = '<tr><td class="muted" colspan="6">načítavam…</td></tr>';
+  try {
+    const d = await api(`/api/dash/users/search?q=${encodeURIComponent(q)}`);
+    if (!d.users || !d.users.length) { tbody.innerHTML = '<tr><td class="muted" colspan="6">Nič nenájdené.</td></tr>'; return; }
+    tbody.innerHTML = d.users.map(u => `<tr>
+      <td>${u.email}</td>
+      <td class="muted">${new Date(u.created_at).toLocaleString('sk-SK')}</td>
+      <td>${u.is_premium ? (u.plan || 'premium') : 'free'}</td>
+      <td>${u.trial_count ?? 0}</td>
+      <td>${u.app_banned_at ? `<span style="color:var(--red)">zabanovaný</span><div class="muted" style="font-size:.78rem">${(u.app_ban_reason || '').replace(/</g, '&lt;')}</div>` : '<span style="color:var(--volt)">aktívny</span>'}</td>
+      <td>${u.app_banned_at
+        ? `<button class="btn secondary" data-email="${u.email}" onclick="usersUnban(this)">Odblokovať</button>`
+        : `<button class="btn" data-email="${u.email}" onclick="usersBan(this)">Zabanovať</button>`}</td>
+    </tr>`).join('');
+  } catch (e) {
+    tbody.innerHTML = '<tr><td class="muted" colspan="6">Chyba načítania.</td></tr>';
+  }
+}
+
+async function usersBan(btn) {
+  const email = btn.dataset.email;
+  const reason = usersBanReasonPrompt();
+  if (reason === null) return;
+  try { await api(`/api/dash/users/${encodeURIComponent(email)}/ban`, { method: 'POST', body: JSON.stringify({ reason }) }); usersSearch(); }
+  catch (e) { alert('Chyba: ' + e.message); }
+}
+
+async function usersUnban(btn) {
+  const email = btn.dataset.email;
+  try { await api(`/api/dash/users/${encodeURIComponent(email)}/unban`, { method: 'POST' }); usersSearch(); }
+  catch (e) { alert('Chyba: ' + e.message); }
 }
 
 async function renderWebinar() {
