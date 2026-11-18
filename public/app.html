@@ -3451,6 +3451,7 @@ function updateGenTopicChips(part){
 }
 
 async function generateQuestions(){
+  if(!isPremium()){showPaywall('ai');return;}
   const part=currentGenSubject==='vsp'?(document.querySelector('#genPartChips .chip.active')?.dataset.val||'verbal'):currentGenSubject;
   const topicEl=document.querySelector('#genTopicChips .chip.active');
   const topic=topicEl?.dataset.val||'';
@@ -3486,7 +3487,7 @@ async function generateQuestions(){
 
   try{
     const response=await fetch('/api/generate-topic',{
-      method:'POST',headers:{'Content-Type':'application/json'},
+      method:'POST',headers:{'Content-Type':'application/json',...(await getAuthHeader())},
       body:JSON.stringify({topic:activeTopic,part,count:genCount,difficulty:diff,lang:currentLang})
     });
     clearInterval(stepInterval);
@@ -4139,9 +4140,13 @@ function renderHistory(){
 // ============================================================
 async function loadAICoach(entry,topicStats){
   const ce=document.getElementById('coach-card');if(!ce)return;
+  if(!isPremium()){
+    ce.innerHTML=`<div class="coach-header"><div class="coach-avatar">🤖</div><div><div class="coach-name">${t('coachLabel')}</div></div></div><div class="coach-text">${currentLang==='cz'?'Osobní AI kouč je součástí Premium.':'Osobný AI kouč je súčasťou Premium.'} <a href="#" onclick="showPaywall('ai');return false" style="color:var(--volt)">${currentLang==='cz'?'Více':'Viac'} →</a></div>`;
+    return;
+  }
   ce.innerHTML=`<div class="coach-header"><div class="coach-avatar">🤖</div><div><div class="coach-name">${t('coachLabel')}</div><div class="coach-label">${t('coachAnalyzing')}</div></div></div><div class="coach-loading"><div class="coach-dots"><span></span><span></span><span></span></div>${t('coachGenerating')}</div>`;
   try{
-    const response=await fetch('/api/coach',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({correct:entry.correct,total:entry.correct+entry.wrong+entry.skipped,topicStats,estimatedPercentile:entry.estimated,testsCount:state.globalStats.tests})});
+    const response=await fetch('/api/coach',{method:'POST',headers:{'Content-Type':'application/json',...(await getAuthHeader())},body:JSON.stringify({correct:entry.correct,total:entry.correct+entry.wrong+entry.skipped,topicStats,estimatedPercentile:entry.estimated,testsCount:state.globalStats.tests})});
     const data=await response.json();
     ce.innerHTML=`<div class="coach-header"><div class="coach-avatar">🤖</div><div><div class="coach-name">${t('coachLabel')}</div><div class="coach-label">${t('coachPersonalized')}</div></div></div><div class="coach-text">${(data.message||t('coachDefault')).replace(/\n/g,'<br>')}</div>`;
   }catch(e){ce.innerHTML='';}
@@ -4177,8 +4182,9 @@ function showPaywall(type){
   if(isPremium())return;  // Premium užívateľ — nikdy nezobrazuj paywall
   if(document.getElementById('paywall-overlay'))return;
   const isAnon=type==='anon'||!currentUser;
-  const titleText=t(isAnon?'paywallTrialUsed1':'paywallTrialUsedN',{n:isAnon?FREE_TESTS_ANON:FREE_TESTS_REGISTERED});
-  const subtitleText=isAnon?t('paywallAnonSub',{n:FREE_TESTS_REGISTERED}):t('paywallRegSub');
+  // (patch 299) type==='ai' -- AI funkcie sú len pre Premium/Elite.
+  const titleText=type==='ai'?(currentLang==='cz'?'AI funkce jsou součástí Premium':'AI funkcie sú súčasťou Premium'):t(isAnon?'paywallTrialUsed1':'paywallTrialUsedN',{n:isAnon?FREE_TESTS_ANON:FREE_TESTS_REGISTERED});
+  const subtitleText=type==='ai'?t('paywallRegSub'):(isAnon?t('paywallAnonSub',{n:FREE_TESTS_REGISTERED}):t('paywallRegSub'));
   const googleBtn=`<svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>`;
   const overlay=document.createElement('div');overlay.className='paywall-overlay';overlay.id='paywall-overlay';
   overlay.innerHTML=`<div class="paywall-box">
@@ -5296,13 +5302,19 @@ async function fetchSolution(qIdx) {
     return;
   }
 
+  // (patch 299) AI postup riešenia je len pre Premium/Elite.
+  if (!isPremium()) {
+    wrap.innerHTML = '<div style="color:var(--text3);font-size:.76rem;font-family:var(--mono);padding:.3rem 0">' + (currentLang==='cz' ? 'Postup řešení od AI je součástí Premium.' : 'Postup riešenia od AI je súčasťou Premium.') + ' <a href="#" onclick="showPaywall(\'ai\');return false" style="color:var(--volt)">' + (currentLang==='cz' ? 'Více' : 'Viac') + ' →</a></div>';
+    return;
+  }
+
   // Loading stav priamo vo wrap
   wrap.innerHTML = '<div style="color:var(--text3);font-family:var(--mono);font-size:.76rem;padding:.5rem 0;display:flex;align-items:center;gap:.5rem"><span style="display:inline-block;width:14px;height:14px;border:1.5px solid rgba(176,155,255,.3);border-top-color:var(--purple2);border-radius:50%;animation:spin .7s linear infinite"></span>' + (currentLang==='cz' ? 'Generuji postup řešení...' : 'Generujem postup riešenia...') + '</div>';
 
   try {
     const res = await fetch('/api/solution', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...(await getAuthHeader()) },
       body: JSON.stringify({
         topic: q.topic,
         text: q.text,

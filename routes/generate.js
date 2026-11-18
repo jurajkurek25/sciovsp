@@ -1,5 +1,21 @@
 const express = require('express');
 const router = express.Router();
+const { createClient } = require('@supabase/supabase-js');
+
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
+
+async function verifyToken(req) {
+  const auth = req.headers.authorization;
+  if (!auth || !auth.startsWith('Bearer ')) return null;
+  const token = auth.slice(7);
+  try {
+    const { data, error } = await supabase.auth.getUser(token);
+    if (error || !data.user) return null;
+    return data.user;
+  } catch {
+    return null;
+  }
+}
 
 const ANTHROPIC_API = 'https://api.anthropic.com/v1/messages';
 // Dynamický fallback na NAJNOVŠÍ dostupný model (nikdy na starší pevne
@@ -116,6 +132,16 @@ router.post('/generate-topic', async (req, res) => {
 
   if (!process.env.ANTHROPIC_API_KEY) {
     return res.status(500).json({ error: { message: 'AI generátor nie je nakonfigurovaný (chýba ANTHROPIC_API_KEY).' } });
+  }
+
+  // (patch 299) AI Generátor úloh je len pre Premium/Elite -- bez
+  // bezplatných použití (predtým 3, patch 256).
+  const authUser = await verifyToken(req);
+  if (!authUser) return res.status(401).json({ error: { message: 'Musíš byť prihlásený.' } });
+  const genUserEmail = (authUser.email || '').toLowerCase();
+  const { data: dbUser } = await supabase.from('users').select('is_premium').eq('email', genUserEmail).maybeSingle();
+  if (!dbUser?.is_premium) {
+    return res.status(403).json({ error: { message: 'AI Generátor úloh je súčasťou Premium a Elite.' }, premiumRequired: true });
   }
 
   const safeCount = Math.max(1, Math.min(parseInt(count, 10) || 5, 10));
