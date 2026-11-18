@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Darčeková karta hotová — SP Tréner</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@300;400;500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
+<style>
+:root{--black:#08080d;--black2:#0f0f18;--border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.13);--text:#eeeef5;--text2:#a1a1bc;--text3:#5c5c7a;--volt:#c8ff00;--purple:#7c5cff;--red:#ff3f5e;--green:#36e896;--serif:'Instrument Serif',Georgia,serif;--mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--black);color:var(--text);font-family:var(--sans);line-height:1.6;min-height:100vh;display:flex;align-items:center;justify-content:center}
+a{color:var(--purple2)}
+.wrap{max-width:480px;padding:2rem 1.2rem;text-align:center}
+h1{font-family:var(--serif);font-size:2rem;margin-bottom:.6rem}
+.muted{color:var(--text3);font-size:.9rem}
+.code-box{margin:1.6rem 0;padding:1.3rem;background:var(--black2);border:1px solid var(--border2);border-radius:12px}
+.code-box .code{font-family:var(--mono);font-size:1.5rem;color:var(--volt);font-weight:700;letter-spacing:.05em}
+.btn{display:inline-block;margin-top:1rem;padding:.8rem 1.4rem;background:var(--volt);color:var(--black);border:none;border-radius:9px;font-weight:700;font-family:var(--mono);font-size:.82rem;cursor:pointer;text-decoration:none}
+.err{color:var(--red)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="root"><p class="muted">Spracúvam platbu…</p></div>
+</div>
+<script>
+const params = new URLSearchParams(location.search);
+const sessionId = params.get('session_id');
+const root = document.getElementById('root');
+
+async function poll(attempt) {
+  if (!sessionId) { root.innerHTML = '<p class="err">Chýba session_id.</p>'; return; }
+  try {
+    const res = await fetch('/api/gift-cards/by-session/' + encodeURIComponent(sessionId));
+    if (res.ok) {
+      const data = await res.json();
+      render(data.card);
+      return;
+    }
+  } catch (e) {}
+  if (attempt < 8) { setTimeout(() => poll(attempt + 1), 1200); }
+  else { root.innerHTML = '<p class="err">Platba sa spracúva dlhšie ako obvykle. Skús o pár minút obnoviť stránku, alebo si kartu ulož podľa e-mailu s potvrdením platby.</p>'; }
+}
+
+function render(card) {
+  root.innerHTML = `<h1>Ďakujeme! 🎁</h1>
+    <p class="muted">Darčeková karta je pripravená.</p>
+    <div class="code-box">
+      <div class="muted" style="margin-bottom:.4rem">Kód na uplatnenie</div>
+      <div class="code">${card.code}</div>
+    </div>
+    <a class="btn" href="/api/gift-cards/${encodeURIComponent(card.code)}/pdf" target="_blank" rel="noopener">Stiahnuť / vytlačiť PDF kartu</a>
+    <p class="muted" style="margin-top:1.2rem">Obdarovaný uplatní kód na <a href="/uplatnit-darcek">sptrener.online/uplatnit-darcek</a> po prihlásení cez Google.</p>`;
+}
+
+poll(0);
+</script>
+</body>
+</html>
