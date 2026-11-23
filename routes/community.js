@@ -131,11 +131,32 @@ function displayNameOf(profile, email) {
   return (profile && profile.display_name) || (profile && profile.username) || email;
 }
 
+// Verejný identifikátor pre iného člena, posielaný klientovi (feed, adresár,
+// rebríček, konverzácie) — VŽDY username, NIKDY email. null ak profil ešte
+// nemá username (nemalo by nastať, ensureProfile ho vytvára pri každom
+// prístupe, ale nech sa email nikdy nedostane do JSON ani ako fallback).
+function publicIdOf(profile) {
+  return (profile && profile.username) || null;
+}
+
+// Prijme identifikátor z URL parametra, ktorý môže byť buď username (nové,
+// verejné -- čo teraz vracajú authorEmail/otherEmail/email polia) alebo
+// priamo email (spätná kompatibilita so starými/vyrcachovanými hodnotami) --
+// a vráti skutočný email na interné DB queries. Nikdy sa neposiela naspäť
+// klientovi.
+async function resolveIdentifierToEmail(identifier) {
+  const raw = (identifier || '').toString().trim().toLowerCase();
+  if (!raw) return null;
+  if (raw.includes('@')) return raw;
+  const { data } = await supabase.from('community_profiles').select('email').eq('username', raw).maybeSingle();
+  return data?.email || null;
+}
+
 function serializePost(row, likedPostIds, commentCounts, profiles) {
   const profile = profiles?.[row.author_email];
   return {
     id: row.id,
-    authorEmail: row.author_email,
+    authorEmail: publicIdOf(profile),
     authorName: (profile && profile.display_name) || (profile && profile.username) || row.author_name,
     authorAvatarUrl: profile?.avatar_url || null,
     body: row.body,
@@ -151,7 +172,7 @@ function serializeComment(row, likedCommentIds, likeCounts, profiles) {
   const profile = profiles?.[row.author_email];
   return {
     id: row.id,
-    authorEmail: row.author_email,
+    authorEmail: publicIdOf(profile),
     authorName: (profile && profile.display_name) || (profile && profile.username) || row.author_name,
     authorAvatarUrl: profile?.avatar_url || null,
     body: row.body,
@@ -165,7 +186,7 @@ function serializePhoto(row, profiles) {
   const profile = profiles?.[row.author_email];
   return {
     id: row.id,
-    authorEmail: row.author_email,
+    authorEmail: publicIdOf(profile),
     authorName: (profile && profile.display_name) || (profile && profile.username) || row.author_name,
     authorAvatarUrl: profile?.avatar_url || null,
     imageUrl: row.image_url,
@@ -519,7 +540,8 @@ module.exports = function registerCommunity(app) {
   // komunity (fotka, bio) + jeho posledné príspevky.
   app.get('/api/community/profile/:email', requireCommunityAccess, async (req, res) => {
     try {
-      const email = (req.params.email || '').toString().trim().toLowerCase();
+      const email = await resolveIdentifierToEmail(req.params.email);
+      if (!email) return res.status(404).json({ error: 'Tento používateľ nie je v komunite.' });
       const targetAccess = await getCommunityAccess(email);
       if (!targetAccess.hasAccess) return res.status(404).json({ error: 'Tento používateľ nie je v komunite.' });
       const profileRow = await ensureProfile(email);
@@ -542,7 +564,7 @@ module.exports = function registerCommunity(app) {
       const profiles = { [email]: profileRow };
       res.json({
         profile: {
-          email,
+          email: publicIdOf(profileRow),
           displayName: displayNameOf(profileRow, email),
           avatarUrl: profileRow?.avatar_url || null,
           bio: profileRow?.bio || null
@@ -625,7 +647,7 @@ module.exports = function registerCommunity(app) {
         supabase.from('community_posts').select('id, author_email, author_name').is('deleted_at', null).limit(5000),
         supabase.from('community_comments').select('id, author_email, author_name').is('deleted_at', null).limit(5000),
         supabase.from('community_likes').select('post_id, comment_id').limit(20000),
-        supabase.from('community_profiles').select('email, display_name, avatar_url'),
+        supabase.from('community_profiles').select('email, display_name, avatar_url, username'),
         supabase.from('training_streaks').select('email, best_percentile')
       ]);
 
@@ -663,8 +685,8 @@ module.exports = function registerCommunity(app) {
         const score = likeN * 2 + postN * 3 + commentN * 1 + (percentile != null ? Math.round(percentile / 5) : 0);
         const profile = profileMap[email];
         return {
-          email,
-          displayName: (profile && profile.display_name) || nameSeen[email] || (profile && profile.username) || email,
+          email: publicIdOf(profile),
+          displayName: (profile && profile.display_name) || nameSeen[email] || (profile && profile.username) || 'Člen komunity',
           avatarUrl: profile?.avatar_url || null,
           postCount: postN,
           commentCount: commentN,
@@ -705,7 +727,7 @@ module.exports = function registerCommunity(app) {
           const profile = profiles[otherEmail];
           const last = lastMessages[c.id];
           return {
-            otherEmail,
+            otherEmail: publicIdOf(profile),
             otherName: displayNameOf(profile, otherEmail),
             otherAvatarUrl: profile?.avatar_url || null,
             lastMessage: last ? last.body : null,
@@ -723,7 +745,7 @@ module.exports = function registerCommunity(app) {
   // konverzáciu s daným účastníkom a vráti históriu správ.
   app.get('/api/community/conversations/:email', requireCommunityAccess, async (req, res) => {
     try {
-      const otherEmail = (req.params.email || '').toString().trim().toLowerCase();
+      const otherEmail = await resolveIdentifierToEmail(req.params.email);
       if (!otherEmail || otherEmail === req.communityEmail) return res.status(400).json({ error: 'Neplatný príjemca.' });
       const otherAccess = await getCommunityAccess(otherEmail);
       if (!otherAccess.hasAccess) return res.status(404).json({ error: 'Tento používateľ nie je v komunite.' });
@@ -731,10 +753,12 @@ module.exports = function registerCommunity(app) {
       const { data: messages, error } = await supabase.from('community_messages').select('*').eq('conversation_id', convo.id).order('created_at', { ascending: true }).limit(200);
       if (error) throw error;
       const profileRow = await ensureProfile(otherEmail);
+      const myProfileRow = await ensureProfile(req.communityEmail);
+      const senderPublicId = (senderEmail) => senderEmail === req.communityEmail ? publicIdOf(myProfileRow) : publicIdOf(profileRow);
       res.json({
         conversationId: convo.id,
-        other: { email: otherEmail, displayName: displayNameOf(profileRow, otherEmail), avatarUrl: profileRow?.avatar_url || null },
-        messages: (messages || []).map(m => ({ id: m.id, senderEmail: m.sender_email, body: m.body, createdAt: m.created_at }))
+        other: { email: publicIdOf(profileRow), displayName: displayNameOf(profileRow, otherEmail), avatarUrl: profileRow?.avatar_url || null },
+        messages: (messages || []).map(m => ({ id: m.id, senderEmail: senderPublicId(m.sender_email), body: m.body, createdAt: m.created_at }))
       });
     } catch (e) {
       console.error('community conversation view error:', e.message);
@@ -748,7 +772,7 @@ module.exports = function registerCommunity(app) {
     if (!body) return res.status(400).json({ error: 'Správa nemôže byť prázdna.' });
     if (body.length > DM_BODY_MAX) return res.status(400).json({ error: 'Správa je príliš dlhá.' });
     try {
-      const otherEmail = (req.params.email || '').toString().trim().toLowerCase();
+      const otherEmail = await resolveIdentifierToEmail(req.params.email);
       if (!otherEmail || otherEmail === req.communityEmail) return res.status(400).json({ error: 'Neplatný príjemca.' });
       const otherAccess = await getCommunityAccess(otherEmail);
       if (!otherAccess.hasAccess) return res.status(404).json({ error: 'Tento používateľ nie je v komunite.' });
@@ -770,16 +794,6 @@ module.exports = function registerCommunity(app) {
   // (rovnaké pole ako manuálny ban v dash-service), alebo nahlásenie
   // zamietne ako neopodstatnené. Obsah správ sa nikam mimo tejto funkcie
   // nezobrazuje — do audit tabuľky ide len verdikt a krátke zdôvodnenie.
-  // FINANČNÁ ZÁPLATA -- tento endpoint volá AI (callClaudeJudge) bez
-  // akéhokoľvek stropu. requireCommunityAccess znamená platiaci Premium/Elite
-  // člen, nie "hocikto" -- ale aj platiaci člen mohol doteraz zavolať toto
-  // ľubovoľne veľakrát za sebou, aj opakovane na tú istú konverzáciu, a
-  // zakaždým sa zaplatilo Claude API volanie. Dve nezávislé poistky:
-  //   1. Opakované nahlásenie TEJ ISTEJ konverzácie tým istým človekom
-  //      nevolá AI znova -- vráti sa už uložený verdikt.
-  //   2. Denný strop REPORT_DAILY_LIMIT nových (rôznych) nahlásení na
-  //      používateľa, počítaný priamo z community_message_reports (žiadna
-  //      nová migrácia netreba, tabuľka už má created_at).
   const REPORT_DAILY_LIMIT = 10;
   app.post('/api/community/conversations/:id/report', requireCommunityAccess, async (req, res) => {
     try {
@@ -846,7 +860,7 @@ module.exports = function registerCommunity(app) {
       const members = (activeUsers || []).map(u => {
         const profile = profiles[u.email];
         return {
-          email: u.email,
+          email: publicIdOf(profile),
           displayName: displayNameOf(profile, u.email),
           avatarUrl: profile?.avatar_url || null,
           bio: profile?.bio || null

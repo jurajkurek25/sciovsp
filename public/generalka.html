@@ -546,6 +546,8 @@ function renderLanding() {
       <h1>${t('heroTitle')}</h1>
       <p class="gk-hero-sub">${t('heroSub')}</p>
       <div class="gk-hero-cta">
+        <label style="display:flex;gap:.5rem;align-items:flex-start;font-size:.78rem;text-align:left;margin-top:.75rem"><input type="checkbox" id="generalkaVopCheckbox" style="margin-top:.15rem;flex-shrink:0"><span>Súhlasím s <a href="/legal.html#vop" target="_blank">obchodnými podmienkami</a> a <a href="/legal.html#privacy" target="_blank">ochranou osobných údajov</a>.</span></label>
+        <label style="display:flex;gap:.5rem;align-items:flex-start;font-size:.78rem;text-align:left;margin-top:.75rem"><input type="checkbox" id="generalkaMarketingCheckbox" style="margin-top:.15rem;flex-shrink:0"><span>Chcem dostávať aj odporúčania a ponuky partnerov (voliteľné, kedykoľvek sa dá odhlásiť).</span></label>
         <button class="btn" id="buyBtnHero" onclick="startCheckout()">${t('buyBtn')}</button>
         <div class="err" id="landingErr"></div>
         <div class="gk-hero-note">${t('heroNote')}</div>
@@ -669,9 +671,19 @@ async function startCheckout() {
   const btns = ['buyBtnHero', 'buyBtnFinal'].map(id => document.getElementById(id)).filter(Boolean);
   const errEl = document.getElementById('landingErr');
   if (errEl) errEl.textContent = '';
+  const vopBox = document.getElementById('generalkaVopCheckbox');
+  if (!vopBox || !vopBox.checked) {
+    if (errEl) errEl.textContent = 'Musíš súhlasiť s obchodnými podmienkami.';
+    return;
+  }
   btns.forEach(b => { b.disabled = true; });
   try {
-    const data = await apiFetch('/api/generalka/checkout', { method: 'POST' });
+    const marketingBox = document.getElementById('generalkaMarketingCheckbox');
+    const data = await apiFetch('/api/generalka/checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ marketingConsent: !!(marketingBox && marketingBox.checked), vopAccepted: !!(vopBox && vopBox.checked) })
+    });
     location.href = data.url;
   } catch (e) {
     if (errEl) errEl.textContent = e.message;

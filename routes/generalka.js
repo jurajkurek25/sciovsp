@@ -302,7 +302,12 @@ module.exports = function registerGeneralka(app) {
     const user = await verifyToken(req);
     if (!user) return res.status(401).json({ error: 'Musíš byť prihlásený cez Google.' });
     const email = (user.email || '').toString().trim().toLowerCase();
+    const { marketingConsent, vopAccepted } = req.body || {};
+    if (!vopAccepted) return res.status(400).json({ error: 'Musíš súhlasiť s obchodnými podmienkami.' });
     try {
+      if (marketingConsent !== undefined) {
+        await supabase.from('users').update({ marketing_emails_opt_out: !marketingConsent }).eq('email', email);
+      }
       let customerId;
       const { data: existingUser } = await supabase.from('users').select('stripe_customer_id').eq('email', email).maybeSingle();
       if (existingUser?.stripe_customer_id) {

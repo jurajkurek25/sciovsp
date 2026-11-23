@@ -392,7 +392,7 @@ module.exports = function registerSutaz(app) {
       if (!authUser) return res.status(401).json({ error: 'Prihlás sa.' });
       const email = (authUser.email || '').toLowerCase();
 
-      const { fullName, contactEmail, residenceMunicipality, residenceCountry, schoolName, studyProgram, admissionDecisionDate, ageConfirmed, statuteAck } = req.body || {};
+      const { fullName, contactEmail, residenceMunicipality, residenceCountry, schoolName, studyProgram, admissionDecisionDate, ageConfirmed, statuteAck, marketingConsent } = req.body || {};
       if (!fullName || !fullName.trim()) return res.status(400).json({ error: 'Chýba meno a priezvisko.' });
       if (!contactEmail || !/^\S+@\S+\.\S+$/.test(contactEmail.trim())) return res.status(400).json({ error: 'Chýba alebo je neplatný súťažný kontaktný e-mail.' });
       if (!residenceMunicipality || !residenceMunicipality.trim()) return res.status(400).json({ error: 'Chýba obec bydliska.' });
@@ -420,6 +420,9 @@ module.exports = function registerSutaz(app) {
       }
       if (statuteAck !== 'true' && statuteAck !== true) {
         return res.status(400).json({ error: 'Musíš potvrdiť, že si sa oboznámil/a so štatútom súťaže.' });
+      }
+      if (marketingConsent !== undefined) {
+        await supabase.from('users').update({ marketing_emails_opt_out: !(marketingConsent === 'true' || marketingConsent === true) }).eq('email', email);
       }
       if (!req.file) return res.status(400).json({ error: 'Chýba doklad o prijatí na vysokú školu.' });
       if (!ADMISSION_DOC_MIME.includes(req.file.mimetype)) {

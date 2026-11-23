@@ -349,7 +349,11 @@ module.exports = function registerAutoseoRoutes(app) {
         }
 
         const slug = payload.slug ? slugify(payload.slug) : slugify(payload.title);
-        const basename = 'article-' + payload.id + '-' + Date.now();
+        // (patch 286) payload.id sanitizovaný na bezpečnú podmnožinu znakov
+        // pred použitím v názve súboru -- bráni path traversal cez "../" v
+        // id, ktoré by inak uniklo z UPLOAD_DIR.
+        const safePayloadId = String(payload.id).replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 100) || 'unknown';
+        const basename = 'article-' + safePayloadId + '-' + Date.now();
 
         const [heroLocal, infographicLocal] = await Promise.all([
           downloadImage(payload.heroImageUrl, basename + '-hero'),

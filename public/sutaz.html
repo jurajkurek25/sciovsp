@@ -566,6 +566,7 @@ async function renderFormCard(data){
       </div>
       <div class="consent-row"><input type="checkbox" id="fAge" required><label for="fAge">Potvrdzujem, že som v deň podania prihlášky dovŕšil/a 18 rokov. *</label></div>
       <div class="consent-row"><input type="checkbox" id="fStatute" required><label for="fStatute">Oboznámil/a som sa so <a href="#" id="fStatuteLink" target="_blank">štatútom súťaže</a> a súhlasím s jeho podmienkami. *</label></div>
+      <div class="consent-row"><input type="checkbox" id="fMarketingConsent"><label for="fMarketingConsent">Chcem dostávať aj odporúčania a ponuky partnerov (voliteľné, kedykoľvek sa dá odhlásiť).</label></div>
       <div class="privacy-note">Tvoje údaje a doklad o prijatí spracúvame výhradne na účel overenia a priebehu tejto súťaže — nie na reklamu, a neposkytujeme ich Martinusu. Kópia dokladu sa vymaže do 30 dní po overení. Viac v <a href="/legal.html#privacy" target="_blank">informácii o spracúvaní osobných údajov</a>.</div>
       <button type="submit" class="btn-primary" id="submitBtn" style="width:100%;justify-content:center"><span class="spinner"></span><span class="btn-label">Odoslať prihlášku</span></button>
     </form>
@@ -605,6 +606,7 @@ async function renderFormCard(data){
       fd.append('admissionDecisionDate', document.getElementById('fDate').value);
       fd.append('ageConfirmed', 'true');
       fd.append('statuteAck', 'true');
+      fd.append('marketingConsent', document.getElementById('fMarketingConsent').checked ? 'true' : 'false');
       fd.append('admissionDoc', fileInput.files[0]);
 
       const headers = await getAuthHeader();

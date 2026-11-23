@@ -1,6 +1,6 @@
 // VSP Tréner — Service Worker
 // Verzia cache — zmeň pri každom deploy aby sa aktualizovala appka
-const CACHE_VERSION = 'vsp-v1';
+const CACHE_VERSION = 'vsp-v4';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const DYNAMIC_CACHE = `${CACHE_VERSION}-dynamic`;
 
@@ -40,6 +40,14 @@ self.addEventListener('fetch', event => {
   const { request } = event;
   const url = new URL(request.url);
 
+  // Cudzie domény (Cookiebot, supabase-js z cdn.jsdelivr.net, Google Fonts,
+  // GTM, video CDN, ...) -- SW sa ich vôbec nedotýka. Bez event.respondWith()
+  // prehliadač request spracuje natívne, mimo CSP connect-src quirku, ktorý
+  // by inak SW-ov vlastný fetch() vnútri handlera potichu zablokoval.
+  if (url.origin !== self.location.origin) {
+    return;
+  }
+
   // API volania — vždy network (nikdy cache)
   if (url.pathname.startsWith('/api/')) {
     event.respondWith(
@@ -53,10 +61,8 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Supabase / Stripe / externé API — vždy network
-  if (url.hostname.includes('supabase.co') ||
-      url.hostname.includes('stripe.com') ||
-      url.hostname.includes('anthropic.com')) {
+  // Kurzy — vždy network, nikdy cache (prístup ku lekciám je per-užívateľ a mení sa)
+  if (url.pathname.startsWith('/kurzy')) {
     event.respondWith(fetch(request));
     return;
   }
@@ -83,7 +89,8 @@ self.addEventListener('fetch', event => {
       caches.match(request).then(cached => {
         if (cached) return cached;
         return fetch(request).then(response => {
-          caches.open(DYNAMIC_CACHE).then(cache => cache.put(request, response.clone()));
+          const clone = response.clone();
+          caches.open(DYNAMIC_CACHE).then(cache => cache.put(request, clone));
           return response;
         });
       })
