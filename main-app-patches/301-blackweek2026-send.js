@@ -7,10 +7,15 @@
 //    BLACKWEEK40, platný len do 27.11.2026 23:59 (SEČ). Bezpečne
 //    spustiteľné viackrát — ak kód už existuje, znova ho nevytvára.
 // 2) Pošle email VŠETKÝM userom bez Premium/Elite (is_premium = false
-//    alebo null), ktorí nemajú vypnuté marketingové e-maily
-//    (marketing_emails_opt_out = false). Jazyk (SK/CZ) podľa users.lang.
-//    Bezpečne opakovateľné — každému sa pošle len raz (filter
-//    blackweek2026_sent_at IS NULL).
+//    alebo null). Jazyk (SK/CZ) podľa users.lang. Bezpečne opakovateľné —
+//    každému sa pošle len raz (filter blackweek2026_sent_at IS NULL).
+//
+//    (rozhodnutie majiteľa, nov 2026) marketing_emails_opt_out sa tu
+//    ZÁMERNE NEKONTROLUJE -- v DB má v tejto chvíli explicitne true úplne
+//    každý účet (pravdepodobne DB default pri registrácii), takže by sa
+//    touto kampaňou nedostal nikto. Pre tento jeden jednorazový Black
+//    Week email majiteľ rozhodol poslať aj tak. Pre budúce kampane buď
+//    tento filter vráť, alebo oprav default pri registrácii.
 //
 // Vyžaduje: db/migrate_blackweek2026.sql už spustený + emails/blackweek2026.html
 // a emails/blackweek2026-cz.html + main-app-patches/300-blackweek-route.js
@@ -78,7 +83,6 @@ async function main() {
     .from('users')
     .select('email, lang')
     .or('is_premium.is.null,is_premium.eq.false')
-    .or('marketing_emails_opt_out.is.null,marketing_emails_opt_out.eq.false')
     .is('blackweek2026_sent_at', null);
   if (error) { console.error('Chyba načítania users:', error.message); process.exit(1); }
   console.log('Počet na odoslanie:', (users || []).length);
