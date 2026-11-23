@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Black Week — SP Tréner</title>
+<meta name="description" content="Black Week zľava -40% na Premium aj Elite — platí len do piatku 27.11. do polnoci.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@400;500;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
+<style>
+:root{--black:#08080d;--black2:#0f0f18;--black3:#171724;--border:rgba(255,255,255,.09);--border2:rgba(255,255,255,.16);--text:#eeeef5;--text2:#a1a1bc;--text3:#5c5c7a;--volt:#c8ff00;--purple:#7c5cff;--purple2:#b09bff;--serif:'Instrument Serif',Georgia,serif;--mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--black);color:var(--text);font-family:var(--sans);line-height:1.6;min-height:100vh}
+a{color:inherit}
+.wrap{max-width:720px;margin:0 auto;padding:2rem 1.2rem 4rem}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem}
+.back{font-family:var(--mono);font-size:.78rem;color:var(--text2);text-decoration:none}
+.lang{display:flex;gap:.4rem}
+.lang button{font-family:var(--mono);font-size:.72rem;padding:.35rem .65rem;background:var(--black2);border:1px solid var(--border2);border-radius:6px;color:var(--text2);cursor:pointer}
+.lang button.active{color:var(--volt);border-color:var(--volt)}
+.eyebrow{display:inline-flex;align-items:center;gap:.5rem;font-family:var(--mono);font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;color:#000;background:var(--volt);padding:.45rem .9rem;border-radius:99px;margin-bottom:1.2rem;font-weight:700}
+h1{font-family:var(--serif);font-size:clamp(2.2rem,6vw,3.4rem);line-height:1.08;margin-bottom:1rem}
+h1 em{font-style:italic;color:var(--purple2)}
+.sub{color:var(--text2);font-size:1.05rem;max-width:520px;margin-bottom:2rem}
+.code-box{display:flex;align-items:center;gap:1rem;background:var(--black2);border:1px dashed var(--volt);border-radius:14px;padding:1.1rem 1.4rem;max-width:420px;margin-bottom:1rem}
+.code-box .code{font-family:var(--mono);font-size:1.4rem;font-weight:700;letter-spacing:.1em;color:var(--volt)}
+.code-box .hint{font-size:.76rem;color:var(--text3);margin-top:.15rem}
+.copy-btn{margin-left:auto;background:transparent;border:1px solid var(--border2);color:var(--text2);border-radius:8px;padding:.5rem .8rem;font-family:var(--mono);font-size:.72rem;cursor:pointer;white-space:nowrap}
+.copy-btn:hover{border-color:var(--volt);color:var(--volt)}
+.countdown{margin:1.8rem 0 2.6rem}
+.countdown .label{font-family:var(--mono);font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);margin-bottom:.4rem}
+.countdown .clock{font-family:var(--mono);font-size:2.1rem;font-weight:700;letter-spacing:.03em}
+.ended-banner{display:none;background:var(--black2);border:1px solid var(--border2);border-left:3px solid var(--purple);border-radius:10px;padding:1.2rem 1.4rem;margin-bottom:2rem}
+.ended-banner h3{font-family:var(--serif);font-size:1.3rem;margin-bottom:.4rem}
+.ended-banner p{color:var(--text2);font-size:.9rem}
+.plans{display:grid;grid-template-columns:1fr 1fr;gap:1.1rem;margin-bottom:2.5rem}
+.plan{background:var(--black2);border:1px solid var(--border);border-radius:14px;padding:1.5rem;display:flex;flex-direction:column;gap:.7rem}
+.plan.featured{border-color:var(--volt)}
+.plan .badge{align-self:flex-start;background:var(--volt);color:#000;font-family:var(--mono);font-size:.65rem;font-weight:700;padding:.2rem .6rem;border-radius:6px}
+.plan .name{font-family:var(--serif);font-size:1.4rem}
+.plan .price-row{display:flex;align-items:baseline;gap:.5rem}
+.plan .price-old{text-decoration:line-through;color:var(--text3);font-size:.95rem}
+.plan .price-new{font-family:var(--mono);font-size:1.7rem;font-weight:700;color:var(--volt)}
+.plan .price-period{font-size:.78rem;color:var(--text3)}
+.plan ul{list-style:none;display:flex;flex-direction:column;gap:.4rem;margin:.2rem 0}
+.plan li{font-size:.84rem;color:var(--text2)}
+.plan-btn{margin-top:auto;display:block;text-align:center;padding:.9rem;border-radius:10px;font-family:var(--mono);font-weight:700;font-size:.85rem;text-decoration:none}
+.plan-btn.primary{background:var(--volt);color:#000}
+.plan-btn.secondary{background:transparent;border:1px solid var(--border2);color:var(--text)}
+.faq-item{border-top:1px solid var(--border);padding:1.1rem 0}
+.faq-item h4{font-size:.92rem;margin-bottom:.4rem}
+.faq-item p{font-size:.85rem;color:var(--text2)}
+.foot{margin-top:3rem;padding-top:1.5rem;border-top:1px solid var(--border);display:flex;gap:1rem;flex-wrap:wrap;font-family:var(--mono);font-size:.75rem;color:var(--text3)}
+.foot a{color:var(--text3);text-decoration:none}
+.foot a:hover{color:var(--text2)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <a class="back" href="/" id="tBack">← SP Tréner</a>
+    <div class="lang">
+      <button id="langSk" onclick="setLang('sk')">SK</button>
+      <button id="langCs" onclick="setLang('cs')">CZ</button>
+    </div>
+  </div>
+
+  <span class="eyebrow" id="tEyebrow">🖤 Black Week</span>
+  <h1 id="tH1">-40% na <em id="tH1Em">Premium aj Elite</em></h1>
+  <p class="sub" id="tSub">Len tento týždeň — platí do piatku 27.11. do polnoci. Potom sa cena vracia na bežnú.</p>
+
+  <div class="code-box">
+    <div>
+      <div class="code">BLACKWEEK40</div>
+      <div class="hint" id="tCodeHint">zadaj tento kód pri platbe</div>
+    </div>
+    <button class="copy-btn" id="copyBtn" onclick="copyCode()">Kopírovať</button>
+  </div>
+
+  <div class="countdown" id="countdownBox">
+    <div class="label" id="tCountdownLabel">Ponuka končí o</div>
+    <div class="clock" id="clock">--:--:--:--</div>
+  </div>
+  <div class="ended-banner" id="endedBanner">
+    <h3 id="tEndedTitle">Black Week skončil.</h3>
+    <p id="tEndedBody">Členstvo je stále dostupné, teraz za bežnú cenu.</p>
+  </div>
+
+  <div class="plans" id="plansBox">
+    <div class="plan">
+      <div class="name">Premium</div>
+      <div class="price-row"><span class="price-old">9,90 €</span><span class="price-new">5,94 €</span></div>
+      <div class="price-period" id="tFirstMonth">prvý mesiac, potom bežná cena</div>
+      <ul>
+        <li id="tPF1">Neobmedzený AI generátor testov</li>
+        <li id="tPF2">Sledovanie pokroku a štatistiky</li>
+        <li id="tPF3">Prístup ku kurzom</li>
+      </ul>
+      <a class="plan-btn secondary" href="/app?upgrade=premium" id="premiumBtn">Získať Premium →</a>
+    </div>
+    <div class="plan featured">
+      <span class="badge" id="tRecommended">Odporúčame</span>
+      <div class="name">Elite</div>
+      <div class="price-row"><span class="price-old">19,90 €</span><span class="price-new">11,94 €</span></div>
+      <div class="price-period" id="tFirstMonth2">prvý mesiac, potom bežná cena</div>
+      <ul>
+        <li id="tEF1">Všetko z Premium</li>
+        <li id="tEF2">Osobný AI mentor</li>
+        <li id="tEF3">Pokročilé AI nástroje na mieru</li>
+      </ul>
+      <a class="plan-btn primary" href="/app?upgrade=elite" id="eliteBtn">Získať Elite →</a>
+    </div>
+  </div>
+
+  <div id="faqBox">
+    <div class="faq-item">
+      <h4 id="tFaqQ1">Ako uplatním zľavu?</h4>
+      <p id="tFaqA1">Klikni na tlačidlo vyššie, prihlás sa cez Google a na platobnej stránke Stripe zadaj kód BLACKWEEK40 do poľa „Promo code / Add promotion code".</p>
+    </div>
+    <div class="faq-item">
+      <h4 id="tFaqQ2">Platí to aj na mesačné predplatné, nie len jednorazovo?</h4>
+      <p id="tFaqA2">Zľava sa uplatní na prvú platbu. Predplatné potom pokračuje mesačne za bežnú cenu, zrušiť ho môžeš kedykoľvek.</p>
+    </div>
+    <div class="faq-item">
+      <h4 id="tFaqQ3">Čo keď už predplatné mám?</h4>
+      <p id="tFaqA3">Kód platí len pri založení nového predplatného, nedá sa dodatočne uplatniť na už bežiace.</p>
+    </div>
+  </div>
+
+  <div class="foot">
+    <a href="/legal.html#vop" id="tFootVop">Obchodné podmienky</a>
+    <a href="/legal.html#privacy" id="tFootPriv">Ochrana osobných údajov</a>
+    <a href="mailto:juraj@jurajkurek.com">juraj@jurajkurek.com</a>
+  </div>
+</div>
+
+<script>
+const DEADLINE = new Date('2026-11-27T23:59:59+01:00').getTime();
+
+const I18N = {
+  sk: {
+    tBack:'← SP Tréner', tEyebrow:'🖤 Black Week', tH1Em:'Premium aj Elite',
+    tSub:'Len tento týždeň — platí do piatku 27.11. do polnoci. Potom sa cena vracia na bežnú.',
+    tCodeHint:'zadaj tento kód pri platbe', copyBtn:'Kopírovať', copyBtnDone:'✓ Skopírované',
+    tCountdownLabel:'Ponuka končí o',
+    tEndedTitle:'Black Week skončil.', tEndedBody:'Členstvo je stále dostupné, teraz za bežnú cenu.',
+    tFirstMonth:'prvý mesiac, potom bežná cena', tFirstMonth2:'prvý mesiac, potom bežná cena',
+    tPF1:'Neobmedzený AI generátor testov', tPF2:'Sledovanie pokroku a štatistiky', tPF3:'Prístup ku kurzom',
+    tRecommended:'Odporúčame', tEF1:'Všetko z Premium', tEF2:'Osobný AI mentor', tEF3:'Pokročilé AI nástroje na mieru',
+    premiumBtn:'Získať Premium →', eliteBtn:'Získať Elite →',
+    tFaqQ1:'Ako uplatním zľavu?', tFaqA1:'Klikni na tlačidlo vyššie, prihlás sa cez Google a na platobnej stránke Stripe zadaj kód BLACKWEEK40 do poľa „Promo code / Add promotion code".',
+    tFaqQ2:'Platí to aj na mesačné predplatné, nie len jednorazovo?', tFaqA2:'Zľava sa uplatní na prvú platbu. Predplatné potom pokračuje mesačne za bežnú cenu, zrušiť ho môžeš kedykoľvek.',
+    tFaqQ3:'Čo keď už predplatné mám?', tFaqA3:'Kód platí len pri založení nového predplatného, nedá sa dodatočne uplatniť na už bežiace.',
+    tFootVop:'Obchodné podmienky', tFootPriv:'Ochrana osobných údajov'
+  },
+  cs: {
+    tBack:'← SP Tréner', tEyebrow:'🖤 Black Week', tH1Em:'Premium i Elite',
+    tSub:'Jen tento týden — platí do pátku 27.11. do půlnoci. Pak se cena vrací na běžnou.',
+    tCodeHint:'zadej tento kód při platbě', copyBtn:'Kopírovat', copyBtnDone:'✓ Zkopírováno',
+    tCountdownLabel:'Nabídka končí za',
+    tEndedTitle:'Black Week skončil.', tEndedBody:'Členství je stále dostupné, teď za běžnou cenu.',
+    tFirstMonth:'první měsíc, pak běžná cena', tFirstMonth2:'první měsíc, pak běžná cena',
+    tPF1:'Neomezený AI generátor testů', tPF2:'Sledování pokroku a statistiky', tPF3:'Přístup ke kurzům',
+    tRecommended:'Doporučujeme', tEF1:'Vše z Premium', tEF2:'Osobní AI mentor', tEF3:'Pokročilé AI nástroje na míru',
+    premiumBtn:'Získat Premium →', eliteBtn:'Získat Elite →',
+    tFaqQ1:'Jak uplatním slevu?', tFaqA1:'Klikni na tlačítko výše, přihlas se přes Google a na platební stránce Stripe zadej kód BLACKWEEK40 do pole „Promo code / Add promotion code".',
+    tFaqQ2:'Platí to i na měsíční předplatné, ne jen jednorázově?', tFaqA2:'Sleva se uplatní na první platbu. Předplatné pak pokračuje měsíčně za běžnou cenu, zrušit ho můžeš kdykoliv.',
+    tFaqQ3:'Co když už předplatné mám?', tFaqA3:'Kód platí jen při založení nového předplatného, nedá se dodatečně uplatnit na už běžící.',
+    tFootVop:'Obchodní podmínky', tFootPriv:'Ochrana osobních údajů'
+  }
+};
+
+function setLang(lang){
+  const t = I18N[lang] || I18N.sk;
+  document.documentElement.lang = lang === 'cs' ? 'cs' : 'sk';
+  Object.keys(t).forEach(function(key){
+    if (key === 'copyBtnDone') return;
+    const el = document.getElementById(key);
+    if (el) el.textContent = t[key];
+  });
+  document.getElementById('langSk').classList.toggle('active', lang === 'sk');
+  document.getElementById('langCs').classList.toggle('active', lang === 'cs');
+  localStorage.setItem('sp_lang', lang);
+  window._bwLang = lang;
+}
+
+function copyCode(){
+  navigator.clipboard.writeText('BLACKWEEK40').then(function(){
+    const btn = document.getElementById('copyBtn');
+    const t = I18N[window._bwLang || 'sk'];
+    const original = btn.textContent;
+    btn.textContent = t.copyBtnDone;
+    setTimeout(function(){ btn.textContent = original; }, 2000);
+  }).catch(function(){});
+}
+
+function tick(){
+  const remaining = DEADLINE - Date.now();
+  if (remaining <= 0) {
+    document.getElementById('countdownBox').style.display = 'none';
+    document.getElementById('plansBox').style.display = 'none';
+    document.getElementById('endedBanner').style.display = 'block';
+    clearInterval(timer);
+    return;
+  }
+  const d = Math.floor(remaining / 86400000);
+  const h = Math.floor((remaining % 86400000) / 3600000);
+  const m = Math.floor((remaining % 3600000) / 60000);
+  const s = Math.floor((remaining % 60000) / 1000);
+  document.getElementById('clock').textContent =
+    String(d).padStart(2,'0') + 'd ' + String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+}
+const timer = setInterval(tick, 1000);
+tick();
+
+const urlLang = new URLSearchParams(location.search).get('lang');
+setLang(urlLang === 'cs' ? 'cs' : (localStorage.getItem('sp_lang') === 'cs' ? 'cs' : 'sk'));
+</script>
+</body>
+</html>

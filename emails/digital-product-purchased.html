@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="sk">
+<head><meta charset="utf-8"></head>
+<body style="margin:0;padding:0;background:#f4f4f7;font-family:Arial,Helvetica,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f7;padding:24px 0;">
+    <tr><td align="center">
+      <table role="presentation" width="100%" style="max-width:560px;background:#ffffff;border-radius:12px;overflow:hidden;">
+        <tr><td style="background:#1a1a2e;padding:24px 32px;">
+          <span style="color:#ffffff;font-size:20px;font-weight:bold;">SP Tréner</span>
+        </td></tr>
+        <tr><td style="padding:32px;">
+          <h2 style="margin:0 0 16px;color:#1a1a2e;">Ďakujeme za kúpu!</h2>
+          <p style="color:#333;font-size:15px;line-height:1.6;">Tvoj produkt <strong>{{TITLE}}</strong> je pripravený na stiahnutie.</p>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:20px 0;">
+            <tr><td align="center">
+              <a href="{{DOWNLOAD_URL}}" style="display:inline-block;background:#c8ff00;color:#1a1a2e;text-decoration:none;font-weight:bold;font-size:15px;padding:14px 28px;border-radius:8px;">
+                Stiahnuť {{TITLE}}
+              </a>
+            </td></tr>
+          </table>
+          <p style="color:#777;font-size:13px;line-height:1.5;">
+            Link je platný hodinu od odoslania tohto emailu. Ak medzitým vyprší, vráť sa na stránku
+            <a href="{{BASE_URL}}/obchod/dakujeme?session_id={{SESSION_ID}}" style="color:#1a1a2e;">potvrdenia nákupu</a>
+            a vygeneruje sa nový.
+          </p>
+          <p style="color:#777;font-size:13px;margin-top:20px;">— SP Tréner</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>

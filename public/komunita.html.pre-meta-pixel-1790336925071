@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Komunita — SP Tréner</title>
+<meta name="description" content="Súkromná komunita pre členov, ktorí si Premium/Elite kúpili cez ponuku po webinári.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Manrope:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#14100D; --ink2:#1c1610; --ink3:#241c14;
+  --text:#F6F1E7; --text2:rgba(246,241,231,.66); --text3:rgba(246,241,231,.4);
+  --ignite:#c8ff00; --signal:#7c5cff;
+  --border:rgba(246,241,231,.14); --border2:rgba(246,241,231,.24);
+  --serif:'Bricolage Grotesque',Georgia,serif; --mono:'Space Mono',monospace; --sans:'Manrope',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--ink);color:var(--text);font-family:var(--sans);line-height:1.6;min-height:100vh}
+a{color:var(--signal)}
+button{font-family:inherit;color:inherit}
+textarea,input{font-family:inherit}
+
+.top{max-width:640px;margin:0 auto;padding:1.5rem 1.2rem 0;display:flex;justify-content:space-between;align-items:center}
+.top a.back{font-family:var(--mono);font-weight:500;font-size:.82rem;color:var(--ignite);text-decoration:none}
+.lang-switch{display:flex;gap:.35rem}
+.lang-switch button{font-family:var(--mono);font-weight:700;font-size:.7rem;padding:.3rem .6rem;background:var(--ink3);border:1px solid var(--border2);border-radius:6px;color:var(--text3);cursor:pointer}
+.lang-switch button.active{background:var(--ignite);color:var(--ink);border-color:var(--ignite)}
+.wrap{max-width:640px;margin:0 auto;padding:1.6rem 1.2rem 5rem}
+h1{font-family:var(--serif);font-weight:800;font-size:1.7rem;margin-bottom:.3rem}
+.sub{color:var(--text2);font-size:.92rem;margin-bottom:1.6rem}
+
+.gate{max-width:420px;margin:3rem auto;background:var(--ink3);border:1px solid var(--border2);border-radius:12px;padding:1.8rem;text-align:center}
+.gate p{color:var(--text2);font-size:.92rem;margin-bottom:1.2rem}
+.gate a.cta,.gate button{display:inline-block;padding:.85rem 1.5rem;background:var(--ignite);color:var(--ink);border:none;border-radius:8px;text-decoration:none;font-family:var(--mono);font-weight:700;font-size:.88rem;cursor:pointer}
+
+.tabs{display:flex;gap:.5rem;margin-bottom:1.4rem;border-bottom:1px solid var(--border)}
+.tab{background:none;border:none;color:var(--text3);padding:.6rem .3rem;font-family:var(--mono);font-size:.82rem;cursor:pointer;border-bottom:2px solid transparent;margin-right:.8rem}
+.tab.active{color:var(--ignite);border-bottom-color:var(--ignite)}
+
+.avatar{border-radius:50%;object-fit:cover;flex-shrink:0;display:inline-block;vertical-align:middle}
+.avatar-fallback{background:var(--ink2);border:1px solid var(--border2);color:var(--text3);display:inline-flex;align-items:center;justify-content:center;font-family:var(--mono);font-weight:700}
+.author-link{display:inline-flex;align-items:center;gap:.5rem;cursor:pointer;background:none;border:none;color:inherit;padding:0;text-align:left}
+
+.composer{background:var(--ink3);border:1px solid var(--border2);border-radius:12px;padding:1.2rem;margin-bottom:1.6rem}
+.composer textarea{width:100%;min-height:80px;background:var(--ink2);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:.7rem .8rem;font-size:.9rem;resize:vertical}
+.composer-row{display:flex;justify-content:space-between;align-items:center;margin-top:.7rem;gap:.6rem;flex-wrap:wrap}
+.composer input[type=file]{font-size:.75rem;color:var(--text3);max-width:160px}
+.composer input[type=text]{width:100%;background:var(--ink2);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:.6rem .7rem;font-size:.85rem;margin-top:.6rem}
+.composer button{padding:.6rem 1.2rem;background:var(--ignite);color:var(--ink);border:none;border-radius:8px;font-family:var(--mono);font-weight:700;font-size:.82rem;cursor:pointer}
+.composer button:disabled{opacity:.5;cursor:default}
+.composer .err{color:#ff8a8a;font-size:.8rem;margin-top:.5rem}
+.composer .ok{color:var(--ignite);font-size:.8rem;margin-top:.5rem}
+
+.post{background:var(--ink3);border:1px solid var(--border2);border-radius:12px;padding:1.2rem;margin-bottom:1rem}
+.post .meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem}
+.post .author{font-family:var(--mono);font-size:.8rem;color:var(--ignite)}
+.post .time{font-family:var(--mono);font-size:.72rem;color:var(--text3)}
+.post .body{font-size:.92rem;white-space:pre-wrap;word-break:break-word}
+.post img.attach{max-width:100%;border-radius:8px;margin-top:.7rem;display:block}
+.post .actions{display:flex;gap:1rem;margin-top:.8rem;font-family:var(--mono);font-size:.78rem}
+.post .actions button{background:none;border:none;color:var(--text2);cursor:pointer;padding:0}
+.post .actions button.liked{color:var(--ignite)}
+.post .actions button.danger{color:#ff8a8a}
+
+.comments{margin-top:.9rem;padding-top:.9rem;border-top:1px solid var(--border)}
+.comment{display:flex;justify-content:space-between;gap:.6rem;font-size:.85rem;margin-bottom:.6rem}
+.comment .cbody{flex:1;display:flex;align-items:flex-start;gap:.5rem}
+.comment .ctext{flex:1}
+.comment .cauthor{font-family:var(--mono);font-size:.72rem;color:var(--ignite);display:block;margin-bottom:.15rem;cursor:pointer;background:none;border:none;padding:0}
+.comment button.del{background:none;border:none;color:var(--text3);cursor:pointer;font-family:var(--mono);font-size:.72rem;flex-shrink:0}
+.comment-form{display:flex;gap:.5rem;margin-top:.6rem}
+.comment-form input{flex:1;background:var(--ink2);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:.5rem .7rem;font-size:.82rem}
+.comment-form button{background:var(--signal);color:#fff;border:none;border-radius:8px;padding:.5rem .9rem;font-size:.78rem;cursor:pointer}
+
+.load-more{display:block;margin:1rem auto 0;background:var(--ink3);border:1px solid var(--border2);color:var(--text2);padding:.7rem 1.4rem;border-radius:8px;cursor:pointer;font-family:var(--mono);font-size:.82rem}
+.empty{color:var(--text3);text-align:center;padding:2rem 0;font-size:.9rem}
+
+.gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:.5rem}
+.gallery-item{position:relative;border-radius:8px;overflow:hidden;background:var(--ink3)}
+.gallery-item img{width:100%;aspect-ratio:1;object-fit:cover;display:block}
+.gallery-item .del{position:absolute;top:.3rem;right:.3rem;background:rgba(20,16,13,.75);border:none;color:#ff8a8a;border-radius:6px;width:22px;height:22px;cursor:pointer;font-size:.75rem;line-height:1}
+
+.profile-card{display:flex;gap:1rem;align-items:center;background:var(--ink3);border:1px solid var(--border2);border-radius:12px;padding:1.2rem;margin-bottom:1.4rem}
+.profile-info{flex:1;min-width:0}
+.profile-name{font-family:var(--serif);font-weight:700;font-size:1.2rem}
+.profile-bio{color:var(--text2);font-size:.85rem;margin-top:.3rem;white-space:pre-wrap;word-break:break-word}
+.profile-edit-btn{margin-top:.6rem;background:none;border:1px solid var(--border2);color:var(--text2);padding:.4rem .8rem;border-radius:8px;font-family:var(--mono);font-size:.76rem;cursor:pointer}
+
+.profile-edit-card{background:var(--ink3);border:1px solid var(--border2);border-radius:12px;padding:1.4rem}
+.profile-edit-card label{display:block;font-family:var(--mono);font-size:.74rem;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin:1rem 0 .4rem}
+.profile-edit-card label:first-of-type{margin-top:0}
+.profile-edit-card input[type=text],.profile-edit-card textarea{width:100%;background:var(--ink2);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:.7rem .8rem;font-size:.9rem}
+.profile-edit-card textarea{min-height:70px;resize:vertical}
+.avatar-upload{display:flex;align-items:center;gap:1rem}
+.avatar-upload input[type=file]{font-size:.75rem;color:var(--text3)}
+.avatar-upload button{padding:.5rem 1rem;background:var(--ink2);border:1px solid var(--border2);color:var(--text);border-radius:8px;font-family:var(--mono);font-size:.76rem;cursor:pointer}
+.profile-edit-card > button{margin-top:1.2rem;padding:.7rem 1.4rem;background:var(--ignite);color:var(--ink);border:none;border-radius:8px;font-family:var(--mono);font-weight:700;font-size:.85rem;cursor:pointer}
+
+.lb-row{display:flex;align-items:center;gap:.8rem;background:var(--ink3);border:1px solid var(--border2);border-radius:10px;padding:.8rem 1rem;margin-bottom:.5rem}
+.lb-rank{font-family:var(--mono);font-weight:700;font-size:.95rem;width:26px;flex-shrink:0;color:var(--text3)}
+.lb-rank.r1{color:#ffd700}.lb-rank.r2{color:#b0b8c1}.lb-rank.r3{color:#cd7f32}
+.lb-info{flex:1;min-width:0}
+.lb-name{font-size:.9rem;font-weight:600}
+.lb-stats{font-family:var(--mono);font-size:.72rem;color:var(--text3);margin-top:.15rem}
+.lb-score{font-family:var(--mono);font-weight:700;color:var(--ignite);font-size:.95rem;flex-shrink:0}
+
+.convo-row{display:flex;align-items:center;gap:.7rem;background:var(--ink3);border:1px solid var(--border2);border-radius:10px;padding:.8rem 1rem;margin-bottom:.5rem;cursor:pointer;text-align:left;width:100%}
+.convo-info{flex:1;min-width:0}
+.convo-name{font-size:.9rem;font-weight:600}
+.convo-preview{font-size:.8rem;color:var(--text3);margin-top:.15rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dm-btn{display:inline-block;margin-top:.6rem;background:var(--signal);color:#fff;border:none;border-radius:8px;padding:.5rem 1rem;font-family:var(--mono);font-size:.78rem;cursor:pointer}
+
+.chat-header{display:flex;align-items:center;gap:.7rem;margin-bottom:1.2rem}
+.chat-header .lb-info{flex:1}
+.chat-back{background:none;border:none;color:var(--ignite);font-family:var(--mono);font-size:.8rem;cursor:pointer;padding:0;margin-bottom:1rem;display:inline-block}
+.chat-report{background:none;border:1px solid var(--border2);color:#ff8a8a;border-radius:8px;padding:.4rem .8rem;font-family:var(--mono);font-size:.72rem;cursor:pointer;flex-shrink:0}
+.chat-messages{display:flex;flex-direction:column;gap:.5rem;margin-bottom:1rem}
+.chat-msg{max-width:75%;padding:.6rem .85rem;border-radius:12px;font-size:.88rem;word-break:break-word}
+.chat-msg.mine{align-self:flex-end;background:var(--signal);color:#fff}
+.chat-msg.theirs{align-self:flex-start;background:var(--ink3);border:1px solid var(--border2)}
+.chat-msg .ctime{display:block;font-family:var(--mono);font-size:.62rem;opacity:.6;margin-top:.25rem}
+.chat-form{display:flex;gap:.5rem}
+.chat-form input{flex:1;background:var(--ink2);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:.7rem .8rem;font-size:.88rem}
+.chat-form button{background:var(--ignite);color:var(--ink);border:none;border-radius:8px;padding:.7rem 1.1rem;font-family:var(--mono);font-weight:700;font-size:.82rem;cursor:pointer}
+
+.member-row{display:flex;align-items:center;gap:.7rem;background:var(--ink3);border:1px solid var(--border2);border-radius:10px;padding:.8rem 1rem;margin-bottom:.5rem;cursor:pointer;text-align:left;width:100%}
+.member-info{flex:1;min-width:0}
+.member-name{font-size:.9rem;font-weight:600}
+.member-bio{font-size:.78rem;color:var(--text3);margin-top:.15rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+</style>
+</head>
+<body>
+<div class="top">
+  <a class="back" href="/app.html" data-i18n="backLink"></a>
+  <div class="lang-switch">
+    <button id="langSK" onclick="setLang('sk')">SK</button>
+    <button id="langCZ" onclick="setLang('cz')">CZ</button>
+  </div>
+</div>
+<div class="wrap">
+  <h1 data-i18n="pageTitle"></h1>
+  <p class="sub" data-i18n="pageSub"></p>
+
+  <div id="gateBox" class="gate" style="display:none"></div>
+  <div id="feedBox" style="display:none">
+    <div class="tabs">
+      <button class="tab" data-tab="feed" onclick="location.hash='feed'" data-i18n="tabFeed"></button>
+      <button class="tab" data-tab="gallery" onclick="location.hash='gallery'" data-i18n="tabGallery"></button>
+      <button class="tab" data-tab="leaderboard" onclick="location.hash='leaderboard'" data-i18n="tabLeaderboard"></button>
+      <button class="tab" data-tab="members" onclick="location.hash='members'" data-i18n="tabMembers"></button>
+      <button class="tab" data-tab="messages" onclick="location.hash='messages'" data-i18n="tabMessages"></button>
+      <button class="tab" data-tab="myprofile" onclick="location.hash='myprofile'" data-i18n="tabMyProfile"></button>
+    </div>
+
+    <div id="viewFeed">
+      <div class="composer">
+        <textarea id="postBody" maxlength="4000" data-i18n-placeholder="postPlaceholder"></textarea>
+        <div class="composer-row">
+          <input type="file" id="postImage" accept="image/png,image/jpeg,image/webp,image/gif">
+          <button id="postSubmitBtn" onclick="submitPost()" data-i18n="publishBtn"></button>
+        </div>
+        <div class="err" id="postErr"></div>
+      </div>
+      <div id="postsList"></div>
+      <button class="load-more" id="loadMoreBtn" style="display:none" onclick="loadPosts(false)" data-i18n="loadOlderBtn"></button>
+    </div>
+
+    <div id="viewGallery" style="display:none">
+      <div class="composer">
+        <input type="file" id="photoImage" accept="image/png,image/jpeg,image/webp,image/gif">
+        <input type="text" id="photoCaption" maxlength="300" data-i18n-placeholder="captionPlaceholder">
+        <div class="composer-row">
+          <span></span>
+          <button id="photoSubmitBtn" onclick="submitPhoto()" data-i18n="uploadPhotoBtn"></button>
+        </div>
+        <div class="err" id="photoErr"></div>
+      </div>
+      <div class="gallery-grid" id="galleryGrid"></div>
+      <button class="load-more" id="galleryLoadMoreBtn" style="display:none" onclick="loadGallery(false)" data-i18n="loadOlderBtn"></button>
+    </div>
+
+    <div id="viewLeaderboard" style="display:none">
+      <p class="sub" style="margin-bottom:1rem" data-i18n="leaderboardSub"></p>
+      <div id="leaderboardList"></div>
+    </div>
+
+    <div id="viewMembers" style="display:none">
+      <div id="membersList"></div>
+    </div>
+
+    <div id="viewMessages" style="display:none">
+      <div id="conversationsList"></div>
+    </div>
+
+    <div id="viewChat" style="display:none">
+      <button class="chat-back" onclick="location.hash='messages'" data-i18n="backToMessages"></button>
+      <div class="chat-header" id="chatHeader"></div>
+      <div class="chat-messages" id="chatMessages"></div>
+      <div class="chat-form">
+        <input type="text" id="chatInput" maxlength="2000" data-i18n-placeholder="chatPlaceholder">
+        <button onclick="sendChatMessage()" data-i18n="sendBtn"></button>
+      </div>
+      <div class="err" id="chatErr"></div>
+    </div>
+
+    <div id="viewProfile" style="display:none">
+      <div id="profileHeader"></div>
+      <div id="profilePostsList"></div>
+    </div>
+
+    <div id="viewMyProfile" style="display:none">
+      <div class="profile-edit-card">
+        <div class="avatar-upload">
+          <div id="myAvatarPreview"></div>
+          <div>
+            <input type="file" id="avatarFile" accept="image/png,image/jpeg,image/webp,image/gif"><br>
+            <button onclick="submitAvatar()" data-i18n="changePhotoBtn"></button>
+          </div>
+        </div>
+        <label for="myUsername" data-i18n="usernameLabel"></label>
+        <input type="text" id="myUsername" maxlength="20" data-i18n-placeholder="usernamePlaceholder">
+        <label for="myDisplayName" data-i18n="displayNameLabel"></label>
+        <input type="text" id="myDisplayName" maxlength="60">
+        <label for="myBio" data-i18n="bioLabel"></label>
+        <textarea id="myBio" maxlength="300"></textarea>
+        <button onclick="saveProfile()" data-i18n="saveBtn"></button>
+        <div class="err" id="myProfileErr"></div>
+        <div class="ok" id="myProfileOk"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// ─────────────────────────── I18N ───────────────────────────
+const TRANSLATIONS = {
+  sk: {
+    backLink: '← SP Tréner',
+    pageTitle: 'Komunita',
+    pageSub: 'Súkromný priestor len pre členov, ktorí si Premium/Elite kúpili cez ponuku po webinári.',
+    tabFeed: 'Feed', tabGallery: 'Fotky', tabLeaderboard: 'Rebríček', tabMembers: 'Členovia', tabMessages: 'Správy', tabMyProfile: 'Môj profil',
+    postPlaceholder: 'Napíš niečo pre komunitu…',
+    publishBtn: 'Uverejniť',
+    loadOlderBtn: 'Načítať staršie',
+    captionPlaceholder: 'Popis (nepovinné)',
+    uploadPhotoBtn: 'Nahrať fotku',
+    leaderboardSub: 'Kombinuje zapojenie v komunite (lajky, príspevky, komentáre) s najlepším dosiahnutým percentilom v SP Tréner testoch.',
+    backToMessages: '← Späť na správy',
+    chatPlaceholder: 'Napíš správu…',
+    sendBtn: 'Odoslať',
+    changePhotoBtn: 'Zmeniť fotku',
+    usernameLabel: 'Používateľské meno',
+    usernamePlaceholder: 'napr. jano2006',
+    displayNameLabel: 'Zobrazované meno (nepovinné)',
+    bioLabel: 'O mne',
+    saveBtn: 'Uložiť',
+    loading: 'načítavam…',
+    genericServerError: 'Chyba servera.',
+    loadError: 'Chyba načítania.',
+    loginPrompt: 'Prihlás sa cez Google, aby sme overili, či máš do komunity prístup.',
+    loginBtn: 'Prihlásiť sa cez Google',
+    bannedMsg: 'Prístup do komunity ti bol zablokovaný.',
+    noAccessMsg: 'Komunita je exkluzívny bonus pre členov, ktorí si Premium alebo Elite kúpili cez ponuku po webinári. Ak si to ešte nemáš, pozri si najbližší termín.',
+    registerWebinarLink: 'Zaregistrovať sa na webinár →',
+    accessCheckFailed: 'Nepodarilo sa overiť prístup. Skús to znova neskôr.',
+    emptyFeed: 'Zatiaľ tu nikto nič nenapísal. Buď prvý/á →',
+    deleteBtn: 'Zmazať',
+    deleteBtnLower: 'zmazať',
+    commentPlaceholder: 'Napíš komentár…',
+    postNeedsContent: 'Napíš niečo alebo pridaj obrázok.',
+    confirmDeletePost: 'Zmazať tento príspevok?',
+    confirmDeleteComment: 'Zmazať tento komentár?',
+    emptyGallery: 'Zatiaľ tu nie sú žiadne fotky.',
+    pickPhoto: 'Vyber fotku.',
+    confirmDeletePhoto: 'Zmazať túto fotku?',
+    emptyLeaderboard: 'Zatiaľ nie je koho zoradiť.',
+    leaderboardStats: '{posts} príspevkov · {comments} komentárov · {likes} lajkov · {percentile} v SP Tréner',
+    emptyMembers: 'Zatiaľ tu nie je nikto iný.',
+    emptyConversations: 'Zatiaľ žiadne správy. Napíš niekomu z profilu →',
+    chatLoadError: 'Chyba načítania konverzácie.',
+    reportBtn: 'Nahlásiť',
+    emptyChat: 'Zatiaľ žiadne správy. Napíš prvú →',
+    confirmReport: 'Nahlásiť túto konverzáciu? AI posúdi históriu správ a rozhodne, či druhú stranu zablokovať. Obsah konverzácie ostáva súkromný — nevidí ho žiadny administrátor, len AI kontrola.',
+    reportInProgress: 'Posudzujem…',
+    reportBlocked: 'Nahlásenie vyhodnotené: osoba bola zablokovaná. ({reason})',
+    reportDismissed: 'Nahlásenie vyhodnotené ako neopodstatnené. ({reason})',
+    editProfileBtn: 'Upraviť profil',
+    sendMessageBtn: '✉ Napísať správu',
+    emptyProfilePosts: 'Zatiaľ žiadne príspevky.',
+    profileLoadError: 'Chyba načítania profilu.',
+    savedMsg: 'Uložené.',
+    photoChangedMsg: 'Fotka zmenená.',
+    locale: 'sk-SK'
+  },
+  cz: {
+    backLink: '← SP Tréner',
+    pageTitle: 'Komunita',
+    pageSub: 'Soukromý prostor jen pro členy, kteří si Premium/Elite koupili přes nabídku po webináři.',
+    tabFeed: 'Feed', tabGallery: 'Fotky', tabLeaderboard: 'Žebříček', tabMembers: 'Členové', tabMessages: 'Zprávy', tabMyProfile: 'Můj profil',
+    postPlaceholder: 'Napiš něco pro komunitu…',
+    publishBtn: 'Zveřejnit',
+    loadOlderBtn: 'Načíst starší',
+    captionPlaceholder: 'Popis (nepovinné)',
+    uploadPhotoBtn: 'Nahrát fotku',
+    leaderboardSub: 'Kombinuje zapojení v komunitě (lajky, příspěvky, komentáře) s nejlepším dosaženým percentilem v testech SP Tréner.',
+    backToMessages: '← Zpět na zprávy',
+    chatPlaceholder: 'Napiš zprávu…',
+    sendBtn: 'Odeslat',
+    changePhotoBtn: 'Změnit fotku',
+    usernameLabel: 'Uživatelské jméno',
+    usernamePlaceholder: 'např. jano2006',
+    displayNameLabel: 'Zobrazované jméno (nepovinné)',
+    bioLabel: 'O mně',
+    saveBtn: 'Uložit',
+    loading: 'načítám…',
+    genericServerError: 'Chyba serveru.',
+    loadError: 'Chyba načítání.',
+    loginPrompt: 'Přihlas se přes Google, abychom ověřili, jestli máš do komunity přístup.',
+    loginBtn: 'Přihlásit se přes Google',
+    bannedMsg: 'Přístup do komunity ti byl zablokován.',
+    noAccessMsg: 'Komunita je exkluzivní bonus pro členy, kteří si Premium nebo Elite koupili přes nabídku po webináři. Pokud to ještě nemáš, podívej se na nejbližší termín.',
+    registerWebinarLink: 'Zaregistrovat se na webinář →',
+    accessCheckFailed: 'Nepodařilo se ověřit přístup. Zkus to znovu později.',
+    emptyFeed: 'Zatím tu nikdo nic nenapsal. Buď první →',
+    deleteBtn: 'Smazat',
+    deleteBtnLower: 'smazat',
+    commentPlaceholder: 'Napiš komentář…',
+    postNeedsContent: 'Napiš něco nebo přidej obrázek.',
+    confirmDeletePost: 'Smazat tento příspěvek?',
+    confirmDeleteComment: 'Smazat tento komentář?',
+    emptyGallery: 'Zatím tu nejsou žádné fotky.',
+    pickPhoto: 'Vyber fotku.',
+    confirmDeletePhoto: 'Smazat tuto fotku?',
+    emptyLeaderboard: 'Zatím není koho seřadit.',
+    leaderboardStats: '{posts} příspěvků · {comments} komentářů · {likes} lajků · {percentile} v SP Tréner',
+    emptyMembers: 'Zatím tu není nikdo jiný.',
+    emptyConversations: 'Zatím žádné zprávy. Napiš někomu z profilu →',
+    chatLoadError: 'Chyba načítání konverzace.',
+    reportBtn: 'Nahlásit',
+    emptyChat: 'Zatím žádné zprávy. Napiš první →',
+    confirmReport: 'Nahlásit tuto konverzaci? AI posoudí historii zpráv a rozhodne, jestli druhou stranu zablokovat. Obsah konverzace zůstává soukromý — nevidí ho žádný administrátor, jen AI kontrola.',
+    reportInProgress: 'Posuzuji…',
+    reportBlocked: 'Nahlášení vyhodnoceno: osoba byla zablokována. ({reason})',
+    reportDismissed: 'Nahlášení vyhodnoceno jako neopodstatněné. ({reason})',
+    editProfileBtn: 'Upravit profil',
+    sendMessageBtn: '✉ Napsat zprávu',
+    emptyProfilePosts: 'Zatím žádné příspěvky.',
+    profileLoadError: 'Chyba načítání profilu.',
+    savedMsg: 'Uloženo.',
+    photoChangedMsg: 'Fotka změněna.',
+    locale: 'cs-CZ'
+  }
+};
+let currentLang = localStorage.getItem('vsp_lang') || 'sk';
+function t(key, vars) {
+  let str = TRANSLATIONS[currentLang]?.[key] ?? TRANSLATIONS.sk?.[key] ?? key;
+  if (vars) Object.entries(vars).forEach(([k, v]) => { str = str.replace(new RegExp('{' + k + '}', 'g'), v); });
+  return str;
+}
+function applyStaticTranslations() {
+  document.querySelectorAll('[data-i18n]').forEach(el => { el.innerHTML = t(el.dataset.i18n); });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { el.placeholder = t(el.dataset.i18nPlaceholder); });
+}
+function setLang(lang) {
+  currentLang = lang;
+  localStorage.setItem('vsp_lang', lang);
+  document.getElementById('langSK').classList.toggle('active', lang === 'sk');
+  document.getElementById('langCZ').classList.toggle('active', lang === 'cz');
+  applyStaticTranslations();
+  if (accessGranted) route();
+}
+
+const SUPABASE_URL = 'https://zrnqiwareacqyndwchsv.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpybnFpd2FyZWFjcXluZHdjaHN2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMDA3NTAsImV4cCI6MjA4OTc3Njc1MH0.iUne23YDxp12Iwxdk9U8MfcV0NTBtrNf9OgsjQdiADk';
+const _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let currentUser = null;
+let authToken = null;
+let accessGranted = false;
+let lastPostId = null;
+let galleryLastId = null;
+let feedLoadedOnce = false;
+
+function esc(s) { return String(s == null ? '' : s).replace(/[<>&]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c])); }
+function fmtTime(iso) { return new Date(iso).toLocaleString(t('locale')); }
+
+function avatarHtml(url, name, size) {
+  size = size || 32;
+  if (url) return `<img class="avatar" src="${url}" style="width:${size}px;height:${size}px">`;
+  const initial = (name || '?').trim().charAt(0).toUpperCase() || '?';
+  return `<span class="avatar avatar-fallback" style="width:${size}px;height:${size}px;font-size:${Math.round(size * 0.42)}px">${esc(initial)}</span>`;
+}
+
+async function apiFetch(url, opts) {
+  opts = opts || {};
+  opts.headers = Object.assign({}, opts.headers, authToken ? { Authorization: 'Bearer ' + authToken } : {});
+  const res = await fetch(url, opts);
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || t('genericServerError'));
+  return data;
+}
+
+async function init() {
+  document.getElementById('langSK').classList.toggle('active', currentLang === 'sk');
+  document.getElementById('langCZ').classList.toggle('active', currentLang === 'cz');
+  applyStaticTranslations();
+  const { data: { session } } = await _supabase.auth.getSession();
+  currentUser = session ? session.user : null;
+  authToken = session ? session.access_token : null;
+  await checkAccess();
+  _supabase.auth.onAuthStateChange(async (event, session) => {
+    currentUser = session ? session.user : null;
+    authToken = session ? session.access_token : null;
+    await checkAccess();
+  });
+  window.addEventListener('hashchange', () => { if (accessGranted) route(); });
+}
+
+async function checkAccess() {
+  const gate = document.getElementById('gateBox');
+  const feed = document.getElementById('feedBox');
+  if (!currentUser) {
+    accessGranted = false;
+    gate.style.display = 'block';
+    feed.style.display = 'none';
+    gate.innerHTML = `<p>${t('loginPrompt')}</p><button onclick="signIn()">${t('loginBtn')}</button>`;
+    return;
+  }
+  try {
+    const status = await apiFetch('/api/community/access-status');
+    if (status.hasAccess) {
+      accessGranted = true;
+      gate.style.display = 'none';
+      feed.style.display = 'block';
+      route();
+    } else {
+      accessGranted = false;
+      gate.style.display = 'block';
+      feed.style.display = 'none';
+      const msg = status.banned ? t('bannedMsg') : t('noAccessMsg');
+      gate.innerHTML = '<p>' + msg + '</p>' + (status.banned ? '' : `<a class="cta" href="/webinar">${t('registerWebinarLink')}</a>`);
+    }
+  } catch (e) {
+    accessGranted = false;
+    gate.style.display = 'block';
+    feed.style.display = 'none';
+    gate.innerHTML = `<p>${t('accessCheckFailed')}</p>`;
+  }
+}
+
+function signIn() {
+  _supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.href } });
+}
+
+// ─────────────────────── ROUTER (feed / gallery / profil / môj profil) ───────────────────────
+const VIEWS = { feed: 'viewFeed', gallery: 'viewGallery', leaderboard: 'viewLeaderboard', members: 'viewMembers', messages: 'viewMessages', chat: 'viewChat', profile: 'viewProfile', myprofile: 'viewMyProfile' };
+
+function parseHash() {
+  const h = location.hash.replace(/^#/, '');
+  if (h.indexOf('profile/') === 0) return { view: 'profile', email: decodeURIComponent(h.slice(8)) };
+  if (h.indexOf('chat/') === 0) return { view: 'chat', email: decodeURIComponent(h.slice(5)) };
+  if (h === 'gallery') return { view: 'gallery' };
+  if (h === 'leaderboard') return { view: 'leaderboard' };
+  if (h === 'members') return { view: 'members' };
+  if (h === 'messages') return { view: 'messages' };
+  if (h === 'myprofile') return { view: 'myprofile' };
+  return { view: 'feed' };
+}
+
+function openProfile(email) {
+  location.hash = 'profile/' + encodeURIComponent(email);
+}
+
+function route() {
+  const r = parseHash();
+  Object.keys(VIEWS).forEach(v => { document.getElementById(VIEWS[v]).style.display = (v === r.view) ? 'block' : 'none'; });
+  const activeTab = r.view === 'chat' ? 'messages' : r.view;
+  document.querySelectorAll('.tab').forEach(tb => tb.classList.toggle('active', tb.dataset.tab === activeTab));
+  if (r.view === 'feed') { if (!feedLoadedOnce) { loadPosts(true); feedLoadedOnce = true; } }
+  else if (r.view === 'gallery') loadGallery(true);
+  else if (r.view === 'leaderboard') loadLeaderboard();
+  else if (r.view === 'members') loadMembers();
+  else if (r.view === 'messages') loadConversations();
+  else if (r.view === 'chat') loadChat(r.email);
+  else if (r.view === 'profile') loadProfile(r.email);
+  else if (r.view === 'myprofile') loadMyProfile();
+}
+
+function openChat(email) { location.hash = 'chat/' + encodeURIComponent(email); }
+
+// ─────────────────────────────────────── FEED ───────────────────────────────────────
+async function loadPosts(reset) {
+  if (reset) { lastPostId = null; document.getElementById('postsList').innerHTML = ''; }
+  try {
+    const url = '/api/community/posts' + (lastPostId ? '?before=' + lastPostId : '');
+    const data = await apiFetch(url);
+    const list = document.getElementById('postsList');
+    if (!data.posts.length && reset) {
+      list.innerHTML = `<div class="empty">${t('emptyFeed')}</div>`;
+    } else {
+      data.posts.forEach(p => { list.insertAdjacentHTML('beforeend', renderPost(p)); });
+      if (data.posts.length) lastPostId = data.posts[data.posts.length - 1].id;
+    }
+    document.getElementById('loadMoreBtn').style.display = data.hasMore ? 'block' : 'none';
+  } catch (e) {}
+}
+
+function renderPost(p) {
+  return `<div class="post" id="post-${p.id}">
+    <div class="meta">
+      <button class="author-link" data-email="${esc(p.authorEmail)}" onclick="openProfile(this.dataset.email)">
+        ${avatarHtml(p.authorAvatarUrl, p.authorName || p.authorEmail)}
+        <span class="author">${esc(p.authorName || p.authorEmail)}</span>
+      </button>
+      <span class="time">${fmtTime(p.createdAt)}</span>
+    </div>
+    ${p.body ? `<div class="body">${esc(p.body)}</div>` : ''}
+    ${p.imageUrl ? `<img class="attach" src="${p.imageUrl}" loading="lazy">` : ''}
+    <div class="actions">
+      <button class="${p.liked ? 'liked' : ''}" onclick="toggleLike('post', ${p.id}, this)">♥ <span class="like-count">${p.likeCount}</span></button>
+      <button onclick="toggleComments(${p.id})">💬 <span class="comment-count">${p.commentCount}</span></button>
+      ${p.authorEmail === (currentUser && currentUser.email) ? `<button class="danger" onclick="deletePost(${p.id})">${t('deleteBtn')}</button>` : ''}
+    </div>
+    <div class="comments" id="comments-${p.id}" style="display:none"></div>
+  </div>`;
+}
+
+async function toggleLike(kind, id, btn) {
+  const liked = btn.classList.contains('liked');
+  const countEl = btn.querySelector('.like-count');
+  try {
+    await apiFetch(`/api/community/${kind === 'post' ? 'posts' : 'comments'}/${id}/like`, { method: liked ? 'DELETE' : 'POST' });
+    btn.classList.toggle('liked', !liked);
+    if (countEl) countEl.textContent = Math.max(0, parseInt(countEl.textContent, 10) + (liked ? -1 : 1));
+  } catch (e) {}
+}
+
+async function toggleComments(postId) {
+  const box = document.getElementById('comments-' + postId);
+  if (box.style.display === 'block') { box.style.display = 'none'; return; }
+  box.style.display = 'block';
+  box.innerHTML = `<div class="empty">${t('loading')}</div>`;
+  try {
+    const data = await apiFetch('/api/community/posts/' + postId + '/comments');
+    box.innerHTML = data.comments.map(c => renderComment(postId, c)).join('') + `
+      <div class="comment-form">
+        <input type="text" id="commentInput-${postId}" placeholder="${esc(t('commentPlaceholder'))}" maxlength="1000">
+        <button onclick="submitComment(${postId})">${t('sendBtn')}</button>
+      </div>`;
+  } catch (e) {
+    box.innerHTML = `<div class="empty">${t('loadError')}</div>`;
+  }
+}
+
+function renderComment(postId, c) {
+  return `<div class="comment" id="comment-${c.id}">
+    <div class="cbody">
+      ${avatarHtml(c.authorAvatarUrl, c.authorName || c.authorEmail, 24)}
+      <div class="ctext">
+        <button class="cauthor" data-email="${esc(c.authorEmail)}" onclick="openProfile(this.dataset.email)">${esc(c.authorName || c.authorEmail)}</button>
+        ${esc(c.body)}
+        <button class="${c.liked ? 'liked' : ''}" style="margin-left:.5rem;background:none;border:none;color:var(--text2);cursor:pointer;font-size:.78rem" onclick="toggleLike('comment', ${c.id}, this)">♥ <span class="like-count">${c.likeCount}</span></button>
+      </div>
+    </div>
+    ${c.authorEmail === (currentUser && currentUser.email) ? `<button class="del" onclick="deleteComment(${postId},${c.id})">${t('deleteBtnLower')}</button>` : ''}
+  </div>`;
+}
+
+async function submitPost() {
+  const body = document.getElementById('postBody').value.trim();
+  const fileInput = document.getElementById('postImage');
+  const errEl = document.getElementById('postErr');
+  const btn = document.getElementById('postSubmitBtn');
+  errEl.textContent = '';
+  if (!body && !fileInput.files.length) { errEl.textContent = t('postNeedsContent'); return; }
+  btn.disabled = true;
+  try {
+    const fd = new FormData();
+    fd.append('body', body);
+    if (fileInput.files.length) fd.append('image', fileInput.files[0]);
+    const data = await apiFetch('/api/community/posts', { method: 'POST', body: fd });
+    document.getElementById('postBody').value = '';
+    fileInput.value = '';
+    document.getElementById('postsList').insertAdjacentHTML('afterbegin', renderPost(data.post));
+  } catch (e) {
+    errEl.textContent = e.message;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function submitComment(postId) {
+  const input = document.getElementById('commentInput-' + postId);
+  const body = input.value.trim();
+  if (!body) return;
+  try {
+    const data = await apiFetch('/api/community/posts/' + postId + '/comments', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ body })
+    });
+    input.value = '';
+    const box = document.getElementById('comments-' + postId);
+    box.insertAdjacentHTML('beforeend', renderComment(postId, data.comment));
+    box.querySelector('.comment-form').remove();
+    box.insertAdjacentHTML('beforeend', `<div class="comment-form"><input type="text" id="commentInput-${postId}" placeholder="${esc(t('commentPlaceholder'))}" maxlength="1000"><button onclick="submitComment(${postId})">${t('sendBtn')}</button></div>`);
+    const post = document.getElementById('post-' + postId);
+    const cc = post.querySelector('.comment-count');
+    cc.textContent = parseInt(cc.textContent, 10) + 1;
+  } catch (e) {}
+}
+
+async function deletePost(id) {
+  if (!confirm(t('confirmDeletePost'))) return;
+  try {
+    await apiFetch('/api/community/posts/' + id, { method: 'DELETE' });
+    const el = document.getElementById('post-' + id);
+    if (el) el.remove();
+  } catch (e) {}
+}
+
+async function deleteComment(postId, id) {
+  if (!confirm(t('confirmDeleteComment'))) return;
+  try {
+    await apiFetch('/api/community/comments/' + id, { method: 'DELETE' });
+    document.getElementById('comment-' + id).remove();
+    const post = document.getElementById('post-' + postId);
+    const cc = post.querySelector('.comment-count');
+    cc.textContent = Math.max(0, parseInt(cc.textContent, 10) - 1);
+  } catch (e) {}
+}
+
+// ─────────────────────────────────────── GALÉRIA ───────────────────────────────────────
+async function loadGallery(reset) {
+  if (reset) { galleryLastId = null; document.getElementById('galleryGrid').innerHTML = ''; }
+  try {
+    const url = '/api/community/photos' + (galleryLastId ? '?before=' + galleryLastId : '');
+    const data = await apiFetch(url);
+    const grid = document.getElementById('galleryGrid');
+    if (!data.photos.length && reset) {
+      grid.innerHTML = `<div class="empty">${t('emptyGallery')}</div>`;
+    } else {
+      data.photos.forEach(p => grid.insertAdjacentHTML('beforeend', renderGalleryPhoto(p)));
+      if (data.photos.length) galleryLastId = data.photos[data.photos.length - 1].id;
+    }
+    document.getElementById('galleryLoadMoreBtn').style.display = data.hasMore ? 'block' : 'none';
+  } catch (e) {}
+}
+
+function renderGalleryPhoto(p) {
+  return `<div class="gallery-item" id="photo-${p.id}">
+    <img src="${p.imageUrl}" loading="lazy" title="${esc(p.caption || p.authorName || p.authorEmail)}">
+    ${p.authorEmail === (currentUser && currentUser.email) ? `<button class="del" onclick="deletePhoto(${p.id})">✕</button>` : ''}
+  </div>`;
+}
+
+async function submitPhoto() {
+  const fileInput = document.getElementById('photoImage');
+  const caption = document.getElementById('photoCaption').value.trim();
+  const errEl = document.getElementById('photoErr');
+  const btn = document.getElementById('photoSubmitBtn');
+  errEl.textContent = '';
+  if (!fileInput.files.length) { errEl.textContent = t('pickPhoto'); return; }
+  btn.disabled = true;
+  try {
+    const fd = new FormData();
+    fd.append('image', fileInput.files[0]);
+    if (caption) fd.append('caption', caption);
+    const data = await apiFetch('/api/community/photos', { method: 'POST', body: fd });
+    fileInput.value = '';
+    document.getElementById('photoCaption').value = '';
+    const grid = document.getElementById('galleryGrid');
+    const emptyEl = grid.querySelector('.empty');
+    if (emptyEl) emptyEl.remove();
+    grid.insertAdjacentHTML('afterbegin', renderGalleryPhoto(data.photo));
+  } catch (e) {
+    errEl.textContent = e.message;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function deletePhoto(id) {
+  if (!confirm(t('confirmDeletePhoto'))) return;
+  try {
+    await apiFetch('/api/community/photos/' + id, { method: 'DELETE' });
+    const el = document.getElementById('photo-' + id);
+    if (el) el.remove();
+  } catch (e) {}
+}
+
+// ─────────────────────────────────────── REBRÍČEK ───────────────────────────────────────
+async function loadLeaderboard() {
+  const list = document.getElementById('leaderboardList');
+  list.innerHTML = `<div class="empty">${t('loading')}</div>`;
+  try {
+    const data = await apiFetch('/api/community/leaderboard');
+    if (!data.leaderboard.length) { list.innerHTML = `<div class="empty">${t('emptyLeaderboard')}</div>`; return; }
+    list.innerHTML = data.leaderboard.map((row, i) => renderLeaderboardRow(row, i + 1)).join('');
+  } catch (e) {
+    list.innerHTML = `<div class="empty">${t('loadError')}</div>`;
+  }
+}
+
+function renderLeaderboardRow(row, rank) {
+  const rankClass = rank === 1 ? 'r1' : rank === 2 ? 'r2' : rank === 3 ? 'r3' : '';
+  const percentileText = row.bestPercentile != null ? 'P' + Math.round(row.bestPercentile) : '—';
+  return `<div class="lb-row">
+    <span class="lb-rank ${rankClass}">${rank}.</span>
+    <button class="author-link" data-email="${esc(row.email)}" onclick="openProfile(this.dataset.email)">
+      ${avatarHtml(row.avatarUrl, row.displayName, 40)}
+    </button>
+    <div class="lb-info">
+      <button class="author-link" data-email="${esc(row.email)}" onclick="openProfile(this.dataset.email)" style="padding:0">
+        <span class="lb-name">${esc(row.displayName)}</span>
+      </button>
+      <div class="lb-stats">${t('leaderboardStats', { posts: row.postCount, comments: row.commentCount, likes: row.likesReceived, percentile: percentileText })}</div>
+    </div>
+    <span class="lb-score">${row.score}b</span>
+  </div>`;
+}
+
+// ─────────────────────────────────────── ČLENOVIA (adresár) ───────────────────────────────────────
+async function loadMembers() {
+  const list = document.getElementById('membersList');
+  list.innerHTML = `<div class="empty">${t('loading')}</div>`;
+  try {
+    const data = await apiFetch('/api/community/members');
+    if (!data.members.length) { list.innerHTML = `<div class="empty">${t('emptyMembers')}</div>`; return; }
+    list.innerHTML = data.members.map(renderMemberRow).join('');
+  } catch (e) {
+    list.innerHTML = `<div class="empty">${t('loadError')}</div>`;
+  }
+}
+
+function renderMemberRow(m) {
+  return `<button class="member-row" data-email="${esc(m.email)}" onclick="openProfile(this.dataset.email)">
+    ${avatarHtml(m.avatarUrl, m.displayName, 40)}
+    <div class="member-info">
+      <div class="member-name">${esc(m.displayName)}</div>
+      ${m.bio ? `<div class="member-bio">${esc(m.bio)}</div>` : ''}
+    </div>
+  </button>`;
+}
+
+// ─────────────────────────────────────── SPRÁVY (zoznam konverzácií) ───────────────────────────────────────
+async function loadConversations() {
+  const list = document.getElementById('conversationsList');
+  list.innerHTML = `<div class="empty">${t('loading')}</div>`;
+  try {
+    const data = await apiFetch('/api/community/conversations');
+    if (!data.conversations.length) { list.innerHTML = `<div class="empty">${t('emptyConversations')}</div>`; return; }
+    list.innerHTML = data.conversations.map(renderConvoRow).join('');
+  } catch (e) {
+    list.innerHTML = `<div class="empty">${t('loadError')}</div>`;
+  }
+}
+
+function renderConvoRow(c) {
+  return `<button class="convo-row" data-email="${esc(c.otherEmail)}" onclick="openChat(this.dataset.email)">
+    ${avatarHtml(c.otherAvatarUrl, c.otherName, 40)}
+    <div class="convo-info">
+      <div class="convo-name">${esc(c.otherName)}</div>
+      <div class="convo-preview">${esc(c.lastMessage || '')}</div>
+    </div>
+  </button>`;
+}
+
+// ─────────────────────────────────────── CHAT (konverzácia) ───────────────────────────────────────
+let currentChatEmail = null;
+
+async function loadChat(email) {
+  currentChatEmail = email;
+  const header = document.getElementById('chatHeader');
+  const box = document.getElementById('chatMessages');
+  document.getElementById('chatErr').textContent = '';
+  header.innerHTML = `<div class="empty">${t('loading')}</div>`;
+  box.innerHTML = '';
+  try {
+    const data = await apiFetch('/api/community/conversations/' + encodeURIComponent(email));
+    const o = data.other;
+    header.innerHTML = `
+      <button class="author-link" data-email="${esc(o.email)}" onclick="openProfile(this.dataset.email)">
+        ${avatarHtml(o.avatarUrl, o.displayName, 40)}
+      </button>
+      <div class="lb-info">
+        <button class="author-link" data-email="${esc(o.email)}" onclick="openProfile(this.dataset.email)" style="padding:0"><span class="lb-name">${esc(o.displayName)}</span></button>
+      </div>
+      <button class="chat-report" onclick="reportConversation(${data.conversationId})">${t('reportBtn')}</button>`;
+    box.innerHTML = data.messages.length
+      ? data.messages.map(renderChatMessage).join('')
+      : `<div class="empty">${t('emptyChat')}</div>`;
+    box.scrollTop = box.scrollHeight;
+  } catch (e) {
+    header.innerHTML = `<div class="empty">${t('chatLoadError')}</div>`;
+  }
+}
+
+function renderChatMessage(m) {
+  const mine = currentUser && m.senderEmail === (currentUser.email || '').toLowerCase();
+  return `<div class="chat-msg ${mine ? 'mine' : 'theirs'}">${esc(m.body)}<span class="ctime">${fmtTime(m.createdAt)}</span></div>`;
+}
+
+async function sendChatMessage() {
+  const input = document.getElementById('chatInput');
+  const body = input.value.trim();
+  const errEl = document.getElementById('chatErr');
+  errEl.textContent = '';
+  if (!body || !currentChatEmail) return;
+  try {
+    const data = await apiFetch('/api/community/conversations/' + encodeURIComponent(currentChatEmail) + '/messages', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ body })
+    });
+    input.value = '';
+    const box = document.getElementById('chatMessages');
+    const emptyEl = box.querySelector('.empty');
+    if (emptyEl) emptyEl.remove();
+    box.insertAdjacentHTML('beforeend', renderChatMessage(data.message));
+    box.scrollTop = box.scrollHeight;
+  } catch (e) {
+    errEl.textContent = e.message;
+  }
+}
+
+async function reportConversation(conversationId) {
+  if (!confirm(t('confirmReport'))) return;
+  const errEl = document.getElementById('chatErr');
+  errEl.textContent = t('reportInProgress');
+  try {
+    const data = await apiFetch('/api/community/conversations/' + conversationId + '/report', { method: 'POST' });
+    errEl.textContent = data.verdict === 'block'
+      ? t('reportBlocked', { reason: data.reasoning })
+      : t('reportDismissed', { reason: data.reasoning });
+  } catch (e) {
+    errEl.textContent = e.message;
+  }
+}
+
+// ─────────────────────────────────────── PROFIL (cudzí) ───────────────────────────────────────
+async function loadProfile(email) {
+  const header = document.getElementById('profileHeader');
+  const list = document.getElementById('profilePostsList');
+  header.innerHTML = `<div class="empty">${t('loading')}</div>`;
+  list.innerHTML = '';
+  try {
+    const data = await apiFetch('/api/community/profile/' + encodeURIComponent(email));
+    const p = data.profile;
+    const isMe = currentUser && (currentUser.email || '').toLowerCase() === email.toLowerCase();
+    header.innerHTML = `
+      <div class="profile-card">
+        ${avatarHtml(p.avatarUrl, p.displayName || p.email, 72)}
+        <div class="profile-info">
+          <div class="profile-name">${esc(p.displayName || p.email)}</div>
+          ${p.bio ? `<div class="profile-bio">${esc(p.bio)}</div>` : ''}
+          ${isMe ? `<button class="profile-edit-btn" onclick="location.hash='myprofile'">${t('editProfileBtn')}</button>` : `<button class="dm-btn" data-email="${esc(email)}" onclick="openChat(this.dataset.email)">${t('sendMessageBtn')}</button>`}
+        </div>
+      </div>`;
+    list.innerHTML = data.posts.length ? data.posts.map(renderPost).join('') : `<div class="empty">${t('emptyProfilePosts')}</div>`;
+  } catch (e) {
+    header.innerHTML = `<div class="empty">${t('profileLoadError')}</div>`;
+  }
+}
+
+// ─────────────────────────────────────── MÔJ PROFIL (editácia) ───────────────────────────────────────
+async function loadMyProfile() {
+  try {
+    const data = await apiFetch('/api/community/profile/me');
+    const p = data.profile;
+    document.getElementById('myUsername').value = p.username || '';
+    document.getElementById('myDisplayName').value = p.displayName || '';
+    document.getElementById('myBio').value = p.bio || '';
+    document.getElementById('myAvatarPreview').innerHTML = avatarHtml(p.avatarUrl, p.displayName || p.username, 72);
+  } catch (e) {}
+}
+
+async function saveProfile() {
+  const username = document.getElementById('myUsername').value.trim();
+  const displayName = document.getElementById('myDisplayName').value.trim();
+  const bio = document.getElementById('myBio').value.trim();
+  const errEl = document.getElementById('myProfileErr');
+  const okEl = document.getElementById('myProfileOk');
+  errEl.textContent = ''; okEl.textContent = '';
+  try {
+    await apiFetch('/api/community/profile', {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username, displayName, bio })
+    });
+    okEl.textContent = t('savedMsg');
+    setTimeout(() => { okEl.textContent = ''; }, 2500);
+  } catch (e) {
+    errEl.textContent = e.message;
+  }
+}
+
+async function submitAvatar() {
+  const fileInput = document.getElementById('avatarFile');
+  const errEl = document.getElementById('myProfileErr');
+  const okEl = document.getElementById('myProfileOk');
+  errEl.textContent = ''; okEl.textContent = '';
+  if (!fileInput.files.length) { errEl.textContent = t('pickPhoto'); return; }
+  try {
+    const fd = new FormData();
+    fd.append('avatar', fileInput.files[0]);
+    const data = await apiFetch('/api/community/profile/avatar', { method: 'POST', body: fd });
+    document.getElementById('myAvatarPreview').innerHTML = avatarHtml(data.avatarUrl, '', 72);
+    fileInput.value = '';
+    okEl.textContent = t('photoChangedMsg');
+    setTimeout(() => { okEl.textContent = ''; }, 2500);
+  } catch (e) {
+    errEl.textContent = e.message;
+  }
+}
+
+init();
+</script>
+</body>
+</html>

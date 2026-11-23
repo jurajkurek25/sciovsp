@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /app?
+Disallow: /go/
+
+Sitemap: https://sptrener.online/sitemap.xml

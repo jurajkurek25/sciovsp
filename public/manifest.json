@@ -1,0 +1,29 @@
+{
+  "name": "VSP Tréner — SCIO + AI",
+  "short_name": "VSP Tréner",
+  "description": "Tréner na SCIO VSP testy. Reálna simulácia, AI analýza, percentilový tracker.",
+  "start_url": "/app",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#08080d",
+  "theme_color": "#08080d",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["education", "productivity"],
+  "lang": "sk",
+  "dir": "ltr",
+  "prefer_related_applications": false
+}

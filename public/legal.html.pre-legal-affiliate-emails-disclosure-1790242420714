@@ -1,0 +1,1994 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <script id="Cookiebot" src="https://consent.cookiebot.com/uc.js" data-cbid="082b4b18-7f50-41b6-b374-be0c015a5fe0" type="text/javascript" async></script>
+  <!-- Google tag (gtag.js) — deferred to idle time; dataLayer queue preserves gtag() calls made before it loads -->
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-SHRPWTXJP2');
+    (function(){
+      function loadGtag(){
+        var s=document.createElement('script');
+        s.async=true;
+        s.src='https://www.googletagmanager.com/gtag/js?id=G-SHRPWTXJP2';
+        document.head.appendChild(s);
+      }
+      function scheduleGtag(){
+        if('requestIdleCallback' in window){requestIdleCallback(loadGtag,{timeout:3000});}
+        else{setTimeout(loadGtag,1);}
+      }
+      if(document.readyState==='complete'){setTimeout(scheduleGtag,2000);}
+      else{window.addEventListener('load',function(){setTimeout(scheduleGtag,2000);});}
+    })();
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Podmienky a ochrana osobných údajov — SP Tréner</title>
+  <meta name="description" content="Všeobecné obchodné podmienky a zásady ochrany osobných údajov pre SP Tréner.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@300;400;500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --black: #08080d;
+      --black2: #0f0f18;
+      --black3: #171724;
+      --border: rgba(255,255,255,0.07);
+      --border2: rgba(255,255,255,0.13);
+      --text: #eeeef5;
+      --text2: #a1a1bc;
+      --text3: #5c5c7a;
+      --volt: #c8ff00;
+      --purple: #7c5cff;
+      --purple2: #b09bff;
+      --red: #ff3f5e;
+      --green: #36e896;
+      --yellow: #ffc94d;
+      --serif: 'Instrument Serif', Georgia, serif;
+      --mono: 'DM Mono', monospace;
+      --sans: 'DM Sans', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--black);
+      color: var(--text);
+      font-family: var(--sans);
+      overflow-x: hidden;
+      line-height: 1.65;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 1.1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(8,8,13,0.88);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-logo {
+      font-family: var(--mono);
+      font-size: 13px;
+      letter-spacing: 0.15em;
+      color: var(--text);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+    }
+
+    .nav-dot {
+      width: 7px;
+      height: 7px;
+      background: var(--volt);
+      border-radius: 50%;
+      animation: pulse-dot 2s infinite;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.7); }
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .nav-link,
+    .nav-cta {
+      text-decoration: none;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      letter-spacing: 0.05em;
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+
+    .nav-link {
+      color: var(--text2);
+      padding: 0.65rem 0.85rem;
+      border: 1px solid transparent;
+    }
+
+    .nav-link:hover {
+      color: var(--text);
+      border-color: var(--border2);
+    }
+
+    .nav-cta {
+      padding: 0.75rem 1.1rem;
+      background: var(--volt);
+      color: var(--black);
+      font-weight: 700;
+    }
+
+    .nav-cta:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(200,255,0,0.25);
+    }
+
+    .hero {
+      position: relative;
+      padding: 7rem 2rem 3rem;
+      text-align: center;
+      overflow: hidden;
+      z-index: 1;
+    }
+
+    .hero-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(124,92,255,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(124,92,255,0.04) 1px, transparent 1px);
+      background-size: 60px 60px;
+      mask-image: radial-gradient(ellipse 75% 75% at 50% 45%, black, transparent);
+      pointer-events: none;
+    }
+
+    .hero-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      pointer-events: none;
+      animation: orb-float 9s ease-in-out infinite;
+    }
+
+    .hero-orb-1 {
+      width: 420px;
+      height: 420px;
+      background: rgba(124,92,255,0.12);
+      top: -120px;
+      left: -120px;
+    }
+
+    .hero-orb-2 {
+      width: 360px;
+      height: 360px;
+      background: rgba(200,255,0,0.06);
+      right: -80px;
+      top: 20px;
+      animation-delay: -4s;
+    }
+
+    .hero-orb-3 {
+      width: 260px;
+      height: 260px;
+      background: rgba(255,63,94,0.07);
+      bottom: -40px;
+      left: 45%;
+      animation-delay: -2s;
+    }
+
+    @keyframes orb-float {
+      0%, 100% { transform: translate(0,0) scale(1); }
+      33% { transform: translate(28px,-24px) scale(1.05); }
+      66% { transform: translate(-18px,20px) scale(0.95); }
+    }
+
+    .hero-eyebrow {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--volt);
+      margin-bottom: 1.4rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-title {
+      font-family: var(--serif);
+      font-size: clamp(2.8rem, 6vw, 5.8rem);
+      line-height: 1.03;
+      letter-spacing: -0.025em;
+      margin: 0 auto 1.2rem;
+      max-width: 950px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-title em {
+      font-style: italic;
+      color: var(--purple2);
+    }
+
+    .hero-title .volt-text {
+      color: var(--volt);
+      font-style: normal;
+    }
+
+    .hero-sub {
+      max-width: 760px;
+      margin: 0 auto;
+      color: var(--text2);
+      font-size: 1.02rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .ticker-wrap {
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      background: var(--black2);
+      overflow: hidden;
+      padding: 0.85rem 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .ticker-track {
+      display: flex;
+      gap: 3rem;
+      white-space: nowrap;
+      animation: ticker 26s linear infinite;
+    }
+
+    .ticker-item {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      color: var(--text3);
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-shrink: 0;
+    }
+
+    .ticker-item span { color: var(--volt); }
+
+    @keyframes ticker {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 4rem 2rem 6rem;
+    }
+
+    .section {
+      margin-bottom: 2rem;
+    }
+
+    .section-header {
+      margin-bottom: 2rem;
+    }
+
+    .section-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--text3);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .section-title {
+      font-family: var(--serif);
+      font-size: clamp(2rem, 4vw, 3.6rem);
+      line-height: 1.08;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.9rem;
+    }
+
+    .section-title em {
+      font-style: italic;
+      color: var(--purple2);
+    }
+
+    .section-intro {
+      max-width: 700px;
+      color: var(--text2);
+      font-size: 1rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 1.5rem;
+      align-items: start;
+    }
+
+    .card {
+      background: rgba(15,15,24,0.82);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2rem;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.18);
+    }
+
+    .card.highlight {
+      border-color: rgba(200,255,0,0.18);
+      background: linear-gradient(135deg, rgba(15,15,24,0.95), rgba(200,255,0,0.03));
+    }
+
+    .meta-list {
+      display: grid;
+      gap: 0.9rem;
+    }
+
+    .meta-item {
+      padding: 1rem 1.1rem;
+      background: var(--black);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+    }
+
+    .meta-label {
+      display: block;
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text3);
+      margin-bottom: 0.35rem;
+    }
+
+    .meta-value {
+      color: var(--text);
+      font-size: 0.96rem;
+      word-break: break-word;
+    }
+
+    .note {
+      margin-top: 1rem;
+      padding: 1rem 1.1rem;
+      border-radius: 14px;
+      border: 1px solid rgba(255,201,77,0.18);
+      background: rgba(255,201,77,0.05);
+      color: var(--text2);
+      font-size: 0.92rem;
+    }
+
+    .pricing-table {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin: 1.2rem 0 0.4rem;
+    }
+
+    .pricing-tier {
+      background: var(--black);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.2rem;
+    }
+
+    .pricing-tier.premium { border-color: rgba(200,255,0,0.2); }
+    .pricing-tier.elite { border-color: rgba(124,92,255,0.3); }
+
+    .pricing-tier-name {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text3);
+      margin-bottom: 0.5rem;
+    }
+
+    .pricing-tier-price {
+      font-family: var(--mono);
+      font-size: 1.4rem;
+      color: var(--text);
+      margin-bottom: 0.3rem;
+    }
+
+    .pricing-tier.premium .pricing-tier-price { color: var(--volt); }
+    .pricing-tier.elite .pricing-tier-price { color: var(--purple2); }
+
+    .pricing-tier-note {
+      font-size: 0.82rem;
+      color: var(--text2);
+    }
+
+    .legal-section {
+      margin-top: 4rem;
+    }
+
+    .legal-block {
+      background: var(--black2);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      overflow: hidden;
+      margin-top: 1.2rem;
+    }
+
+    .legal-item {
+      padding: 1.4rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .legal-item:last-child {
+      border-bottom: none;
+    }
+
+    .legal-item h3 {
+      font-size: 1.02rem;
+      font-weight: 700;
+      margin-bottom: 0.7rem;
+      color: var(--text);
+    }
+
+    .legal-item p {
+      color: var(--text2);
+      font-size: 0.95rem;
+      margin-bottom: 0.7rem;
+    }
+
+    .legal-item p:last-child {
+      margin-bottom: 0;
+    }
+
+    .legal-item ul {
+      list-style: none;
+      display: grid;
+      gap: 0.5rem;
+      margin: 0.4rem 0 0.3rem;
+    }
+
+    .legal-item li {
+      color: var(--text2);
+      font-size: 0.95rem;
+      padding-left: 1.1rem;
+      position: relative;
+    }
+
+    .legal-item li::before {
+      content: '→';
+      position: absolute;
+      left: 0;
+      top: 0;
+      color: var(--purple2);
+      font-family: var(--mono);
+      font-size: 0.8rem;
+    }
+
+    .anchor-nav {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-top: 1.5rem;
+    }
+
+    .anchor-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.78rem 1rem;
+      border: 1px solid var(--border2);
+      border-radius: 10px;
+      text-decoration: none;
+      color: var(--text2);
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      letter-spacing: 0.05em;
+      transition: all 0.2s;
+    }
+
+    .anchor-link:hover {
+      color: var(--text);
+      border-color: var(--purple);
+      transform: translateY(-1px);
+    }
+
+    .footer-cta {
+      margin-top: 4rem;
+      padding: 2rem;
+      border-radius: 22px;
+      background: linear-gradient(135deg, rgba(124,92,255,0.08), rgba(200,255,0,0.04));
+      border: 1px solid var(--border);
+      text-align: center;
+    }
+
+    .footer-cta h3 {
+      font-family: var(--serif);
+      font-size: clamp(1.8rem, 3vw, 3rem);
+      line-height: 1.1;
+      margin-bottom: 0.8rem;
+    }
+
+    .footer-cta h3 em {
+      font-style: italic;
+      color: var(--purple2);
+    }
+
+    .footer-cta p {
+      color: var(--text2);
+      max-width: 680px;
+      margin: 0 auto 1.5rem;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      padding: 1rem 1.5rem;
+      background: var(--volt);
+      color: var(--black);
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 0.92rem;
+      text-decoration: none;
+      font-family: var(--mono);
+      letter-spacing: 0.03em;
+      transition: all 0.2s;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 28px rgba(200,255,0,0.28);
+    }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      position: relative;
+      z-index: 1;
+    }
+
+    .footer-logo {
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: 0.15em;
+      color: var(--text3);
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 1.4rem;
+      flex-wrap: wrap;
+    }
+
+    .footer-links a {
+      text-decoration: none;
+      color: var(--text3);
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      letter-spacing: 0.05em;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover { color: var(--text2); }
+
+    .lang-switcher{display:flex;align-items:center;gap:.35rem}
+    .lang-btn{padding:.45rem .7rem;border:1px solid var(--border2);background:transparent;color:var(--text2);border-radius:6px;font-family:var(--mono);font-size:.72rem;letter-spacing:.06em;cursor:pointer;transition:all .2s}
+    .lang-btn:hover{color:var(--text);border-color:var(--purple)}
+    .lang-btn.active{background:var(--volt);color:var(--black);border-color:var(--volt)}
+
+    @media (max-width: 900px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+      .pricing-table {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      nav {
+        padding: 1rem 1.25rem;
+      }
+
+      .page,
+      .hero {
+        padding-left: 1.25rem;
+        padding-right: 1.25rem;
+      }
+
+      .card,
+      .legal-item,
+      .footer-cta {
+        padding: 1.35rem;
+      }
+
+      footer {
+        flex-direction: column;
+        text-align: center;
+      }
+    }
+  </style>
+
+  <!-- Neoworkly Chat Widget -->
+  <script>
+    window.NeoworklyConfig = { widgetId: '3d65a132-78ea-46bb-a237-b02ba54947e7' };
+  </script>
+  <script src="https://neoworkly.com/widget.js" async></script>
+
+</head>
+<body>
+
+  <nav>
+    <a href="/" class="nav-logo">
+      <span class="nav-dot"></span>
+      SP TRÉNER
+    </a>
+    <div class="nav-links">
+      <a href="#vop" class="nav-link" data-i18n="navVop">VOP</a>
+      <a href="#privacy" class="nav-link" data-i18n="navPrivacy">Súkromie</a>
+      <a href="/blog" class="nav-link" data-i18n="navBlog">Blog</a>
+      <div class="lang-switcher">
+        <button class="lang-btn" id="langSK" onclick="setLang('sk')">SK</button>
+        <button class="lang-btn" id="langCZ" onclick="setLang('cz')">CZ</button>
+      </div>
+      <a href="/app" class="nav-cta" data-i18n="navCta">Prejsť do aplikácie →</a>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-grid"></div>
+    <div class="hero-orb hero-orb-1"></div>
+    <div class="hero-orb hero-orb-2"></div>
+    <div class="hero-orb hero-orb-3"></div>
+
+    <div class="hero-eyebrow" data-i18n="heroEyebrow">Právne dokumenty · SP Tréner</div>
+    <h1 class="hero-title" data-i18n="heroTitle">
+      Podmienky používania<br>
+      a <em>ochrana</em><br>
+      <span class="volt-text">osobných údajov.</span>
+    </h1>
+    <p class="hero-sub" data-i18n="heroSub">
+      Transparentne, zrozumiteľne a v rovnakom štýle ako zvyšok produktu.
+      Nižšie nájdeš všeobecné obchodné podmienky aj zásady ochrany osobných údajov pre službu SP Tréner.
+    </p>
+  </section>
+
+  <div class="ticker-wrap">
+    <div class="ticker-track">
+      <div class="ticker-item" data-i18n="ticker1">Digitálna služba <span>SaaS</span></div>
+      <div class="ticker-item" data-i18n="ticker2">Premium <span>9,90 € / mesiac</span></div>
+      <div class="ticker-item" data-i18n="ticker3">Elite <span>19,90 € / mesiac</span></div>
+      <div class="ticker-item" data-i18n="ticker4">Platby <span>Stripe</span></div>
+      <div class="ticker-item" data-i18n="ticker5">AI spracovanie <span>Claude · Anthropic</span></div>
+      <div class="ticker-item" data-i18n="ticker6">Právo <span>SR / CZ štandard</span></div>
+
+      <div class="ticker-item" data-i18n="ticker1">Digitálna služba <span>SaaS</span></div>
+      <div class="ticker-item" data-i18n="ticker2">Premium <span>9,90 € / mesiac</span></div>
+      <div class="ticker-item" data-i18n="ticker3">Elite <span>19,90 € / mesiac</span></div>
+      <div class="ticker-item" data-i18n="ticker4">Platby <span>Stripe</span></div>
+      <div class="ticker-item" data-i18n="ticker5">AI spracovanie <span>Claude · Anthropic</span></div>
+      <div class="ticker-item" data-i18n="ticker6">Právo <span>SR / CZ štandard</span></div>
+    </div>
+  </div>
+
+  <main class="page">
+    <section class="section">
+      <div class="section-header">
+        <div class="section-label" data-i18n="ovLabel">Prehľad</div>
+        <h2 class="section-title" data-i18n="ovTitle">Kto službu <em>prevádzkuje</em></h2>
+        <p class="section-intro" data-i18n="ovIntro">
+          Tieto dokumenty sa vzťahujú na online službu SP Tréner, ktorú prevádzkuje spoločnosť Ngroup, s. r. o.
+        </p>
+      </div>
+
+      <div class="grid">
+        <div class="card highlight">
+          <div class="meta-list">
+            <div class="meta-item" data-i18n="meta1">
+              <span class="meta-label">Prevádzkovateľ</span>
+              <div class="meta-value">Ngroup, s. r. o.</div>
+            </div>
+            <div class="meta-item" data-i18n="meta2">
+              <span class="meta-label">Sídlo</span>
+              <div class="meta-value">Dunajská 8, 811 08 Bratislava, Slovenská republika</div>
+            </div>
+            <div class="meta-item" data-i18n="meta3">
+              <span class="meta-label">Služba</span>
+              <div class="meta-value">SP Tréner</div>
+            </div>
+            <div class="meta-item" data-i18n="meta4">
+              <span class="meta-label">Typ služby</span>
+              <div class="meta-value">Digitálny obsah a online SaaS aplikácia</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="meta-list">
+            <div class="meta-item" data-i18n="meta5">
+              <span class="meta-label">AI poskytovateľ</span>
+              <div class="meta-value">Claude · Anthropic</div>
+            </div>
+            <div class="meta-item" data-i18n="meta6">
+              <span class="meta-label">Platobná brána</span>
+              <div class="meta-value">Stripe</div>
+            </div>
+            <div class="meta-item" data-i18n="meta7">
+              <span class="meta-label">IČO</span>
+              <div class="meta-value">53813189</div>
+            </div>
+            <div class="meta-item" data-i18n="meta8">
+              <span class="meta-label">Kontaktný email</span>
+              <div class="meta-value">juraj@jurajkurek.com</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="anchor-nav">
+        <a class="anchor-link" href="#vop" data-i18n="anchor1">Prejsť na VOP →</a>
+        <a class="anchor-link" href="#privacy" data-i18n="anchor2">Prejsť na ochranu údajov →</a>
+      </div>
+    </section>
+
+    <section class="legal-section" id="vop">
+      <div class="section-header">
+        <div class="section-label" data-i18n="vopLabel">Dokument 01</div>
+        <h2 class="section-title" data-i18n="vopTitle">Všeobecné obchodné <em>podmienky</em></h2>
+        <p class="section-intro" data-i18n="vopIntro">
+          Tieto VOP upravujú podmienky používania služby SP Tréner, podmienky predplatného, reklamácie,
+          zodpovednosť a základné pravidlá využívania digitálneho obsahu.
+        </p>
+      </div>
+
+      <div class="legal-block">
+        <div class="legal-item" data-i18n="vop1">
+          <h3>1. Základné ustanovenia</h3>
+          <p>
+            Tieto Všeobecné obchodné podmienky upravujú právne vzťahy medzi prevádzkovateľom služby a používateľom,
+            ktorý využíva online službu „SP Tréner".
+          </p>
+          <p>
+            Prevádzkovateľom služby je <strong>Ngroup, s. r. o.</strong>, so sídlom <strong>Dunajská 8, 811 08 Bratislava, Slovenská republika</strong>,
+            IČO: <strong>53813189</strong>, email: <strong>juraj@jurajkurek.com</strong>.
+          </p>
+        </div>
+
+        <div class="legal-item" data-i18n="vop2">
+          <h3>2. Charakter služby</h3>
+          <p>
+            SP Tréner je digitálny produkt poskytovaný online formou SaaS, určený na prípravu na testy všeobecných študijných predpokladov (VŠP).
+          </p>
+          <ul>
+            <li>simulácie VŠP testov,</li>
+            <li>AI generovanie úloh,</li>
+            <li>analýzu výsledkov testov,</li>
+            <li>personalizované odporúčania a sledovanie progresu,</li>
+            <li>súkromné skupiny (SP Klany) a referral program medzi používateľmi,</li>
+            <li>video kurzy s lekciami, materiálmi na stiahnutie a záverečným testom,</li>
+            <li>darčekové karty (poukazy) na Premium prístup alebo video kurz, ktoré môže zakúpiť a darovať aj iná osoba než príjemca.</li>
+          </ul>
+          <p>
+            Služba nie je oficiálnym produktom žiadneho konkrétneho poskytovateľa testov všeobecných študijných predpokladov
+            a nezaručuje konkrétny výsledok, percentil ani prijatie na vysokú školu.
+          </p>
+        </div>
+
+        <div class="legal-item" data-i18n="vop3">
+          <h3>3. Uzavretie zmluvy</h3>
+          <p>
+            Zmluvný vzťah medzi prevádzkovateľom a používateľom vzniká začatím používania služby alebo zakúpením plateného predplatného.
+            Používateľ používaním služby potvrdzuje, že sa oboznámil s týmito VOP a súhlasí s nimi.
+          </p>
+        </div>
+
+        <div class="legal-item" data-i18n="vop4">
+          <h3>4. Bezplatná verzia</h3>
+          <p>
+            Prevádzkovateľ sprístupňuje používateľovi bezplatnú verziu služby, ktorá zahŕňa najmä 3 plné testové simulácie
+            a základnú analýzu výsledkov, bez potreby zadania platobnej karty.
+          </p>
+          <p>
+            Prevádzkovateľ si vyhradzuje právo rozsah bezplatnej verzie meniť, obmedziť alebo ukončiť bez predchádzajúceho upozornenia.
+          </p>
+        </div>
+
+        <div class="legal-item" data-i18n="vop5">
+          <h3>5. Predplatné a cena</h3>
+          <p>
+            Platený prístup je poskytovaný formou mesačného predplatného v dvoch úrovniach, podľa aktuálnej ponuky uvedenej na webovej stránke:
+          </p>
+          <div class="pricing-table">
+            <div class="pricing-tier">
+              <div class="pricing-tier-name">Free</div>
+              <div class="pricing-tier-price">0 €</div>
+              <div class="pricing-tier-note">3 testy, bez karty</div>
+            </div>
+            <div class="pricing-tier premium">
+              <div class="pricing-tier-name">Premium</div>
+              <div class="pricing-tier-price">9,90 € / mes.</div>
+              <div class="pricing-tier-note">neobmedzené testy, AI generátor, SP Klany</div>
+            </div>
+            <div class="pricing-tier elite">
+              <div class="pricing-tier-name">Elite</div>
+              <div class="pricing-tier-price">19,90 € / mes.</div>
+              <div class="pricing-tier-note">Premium + AI Mentor a ďalšie funkcie</div>
+            </div>
+          </div>
+          <ul>
+            <li>predplatné sa platí vopred za fakturačné obdobie,</li>
+            <li>platby sú spracované prostredníctvom Stripe,</li>
+            <li>prechod medzi úrovňami Premium a Elite je možný kedykoľvek v aplikácii,</li>
+            <li>ceny môžu byť v budúcnosti zmenené, pričom zmena sa nedotkne už zaplateného obdobia.</li>
+          </ul>
+        </div>
+
+        <div class="legal-item" data-i18n="vop6">
+          <h3>6. Automatické obnovenie predplatného</h3>
+          <p>
+            Zakúpením Premium alebo Elite prístupu používateľ berie na vedomie, že predplatné sa automaticky obnovuje
+            na ďalšie fakturačné obdobie, pokiaľ nie je včas zrušené pred jeho obnovením.
+          </p>
+        </div>
+
+        <div class="legal-item" data-i18n="vop7">
+          <h3>7. Zrušenie predplatného</h3>
+          <p>
+            Používateľ môže predplatné zrušiť kedykoľvek cez používateľský účet, zákaznícky portál Stripe alebo kontaktovaním podpory.
+          </p>
+          <p>
+            Po zrušení zostáva prístup k plateným funkciám aktívny do konca už zaplateného obdobia. Po jeho uplynutí sa účet prepne na bezplatný režim,
+            ak je dostupný. Za nevyužité obdobie sa pomerná časť ceny nevracia, ak právny predpis neustanovuje inak.
+          </p>
+        </div>
+
+        <div class="legal-item" data-i18n="vop8">
+          <h3>8. Referral program a bonusové dni</h3>
+          <p>
+            Používateľ s aktívnym Premium alebo Elite prístupom môže získať a zdieľať referral kód. Ak nový používateľ tento kód
+            použije pri kúpe predplatného, obom stranám môže byť pripísaný bonus vo forme dodatočných dní predplatného navyše
+            k zaplatenému obdobiu, podľa aktuálnych podmienok programu uvedených na webovej stránke.
+          </p>
+          <p>
+            Prevádzkovateľ si vyhradzuje právo podmienky referral programu, výšku bonusu aj jeho dostupnosť kedykoľvek zmeniť alebo ukončiť.
+            Bonusové dni nemajú peňažnú hodnotu a nie je možné ich vyplatiť ani zameniť za hotovosť.
+          </p>
+        </div>
+
+        <div class="legal-item" data-i18n="vop9">
+          <h3>9. Digitálny obsah a odstúpenie od zmluvy</h3>
+          <p>
+            Služba predstavuje digitálny obsah dodávaný online bez fyzického nosiča. Používateľ výslovne súhlasí
+            so začatím poskytovania digitálneho obsahu pred uplynutím lehoty na odstúpenie od zmluvy a berie na vedomie,
+            že tým môže v rozsahu dovolenom právnymi predpismi stratiť právo na odstúpenie od zmluvy.
+          </p>
+          <p>
+            Uvedené sa vzťahuje aj na zakúpené video kurzy, ktoré predstavujú samostatný digitálny obsah dodávaný online.
+          </p>
+          <p>
+            Darčeková karta predstavuje jednorazovo zakúpený poukaz na Premium prístup alebo video kurz. Platnosť karty nie je časovo obmedzená
+            a je možné ju uplatniť kedykoľvek zadaním kódu po prihlásení; po uplatnení sa na poskytnutý prístup vzťahujú rovnaké podmienky
+            ako pri jeho priamom zakúpení.
+          </p>
+        </div>
+
+        <div class="legal-item" data-i18n="vop10">
+          <h3>10. Reklamácie a dostupnosť služby</h3>
+          <p>
+            Používateľ je oprávnený reklamovať technické vady služby, najmä dlhodobú nedostupnosť, nefunkčnosť alebo nesprávne účtovanie.
+          </p>
+          <p>
+            Reklamáciu je možné uplatniť na emailovej adrese <strong>juraj@jurajkurek.com</strong>.
+            Prevádzkovateľ vybaví reklamáciu v primeranej lehote a v súlade s platnými právnymi predpismi.
+          </p>
+        </div>
+
+        <div class="legal-item" data-i18n="vop11">
+          <h3>11. AI služby a obmedzenie výstupov</h3>
+          <p>
+            Služba využíva AI technológie poskytované spoločnosťou Anthropic, najmä model Claude,
+            na generovanie úloh a vytváranie odporúčaní po ukončení testu.
+          </p>
+          <p>
+            Používateľ berie na vedomie, že AI výstupy môžu byť nepresné, neúplné alebo nevhodné
+            a slúžia výlučne ako pomocný tréningový nástroj, nie ako odborné, právne, pedagogické alebo garančné stanovisko.
+          </p>
+          <p>
+            Prevádzkovateľ je oprávnený kedykoľvek a bez predchádzajúceho oznámenia zmeniť konkrétny
+            použitý AI model (napríklad na novšiu verziu od toho istého poskytovateľa), a to najmä
+            s cieľom zachovať nepretržitú funkčnosť služby. Táto zmena nemá vplyv na povahu ani účel
+            AI výstupov popísaný vyššie.
+          </p>
+        </div>
+
+        <div class="legal-item" data-i18n="vop12">
+          <h3>12. Zodpovednosť</h3>
+          <p>
+            Prevádzkovateľ nezodpovedá za individuálne výsledky používateľa v testoch, za jeho prijatie na školu,
+            za rozhodnutia vykonané na základe AI odporúčaní ani za výpadky externých služieb tretích strán.
+          </p>
+          <p>
+            Prevádzkovateľ zodpovedá len v rozsahu, ktorý výslovne vyžadujú kogentné právne predpisy.
+          </p>
+        </div>
+
+        <div class="legal-item" data-i18n="vop13">
+          <h3>13. Duševné vlastníctvo</h3>
+          <p>
+            Všetok obsah sprístupnený v rámci služby, vrátane testov, textov, štruktúr úloh, dizajnu, analytických výstupov a softvéru,
+            je chránený právami duševného vlastníctva.
+          </p>
+          <ul>
+            <li>je zakázané obsah kopírovať, šíriť alebo komerčne využívať bez súhlasu,</li>
+            <li>je zakázané sprístupňovať účet tretím osobám, ak to služba výslovne nepovoľuje.</li>
+          </ul>
+        </div>
+
+        <div class="legal-item" data-i18n="vop14">
+          <h3>14. Ukončenie účtu alebo služby</h3>
+          <p>
+            Prevádzkovateľ si vyhradzuje právo obmedziť alebo ukončiť účet používateľa, ak porušuje tieto VOP,
+            používa službu zneužívajúcim spôsobom alebo zasahuje do jej bezpečnosti či funkčnosti.
+          </p>
+          <p>
+            Prevádzkovateľ si zároveň vyhradzuje právo službu meniť, rozširovať, obmedziť alebo ukončiť.
+          </p>
+        </div>
+
+        <div class="legal-item" data-i18n="vop15">
+          <h3>15. Riešenie sporov</h3>
+          <p>
+            Na právne vzťahy sa vzťahuje právny poriadok Slovenskej republiky. Spotrebiteľ má právo obrátiť sa aj na
+            Slovenskú obchodnú inšpekciu alebo využiť alternatívne riešenie spotrebiteľských sporov, ak sú na to splnené zákonné podmienky.
+          </p>
+        </div>
+
+        <div class="legal-item" data-i18n="vop16">
+          <h3>16. Reklama v aplikácii</h3>
+          <p>
+            Súčasťou aplikácie je reklamný priestor spravovaný prostredníctvom platformy ad.sptrener.online, ktorú prevádzkuje ten istý prevádzkovateľ.
+          </p>
+          <p>
+            Bannerová reklama sa zobrazuje všetkým používateľom bez ohľadu na to, či majú aktívne platené predplatné, alebo používajú bezplatnú verziu.
+            Bannery sú umiestnené v spodnej časti obrazovky ako odporúčania a nezasahujú do priebehu testovania ani do ostatných funkcií služby.
+            Používateľ s aktívnym predplatným tak z bannerovej reklamy získava len prípadné akcie, zľavy a ponuky, bez toho, aby mu akokoľvek narúšala používanie služby.
+          </p>
+          <p>
+            Používateľ na bezplatnom pláne má navyše možnosť dobrovoľne si pozrieť krátku video reklamu výmenou za bonusový test nad rámec denného bezplatného limitu.
+            Táto možnosť je vždy dobrovoľná, dostupná len na vyžiadanie a zobrazuje sa výhradne registrovaným používateľom na bezplatnom pláne —
+            používateľom s aktívnym platným predplatným sa neponúka.
+          </p>
+          <p>
+            Prevádzkovateľ nezodpovedá za obsah reklamných kreatív tretích strán; tie pred zverejnením prechádzajú automatizovanou kontrolou obsahu.
+          </p>
+        </div>
+
+        <div class="legal-item" data-i18n="vop17">
+          <h3>17. Osobitné podmienky ponuky po webinári</h3>
+          <p>
+            Prevádzkovateľ príležitostne ponúka jednorazové (neopakované) členstvo Premium alebo Elite na vopred určené
+            obdobie 3, 6 alebo 12 mesiacov, dostupné prostredníctvom osobitnej stránky ponuky nadväzujúcej na bezplatný webinár.
+          </p>
+          <ul>
+            <li>ide o jednorazovú platbu vopred za celé zvolené obdobie — nejde o predplatné a po jeho skončení sa automaticky neobnovuje ani nestrháva ďalšia platba (čl. 6 a čl. 7 sa naň nevzťahujú),</li>
+            <li>zvýhodnená (akciová) cena je dostupná len po registrácii na bezplatný webinár a len počas časovo obmedzeného obdobia po prvej návšteve ponukovej stránky, ktoré je zreteľne zobrazené formou odpočtu,</li>
+            <li>po uplynutí tohto obdobia sa cena mení na bežnú (neakciovú) cenu; členstvo na 3, 6 alebo 12 mesiacov zostáva naďalej dostupné, len bez akciovej zľavy a bez bonusového balíka kurzov viazaného výhradne na túto akciu,</li>
+            <li>počas trvania zaplateného obdobia má používateľ rovnaký rozsah prístupu ako pri zodpovedajúcej úrovni bežného predplatného (čl. 5),</li>
+            <li>po uplynutí zaplateného obdobia prístup k plateným funkciám automaticky zaniká, ak si používateľ nezakúpi ďalšie obdobie alebo neprejde na štandardné predplatné.</li>
+          </ul>
+        </div>
+
+        <div class="legal-item" data-i18n="vop18">
+          <h3>18. Záverečné ustanovenia</h3>
+          <p>
+            Prevádzkovateľ si vyhradzuje právo tieto VOP meniť. Nové znenie je účinné dňom zverejnenia, ak nie je uvedené inak.
+          </p>
+          <p>
+            Posledná aktualizácia: <strong>14.8.2026</strong>.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="legal-section" id="privacy">
+      <div class="section-header">
+        <div class="section-label" data-i18n="privLabel">Dokument 02</div>
+        <h2 class="section-title" data-i18n="privTitle">Zásady ochrany <em>osobných údajov</em></h2>
+        <p class="section-intro" data-i18n="privIntro">
+          Tento dokument vysvetľuje, aké údaje spracúvaš, na aký účel, na akom právnom základe
+          a aké práva majú používatelia služby SP Tréner.
+        </p>
+      </div>
+
+      <div class="legal-block">
+        <div class="legal-item" data-i18n="priv1">
+          <h3>1. Prevádzkovateľ osobných údajov</h3>
+          <p>
+            Prevádzkovateľom osobných údajov je <strong>Ngroup, s. r. o.</strong>, Dunajská 8, 811 08 Bratislava,
+            Slovenská republika, IČO: <strong>53813189</strong>, email: <strong>juraj@jurajkurek.com</strong>.
+          </p>
+        </div>
+
+        <div class="legal-item" data-i18n="priv2">
+          <h3>2. Aké údaje spracúvame</h3>
+          <p>V závislosti od spôsobu používania služby môžeme spracúvať najmä:</p>
+          <ul>
+            <li>identifikačné a kontaktné údaje, napríklad email,</li>
+            <li>prihlasovacie a účtové údaje,</li>
+            <li>odpovede používateľa v testoch a výsledky testov,</li>
+            <li>údaje o používaní služby, histórii aktivít a progres tracking,</li>
+            <li>údaje o referral kóde a jeho použití, ak sa používateľ zapojí do referral programu,</li>
+            <li>údaje o zakúpených kurzoch, postupe v lekciách a súboroch nahraných na vyhodnotenie AI,</li>
+            <li>pri darčekových kartách email kupujúceho, meno príjemcu a sprievodný odkaz (ak ich vyplníš) a email osoby, ktorá kartu uplatní,</li>
+            <li>osobný termín testu (ak si ho v aplikácii nastavíš) a údaje o tréningovej sérii (streak),</li>
+            <li>obsah spätnej väzby/recenzie, ktorú nám zašleš po teste (hodnotenie a text),</li>
+            <li>meno, email a vybraný termín pri registrácii na webinár,</li>
+            <li>ak sa prihlásiš cez Google účet, základné profilové údaje z tohto účtu (meno, email, profilová fotka),</li>
+            <li>obsah komunikácie s AI chatbotom zobrazeným na stránke,</li>
+            <li>technické údaje, napríklad IP adresu, cookies a základné údaje o zariadení.</li>
+          </ul>
+        </div>
+
+        <div class="legal-item" data-i18n="priv3">
+          <h3>3. Účely spracúvania</h3>
+          <p>Osobné údaje spracúvame najmä na tieto účely:</p>
+          <ul>
+            <li>poskytovanie a prevádzka služby,</li>
+            <li>vyhodnocovanie testov a zobrazovanie výsledkov,</li>
+            <li>tvorba personalizovaných odporúčaní a AI Coach správ,</li>
+            <li>správa účtu, predplatného a zákazníckej podpory,</li>
+            <li>prevádzka referral programu a SP Klanov,</li>
+            <li>poskytovanie video kurzov a vyhodnocovanie nahraných úloh pomocou AI,</li>
+            <li>spracovanie nákupu a uplatnenia darčekových kariet,</li>
+            <li>zasielanie automatických pripomienkových emailov (napríklad odpočet do termínu testu, tréningová séria, potvrdenie registrácie na webinár),</li>
+            <li>zber a zobrazovanie recenzií služby,</li>
+            <li>prevádzka AI chatbota na stránke na účely zákazníckej podpory a predaja,</li>
+            <li>zlepšovanie funkčnosti, bezpečnosti a kvality služby,</li>
+            <li>plnenie zákonných povinností.</li>
+          </ul>
+        </div>
+
+        <div class="legal-item" data-i18n="priv4">
+          <h3>4. Právny základ spracúvania</h3>
+          <p>Osobné údaje spracúvame na základe:</p>
+          <ul>
+            <li>plnenia zmluvy alebo vykonania opatrení pred uzavretím zmluvy,</li>
+            <li>oprávneného záujmu, najmä pri zabezpečení prevádzky, ochrany služby a základnej analytiky,</li>
+            <li>súhlasu, ak ide o marketingové emaily, marketingové cookies alebo iné nepovinné spracúvanie.</li>
+          </ul>
+        </div>
+
+        <div class="legal-item" data-i18n="priv5">
+          <h3>5. AI spracovanie údajov</h3>
+          <p>
+            Na generovanie úloh a vytváranie odporúčaní po ukončení testu využívame služby spoločnosti <strong>Anthropic</strong> (Claude).
+          </p>
+          <p>
+            Do AI systémov odosielame len údaje nevyhnutné na vytvorenie výstupu, najmä odpovede v teste,
+            výsledkové dáta a tematické zhrnutie slabých miest. Identifikačné údaje, ako meno alebo email,
+            sa do AI spracovania neodosielajú, pokiaľ to nie je nevyhnutné pre konkrétnu funkcionalitu.
+          </p>
+        </div>
+
+        <div class="legal-item" data-i18n="priv6">
+          <h3>6. Sprostredkovatelia a tretie strany</h3>
+          <p>
+            Pri prevádzke služby využívame externých poskytovateľov, ktorí môžu spracúvať osobné údaje v postavení sprostredkovateľov alebo samostatných prevádzkovateľov podľa povahy služby.
+          </p>
+          <ul>
+            <li><strong>Stripe</strong> – spracovanie platieb a súvisiace fakturačné údaje,</li>
+            <li><strong>Anthropic</strong> – AI spracovanie odpovedí a výsledkov na účel generovania výstupov,</li>
+            <li><strong>Supabase</strong> – hosting databázy, autentifikácia používateľov (vrátane prihlásenia cez Google) a ukladanie väčšiny údajov uvedených v tomto dokumente,</li>
+            <li><strong>Google</strong> – prihlásenie cez Google účet (Google Sign-In) a webová analytika (Google Analytics),</li>
+            <li><strong>Neoworkly</strong> – AI chatbotový widget zobrazený na stránke, ktorý môže spracúvať obsah konverzácie a kontaktné údaje zanechané v chate,</li>
+            <li>poskytovateľ e-mailových služieb (SMTP) – doručovanie transakčných a marketingových e-mailov.</li>
+          </ul>
+        </div>
+
+        <div class="legal-item" data-i18n="priv7">
+          <h3>7. Prenos do tretích krajín</h3>
+          <p>
+            Niektorí poskytovatelia môžu spracúvať údaje mimo Európskeho hospodárskeho priestoru.
+            V takom prípade sa prenos uskutočňuje na základe primeraných ochranných mechanizmov,
+            najmä štandardných zmluvných doložiek alebo iného právne uznaného nástroja.
+          </p>
+        </div>
+
+        <div class="legal-item" data-i18n="priv8">
+          <h3>8. Doba uchovávania údajov</h3>
+          <p>
+            Údaje uchovávame po dobu trvania používateľského účtu a následne po dobu nevyhnutnú na ochranu právnych nárokov,
+            splnenie zákonných povinností alebo interných legitímnych potrieb prevádzkovateľa.
+          </p>
+          <p>
+            Ak nie je potrebná dlhšia lehota, údaje môžu byť uchovávané najviac <strong>12 mesiacov po zrušení účtu</strong>,
+            ak právne predpisy nevyžadujú dlhšie uchovanie.
+          </p>
+        </div>
+
+        <div class="legal-item" data-i18n="priv9">
+          <h3>9. Práva dotknutých osôb</h3>
+          <p>Používateľ má právo:</p>
+          <ul>
+            <li>požadovať prístup k osobným údajom,</li>
+            <li>požadovať opravu nepresných alebo neaktuálnych údajov,</li>
+            <li>požadovať vymazanie údajov, ak sú splnené zákonné podmienky,</li>
+            <li>požadovať obmedzenie spracúvania,</li>
+            <li>namietať proti spracúvaniu v prípadoch ustanovených právnymi predpismi,</li>
+            <li>požadovať prenositeľnosť údajov,</li>
+            <li>podať sťažnosť na Úrad na ochranu osobných údajov Slovenskej republiky.</li>
+          </ul>
+        </div>
+
+        <div class="legal-item" data-i18n="priv10">
+          <h3>10. Cookies</h3>
+          <p>
+            Web môže používať nevyhnutné cookies, analytické cookies a prípadne marketingové cookies.
+            Nepovinné cookies by mali byť používané len na základe platného súhlasu používateľa.
+          </p>
+          <p>
+            Ak používaš analytiku alebo remarketing, samotný text nestačí. Musíš mať aj reálne implementovaný cookie banner a evidenciu súhlasov.
+          </p>
+          <p>
+            Na stránke používame službu <strong>Cookiebot</strong> na správu súhlasov a <strong>Google Analytics</strong> na základnú webovú analytiku — tá beží až po udelení súhlasu.
+          </p>
+        </div>
+
+        <div class="legal-item" data-i18n="priv11">
+          <h3>11. Bezpečnosť</h3>
+          <p>
+            Prevádzkovateľ prijíma primerané technické a organizačné opatrenia na ochranu osobných údajov,
+            najmä obmedzenie prístupu, minimalizáciu údajov, bezpečnostné aktualizácie a ochranu dát pri prenose.
+          </p>
+        </div>
+
+        <div class="legal-item" data-i18n="priv12">
+          <h3>12. Reklama a súvisiace údaje</h3>
+          <p>
+            V súvislosti so zobrazovaním bannerovej reklamy sa spracúvajú anonymné údaje o zobrazeniach a kliknutiach, bez väzby na konkrétnu identitu používateľa.
+          </p>
+          <p>
+            Ak sa používateľ na bezplatnom pláne rozhodne dobrovoľne pozrieť video reklamu výmenou za bonusový test, jeho e-mailová adresa a záznam
+            o zhliadnutí (čas začatia, dokončenie, priznanie bonusu) sa krátkodobo zdieľajú s platformou ad.sptrener.online, ktorú prevádzkuje ten istý
+            prevádzkovateľ, na účel overenia nároku na bonus a zamedzenia zneužitia (napr. opakovaného čerpania nad rámec denného limitu).
+            Tieto údaje sa nepoužívajú na iné marketingové účely.
+          </p>
+        </div>
+
+        <div class="legal-item" data-i18n="priv13">
+          <h3>13. Kontakt</h3>
+          <p>
+            Ak si používateľ želá uplatniť svoje práva alebo má otázky k spracúvaniu osobných údajov,
+            môže kontaktovať prevádzkovateľa na adrese <strong>juraj@jurajkurek.com</strong>.
+          </p>
+        </div>
+
+        <div class="legal-item" data-i18n="priv14">
+          <h3>14. Posledná aktualizácia</h3>
+          <p>
+            Tento dokument bol naposledy aktualizovaný <strong>14.8.2026</strong>.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="footer-cta">
+      <h3 data-i18n="footerCtaTitle">Právny základ má byť<br><em>jasný, nie ukrytý.</em></h3>
+
+      <a href="/" class="btn-primary" data-i18n="footerCtaBtn">Späť na landing page →</a>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-logo">SP TRÉNER © 2026</div>
+    <div class="footer-links">
+      <a href="/app" data-i18n="footLink1">Aplikácia</a>
+      <a href="/blog" data-i18n="footLink2">Blog</a>
+      <a href="mailto:juraj@jurajkurek.com" data-i18n="footLink3">Kontakt</a>
+      <a href="#vop" data-i18n="footLink4">Podmienky</a>
+      <a href="#privacy" data-i18n="footLink5">Súkromie</a>
+    </div>
+  </footer>
+
+<script>
+const TRANSLATIONS = {
+sk: {
+navVop: 'VOP',
+navPrivacy: 'Súkromie',
+navBlog: 'Blog',
+navCta: 'Prejsť do aplikácie →',
+heroEyebrow: 'Právne dokumenty · SP Tréner',
+heroTitle: `Podmienky používania<br>
+      a <em>ochrana</em><br>
+      <span class="volt-text">osobných údajov.</span>`,
+heroSub: `Transparentne, zrozumiteľne a v rovnakom štýle ako zvyšok produktu.
+      Nižšie nájdeš všeobecné obchodné podmienky aj zásady ochrany osobných údajov pre službu SP Tréner.`,
+ticker1: 'Digitálna služba <span>SaaS</span>',
+ticker2: 'Premium <span>9,90 € / mesiac</span>',
+ticker3: 'Elite <span>19,90 € / mesiac</span>',
+ticker4: 'Platby <span>Stripe</span>',
+ticker5: 'AI spracovanie <span>Claude · Anthropic</span>',
+ticker6: 'Právo <span>SR / CZ štandard</span>',
+ovLabel: 'Prehľad',
+ovTitle: 'Kto službu <em>prevádzkuje</em>',
+ovIntro: 'Tieto dokumenty sa vzťahujú na online službu SP Tréner, ktorú prevádzkuje spoločnosť Ngroup, s. r. o.',
+meta1: '<span class="meta-label">Prevádzkovateľ</span><div class="meta-value">Ngroup, s. r. o.</div>',
+meta2: '<span class="meta-label">Sídlo</span><div class="meta-value">Dunajská 8, 811 08 Bratislava, Slovenská republika</div>',
+meta3: '<span class="meta-label">Služba</span><div class="meta-value">SP Tréner</div>',
+meta4: '<span class="meta-label">Typ služby</span><div class="meta-value">Digitálny obsah a online SaaS aplikácia</div>',
+meta5: '<span class="meta-label">AI poskytovateľ</span><div class="meta-value">Claude · Anthropic</div>',
+meta6: '<span class="meta-label">Platobná brána</span><div class="meta-value">Stripe</div>',
+meta7: '<span class="meta-label">IČO</span><div class="meta-value">53813189</div>',
+meta8: '<span class="meta-label">Kontaktný email</span><div class="meta-value">juraj@jurajkurek.com</div>',
+anchor1: 'Prejsť na VOP →',
+anchor2: 'Prejsť na ochranu údajov →',
+vopLabel: 'Dokument 01',
+vopTitle: 'Všeobecné obchodné <em>podmienky</em>',
+vopIntro: `Tieto VOP upravujú podmienky používania služby SP Tréner, podmienky predplatného, reklamácie,
+          zodpovednosť a základné pravidlá využívania digitálneho obsahu.`,
+vop1: `<h3>1. Základné ustanovenia</h3>
+          <p>
+            Tieto Všeobecné obchodné podmienky upravujú právne vzťahy medzi prevádzkovateľom služby a používateľom,
+            ktorý využíva online službu „SP Tréner".
+          </p>
+          <p>
+            Prevádzkovateľom služby je <strong>Ngroup, s. r. o.</strong>, so sídlom <strong>Dunajská 8, 811 08 Bratislava, Slovenská republika</strong>,
+            IČO: <strong>53813189</strong>, email: <strong>juraj@jurajkurek.com</strong>.
+          </p>`,
+vop2: `<h3>2. Charakter služby</h3>
+          <p>
+            SP Tréner je digitálny produkt poskytovaný online formou SaaS, určený na prípravu na testy všeobecných študijných predpokladov (VŠP).
+          </p>
+          <ul>
+            <li>simulácie VŠP testov,</li>
+            <li>AI generovanie úloh,</li>
+            <li>analýzu výsledkov testov,</li>
+            <li>personalizované odporúčania a sledovanie progresu,</li>
+            <li>súkromné skupiny (SP Klany) a referral program medzi používateľmi,</li>
+            <li>video kurzy s lekciami, materiálmi na stiahnutie a záverečným testom,</li>
+            <li>darčekové karty (poukazy) na Premium prístup alebo video kurz, ktoré môže zakúpiť a darovať aj iná osoba než príjemca.</li>
+          </ul>
+          <p>
+            Služba nie je oficiálnym produktom žiadneho konkrétneho poskytovateľa testov všeobecných študijných predpokladov
+            a nezaručuje konkrétny výsledok, percentil ani prijatie na vysokú školu.
+          </p>`,
+vop3: `<h3>3. Uzavretie zmluvy</h3>
+          <p>
+            Zmluvný vzťah medzi prevádzkovateľom a používateľom vzniká začatím používania služby alebo zakúpením plateného predplatného.
+            Používateľ používaním služby potvrdzuje, že sa oboznámil s týmito VOP a súhlasí s nimi.
+          </p>`,
+vop4: `<h3>4. Bezplatná verzia</h3>
+          <p>
+            Prevádzkovateľ sprístupňuje používateľovi bezplatnú verziu služby, ktorá zahŕňa najmä 3 plné testové simulácie
+            a základnú analýzu výsledkov, bez potreby zadania platobnej karty.
+          </p>
+          <p>
+            Prevádzkovateľ si vyhradzuje právo rozsah bezplatnej verzie meniť, obmedziť alebo ukončiť bez predchádzajúceho upozornenia.
+          </p>`,
+vop5: `<h3>5. Predplatné a cena</h3>
+          <p>
+            Platený prístup je poskytovaný formou mesačného predplatného v dvoch úrovniach, podľa aktuálnej ponuky uvedenej na webovej stránke:
+          </p>
+          <div class="pricing-table">
+            <div class="pricing-tier">
+              <div class="pricing-tier-name">Free</div>
+              <div class="pricing-tier-price">0 €</div>
+              <div class="pricing-tier-note">3 testy, bez karty</div>
+            </div>
+            <div class="pricing-tier premium">
+              <div class="pricing-tier-name">Premium</div>
+              <div class="pricing-tier-price">9,90 € / mes.</div>
+              <div class="pricing-tier-note">neobmedzené testy, AI generátor, SP Klany</div>
+            </div>
+            <div class="pricing-tier elite">
+              <div class="pricing-tier-name">Elite</div>
+              <div class="pricing-tier-price">19,90 € / mes.</div>
+              <div class="pricing-tier-note">Premium + AI Mentor a ďalšie funkcie</div>
+            </div>
+          </div>
+          <ul>
+            <li>predplatné sa platí vopred za fakturačné obdobie,</li>
+            <li>platby sú spracované prostredníctvom Stripe,</li>
+            <li>prechod medzi úrovňami Premium a Elite je možný kedykoľvek v aplikácii,</li>
+            <li>ceny môžu byť v budúcnosti zmenené, pričom zmena sa nedotkne už zaplateného obdobia.</li>
+          </ul>`,
+vop6: `<h3>6. Automatické obnovenie predplatného</h3>
+          <p>
+            Zakúpením Premium alebo Elite prístupu používateľ berie na vedomie, že predplatné sa automaticky obnovuje
+            na ďalšie fakturačné obdobie, pokiaľ nie je včas zrušené pred jeho obnovením.
+          </p>`,
+vop7: `<h3>7. Zrušenie predplatného</h3>
+          <p>
+            Používateľ môže predplatné zrušiť kedykoľvek cez používateľský účet, zákaznícky portál Stripe alebo kontaktovaním podpory.
+          </p>
+          <p>
+            Po zrušení zostáva prístup k plateným funkciám aktívny do konca už zaplateného obdobia. Po jeho uplynutí sa účet prepne na bezplatný režim,
+            ak je dostupný. Za nevyužité obdobie sa pomerná časť ceny nevracia, ak právny predpis neustanovuje inak.
+          </p>`,
+vop8: `<h3>8. Referral program a bonusové dni</h3>
+          <p>
+            Používateľ s aktívnym Premium alebo Elite prístupom môže získať a zdieľať referral kód. Ak nový používateľ tento kód
+            použije pri kúpe predplatného, obom stranám môže byť pripísaný bonus vo forme dodatočných dní predplatného navyše
+            k zaplatenému obdobiu, podľa aktuálnych podmienok programu uvedených na webovej stránke.
+          </p>
+          <p>
+            Prevádzkovateľ si vyhradzuje právo podmienky referral programu, výšku bonusu aj jeho dostupnosť kedykoľvek zmeniť alebo ukončiť.
+            Bonusové dni nemajú peňažnú hodnotu a nie je možné ich vyplatiť ani zameniť za hotovosť.
+          </p>`,
+vop9: `<h3>9. Digitálny obsah a odstúpenie od zmluvy</h3>
+          <p>
+            Služba predstavuje digitálny obsah dodávaný online bez fyzického nosiča. Používateľ výslovne súhlasí
+            so začatím poskytovania digitálneho obsahu pred uplynutím lehoty na odstúpenie od zmluvy a berie na vedomie,
+            že tým môže v rozsahu dovolenom právnymi predpismi stratiť právo na odstúpenie od zmluvy.
+          </p>
+          <p>
+            Uvedené sa vzťahuje aj na zakúpené video kurzy, ktoré predstavujú samostatný digitálny obsah dodávaný online.
+          </p>
+          <p>
+            Darčeková karta predstavuje jednorazovo zakúpený poukaz na Premium prístup alebo video kurz. Platnosť karty nie je časovo obmedzená
+            a je možné ju uplatniť kedykoľvek zadaním kódu po prihlásení; po uplatnení sa na poskytnutý prístup vzťahujú rovnaké podmienky
+            ako pri jeho priamom zakúpení.
+          </p>`,
+vop10: `<h3>10. Reklamácie a dostupnosť služby</h3>
+          <p>
+            Používateľ je oprávnený reklamovať technické vady služby, najmä dlhodobú nedostupnosť, nefunkčnosť alebo nesprávne účtovanie.
+          </p>
+          <p>
+            Reklamáciu je možné uplatniť na emailovej adrese <strong>juraj@jurajkurek.com</strong>.
+            Prevádzkovateľ vybaví reklamáciu v primeranej lehote a v súlade s platnými právnymi predpismi.
+          </p>`,
+vop11: `<h3>11. AI služby a obmedzenie výstupov</h3>
+          <p>
+            Služba využíva AI technológie poskytované spoločnosťou Anthropic, najmä model Claude,
+            na generovanie úloh a vytváranie odporúčaní po ukončení testu.
+          </p>
+          <p>
+            Používateľ berie na vedomie, že AI výstupy môžu byť nepresné, neúplné alebo nevhodné
+            a slúžia výlučne ako pomocný tréningový nástroj, nie ako odborné, právne, pedagogické alebo garančné stanovisko.
+          </p>
+          <p>
+            Prevádzkovateľ je oprávnený kedykoľvek a bez predchádzajúceho oznámenia zmeniť konkrétny
+            použitý AI model (napríklad na novšiu verziu od toho istého poskytovateľa), a to najmä
+            s cieľom zachovať nepretržitú funkčnosť služby. Táto zmena nemá vplyv na povahu ani účel
+            AI výstupov popísaný vyššie.
+          </p>`,
+vop12: `<h3>12. Zodpovednosť</h3>
+          <p>
+            Prevádzkovateľ nezodpovedá za individuálne výsledky používateľa v testoch, za jeho prijatie na školu,
+            za rozhodnutia vykonané na základe AI odporúčaní ani za výpadky externých služieb tretích strán.
+          </p>
+          <p>
+            Prevádzkovateľ zodpovedá len v rozsahu, ktorý výslovne vyžadujú kogentné právne predpisy.
+          </p>`,
+vop13: `<h3>13. Duševné vlastníctvo</h3>
+          <p>
+            Všetok obsah sprístupnený v rámci služby, vrátane testov, textov, štruktúr úloh, dizajnu, analytických výstupov a softvéru,
+            je chránený právami duševného vlastníctva.
+          </p>
+          <ul>
+            <li>je zakázané obsah kopírovať, šíriť alebo komerčne využívať bez súhlasu,</li>
+            <li>je zakázané sprístupňovať účet tretím osobám, ak to služba výslovne nepovoľuje.</li>
+          </ul>`,
+vop14: `<h3>14. Ukončenie účtu alebo služby</h3>
+          <p>
+            Prevádzkovateľ si vyhradzuje právo obmedziť alebo ukončiť účet používateľa, ak porušuje tieto VOP,
+            používa službu zneužívajúcim spôsobom alebo zasahuje do jej bezpečnosti či funkčnosti.
+          </p>
+          <p>
+            Prevádzkovateľ si zároveň vyhradzuje právo službu meniť, rozširovať, obmedziť alebo ukončiť.
+          </p>`,
+vop15: `<h3>15. Riešenie sporov</h3>
+          <p>
+            Na právne vzťahy sa vzťahuje právny poriadok Slovenskej republiky. Spotrebiteľ má právo obrátiť sa aj na
+            Slovenskú obchodnú inšpekciu alebo využiť alternatívne riešenie spotrebiteľských sporov, ak sú na to splnené zákonné podmienky.
+          </p>`,
+vop16: `<h3>16. Reklama v aplikácii</h3>
+          <p>
+            Súčasťou aplikácie je reklamný priestor spravovaný prostredníctvom platformy ad.sptrener.online, ktorú prevádzkuje ten istý prevádzkovateľ.
+          </p>
+          <p>
+            Bannerová reklama sa zobrazuje všetkým používateľom bez ohľadu na to, či majú aktívne platené predplatné, alebo používajú bezplatnú verziu.
+            Bannery sú umiestnené v spodnej časti obrazovky ako odporúčania a nezasahujú do priebehu testovania ani do ostatných funkcií služby.
+            Používateľ s aktívnym predplatným tak z bannerovej reklamy získava len prípadné akcie, zľavy a ponuky, bez toho, aby mu akokoľvek narúšala používanie služby.
+          </p>
+          <p>
+            Používateľ na bezplatnom pláne má navyše možnosť dobrovoľne si pozrieť krátku video reklamu výmenou za bonusový test nad rámec denného bezplatného limitu.
+            Táto možnosť je vždy dobrovoľná, dostupná len na vyžiadanie a zobrazuje sa výhradne registrovaným používateľom na bezplatnom pláne —
+            používateľom s aktívnym platným predplatným sa neponúka.
+          </p>
+          <p>
+            Prevádzkovateľ nezodpovedá za obsah reklamných kreatív tretích strán; tie pred zverejnením prechádzajú automatizovanou kontrolou obsahu.
+          </p>`,
+vop17: `<h3>17. Osobitné podmienky ponuky po webinári</h3>
+          <p>
+            Prevádzkovateľ príležitostne ponúka jednorazové (neopakované) členstvo Premium alebo Elite na vopred určené
+            obdobie 3, 6 alebo 12 mesiacov, dostupné prostredníctvom osobitnej stránky ponuky nadväzujúcej na bezplatný webinár.
+          </p>
+          <ul>
+            <li>ide o jednorazovú platbu vopred za celé zvolené obdobie — nejde o predplatné a po jeho skončení sa automaticky neobnovuje ani nestrháva ďalšia platba (čl. 6 a čl. 7 sa naň nevzťahujú),</li>
+            <li>zvýhodnená (akciová) cena je dostupná len po registrácii na bezplatný webinár a len počas časovo obmedzeného obdobia po prvej návšteve ponukovej stránky, ktoré je zreteľne zobrazené formou odpočtu,</li>
+            <li>po uplynutí tohto obdobia sa cena mení na bežnú (neakciovú) cenu; členstvo na 3, 6 alebo 12 mesiacov zostáva naďalej dostupné, len bez akciovej zľavy a bez bonusového balíka kurzov viazaného výhradne na túto akciu,</li>
+            <li>počas trvania zaplateného obdobia má používateľ rovnaký rozsah prístupu ako pri zodpovedajúcej úrovni bežného predplatného (čl. 5),</li>
+            <li>po uplynutí zaplateného obdobia prístup k plateným funkciám automaticky zaniká, ak si používateľ nezakúpi ďalšie obdobie alebo neprejde na štandardné predplatné.</li>
+          </ul>`,
+vop18: `<h3>18. Záverečné ustanovenia</h3>
+          <p>
+            Prevádzkovateľ si vyhradzuje právo tieto VOP meniť. Nové znenie je účinné dňom zverejnenia, ak nie je uvedené inak.
+          </p>
+          <p>
+            Posledná aktualizácia: <strong>14.8.2026</strong>.
+          </p>`,
+privLabel: 'Dokument 02',
+privTitle: 'Zásady ochrany <em>osobných údajov</em>',
+privIntro: `Tento dokument vysvetľuje, aké údaje spracúvaš, na aký účel, na akom právnom základe
+          a aké práva majú používatelia služby SP Tréner.`,
+priv1: `<h3>1. Prevádzkovateľ osobných údajov</h3>
+          <p>
+            Prevádzkovateľom osobných údajov je <strong>Ngroup, s. r. o.</strong>, Dunajská 8, 811 08 Bratislava,
+            Slovenská republika, IČO: <strong>53813189</strong>, email: <strong>juraj@jurajkurek.com</strong>.
+          </p>`,
+priv2: `<h3>2. Aké údaje spracúvame</h3>
+          <p>V závislosti od spôsobu používania služby môžeme spracúvať najmä:</p>
+          <ul>
+            <li>identifikačné a kontaktné údaje, napríklad email,</li>
+            <li>prihlasovacie a účtové údaje,</li>
+            <li>odpovede používateľa v testoch a výsledky testov,</li>
+            <li>údaje o používaní služby, histórii aktivít a progres tracking,</li>
+            <li>údaje o referral kóde a jeho použití, ak sa používateľ zapojí do referral programu,</li>
+            <li>údaje o zakúpených kurzoch, postupe v lekciách a súboroch nahraných na vyhodnotenie AI,</li>
+            <li>pri darčekových kartách email kupujúceho, meno príjemcu a sprievodný odkaz (ak ich vyplníš) a email osoby, ktorá kartu uplatní,</li>
+            <li>osobný termín testu (ak si ho v aplikácii nastavíš) a údaje o tréningovej sérii (streak),</li>
+            <li>obsah spätnej väzby/recenzie, ktorú nám zašleš po teste (hodnotenie a text),</li>
+            <li>meno, email a vybraný termín pri registrácii na webinár,</li>
+            <li>ak sa prihlásiš cez Google účet, základné profilové údaje z tohto účtu (meno, email, profilová fotka),</li>
+            <li>obsah komunikácie s AI chatbotom zobrazeným na stránke,</li>
+            <li>technické údaje, napríklad IP adresu, cookies a základné údaje o zariadení.</li>
+          </ul>`,
+priv3: `<h3>3. Účely spracúvania</h3>
+          <p>Osobné údaje spracúvame najmä na tieto účely:</p>
+          <ul>
+            <li>poskytovanie a prevádzka služby,</li>
+            <li>vyhodnocovanie testov a zobrazovanie výsledkov,</li>
+            <li>tvorba personalizovaných odporúčaní a AI Coach správ,</li>
+            <li>správa účtu, predplatného a zákazníckej podpory,</li>
+            <li>prevádzka referral programu a SP Klanov,</li>
+            <li>poskytovanie video kurzov a vyhodnocovanie nahraných úloh pomocou AI,</li>
+            <li>spracovanie nákupu a uplatnenia darčekových kariet,</li>
+            <li>zasielanie automatických pripomienkových emailov (napríklad odpočet do termínu testu, tréningová séria, potvrdenie registrácie na webinár),</li>
+            <li>zber a zobrazovanie recenzií služby,</li>
+            <li>prevádzka AI chatbota na stránke na účely zákazníckej podpory a predaja,</li>
+            <li>zlepšovanie funkčnosti, bezpečnosti a kvality služby,</li>
+            <li>plnenie zákonných povinností.</li>
+          </ul>`,
+priv4: `<h3>4. Právny základ spracúvania</h3>
+          <p>Osobné údaje spracúvame na základe:</p>
+          <ul>
+            <li>plnenia zmluvy alebo vykonania opatrení pred uzavretím zmluvy,</li>
+            <li>oprávneného záujmu, najmä pri zabezpečení prevádzky, ochrany služby a základnej analytiky,</li>
+            <li>súhlasu, ak ide o marketingové emaily, marketingové cookies alebo iné nepovinné spracúvanie.</li>
+          </ul>`,
+priv5: `<h3>5. AI spracovanie údajov</h3>
+          <p>
+            Na generovanie úloh a vytváranie odporúčaní po ukončení testu využívame služby spoločnosti <strong>Anthropic</strong> (Claude).
+          </p>
+          <p>
+            Do AI systémov odosielame len údaje nevyhnutné na vytvorenie výstupu, najmä odpovede v teste,
+            výsledkové dáta a tematické zhrnutie slabých miest. Identifikačné údaje, ako meno alebo email,
+            sa do AI spracovania neodosielajú, pokiaľ to nie je nevyhnutné pre konkrétnu funkcionalitu.
+          </p>`,
+priv6: `<h3>6. Sprostredkovatelia a tretie strany</h3>
+          <p>
+            Pri prevádzke služby využívame externých poskytovateľov, ktorí môžu spracúvať osobné údaje v postavení sprostredkovateľov alebo samostatných prevádzkovateľov podľa povahy služby.
+          </p>
+          <ul>
+            <li><strong>Stripe</strong> – spracovanie platieb a súvisiace fakturačné údaje,</li>
+            <li><strong>Anthropic</strong> – AI spracovanie odpovedí a výsledkov na účel generovania výstupov,</li>
+            <li><strong>Supabase</strong> – hosting databázy, autentifikácia používateľov (vrátane prihlásenia cez Google) a ukladanie väčšiny údajov uvedených v tomto dokumente,</li>
+            <li><strong>Google</strong> – prihlásenie cez Google účet (Google Sign-In) a webová analytika (Google Analytics),</li>
+            <li><strong>Neoworkly</strong> – AI chatbotový widget zobrazený na stránke, ktorý môže spracúvať obsah konverzácie a kontaktné údaje zanechané v chate,</li>
+            <li>poskytovateľ e-mailových služieb (SMTP) – doručovanie transakčných a marketingových e-mailov.</li>
+          </ul>`,
+priv7: `<h3>7. Prenos do tretích krajín</h3>
+          <p>
+            Niektorí poskytovatelia môžu spracúvať údaje mimo Európskeho hospodárskeho priestoru.
+            V takom prípade sa prenos uskutočňuje na základe primeraných ochranných mechanizmov,
+            najmä štandardných zmluvných doložiek alebo iného právne uznaného nástroja.
+          </p>`,
+priv8: `<h3>8. Doba uchovávania údajov</h3>
+          <p>
+            Údaje uchovávame po dobu trvania používateľského účtu a následne po dobu nevyhnutnú na ochranu právnych nárokov,
+            splnenie zákonných povinností alebo interných legitímnych potrieb prevádzkovateľa.
+          </p>
+          <p>
+            Ak nie je potrebná dlhšia lehota, údaje môžu byť uchovávané najviac <strong>12 mesiacov po zrušení účtu</strong>,
+            ak právne predpisy nevyžadujú dlhšie uchovanie.
+          </p>`,
+priv9: `<h3>9. Práva dotknutých osôb</h3>
+          <p>Používateľ má právo:</p>
+          <ul>
+            <li>požadovať prístup k osobným údajom,</li>
+            <li>požadovať opravu nepresných alebo neaktuálnych údajov,</li>
+            <li>požadovať vymazanie údajov, ak sú splnené zákonné podmienky,</li>
+            <li>požadovať obmedzenie spracúvania,</li>
+            <li>namietať proti spracúvaniu v prípadoch ustanovených právnymi predpismi,</li>
+            <li>požadovať prenositeľnosť údajov,</li>
+            <li>podať sťažnosť na Úrad na ochranu osobných údajov Slovenskej republiky.</li>
+          </ul>`,
+priv10: `<h3>10. Cookies</h3>
+          <p>
+            Web môže používať nevyhnutné cookies, analytické cookies a prípadne marketingové cookies.
+            Nepovinné cookies by mali byť používané len na základe platného súhlasu používateľa.
+          </p>
+          <p>
+            Ak používaš analytiku alebo remarketing, samotný text nestačí. Musíš mať aj reálne implementovaný cookie banner a evidenciu súhlasov.
+          </p>
+          <p>
+            Na stránke používame službu <strong>Cookiebot</strong> na správu súhlasov a <strong>Google Analytics</strong> na základnú webovú analytiku — tá beží až po udelení súhlasu.
+          </p>`,
+priv11: `<h3>11. Bezpečnosť</h3>
+          <p>
+            Prevádzkovateľ prijíma primerané technické a organizačné opatrenia na ochranu osobných údajov,
+            najmä obmedzenie prístupu, minimalizáciu údajov, bezpečnostné aktualizácie a ochranu dát pri prenose.
+          </p>`,
+priv12: `<h3>12. Reklama a súvisiace údaje</h3>
+          <p>
+            V súvislosti so zobrazovaním bannerovej reklamy sa spracúvajú anonymné údaje o zobrazeniach a kliknutiach, bez väzby na konkrétnu identitu používateľa.
+          </p>
+          <p>
+            Ak sa používateľ na bezplatnom pláne rozhodne dobrovoľne pozrieť video reklamu výmenou za bonusový test, jeho e-mailová adresa a záznam
+            o zhliadnutí (čas začatia, dokončenie, priznanie bonusu) sa krátkodobo zdieľajú s platformou ad.sptrener.online, ktorú prevádzkuje ten istý
+            prevádzkovateľ, na účel overenia nároku na bonus a zamedzenia zneužitia (napr. opakovaného čerpania nad rámec denného limitu).
+            Tieto údaje sa nepoužívajú na iné marketingové účely.
+          </p>`,
+priv13: `<h3>13. Kontakt</h3>
+          <p>
+            Ak si používateľ želá uplatniť svoje práva alebo má otázky k spracúvaniu osobných údajov,
+            môže kontaktovať prevádzkovateľa na adrese <strong>juraj@jurajkurek.com</strong>.
+          </p>`,
+priv14: `<h3>14. Posledná aktualizácia</h3>
+          <p>
+            Tento dokument bol naposledy aktualizovaný <strong>14.8.2026</strong>.
+          </p>`,
+footerCtaTitle: 'Právny základ má byť<br><em>jasný, nie ukrytý.</em>',
+footerCtaBtn: 'Späť na landing page →',
+footLink1: 'Aplikácia',
+footLink2: 'Blog',
+footLink3: 'Kontakt',
+footLink4: 'Podmienky',
+footLink5: 'Súkromie'
+},
+cz: {
+navVop: 'VOP',
+navPrivacy: 'Soukromí',
+navBlog: 'Blog',
+navCta: 'Přejít do aplikace →',
+heroEyebrow: 'Právní dokumenty · SP Tréner',
+heroTitle: `Podmínky používání<br>
+      a <em>ochrana</em><br>
+      <span class="volt-text">osobních údajů.</span>`,
+heroSub: `Transparentně, srozumitelně a ve stejném stylu jako zbytek produktu.
+      Níže najdeš všeobecné obchodní podmínky i zásady ochrany osobních údajů pro službu SP Tréner.
+      Tento český překlad je informativní; v případě rozporu platí slovenské znění.`,
+ticker1: 'Digitální služba <span>SaaS</span>',
+ticker2: 'Premium <span>9,90 € / měsíc</span>',
+ticker3: 'Elite <span>19,90 € / měsíc</span>',
+ticker4: 'Platby <span>Stripe</span>',
+ticker5: 'AI zpracování <span>Claude · Anthropic</span>',
+ticker6: 'Právo <span>SR / CZ standard</span>',
+ovLabel: 'Přehled',
+ovTitle: 'Kdo službu <em>provozuje</em>',
+ovIntro: 'Tyto dokumenty se vztahují na online službu SP Tréner, kterou provozuje společnost Ngroup, s. r. o.',
+meta1: '<span class="meta-label">Provozovatel</span><div class="meta-value">Ngroup, s. r. o.</div>',
+meta2: '<span class="meta-label">Sídlo</span><div class="meta-value">Dunajská 8, 811 08 Bratislava, Slovenská republika</div>',
+meta3: '<span class="meta-label">Služba</span><div class="meta-value">SP Tréner</div>',
+meta4: '<span class="meta-label">Typ služby</span><div class="meta-value">Digitální obsah a online SaaS aplikace</div>',
+meta5: '<span class="meta-label">AI poskytovatel</span><div class="meta-value">Claude · Anthropic</div>',
+meta6: '<span class="meta-label">Platební brána</span><div class="meta-value">Stripe</div>',
+meta7: '<span class="meta-label">IČO</span><div class="meta-value">53813189</div>',
+meta8: '<span class="meta-label">Kontaktní e-mail</span><div class="meta-value">juraj@jurajkurek.com</div>',
+anchor1: 'Přejít na VOP →',
+anchor2: 'Přejít na ochranu údajů →',
+vopLabel: 'Dokument 01',
+vopTitle: 'Všeobecné obchodní <em>podmínky</em>',
+vopIntro: `Tyto VOP upravují podmínky používání služby SP Tréner, podmínky předplatného, reklamace,
+          odpovědnost a základní pravidla využívání digitálního obsahu.`,
+vop1: `<h3>1. Základní ustanovení</h3>
+          <p>
+            Tyto Všeobecné obchodní podmínky upravují právní vztahy mezi provozovatelem služby a uživatelem,
+            který využívá online službu „SP Tréner".
+          </p>
+          <p>
+            Provozovatelem služby je <strong>Ngroup, s. r. o.</strong>, se sídlem <strong>Dunajská 8, 811 08 Bratislava, Slovenská republika</strong>,
+            IČO: <strong>53813189</strong>, e-mail: <strong>juraj@jurajkurek.com</strong>.
+          </p>`,
+vop2: `<h3>2. Charakter služby</h3>
+          <p>
+            SP Tréner je digitální produkt poskytovaný online formou SaaS, určený k přípravě na testy všeobecných studijních předpokladů (VŠP).
+          </p>
+          <ul>
+            <li>simulace VŠP testů,</li>
+            <li>AI generování úloh,</li>
+            <li>analýzu výsledků testů,</li>
+            <li>personalizovaná doporučení a sledování progresu,</li>
+            <li>soukromé skupiny (SP Klany) a referral program mezi uživateli,</li>
+            <li>video kurzy s lekcemi, materiály ke stažení a závěrečným testem,</li>
+            <li>dárkové karty (poukazy) na Premium přístup nebo video kurz, které může zakoupit a darovat i jiná osoba než příjemce.</li>
+          </ul>
+          <p>
+            Služba není oficiálním produktem žádného konkrétního poskytovatele testů všeobecných studijních předpokladů
+            a nezaručuje konkrétní výsledek, percentil ani přijetí na vysokou školu.
+          </p>`,
+vop3: `<h3>3. Uzavření smlouvy</h3>
+          <p>
+            Smluvní vztah mezi provozovatelem a uživatelem vzniká zahájením používání služby nebo zakoupením placeného předplatného.
+            Uživatel používáním služby potvrzuje, že se seznámil s těmito VOP a souhlasí s nimi.
+          </p>`,
+vop4: `<h3>4. Bezplatná verze</h3>
+          <p>
+            Provozovatel zpřístupňuje uživateli bezplatnou verzi služby, která zahrnuje zejména 3 plné testové simulace
+            a základní analýzu výsledků, bez nutnosti zadání platební karty.
+          </p>
+          <p>
+            Provozovatel si vyhrazuje právo rozsah bezplatné verze měnit, omezit nebo ukončit bez předchozího upozornění.
+          </p>`,
+vop5: `<h3>5. Předplatné a cena</h3>
+          <p>
+            Placený přístup je poskytován formou měsíčního předplatného ve dvou úrovních, podle aktuální nabídky uvedené na webové stránce:
+          </p>
+          <div class="pricing-table">
+            <div class="pricing-tier">
+              <div class="pricing-tier-name">Free</div>
+              <div class="pricing-tier-price">0 €</div>
+              <div class="pricing-tier-note">3 testy, bez karty</div>
+            </div>
+            <div class="pricing-tier premium">
+              <div class="pricing-tier-name">Premium</div>
+              <div class="pricing-tier-price">9,90 € / měs.</div>
+              <div class="pricing-tier-note">neomezené testy, AI generátor, SP Klany</div>
+            </div>
+            <div class="pricing-tier elite">
+              <div class="pricing-tier-name">Elite</div>
+              <div class="pricing-tier-price">19,90 € / měs.</div>
+              <div class="pricing-tier-note">Premium + AI Mentor a další funkce</div>
+            </div>
+          </div>
+          <ul>
+            <li>předplatné se platí předem za fakturační období,</li>
+            <li>platby jsou zpracovány prostřednictvím Stripe,</li>
+            <li>přechod mezi úrovněmi Premium a Elite je možný kdykoliv v aplikaci,</li>
+            <li>ceny mohou být v budoucnu změněny, přičemž změna se nedotkne již zaplaceného období.</li>
+          </ul>`,
+vop6: `<h3>6. Automatické obnovení předplatného</h3>
+          <p>
+            Zakoupením Premium nebo Elite přístupu uživatel bere na vědomí, že předplatné se automaticky obnovuje
+            na další fakturační období, pokud není včas zrušeno před jeho obnovením.
+          </p>`,
+vop7: `<h3>7. Zrušení předplatného</h3>
+          <p>
+            Uživatel může předplatné zrušit kdykoliv přes uživatelský účet, zákaznický portál Stripe nebo kontaktováním podpory.
+          </p>
+          <p>
+            Po zrušení zůstává přístup k placeným funkcím aktivní do konce již zaplaceného období. Po jeho uplynutí se účet přepne do bezplatného režimu,
+            pokud je dostupný. Za nevyužité období se poměrná část ceny nevrací, pokud právní předpis nestanoví jinak.
+          </p>`,
+vop8: `<h3>8. Referral program a bonusové dny</h3>
+          <p>
+            Uživatel s aktivním Premium nebo Elite přístupem může získat a sdílet referral kód. Pokud nový uživatel tento kód
+            použije při koupi předplatného, oběma stranám může být připsán bonus ve formě dodatečných dní předplatného navíc
+            k zaplacenému období, podle aktuálních podmínek programu uvedených na webové stránce.
+          </p>
+          <p>
+            Provozovatel si vyhrazuje právo podmínky referral programu, výši bonusu i jeho dostupnost kdykoliv změnit nebo ukončit.
+            Bonusové dny nemají peněžní hodnotu a nelze je vyplatit ani vyměnit za hotovost.
+          </p>`,
+vop9: `<h3>9. Digitální obsah a odstoupení od smlouvy</h3>
+          <p>
+            Služba představuje digitální obsah dodávaný online bez fyzického nosiče. Uživatel výslovně souhlasí
+            se zahájením poskytování digitálního obsahu před uplynutím lhůty na odstoupení od smlouvy a bere na vědomí,
+            že tím může v rozsahu dovoleném právními předpisy ztratit právo na odstoupení od smlouvy.
+          </p>
+          <p>
+            Uvedené se vztahuje i na zakoupené video kurzy, které představují samostatný digitální obsah dodávaný online.
+          </p>
+          <p>
+            Dárková karta představuje jednorázově zakoupený poukaz na Premium přístup nebo video kurz. Platnost karty není časově omezena
+            a je možné ji uplatnit kdykoli zadáním kódu po přihlášení; po uplatnění se na poskytnutý přístup vztahují stejné podmínky
+            jako při jeho přímém zakoupení.
+          </p>`,
+vop10: `<h3>10. Reklamace a dostupnost služby</h3>
+          <p>
+            Uživatel je oprávněn reklamovat technické vady služby, zejména dlouhodobou nedostupnost, nefunkčnost nebo nesprávné účtování.
+          </p>
+          <p>
+            Reklamaci lze uplatnit na e-mailové adrese <strong>juraj@jurajkurek.com</strong>.
+            Provozovatel vyřídí reklamaci v přiměřené lhůtě a v souladu s platnými právními předpisy.
+          </p>`,
+vop11: `<h3>11. AI služby a omezení výstupů</h3>
+          <p>
+            Služba využívá AI technologie poskytované společností Anthropic, zejména model Claude,
+            ke generování úloh a vytváření doporučení po ukončení testu.
+          </p>
+          <p>
+            Uživatel bere na vědomí, že AI výstupy mohou být nepřesné, neúplné nebo nevhodné
+            a slouží výhradně jako pomocný tréninkový nástroj, ne jako odborné, právní, pedagogické nebo garanční stanovisko.
+          </p>
+          <p>
+            Provozovatel je oprávněn kdykoli a bez předchozího oznámení změnit konkrétní použitý
+            AI model (například na novější verzi od stejného poskytovatele), zejména za účelem
+            zachování nepřetržité funkčnosti služby. Tato změna nemá vliv na povahu ani účel AI
+            výstupů popsaný výše.
+          </p>`,
+vop12: `<h3>12. Odpovědnost</h3>
+          <p>
+            Provozovatel neodpovídá za individuální výsledky uživatele v testech, za jeho přijetí na školu,
+            za rozhodnutí učiněná na základě AI doporučení ani za výpadky externích služeb třetích stran.
+          </p>
+          <p>
+            Provozovatel odpovídá jen v rozsahu, který výslovně vyžadují kogentní právní předpisy.
+          </p>`,
+vop13: `<h3>13. Duševní vlastnictví</h3>
+          <p>
+            Veškerý obsah zpřístupněný v rámci služby, včetně testů, textů, struktur úloh, designu, analytických výstupů a softwaru,
+            je chráněn právy duševního vlastnictví.
+          </p>
+          <ul>
+            <li>je zakázáno obsah kopírovat, šířit nebo komerčně využívat bez souhlasu,</li>
+            <li>je zakázáno zpřístupňovat účet třetím osobám, pokud to služba výslovně nepovoluje.</li>
+          </ul>`,
+vop14: `<h3>14. Ukončení účtu nebo služby</h3>
+          <p>
+            Provozovatel si vyhrazuje právo omezit nebo ukončit účet uživatele, pokud porušuje tyto VOP,
+            používá službu zneužívajícím způsobem nebo zasahuje do její bezpečnosti či funkčnosti.
+          </p>
+          <p>
+            Provozovatel si zároveň vyhrazuje právo službu měnit, rozšiřovat, omezit nebo ukončit.
+          </p>`,
+vop15: `<h3>15. Řešení sporů</h3>
+          <p>
+            Na právní vztahy se vztahuje právní řád Slovenské republiky. Spotřebitel má právo obrátit se i na
+            Slovenskou obchodní inspekci nebo využít alternativní řešení spotřebitelských sporů, pokud jsou pro to splněny zákonné podmínky.
+          </p>`,
+vop16: `<h3>16. Reklama v aplikaci</h3>
+          <p>
+            Součástí aplikace je reklamní prostor spravovaný prostřednictvím platformy ad.sptrener.online, kterou provozuje tentýž provozovatel.
+          </p>
+          <p>
+            Bannerová reklama se zobrazuje všem uživatelům bez ohledu na to, zda mají aktivní placené předplatné, nebo používají bezplatnou verzi.
+            Bannery jsou umístěny ve spodní části obrazovky jako doporučení a nezasahují do průběhu testování ani do ostatních funkcí služby.
+            Uživatel s aktivním předplatným tak z bannerové reklamy získává jen případné akce, slevy a nabídky, aniž by mu jakkoliv narušovala používání služby.
+          </p>
+          <p>
+            Uživatel na bezplatném plánu má navíc možnost dobrovolně zhlédnout krátkou video reklamu výměnou za bonusový test nad rámec denního bezplatného limitu.
+            Tato možnost je vždy dobrovolná, dostupná jen na vyžádání a zobrazuje se výhradně registrovaným uživatelům na bezplatném plánu —
+            uživatelům s aktivním platným předplatným se nenabízí.
+          </p>
+          <p>
+            Provozovatel neodpovídá za obsah reklamních kreativ třetích stran; ty před zveřejněním procházejí automatizovanou kontrolou obsahu.
+          </p>`,
+vop17: `<h3>17. Zvláštní podmínky nabídky po webináři</h3>
+          <p>
+            Provozovatel příležitostně nabízí jednorázové (neopakované) členství Premium nebo Elite na předem určené
+            období 3, 6 nebo 12 měsíců, dostupné prostřednictvím zvláštní nabídkové stránky navazující na bezplatný webinář.
+          </p>
+          <ul>
+            <li>jde o jednorázovou platbu předem za celé zvolené období — nejde o předplatné a po jeho skončení se automaticky neobnovuje ani nestrhává další platba (čl. 6 a čl. 7 se na něj nevztahují),</li>
+            <li>zvýhodněná (akční) cena je dostupná jen po registraci na bezplatný webinář a jen po časově omezenou dobu po první návštěvě nabídkové stránky, která je zřetelně zobrazena formou odpočtu,</li>
+            <li>po uplynutí této doby se cena mění na běžnou (neakční) cenu; členství na 3, 6 nebo 12 měsíců zůstává nadále dostupné, jen bez akční slevy a bez bonusového balíčku kurzů vázaného výhradně na tuto akci,</li>
+            <li>po dobu trvání zaplaceného období má uživatel stejný rozsah přístupu jako u odpovídající úrovně běžného předplatného (čl. 5),</li>
+            <li>po uplynutí zaplaceného období přístup k placeným funkcím automaticky zaniká, pokud si uživatel nezakoupí další období nebo nepřejde na standardní předplatné.</li>
+          </ul>`,
+vop18: `<h3>18. Závěrečná ustanovení</h3>
+          <p>
+            Provozovatel si vyhrazuje právo tyto VOP měnit. Nové znění je účinné dnem zveřejnění, pokud není uvedeno jinak.
+          </p>
+          <p>
+            Poslední aktualizace: <strong>14.8.2026</strong>.
+          </p>`,
+privLabel: 'Dokument 02',
+privTitle: 'Zásady ochrany <em>osobních údajů</em>',
+privIntro: `Tento dokument vysvětluje, jaké údaje zpracováváme, za jakým účelem, na jakém právním základě
+          a jaká práva mají uživatelé služby SP Tréner.`,
+priv1: `<h3>1. Provozovatel osobních údajů</h3>
+          <p>
+            Provozovatelem osobních údajů je <strong>Ngroup, s. r. o.</strong>, Dunajská 8, 811 08 Bratislava,
+            Slovenská republika, IČO: <strong>53813189</strong>, e-mail: <strong>juraj@jurajkurek.com</strong>.
+          </p>`,
+priv2: `<h3>2. Jaké údaje zpracováváme</h3>
+          <p>V závislosti na způsobu používání služby můžeme zpracovávat zejména:</p>
+          <ul>
+            <li>identifikační a kontaktní údaje, například e-mail,</li>
+            <li>přihlašovací a účetní údaje,</li>
+            <li>odpovědi uživatele v testech a výsledky testů,</li>
+            <li>údaje o používání služby, historii aktivit a progres tracking,</li>
+            <li>údaje o referral kódu a jeho použití, pokud se uživatel zapojí do referral programu,</li>
+            <li>údaje o zakoupených kurzech, postupu v lekcích a souborech nahraných k vyhodnocení AI,</li>
+            <li>u dárkových karet e-mail kupujícího, jméno příjemce a doprovodný vzkaz (pokud je vyplníš) a e-mail osoby, která kartu uplatní,</li>
+            <li>osobní termín testu (pokud si ho v aplikaci nastavíš) a údaje o tréninkové sérii (streak),</li>
+            <li>obsah zpětné vazby/recenze, kterou nám zašleš po testu (hodnocení a text),</li>
+            <li>jméno, e-mail a vybraný termín při registraci na webinář,</li>
+            <li>pokud se přihlásíš přes Google účet, základní profilové údaje z tohoto účtu (jméno, e-mail, profilová fotka),</li>
+            <li>obsah komunikace s AI chatbotem zobrazeným na stránce,</li>
+            <li>technické údaje, například IP adresu, cookies a základní údaje o zařízení.</li>
+          </ul>`,
+priv3: `<h3>3. Účely zpracování</h3>
+          <p>Osobní údaje zpracováváme zejména k těmto účelům:</p>
+          <ul>
+            <li>poskytování a provoz služby,</li>
+            <li>vyhodnocování testů a zobrazování výsledků,</li>
+            <li>tvorba personalizovaných doporučení a AI Coach zpráv,</li>
+            <li>správa účtu, předplatného a zákaznické podpory,</li>
+            <li>provoz referral programu a SP Klanů,</li>
+            <li>poskytování video kurzů a vyhodnocování nahraných úloh pomocí AI,</li>
+            <li>zpracování nákupu a uplatnění dárkových karet,</li>
+            <li>zasílání automatických připomínkových e-mailů (například odpočet do termínu testu, tréninková série, potvrzení registrace na webinář),</li>
+            <li>sběr a zobrazování recenzí služby,</li>
+            <li>provoz AI chatbota na stránce za účelem zákaznické podpory a prodeje,</li>
+            <li>zlepšování funkčnosti, bezpečnosti a kvality služby,</li>
+            <li>plnění zákonných povinností.</li>
+          </ul>`,
+priv4: `<h3>4. Právní základ zpracování</h3>
+          <p>Osobní údaje zpracováváme na základě:</p>
+          <ul>
+            <li>plnění smlouvy nebo provedení opatření před uzavřením smlouvy,</li>
+            <li>oprávněného zájmu, zejména při zajištění provozu, ochrany služby a základní analytiky,</li>
+            <li>souhlasu, jde-li o marketingové e-maily, marketingové cookies nebo jiné nepovinné zpracování.</li>
+          </ul>`,
+priv5: `<h3>5. AI zpracování údajů</h3>
+          <p>
+            Ke generování úloh a vytváření doporučení po ukončení testu využíváme služby společnosti <strong>Anthropic</strong> (Claude).
+          </p>
+          <p>
+            Do AI systémů odesíláme jen údaje nezbytné k vytvoření výstupu, zejména odpovědi v testu,
+            výsledková data a tematické shrnutí slabých míst. Identifikační údaje, jako jméno nebo e-mail,
+            se do AI zpracování neodesílají, pokud to není nezbytné pro konkrétní funkcionalitu.
+          </p>`,
+priv6: `<h3>6. Zprostředkovatelé a třetí strany</h3>
+          <p>
+            Při provozu služby využíváme externí poskytovatele, kteří mohou zpracovávat osobní údaje v postavení zprostředkovatelů nebo samostatných provozovatelů podle povahy služby.
+          </p>
+          <ul>
+            <li><strong>Stripe</strong> – zpracování plateb a související fakturační údaje,</li>
+            <li><strong>Anthropic</strong> – AI zpracování odpovědí a výsledků za účelem generování výstupů,</li>
+            <li><strong>Supabase</strong> – hosting databáze, autentizace uživatelů (včetně přihlášení přes Google) a ukládání většiny údajů uvedených v tomto dokumentu,</li>
+            <li><strong>Google</strong> – přihlášení přes Google účet (Google Sign-In) a webová analytika (Google Analytics),</li>
+            <li><strong>Neoworkly</strong> – AI chatbotový widget zobrazený na stránce, který může zpracovávat obsah konverzace a kontaktní údaje zanechané v chatu,</li>
+            <li>poskytovatel e-mailových služeb (SMTP) – doručování transakčních a marketingových e-mailů.</li>
+          </ul>`,
+priv7: `<h3>7. Přenos do třetích zemí</h3>
+          <p>
+            Někteří poskytovatelé mohou zpracovávat údaje mimo Evropský hospodářský prostor.
+            V takovém případě se přenos uskutečňuje na základě přiměřených ochranných mechanismů,
+            zejména standardních smluvních doložek nebo jiného právně uznaného nástroje.
+          </p>`,
+priv8: `<h3>8. Doba uchovávání údajů</h3>
+          <p>
+            Údaje uchováváme po dobu trvání uživatelského účtu a následně po dobu nezbytnou k ochraně právních nároků,
+            splnění zákonných povinností nebo interních legitimních potřeb provozovatele.
+          </p>
+          <p>
+            Není-li potřeba delší lhůta, údaje mohou být uchovávány nejdéle <strong>12 měsíců po zrušení účtu</strong>,
+            pokud právní předpisy nevyžadují delší uchování.
+          </p>`,
+priv9: `<h3>9. Práva dotčených osob</h3>
+          <p>Uživatel má právo:</p>
+          <ul>
+            <li>požadovat přístup k osobním údajům,</li>
+            <li>požadovat opravu nepřesných nebo neaktuálních údajů,</li>
+            <li>požadovat výmaz údajů, jsou-li splněny zákonné podmínky,</li>
+            <li>požadovat omezení zpracování,</li>
+            <li>namítat proti zpracování v případech stanovených právními předpisy,</li>
+            <li>požadovat přenositelnost údajů,</li>
+            <li>podat stížnost u Úřadu na ochranu osobních údajů Slovenské republiky.</li>
+          </ul>`,
+priv10: `<h3>10. Cookies</h3>
+          <p>
+            Web může používat nezbytné cookies, analytické cookies a případně marketingové cookies.
+            Nepovinné cookies by měly být používány jen na základě platného souhlasu uživatele.
+          </p>
+          <p>
+            Pokud používáš analytiku nebo remarketing, samotný text nestačí. Musíš mít i reálně implementovaný cookie banner a evidenci souhlasů.
+          </p>
+          <p>
+            Na stránce používáme službu <strong>Cookiebot</strong> ke správě souhlasů a <strong>Google Analytics</strong> k základní webové analytice — ta běží až po udělení souhlasu.
+          </p>`,
+priv11: `<h3>11. Bezpečnost</h3>
+          <p>
+            Provozovatel přijímá přiměřená technická a organizační opatření k ochraně osobních údajů,
+            zejména omezení přístupu, minimalizaci údajů, bezpečnostní aktualizace a ochranu dat při přenosu.
+          </p>`,
+priv12: `<h3>12. Reklama a související údaje</h3>
+          <p>
+            V souvislosti se zobrazováním bannerové reklamy se zpracovávají anonymní údaje o zobrazeních a kliknutích, bez vazby na konkrétní identitu uživatele.
+          </p>
+          <p>
+            Pokud se uživatel na bezplatném plánu rozhodne dobrovolně zhlédnout video reklamu výměnou za bonusový test, jeho e-mailová adresa a záznam
+            o zhlédnutí (čas zahájení, dokončení, přiznání bonusu) se krátkodobě sdílejí s platformou ad.sptrener.online, kterou provozuje tentýž
+            provozovatel, za účelem ověření nároku na bonus a zamezení zneužití (např. opakovaného čerpání nad rámec denního limitu).
+            Tyto údaje se nepoužívají k jiným marketingovým účelům.
+          </p>`,
+priv13: `<h3>13. Kontakt</h3>
+          <p>
+            Pokud si uživatel přeje uplatnit svá práva nebo má otázky ke zpracování osobních údajů,
+            může kontaktovat provozovatele na adrese <strong>juraj@jurajkurek.com</strong>.
+          </p>`,
+priv14: `<h3>14. Poslední aktualizace</h3>
+          <p>
+            Tento dokument byl naposledy aktualizován <strong>14.8.2026</strong>.
+          </p>`,
+footerCtaTitle: 'Právní základ má být<br><em>jasný, ne skrytý.</em>',
+footerCtaBtn: 'Zpět na landing page →',
+footLink1: 'Aplikace',
+footLink2: 'Blog',
+footLink3: 'Kontakt',
+footLink4: 'Podmínky',
+footLink5: 'Soukromí'
+}
+};
+
+let currentLang = localStorage.getItem('vsp_lang') || 'sk';
+
+function t(key) {
+  return TRANSLATIONS[currentLang]?.[key] ?? TRANSLATIONS.sk?.[key] ?? key;
+}
+
+function applyTranslations() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    el.innerHTML = t(el.dataset.i18n);
+  });
+}
+
+function setLang(lang) {
+  currentLang = lang;
+  localStorage.setItem('vsp_lang', lang);
+  document.getElementById('langSK').classList.toggle('active', lang === 'sk');
+  document.getElementById('langCZ').classList.toggle('active', lang === 'cz');
+  applyTranslations();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  setLang(currentLang);
+});
+</script>
+</body>
+</html>

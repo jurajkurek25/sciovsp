@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <script type='text/javascript' src='https://sptrener.online/jx0drgqv82XPXY7oLkZfwCXMBPT_oiizBVCBsf6uChkVdizUUErzV9iLwVPAYEPneH65LJ-m12-eUg4IWPQoxLossfg-C9ABad6ZfM2kgMti3tQZKgTfjH5lYA0vGWArbOwU4fthY9dlt1CxIpZDgT1SRC9OY5izLNH-2SM6K4IsNgVpTVYDKpIkSqx7KPvWUHYl1KaHR00Jd1m3KXzo9ofJ4j6F5f_exdaJR9vmdxFtIxKb8jjMQsE5B0IYXkCAqkxSsv5FIATyFbE5aAWjjHyKbA4ZaTA14wJ8pcpgpkPNltcg_yt8sOJjlu7ClUBYR1HCBdPRHb3JimiVJj7KPIISzWwCD5dqMpi8Pq9Y7NMx8ab4Mgvci_ycfZIQy4FQoq_Med2Gp_E96FSVa65qIju0gegihDI8kFqnswfiImBs4o0wwRV8kArNdpmKMYg-w9K1PIWTm_mqyw'></script><script id="Cookiebot" src="https://consent.cookiebot.com/uc.js" data-cbid="082b4b18-7f50-41b6-b374-be0c015a5fe0" type="text/javascript" async></script>
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-SHRPWTXJP2"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-SHRPWTXJP2');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Darčeková karta — SP Tréner</title>
+<meta name="description" content="Daruj prístup k SP Tréner — Premium na vybranú dĺžku alebo 1 online kurz podľa vlastného výberu.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@300;400;500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
+<style>
+:root{--black:#08080d;--black2:#0f0f18;--black3:#15151f;--border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.13);--text:#eeeef5;--text2:#a1a1bc;--text3:#5c5c7a;--volt:#c8ff00;--purple:#7c5cff;--purple2:#b09bff;--red:#ff3f5e;--green:#36e896;--serif:'Instrument Serif',Georgia,serif;--mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--black);color:var(--text);font-family:var(--sans);line-height:1.6;min-height:100vh;background-image:radial-gradient(circle at 15% 0%, rgba(124,92,255,.14), transparent 45%),radial-gradient(circle at 85% 10%, rgba(200,255,0,.08), transparent 40%)}
+a{color:var(--purple2)}
+.wrap{max-width:760px;margin:0 auto;padding:2.6rem 1.2rem 6rem}
+.top a{font-family:var(--mono);font-size:.8rem;color:var(--text2);text-decoration:none}
+.hero{padding:2.2rem 0 1.4rem;text-align:center}
+.eyebrow{display:inline-block;font-family:var(--mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--volt);background:rgba(200,255,0,.08);border:1px solid rgba(200,255,0,.25);padding:.3rem .8rem;border-radius:99px;margin-bottom:1rem}
+h1{font-family:var(--serif);font-size:2.7rem;line-height:1.1;margin-bottom:.7rem}
+.sub{color:var(--text2);max-width:480px;margin:0 auto}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin:2.2rem 0 2.6rem}
+.step{background:var(--black2);border:1px solid var(--border);border-radius:12px;padding:1rem .9rem;text-align:center}
+.step .n{font-family:var(--mono);color:var(--volt);font-size:.75rem;margin-bottom:.35rem}
+.step .t{font-size:.82rem;color:var(--text2)}
+.section-label{font-family:var(--mono);font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);margin:1.8rem 0 .8rem}
+.opt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:.7rem}
+.opt-card{display:flex;flex-direction:column;gap:.5rem;background:var(--black2);border:1px solid var(--border2);border-radius:14px;padding:1.1rem;cursor:pointer;transition:border-color .15s,background .15s}
+.opt-card:hover{border-color:rgba(255,255,255,.22)}
+.opt-card.selected{border-color:var(--volt);background:rgba(200,255,0,.06);box-shadow:0 0 0 1px var(--volt) inset}
+.opt-card .icon{font-size:1.3rem}
+.opt-card .label{font-weight:500;font-size:.95rem}
+.opt-card .price{font-family:var(--mono);color:var(--volt);font-weight:700;font-size:1.05rem}
+.addon-box{margin-top:1.1rem;background:var(--black2);border:1px dashed var(--border2);border-radius:12px;padding:1rem 1.1rem;display:none}
+.addon-box.show{display:block}
+.addon-row{display:flex;align-items:flex-start;gap:.7rem;cursor:pointer}
+.addon-row input{width:auto;margin-top:.2rem}
+.addon-row .t{font-weight:500;font-size:.9rem}
+.addon-row .p{color:var(--text3);font-size:.8rem;margin-top:.15rem}
+.addon-row .price{margin-left:auto;font-family:var(--mono);color:var(--volt);font-weight:700;white-space:nowrap}
+.qty-row{display:flex;align-items:center;gap:.6rem;margin-top:.6rem}
+.qty-btn{width:26px;height:26px;border-radius:7px;border:1px solid var(--border2);background:var(--black3);color:var(--text);font-size:.95rem;line-height:1;cursor:pointer}
+.qty-btn:hover{border-color:rgba(255,255,255,.3)}
+.qty-val{font-family:var(--mono);font-size:.9rem;min-width:1.2rem;text-align:center}
+.bundle-row{display:flex;align-items:center;gap:.4rem;margin-top:.6rem;font-size:.75rem;color:var(--text2);cursor:pointer}
+.bundle-row.hidden{display:none}
+.bundle-row input{width:auto}
+.summary{margin-top:1.4rem;background:var(--black3);border:1px solid var(--border2);border-radius:12px;padding:1rem 1.1rem;display:none}
+.summary.show{display:block}
+.summary-row{display:flex;justify-content:space-between;font-size:.85rem;color:var(--text2);padding:.25rem 0}
+.summary-row.total{border-top:1px solid var(--border2);margin-top:.4rem;padding-top:.6rem;font-weight:700;color:var(--text);font-family:var(--mono)}
+.form-block{margin-top:1.6rem;background:var(--black2);border:1px solid var(--border);border-radius:14px;padding:1.5rem;display:none}
+.form-block.show{display:block}
+label{display:block;font-size:.82rem;color:var(--text2);margin-bottom:.35rem;margin-top:.9rem}
+label:first-child{margin-top:0}
+input[type=email],input[type=text],textarea{width:100%;padding:.7rem .9rem;background:var(--black3);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:inherit;font-size:.9rem}
+textarea{min-height:80px;resize:vertical}
+.buy-btn{width:100%;margin-top:1.4rem;padding:.9rem;background:var(--volt);color:var(--black);border:none;border-radius:9px;font-weight:700;font-family:var(--mono);font-size:.85rem;cursor:pointer}
+.buy-btn:disabled{opacity:.5;cursor:not-allowed}
+.err{color:var(--red);font-size:.85rem;margin-top:.8rem;min-height:1em}
+.muted{color:var(--text3);font-size:.85rem}
+@media(max-width:560px){.steps{grid-template-columns:1fr}h1{font-size:2.1rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><a href="/">← SP Tréner</a></div>
+  <div class="hero">
+    <span class="eyebrow">Darčeková karta</span>
+    <h1>Daruj štúdium,<br>nie vec</h1>
+    <p class="sub">Premium prístup na vybranú dĺžku, alebo 1 online kurz podľa vlastného výberu. Po zaplatení dostaneš PDF kartu s kódom na vytlačenie alebo poslanie ďalej.</p>
+  </div>
+  <div class="steps">
+    <div class="step"><div class="n">01</div><div class="t">Vyber si kartu nižšie</div></div>
+    <div class="step"><div class="n">02</div><div class="t">Zaplať bezpečne cez Stripe</div></div>
+    <div class="step"><div class="n">03</div><div class="t">Stiahni si PDF s kódom</div></div>
+  </div>
+  <p class="muted" style="text-align:center;margin:-.5rem 0 1.4rem">Vyber si ľubovoľné množstvo a kombináciu kariet — všetko v jednej objednávke.</p>
+  <div id="optionsRoot"><p class="muted">Načítavam možnosti…</p></div>
+  <div class="summary" id="summaryBox">
+    <div id="summaryLines"></div>
+    <div class="summary-row total" id="summaryTotal"></div>
+  </div>
+  <div class="form-block" id="formBlock">
+    <label for="buyerEmail">Tvoj e-mail (potvrdenie platby)</label>
+    <input type="email" id="buyerEmail" placeholder="tvoj@email.sk" required>
+    <label for="recipientName">Meno obdarovaného (voliteľné, zobrazí sa na karte)</label>
+    <input type="text" id="recipientName" placeholder="napr. Janko">
+    <label for="giftMessage">Odkaz (voliteľné)</label>
+    <textarea id="giftMessage" placeholder="Krátky odkaz pre obdarovaného…"></textarea>
+    <button class="buy-btn" id="buyBtn">Kúpiť darčekovú kartu</button>
+    <div class="err" id="formErr"></div>
+  </div>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+let allOptions = [];
+let addonOption = null;
+let cart = {}; // optionId -> { quantity, includeCourse }
+
+function eur(cents) { return (cents / 100).toFixed(2).replace('.', ',') + ' €'; }
+function hasAnyItems() { return Object.values(cart).some(v => v.quantity > 0); }
+
+async function loadOptions() {
+  try {
+    const res = await fetch('/api/gift-cards/options');
+    const data = await res.json();
+    allOptions = data.options || [];
+    const root = $('#optionsRoot');
+    if (!allOptions.length) {
+      root.innerHTML = '<p class="muted">Momentálne nie sú dostupné žiadne darčekové karty.</p>';
+      return;
+    }
+    const premiumOpts = allOptions.filter(o => o.kind === 'premium').sort((a, b) => a.sort_order - b.sort_order);
+    const eliteOpts = allOptions.filter(o => o.kind === 'elite').sort((a, b) => a.sort_order - b.sort_order);
+    const courseOpts = allOptions.filter(o => o.kind === 'course').sort((a, b) => a.sort_order - b.sort_order);
+    addonOption = courseOpts[0] || null;
+    let html = '';
+    if (premiumOpts.length) {
+      html += '<div class="section-label">Premium predplatné</div><div class="opt-grid">' + premiumOpts.map(o => optCardHtml(o)).join('') + '</div>';
+    }
+    if (eliteOpts.length) {
+      html += '<div class="section-label">Elite predplatné</div><div class="opt-grid">' + eliteOpts.map(o => optCardHtml(o)).join('') + '</div>';
+    }
+    if (courseOpts.length) {
+      html += '<div class="section-label">Online kurz</div><div class="opt-grid">' + courseOpts.map(o => optCardHtml(o)).join('') + '</div>';
+    }
+    root.innerHTML = html;
+  } catch (e) {
+    $('#optionsRoot').innerHTML = '<p class="err">Chyba pri načítaní.</p>';
+  }
+}
+
+function optCardHtml(o) {
+  const icon = o.kind === 'premium' ? '💎' : o.kind === 'elite' ? '🔥' : '🎓';
+  const qty = (cart[o.id] && cart[o.id].quantity) || 0;
+  const canBundle = (o.kind === 'premium' || o.kind === 'elite') && addonOption;
+  const bundleChecked = !!(cart[o.id] && cart[o.id].includeCourse);
+  return `<div class="opt-card${qty > 0 ? ' selected' : ''}" data-id="${o.id}">
+    <span class="icon">${icon}</span>
+    <span class="label">${escapeHtml(o.label)}</span>
+    <span class="price">${eur(o.price_cents)}</span>
+    <div class="qty-row">
+      <button type="button" class="qty-btn" data-action="dec" data-id="${o.id}">−</button>
+      <span class="qty-val" id="qty-${o.id}">${qty}</span>
+      <button type="button" class="qty-btn" data-action="inc" data-id="${o.id}">+</button>
+    </div>
+    ${canBundle ? `<label class="bundle-row${qty > 0 ? '' : ' hidden'}" id="bundle-${o.id}">
+      <input type="checkbox" data-bundle-id="${o.id}"${bundleChecked ? ' checked' : ''}>
+      <span>+ kurz podľa výberu (${eur(addonOption.price_cents)})</span>
+    </label>` : ''}
+  </div>`;
+}
+function escapeHtml(s) { return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function changeQty(id, delta) {
+  const opt = allOptions.find(o => o.id === id);
+  if (!opt) return;
+  if (!cart[id]) cart[id] = { quantity: 0, includeCourse: false };
+  const newQty = Math.max(0, Math.min(20, cart[id].quantity + delta));
+  cart[id].quantity = newQty;
+  if (newQty === 0) cart[id].includeCourse = false;
+  const qtyEl = document.getElementById('qty-' + id);
+  if (qtyEl) qtyEl.textContent = newQty;
+  const cardEl = document.querySelector('.opt-card[data-id="' + CSS.escape(id) + '"]');
+  if (cardEl) cardEl.classList.toggle('selected', newQty > 0);
+  const bundleEl = document.getElementById('bundle-' + id);
+  if (bundleEl) {
+    bundleEl.classList.toggle('hidden', newQty === 0);
+    if (newQty === 0) { const cb = bundleEl.querySelector('input'); if (cb) cb.checked = false; }
+  }
+  $('#formBlock').classList.toggle('show', hasAnyItems());
+  updateSummary();
+}
+
+$('#optionsRoot').addEventListener('click', (e) => {
+  const btn = e.target.closest('.qty-btn');
+  if (!btn) return;
+  changeQty(btn.dataset.id, btn.dataset.action === 'inc' ? 1 : -1);
+});
+$('#optionsRoot').addEventListener('change', (e) => {
+  const cb = e.target.closest('[data-bundle-id]');
+  if (!cb) return;
+  const id = cb.dataset.bundleId;
+  if (!cart[id]) cart[id] = { quantity: 0, includeCourse: false };
+  cart[id].includeCourse = cb.checked;
+  updateSummary();
+});
+
+function updateSummary() {
+  const lines = Object.entries(cart).filter(([id, v]) => v.quantity > 0);
+  if (!lines.length) { $('#summaryBox').classList.remove('show'); $('#buyBtn').textContent = 'Kúpiť darčekovú kartu'; return; }
+  let total = 0;
+  let html = '';
+  for (const [id, v] of lines) {
+    const opt = allOptions.find(o => o.id === id);
+    if (!opt) continue;
+    const lineTotal = opt.price_cents * v.quantity;
+    total += lineTotal;
+    html += `<div class="summary-row">${escapeHtml(opt.label)} × ${v.quantity} — ${eur(lineTotal)}</div>`;
+    if (v.includeCourse && addonOption) {
+      const addonTotal = addonOption.price_cents * v.quantity;
+      total += addonTotal;
+      html += `<div class="summary-row">+ Kurz podľa vlastného výberu × ${v.quantity} — ${eur(addonTotal)}</div>`;
+    }
+  }
+  $('#summaryLines').innerHTML = html;
+  $('#summaryTotal').textContent = 'Spolu: ' + eur(total);
+  $('#summaryBox').classList.add('show');
+  $('#buyBtn').textContent = 'Kúpiť za ' + eur(total);
+}
+
+$('#buyBtn').addEventListener('click', async () => {
+  const buyerEmail = $('#buyerEmail').value.trim();
+  $('#formErr').textContent = '';
+  const items = Object.entries(cart).filter(([id, v]) => v.quantity > 0).map(([id, v]) => ({ optionId: id, quantity: v.quantity, includeCourse: !!v.includeCourse }));
+  if (!items.length) { $('#formErr').textContent = 'Vyber si aspoň jednu darčekovú kartu vyššie.'; return; }
+  if (!buyerEmail.includes('@')) { $('#formErr').textContent = 'Zadaj platný e-mail.'; return; }
+  const btn = $('#buyBtn');
+  const prevLabel = btn.textContent;
+  btn.disabled = true; btn.textContent = 'Chvíľu strpenia…';
+  try {
+    const res = await fetch('/api/gift-cards/checkout', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        items, buyerEmail,
+        recipientName: $('#recipientName').value.trim(), message: $('#giftMessage').value.trim(),
+        refCode: sessionStorage.getItem('partner_ref') || null
+      })
+    });
+    const data = await res.json();
+    if (data.url) { location.href = data.url; }
+    else { $('#formErr').textContent = data.error || 'Chyba pri vytváraní platby.'; btn.disabled = false; btn.textContent = prevLabel; }
+  } catch (e) {
+    $('#formErr').textContent = 'Chyba servera.'; btn.disabled = false; btn.textContent = prevLabel;
+  }
+});
+
+loadOptions();
+</script>
+</body>
+</html>
