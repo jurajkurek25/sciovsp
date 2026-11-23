@@ -78,7 +78,7 @@ async function main() {
     .from('users')
     .select('email, lang')
     .or('is_premium.is.null,is_premium.eq.false')
-    .eq('marketing_emails_opt_out', false)
+    .or('marketing_emails_opt_out.is.null,marketing_emails_opt_out.eq.false')
     .is('blackweek2026_sent_at', null);
   if (error) { console.error('Chyba načítania users:', error.message); process.exit(1); }
   console.log('Počet na odoslanie:', (users || []).length);
